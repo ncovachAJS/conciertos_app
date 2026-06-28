@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../data/services/concert_service.dart';
 import '../../domain/entities/concert.dart';
+import '../../../../shared/widgets/concert_card.dart';
 
 class ConcertsPage extends StatefulWidget {
   const ConcertsPage({super.key});
@@ -46,17 +47,46 @@ class _ConcertsPageState extends State<ConcertsPage> {
         itemBuilder: (context, index) {
           final concert = concerts[index];
 
-          return Card(
-            child: ListTile(
-              onTap: () {
-                context.go('/concert-detail', extra: concert);
-              },
-              leading: const Icon(Icons.music_note),
-              title: Text(concert.artist),
-              subtitle: Text('${concert.festival}\n${concert.city}'),
-              trailing: const Icon(Icons.chevron_right),
-              isThreeLine: true,
-            ),
+          return ConcertCard(
+            concert: concert,
+            onTap: () {
+              context.go('/concert-detail', extra: concert);
+            },
+            onDelete: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Eliminar concierto'),
+                    content: Text('¿Quieres eliminar "${concert.artist}"?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancelar'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Eliminar'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (confirm == true) {
+                ConcertService.instance.deleteConcert(concert.id);
+
+                setState(() {
+                  concerts = ConcertService.instance.getConcerts();
+                });
+
+                if (!context.mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${concert.artist} eliminado')),
+                );
+              }
+            },
           );
         },
       ),

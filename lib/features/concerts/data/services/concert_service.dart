@@ -43,4 +43,8 @@ class ConcertService {
   void addConcert(Concert concert) {
     _concerts.add(concert);
   }
+
+  void deleteConcert(String id) {
+    _concerts.removeWhere((concert) => concert.id == id);
+  }
 }
