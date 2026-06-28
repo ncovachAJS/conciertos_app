@@ -14,9 +14,9 @@ class AppShell extends StatelessWidget {
         return 0;
       case '/concerts':
         return 1;
-      case '/add':
-        return 2;
       case '/favorites':
+        return 2;
+      case '/statistics':
         return 3;
       case '/settings':
         return 4;
@@ -40,10 +40,10 @@ class AppShell extends StatelessWidget {
               context.go('/concerts');
               break;
             case 2:
-              context.go('/add');
+              context.go('/favorites');
               break;
             case 3:
-              context.go('/favorites');
+              context.go('/statistics');
               break;
             case 4:
               context.go('/settings');
@@ -62,9 +62,9 @@ class AppShell extends StatelessWidget {
             label: 'Conciertos',
           ),
           NavigationDestination(
-            icon: Icon(Icons.add_circle_outline),
-            selectedIcon: Icon(Icons.add_circle),
-            label: 'Añadir',
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: 'Estadísticas',
           ),
           NavigationDestination(
             icon: Icon(Icons.favorite_border),

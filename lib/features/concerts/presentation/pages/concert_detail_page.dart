@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/widgets/app_page.dart';
 import '../../domain/entities/concert.dart';
+import '../../../../core/utils/date_formatter.dart';
 
 class ConcertDetailPage extends StatelessWidget {
   final Concert concert;
@@ -45,9 +46,7 @@ class ConcertDetailPage extends StatelessWidget {
                   ListTile(
                     leading: const Icon(Icons.calendar_month),
                     title: const Text('Fecha'),
-                    subtitle: Text(
-                      '${concert.date.day}/${concert.date.month}/${concert.date.year}',
-                    ),
+                    subtitle: Text(DateFormatter.short(concert.date)),
                   ),
                 ],
               ),
