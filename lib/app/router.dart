@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/concerts/domain/entities/concert.dart';
+import '../features/concerts/presentation/pages/concert_detail_page.dart';
 import '../features/concerts/presentation/pages/concerts_page.dart';
 import '../features/add_concert/presentation/pages/add_concert_page.dart';
 import '../features/favorites/presentation/pages/favorites_page.dart';
@@ -19,6 +21,14 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/concerts',
           builder: (context, state) => const ConcertsPage(),
+        ),
+        GoRoute(
+          path: '/concert-detail',
+          builder: (context, state) {
+            final concert = state.extra as Concert;
+
+            return ConcertDetailPage(concert: concert);
+          },
         ),
         GoRoute(
           path: '/add',

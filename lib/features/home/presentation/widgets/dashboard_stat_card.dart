@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 class DashboardStatCard extends StatelessWidget {
-  final String title;
-  final String value;
   final IconData icon;
+  final String value;
+  final String title;
 
   const DashboardStatCard({
     super.key,
-    required this.title,
-    required this.value,
     required this.icon,
+    required this.value,
+    required this.title,
   });
 
   @override
@@ -17,11 +17,11 @@ class DashboardStatCard extends StatelessWidget {
     return Expanded(
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               Icon(icon, size: 32),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 value,
                 style: const TextStyle(
