@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/app_search_bar.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_stats.dart';
 import '../widgets/upcoming_concerts.dart';
@@ -15,9 +16,17 @@ class DashboardView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DashboardHeader(),
-          SizedBox(height: 24),
+
+          SizedBox(height: 28),
+
+          AppSearchBar(),
+
+          SizedBox(height: 36),
+
           DashboardStats(),
-          SizedBox(height: 32),
+
+          SizedBox(height: 36),
+
           UpcomingConcerts(),
         ],
       ),

@@ -11,8 +11,7 @@ class ConcertsApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'My Concerts',
-      theme: lightTheme,
-      darkTheme: darkTheme,
+      theme: AppTheme.dark,
       routerConfig: appRouter,
     );
   }

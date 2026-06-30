@@ -19,25 +19,51 @@ class DashboardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${_greeting()} 👋',
-                style: Theme.of(context).textTheme.headlineLarge,
+        Row(
+          children: [
+            const Spacer(),
+
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                shape: BoxShape.circle,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Bienvenido a My Concerts',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ],
-          ),
+              child: const Icon(Icons.person),
+            ),
+          ],
         ),
-        const CircleAvatar(radius: 24, child: Icon(Icons.person)),
+
+        const SizedBox(height: 28),
+
+        Text(
+          '${_greeting()} 👋',
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+        ),
+
+        const SizedBox(height: 10),
+
+        Text(
+          'My Concerts',
+          style: Theme.of(
+            context,
+          ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(
+          'Tu historia en directo',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(color: Colors.white54),
+        ),
       ],
     );
   }

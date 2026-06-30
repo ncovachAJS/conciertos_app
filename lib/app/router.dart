@@ -30,7 +30,14 @@ final appRouter = GoRouter(
             return ConcertDetailPage(concert: concert);
           },
         ),
-        GoRoute(path: '/add', builder: (context, state) => AddConcertPage()),
+        GoRoute(
+          path: '/add',
+          builder: (context, state) {
+            final concert = state.extra as Concert?;
+
+            return AddConcertPage(concert: concert);
+          },
+        ),
         GoRoute(
           path: '/favorites',
           builder: (context, state) => const FavoritesPage(),

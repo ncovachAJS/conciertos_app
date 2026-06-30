@@ -4,6 +4,11 @@ class Concert {
   final String festival;
   final DateTime date;
   final String city;
+  final bool favorite;
+  final String imageUrl;
+  final int rating;
+  final bool liked;
+  final String venue;
 
   const Concert({
     required this.id,
@@ -11,5 +16,36 @@ class Concert {
     required this.festival,
     required this.date,
     required this.city,
+    required this.venue,
+    this.favorite = false,
+    this.imageUrl = '',
+    this.rating = 0,
+    this.liked = false,
   });
+
+  Concert copyWith({
+    String? id,
+    String? artist,
+    String? festival,
+    DateTime? date,
+    String? city,
+    bool? favorite,
+    String? imageUrl,
+    int? rating,
+    bool? liked,
+    String? venue,
+  }) {
+    return Concert(
+      id: id ?? this.id,
+      artist: artist ?? this.artist,
+      festival: festival ?? this.festival,
+      date: date ?? this.date,
+      city: city ?? this.city,
+      favorite: favorite ?? this.favorite,
+      imageUrl: imageUrl ?? this.imageUrl,
+      rating: rating ?? this.rating,
+      liked: liked ?? this.liked,
+      venue: venue ?? this.venue,
+    );
+  }
 }

@@ -47,4 +47,14 @@ class ConcertService {
   void deleteConcert(String id) {
     _concerts.removeWhere((concert) => concert.id == id);
   }
+
+  void updateConcert(Concert updatedConcert) {
+    final index = _concerts.indexWhere(
+      (concert) => concert.id == updatedConcert.id,
+    );
+
+    if (index != -1) {
+      _concerts[index] = updatedConcert;
+    }
+  }
 }
