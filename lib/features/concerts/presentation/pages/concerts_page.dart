@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/app_page.dart';
-import '../../../../shared/widgets/concert_card.dart';
+import '../../../../shared/widgets/concert_card_V2.dart';
 import '../../data/services/concert_api_service.dart';
 import '../../domain/entities/concert.dart';
 
@@ -70,24 +70,29 @@ class _ConcertsPageState extends State<ConcertsPage> {
   Widget build(BuildContext context) {
     return AppPage(
       title: 'Conciertos',
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: GestureDetector(
+            onTap: () async {
+              final result = await context.push('/add');
 
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFE53935),
-        foregroundColor: Colors.white,
-        elevation: 8,
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Nuevo',
-          style: TextStyle(fontWeight: FontWeight.bold),
+              if (result == true) {
+                await _loadConcerts();
+              }
+            },
+            child: Container(
+              width: 46,
+              height: 46,
+              decoration: const BoxDecoration(
+                color: Color(0xFFE53935),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
+          ),
         ),
-        onPressed: () async {
-          final result = await context.push('/add');
-
-          if (result == true) {
-            await _loadConcerts();
-          }
-        },
-      ),
+      ],
 
       child: Stack(
         children: [
@@ -129,7 +134,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                         itemBuilder: (context, index) {
                           final concert = filteredConcerts[index];
 
-                          return ConcertCard(
+                          return ConcertCardV2(
                             concert: concert,
                             onTap: () {
                               context.go('/concert-detail', extra: concert);
