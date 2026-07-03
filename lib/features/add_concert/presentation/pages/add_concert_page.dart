@@ -38,6 +38,22 @@ class _AddConcertPageState extends State<AddConcertPage> {
   int _rating = 0;
   bool _liked = false;
 
+  bool get _isPastConcert {
+    if (_selectedDate == null) return false;
+
+    final today = DateTime.now();
+
+    final todayWithoutTime = DateTime(today.year, today.month, today.day);
+
+    final concertDate = DateTime(
+      _selectedDate!.year,
+      _selectedDate!.month,
+      _selectedDate!.day,
+    );
+
+    return concertDate.isBefore(todayWithoutTime);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -286,110 +302,120 @@ class _AddConcertPageState extends State<AddConcertPage> {
 
               const SizedBox(height: 32),
 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Valoración',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+              if (_isPastConcert)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Valoración',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
 
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: List.generate(5, (index) {
-                        final active = index < _rating;
+                    Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(5, (index) {
+                          final active = index < _rating;
 
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _rating = index + 1;
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            margin: const EdgeInsets.symmetric(horizontal: 2),
-                            child: Icon(
-                              active
-                                  ? Icons.star_rounded
-                                  : Icons.star_outline_rounded,
-                              color: Colors.amber,
-                              size: active ? 44 : 40,
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _rating = index + 1;
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
+                              child: Icon(
+                                active
+                                    ? Icons.star_rounded
+                                    : Icons.star_outline_rounded,
+                                color: Colors.amber,
+                                size: active ? 44 : 40,
+                              ),
                             ),
-                          ),
-                        );
-                      }),
+                          );
+                        }),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                  Center(
-                    child: Text(
-                      _rating == 0 ? 'Sin valorar' : '$_rating de 5 estrellas',
-                      style: TextStyle(color: Colors.white54, fontSize: 15),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  const SizedBox(height: 24),
-
-                  const Text(
-                    '¿Qué te pareció?',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _liked = !_liked;
-                          });
-                        },
-                        icon: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: Icon(
-                            Icons.thumb_up_rounded,
-                            key: ValueKey(_liked),
-                            color: _liked ? Colors.blueAccent : Colors.grey,
-                            size: 28,
-                          ),
+                    Center(
+                      child: Text(
+                        _rating == 0
+                            ? 'Sin valorar'
+                            : '$_rating de 5 estrellas',
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 15,
                         ),
                       ),
+                    ),
 
-                      const SizedBox(width: 8),
+                    const SizedBox(height: 24),
 
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
+                    const Text(
+                      '¿Qué te pareció?',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
                             setState(() {
                               _liked = !_liked;
                             });
                           },
-                          child: Text(
-                            _liked ? 'Lo recomendaría' : '¿Lo recomendarías?',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: _liked
-                                  ? Colors.blueAccent
-                                  : Colors.white70,
+                          icon: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: Icon(
+                              Icons.thumb_up_rounded,
+                              key: ValueKey(_liked),
+                              color: _liked ? Colors.blueAccent : Colors.grey,
+                              size: 28,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
 
-                  const SizedBox(height: 32),
-                ],
-              ),
+                        const SizedBox(width: 8),
+
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _liked = !_liked;
+                              });
+                            },
+                            child: Text(
+                              _liked ? 'Lo recomendaría' : '¿Lo recomendarías?',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: _liked
+                                    ? Colors.blueAccent
+                                    : Colors.white70,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 32),
+                  ],
+                ),
 
               SizedBox(
                 height: 55,

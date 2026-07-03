@@ -23,6 +23,17 @@ class Concert {
     this.liked = false,
   });
 
+  /// Indica si el concierto ya ha pasado.
+  bool get isPastConcert {
+    final now = DateTime.now();
+
+    final today = DateTime(now.year, now.month, now.day);
+
+    final concertDay = DateTime(date.year, date.month, date.day);
+
+    return concertDay.isBefore(today);
+  }
+
   Concert copyWith({
     String? id,
     String? artist,
