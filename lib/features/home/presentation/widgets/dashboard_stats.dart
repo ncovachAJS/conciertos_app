@@ -1,75 +1,103 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/dashboard_controller.dart';
+
 class DashboardStats extends StatelessWidget {
-  const DashboardStats({super.key});
+  final DashboardController controller;
+
+  const DashboardStats({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          children: [
-            Text(
-              'TU HISTORIA',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                letterSpacing: 2,
-                color: Colors.white54,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text(
-              '286',
-              style: TextStyle(fontSize: 58, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 6),
-
-            Text(
-              'conciertos vividos',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-
-            const SizedBox(height: 32),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const [
-                _StatItem(value: '55', title: 'Festivales'),
-
-                _StatItem(value: '18', title: 'Años'),
-
-                _StatItem(value: '42', title: 'Ciudades'),
-              ],
-            ),
-          ],
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: 14,
+      crossAxisSpacing: 14,
+      childAspectRatio: 1,
+      children: [
+        _StatCard(
+          value: controller.totalConcerts.toString(),
+          label: 'Conciertos',
+          icon: Icons.music_note_rounded,
+          color: const Color(0xFFE53935),
         ),
-      ),
+
+        _StatCard(
+          value: controller.totalFestivals.toString(),
+          label: 'Festivales',
+          icon: Icons.festival_rounded,
+          color: const Color(0xFF42A5F5),
+        ),
+
+        _StatCard(
+          value: controller.averageRating.toStringAsFixed(1),
+          label: 'Valoración',
+          icon: Icons.star_rounded,
+          color: const Color(0xFFFFC107),
+        ),
+
+        _StatCard(
+          value: controller.totalRecommended.toString(),
+          label: 'Recomendados',
+          icon: Icons.thumb_up_alt_rounded,
+          color: const Color(0xFF4CAF50),
+        ),
+      ],
     );
   }
 }
 
-class _StatItem extends StatelessWidget {
+class _StatCard extends StatelessWidget {
   final String value;
-  final String title;
+  final String label;
+  final IconData icon;
+  final Color color;
 
-  const _StatItem({required this.value, required this.title});
+  const _StatCard({
+    required this.value,
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-        ),
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1C1F26),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color.withOpacity(.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color),
+          ),
 
-        const SizedBox(height: 6),
+          const Spacer(),
 
-        Text(title, style: const TextStyle(color: Colors.white70)),
-      ],
+          Text(
+            value,
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white60, fontSize: 14),
+          ),
+        ],
+      ),
     );
   }
 }

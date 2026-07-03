@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/concert_card_V2.dart';
+import '../../../../shared/widgets/concert_grid_card.dart';
 import '../../data/services/concert_api_service.dart';
 import '../../domain/entities/concert.dart';
 
@@ -21,6 +22,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
 
   bool loading = true;
   bool deleting = false;
+  bool gridView = false;
 
   @override
   void initState() {
@@ -39,6 +41,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
 
     try {
       concerts = await ConcertApiService().getConcerts();
+      concerts.sort((a, b) => b.date.compareTo(a.date));
       filteredConcerts = List.from(concerts);
     } catch (e) {
       debugPrint(e.toString());
@@ -71,6 +74,17 @@ class _ConcertsPageState extends State<ConcertsPage> {
     return AppPage(
       title: 'Conciertos',
       actions: [
+        IconButton(
+          tooltip: gridView ? 'Vista lista' : 'Vista tarjetas',
+          onPressed: () {
+            setState(() {
+              gridView = !gridView;
+            });
+          },
+          icon: Icon(
+            gridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.only(right: 12),
           child: GestureDetector(
@@ -93,7 +107,6 @@ class _ConcertsPageState extends State<ConcertsPage> {
           ),
         ),
       ],
-
       child: Stack(
         children: [
           loading
@@ -128,90 +141,207 @@ class _ConcertsPageState extends State<ConcertsPage> {
                     const SizedBox(height: 20),
 
                     Expanded(
-                      child: ListView.separated(
-                        itemCount: filteredConcerts.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 24),
-                        itemBuilder: (context, index) {
-                          final concert = filteredConcerts[index];
-
-                          return ConcertCardV2(
-                            concert: concert,
-                            onTap: () {
-                              context.go('/concert-detail', extra: concert);
-                            },
-                            onEdit: () async {
-                              final result = await context.push(
-                                '/add',
-                                extra: concert,
-                              );
-
-                              if (result == true) {
-                                await _loadConcerts();
-                              }
-                            },
-                            onDelete: () async {
-                              final eliminar = await showDialog<bool>(
-                                context: context,
-                                builder: (dialogContext) => AlertDialog(
-                                  title: const Text('Eliminar concierto'),
-                                  content: Text(
-                                    '¿Seguro que quieres eliminar "${concert.artist}"?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(
-                                        dialogContext,
-                                      ).pop(false),
-                                      child: const Text('Cancelar'),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        switchInCurve: Curves.easeInOut,
+                        switchOutCurve: Curves.easeInOut,
+                        child: gridView
+                            ? GridView.builder(
+                                key: const ValueKey('grid'),
+                                padding: EdgeInsets.zero,
+                                itemCount: filteredConcerts.length,
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 18,
+                                      mainAxisSpacing: 18,
+                                      childAspectRatio: .62,
                                     ),
-                                    FilledButton(
-                                      onPressed: () =>
-                                          Navigator.of(dialogContext).pop(true),
-                                      child: const Text('Eliminar'),
-                                    ),
-                                  ],
-                                ),
-                              );
+                                itemBuilder: (context, index) {
+                                  final concert = filteredConcerts[index];
 
-                              if (eliminar != true) return;
+                                  return ConcertGridCard(
+                                    concert: concert,
 
-                              setState(() {
-                                deleting = true;
-                              });
+                                    onTap: () {
+                                      context.push(
+                                        '/concert-detail',
+                                        extra: concert,
+                                      );
+                                    },
 
-                              try {
-                                await ConcertApiService().deleteConcert(
-                                  concert.id,
-                                );
+                                    onEdit: () async {
+                                      final result = await context.push(
+                                        '/add',
+                                        extra: concert,
+                                      );
 
-                                await _loadConcerts();
+                                      if (result == true) {
+                                        await _loadConcerts();
+                                      }
+                                    },
 
-                                if (!mounted) return;
+                                    onDelete: () async {
+                                      final eliminar = await showDialog<bool>(
+                                        context: context,
+                                        builder: (dialogContext) => AlertDialog(
+                                          title: const Text(
+                                            'Eliminar concierto',
+                                          ),
+                                          content: Text(
+                                            '¿Seguro que quieres eliminar "${concert.artist}"?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                dialogContext,
+                                              ).pop(false),
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            FilledButton(
+                                              onPressed: () => Navigator.of(
+                                                dialogContext,
+                                              ).pop(true),
+                                              child: const Text('Eliminar'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '${concert.artist} eliminado',
-                                    ),
-                                  ),
-                                );
-                              } catch (e) {
-                                debugPrint(e.toString());
-                              } finally {
-                                if (mounted) {
-                                  setState(() {
-                                    deleting = false;
-                                  });
-                                }
-                              }
-                            },
-                          );
-                        },
+                                      if (eliminar != true) return;
+
+                                      setState(() {
+                                        deleting = true;
+                                      });
+
+                                      try {
+                                        await ConcertApiService().deleteConcert(
+                                          concert.id,
+                                        );
+
+                                        await _loadConcerts();
+
+                                        if (!mounted) return;
+
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              '${concert.artist} eliminado',
+                                            ),
+                                          ),
+                                        );
+                                      } catch (e) {
+                                        debugPrint(e.toString());
+                                      } finally {
+                                        if (mounted) {
+                                          setState(() {
+                                            deleting = false;
+                                          });
+                                        }
+                                      }
+                                    },
+                                  );
+                                },
+                              )
+                            : ListView.separated(
+                                key: const ValueKey('list'),
+                                itemCount: filteredConcerts.length,
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: 24),
+                                itemBuilder: (context, index) {
+                                  final concert = filteredConcerts[index];
+
+                                  return ConcertCardV2(
+                                    concert: concert,
+
+                                    onTap: () {
+                                      context.push(
+                                        '/concert-detail',
+                                        extra: concert,
+                                      );
+                                    },
+
+                                    onEdit: () async {
+                                      final result = await context.push(
+                                        '/add',
+                                        extra: concert,
+                                      );
+
+                                      if (result == true) {
+                                        await _loadConcerts();
+                                      }
+                                    },
+
+                                    onDelete: () async {
+                                      final eliminar = await showDialog<bool>(
+                                        context: context,
+                                        builder: (dialogContext) => AlertDialog(
+                                          title: const Text(
+                                            'Eliminar concierto',
+                                          ),
+                                          content: Text(
+                                            '¿Seguro que quieres eliminar "${concert.artist}"?',
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(
+                                                dialogContext,
+                                              ).pop(false),
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            FilledButton(
+                                              onPressed: () => Navigator.of(
+                                                dialogContext,
+                                              ).pop(true),
+                                              child: const Text('Eliminar'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+
+                                      if (eliminar != true) return;
+
+                                      setState(() {
+                                        deleting = true;
+                                      });
+
+                                      try {
+                                        await ConcertApiService().deleteConcert(
+                                          concert.id,
+                                        );
+
+                                        await _loadConcerts();
+
+                                        if (!mounted) return;
+
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              '${concert.artist} eliminado',
+                                            ),
+                                          ),
+                                        );
+                                      } catch (e) {
+                                        debugPrint(e.toString());
+                                      } finally {
+                                        if (mounted) {
+                                          setState(() {
+                                            deleting = false;
+                                          });
+                                        }
+                                      }
+                                    },
+                                  );
+                                },
+                              ),
                       ),
                     ),
                   ],
                 ),
-
           if (deleting)
             Container(
               color: Colors.black54,
