@@ -19,6 +19,11 @@ class _ImportPageState extends State<ImportPage> {
   List<FestivalModel> festivals = [];
 
   bool loading = true;
+  bool importing = false;
+
+  int imported = 0;
+  int totalConcerts = 0;
+  String currentArtist = '';
 
   @override
   void initState() {
@@ -50,6 +55,10 @@ class _ImportPageState extends State<ImportPage> {
       if (confirmar != true) {
         return;
       }
+
+      setState(() {
+        importing = true;
+      });
 
       await _saveConcerts(concerts);
     } catch (e) {
@@ -127,31 +136,124 @@ class _ImportPageState extends State<ImportPage> {
   }
 
   Future<void> _saveConcerts(List<Concert> concerts) async {
-    for (final concert in concerts) {
-      await ConcertApiService().addConcert(concert);
+    try {
+      totalConcerts = concerts.length;
+      imported = 0;
+
+      for (final concert in concerts) {
+        if (mounted) {
+          setState(() {
+            currentArtist = concert.artist;
+            imported++;
+          });
+        }
+
+        await ConcertApiService().addConcert(concert);
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        importing = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${concerts.length} conciertos importados correctamente',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        importing = false;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error importando: $e')));
     }
-
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${concerts.length} conciertos importados correctamente'),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return AppPage(
       title: 'Importar festivales',
-      child: loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: festivals.length,
-              itemBuilder: (context, index) {
-                return _festivalCard(festivals[index]);
-              },
+      child: Stack(
+        children: [
+          loading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                  itemCount: festivals.length,
+                  itemBuilder: (context, index) {
+                    return _festivalCard(festivals[index]);
+                  },
+                ),
+
+          if (importing)
+            Container(
+              color: Colors.black54,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+
+                    const SizedBox(height: 24),
+
+                    const Text(
+                      'Importando festival...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    SizedBox(
+                      width: 260,
+                      child: LinearProgressIndicator(
+                        value: totalConcerts == 0
+                            ? 0
+                            : imported / totalConcerts,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Text(
+                      '$imported / $totalConcerts conciertos',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    const Text(
+                      'Procesando:',
+                      style: TextStyle(color: Colors.white54),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      currentArtist,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
+        ],
+      ),
     );
   }
 
