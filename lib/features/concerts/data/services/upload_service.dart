@@ -30,8 +30,14 @@ class UploadService {
 
     final body = await response.stream.bytesToString();
 
-    final json = jsonDecode(body);
+    final json = jsonDecode(body) as Map<String, dynamic>;
 
-    return json['imageUrl'];
+    final imageUrl = json['imageUrl'];
+
+    if (imageUrl is! String || imageUrl.isEmpty) {
+      throw Exception('La respuesta del servidor no incluye la URL de la imagen');
+    }
+
+    return imageUrl;
   }
 }

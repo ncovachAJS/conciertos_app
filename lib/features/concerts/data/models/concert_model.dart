@@ -11,6 +11,7 @@ class ConcertModel extends Concert {
     required int rating,
     required bool liked,
     required String venue,
+    String city = '',
   }) : super(
           id: id,
           name: name,
@@ -21,6 +22,7 @@ class ConcertModel extends Concert {
           rating: rating,
           liked: liked,
           venue: venue,
+          city: city,
         );
 
   factory ConcertModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class ConcertModel extends Concert {
       festival: json['festival']?.toString() ?? '',
       imageUrl: json['imageUrl']?.toString() ?? '',
       venue: json['venue']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
       date: DateTime.tryParse(
             json['date']?.toString() ?? '',
           ) ??
@@ -51,6 +54,7 @@ class ConcertModel extends Concert {
       rating: concert.rating,
       liked: concert.liked,
       venue: concert.venue,
+      city: concert.city,
     );
   }
 
@@ -62,6 +66,7 @@ class ConcertModel extends Concert {
       'date': date.toIso8601String(),
       'festival': festival,
       'venue': venue,
+      'city': city,
       'description': '',
       'imageUrl': imageUrl,
       'rating': rating,
@@ -83,6 +88,10 @@ class ConcertModel extends Concert {
       'rating': rating,
       'liked': liked,
     };
+
+    if (city.isNotEmpty) {
+      json['city'] = city;
+    }
 
     if (imageUrl.isNotEmpty) {
       json['imageUrl'] = imageUrl;

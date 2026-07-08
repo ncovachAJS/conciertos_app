@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../domain/entities/concert.dart';
@@ -58,8 +57,6 @@ class ConcertApiService {
   }
 
   Future<void> deleteConcert(String id) async {
-    debugPrint('🗑 Eliminando concierto: $id');
-
     final response = await http.delete(
       Uri.parse('${ApiConfig.concertsEndpoint}/$id'),
     );

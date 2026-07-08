@@ -9,6 +9,7 @@ class Concert {
   final int rating;
   final bool liked;
   final String venue;
+  final String city;
 
   const Concert({
     required this.id,
@@ -17,6 +18,7 @@ class Concert {
     required this.festival,
     required this.date,
     required this.venue,
+    this.city = '',
     this.favorite = false,
     this.imageUrl = '',
     this.rating = 0,
@@ -45,6 +47,7 @@ class Concert {
     int? rating,
     bool? liked,
     String? venue,
+    String? city,
   }) {
     return Concert(
       id: id ?? this.id,
@@ -57,6 +60,7 @@ class Concert {
       rating: rating ?? this.rating,
       liked: liked ?? this.liked,
       venue: venue ?? this.venue,
+      city: city ?? this.city,
     );
   }
 }
