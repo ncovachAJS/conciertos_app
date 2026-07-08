@@ -1,7 +1,11 @@
 import '../entities/concert.dart';
 
 abstract class ConcertRepository {
-  List<Concert> getConcerts();
+  Future<List<Concert>> getConcerts();
 
-  void addConcert(Concert concert);
+  Future<void> addConcert(Concert concert);
+
+  Future<void> updateConcert(Concert concert);
+
+  Future<void> deleteConcert(String id);
 }

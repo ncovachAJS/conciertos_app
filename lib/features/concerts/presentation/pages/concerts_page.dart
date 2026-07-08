@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/concert_card_V2.dart';
 import '../../../../shared/widgets/concert_grid_card.dart';
-import '../../data/services/concert_api_service.dart';
+import '../../data/repositories/concert_repository_impl.dart';
+import '../../domain/repositories/concert_repository.dart';
 import '../../domain/entities/concert.dart';
 
 class ConcertsPage extends StatefulWidget {
@@ -16,6 +17,8 @@ class ConcertsPage extends StatefulWidget {
 
 class _ConcertsPageState extends State<ConcertsPage> {
   final TextEditingController _searchController = TextEditingController();
+
+  final ConcertRepository repository = ConcertRepositoryImpl();
 
   List<Concert> concerts = [];
   List<Concert> filteredConcerts = [];
@@ -40,7 +43,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
     setState(() => loading = true);
 
     try {
-      concerts = await ConcertApiService().getConcerts();
+      concerts = await repository.getConcerts();
       concerts.sort((a, b) => b.date.compareTo(a.date));
       filteredConcerts = List.from(concerts);
     } catch (e) {
@@ -64,7 +67,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
       filteredConcerts = concerts.where((concert) {
         return concert.artist.toLowerCase().contains(query) ||
             concert.festival.toLowerCase().contains(query) ||
-            concert.city.toLowerCase().contains(query);
+            concert.name.toLowerCase().contains(query);
       }).toList();
     });
   }
@@ -118,7 +121,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                       controller: _searchController,
                       onChanged: _filterConcerts,
                       decoration: InputDecoration(
-                        hintText: 'Buscar artista, festival o ciudad...',
+                        hintText: 'Buscar concierto, artista o festival...',
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: const Icon(Icons.tune),
                         filled: true,
@@ -189,7 +192,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                             'Eliminar concierto',
                                           ),
                                           content: Text(
-                                            '¿Seguro que quieres eliminar "${concert.artist}"?',
+                                            '¿Seguro que quieres eliminar "${concert.name}"?'
                                           ),
                                           actions: [
                                             TextButton(
@@ -215,9 +218,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                       });
 
                                       try {
-                                        await ConcertApiService().deleteConcert(
-                                          concert.id,
-                                        );
+                                        await repository.deleteConcert(concert.id);
 
                                         await _loadConcerts();
 
@@ -228,7 +229,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              '${concert.artist} eliminado',
+                                              '"${concert.name}" eliminado'
                                             ),
                                           ),
                                         );
@@ -308,9 +309,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                       });
 
                                       try {
-                                        await ConcertApiService().deleteConcert(
-                                          concert.id,
-                                        );
+                                        await repository.deleteConcert(concert.id);
 
                                         await _loadConcerts();
 
@@ -321,7 +320,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              '${concert.artist} eliminado',
+                                              '"${concert.name}" eliminado'
                                             ),
                                           ),
                                         );

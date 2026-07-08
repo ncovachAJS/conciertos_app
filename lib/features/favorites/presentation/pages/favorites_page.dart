@@ -70,7 +70,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       filteredFavorites = favorites.where((concert) {
         return concert.artist.toLowerCase().contains(query) ||
             concert.festival.toLowerCase().contains(query) ||
-            concert.city.toLowerCase().contains(query);
+            concert.name.toLowerCase().contains(query);
       }).toList();
     });
   }
