@@ -3,46 +3,49 @@ import '../../domain/entities/concert.dart';
 class ConcertModel extends Concert {
   const ConcertModel({
     required String id,
+    required String name,
     required String artist,
     required String festival,
     required DateTime date,
-    required String city,
     required String imageUrl,
     required int rating,
     required bool liked,
     required String venue,
   }) : super(
-         id: id,
-         artist: artist,
-         festival: festival,
-         date: date,
-         city: city,
-         imageUrl: imageUrl,
-         rating: rating,
-         liked: liked,
-         venue: venue,
-       );
+          id: id,
+          name: name,
+          artist: artist,
+          festival: festival,
+          date: date,
+          imageUrl: imageUrl,
+          rating: rating,
+          liked: liked,
+          venue: venue,
+        );
 
   factory ConcertModel.fromJson(Map<String, dynamic> json) {
     return ConcertModel(
       id: json['id']?.toString() ?? '',
-      artist: json['banda']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      artist: json['artist']?.toString() ?? '',
       festival: json['festival']?.toString() ?? '',
-      city: json['nombre']?.toString() ?? '',
-      imageUrl: json['imagen']?.toString() ?? '',
+      imageUrl: json['imageUrl']?.toString() ?? '',
       venue: json['venue']?.toString() ?? '',
-      date: DateTime.tryParse(json['fecha'] ?? '') ?? DateTime.now(),
-      rating: int.tryParse(json['rating'].toString()) ?? 0,
-      liked: json['liked'].toString() == 'true',
+      date: DateTime.tryParse(
+            json['date']?.toString() ?? '',
+          ) ??
+          DateTime.now(),
+      rating: json['rating'] ?? 0,
+      liked: json['liked'] ?? false,
     );
   }
 
   factory ConcertModel.fromEntity(Concert concert) {
     return ConcertModel(
       id: concert.id,
+      name: concert.name,
       artist: concert.artist,
       festival: concert.festival,
-      city: concert.city,
       date: concert.date,
       imageUrl: concert.imageUrl,
       rating: concert.rating,
@@ -54,15 +57,42 @@ class ConcertModel extends Concert {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'nombre': city,
-      'banda': artist,
-      'fecha': date.toIso8601String(),
+      'name': name,
+      'artist': artist,
+      'date': date.toIso8601String(),
       'festival': festival,
-      'descripcion': '',
-      'imagen': imageUrl,
+      'venue': venue,
+      'description': '',
+      'imageUrl': imageUrl,
       'rating': rating,
       'liked': liked,
-      'venue': venue,
     };
   }
+
+  /// Payload para `POST /concerts`.
+  ///
+  /// No incluye `id` (lo genera Prisma con `cuid()`) ni campos vacíos que
+  /// harían fallar la validación del backend (p. ej. `imageUrl` con `@IsUrl()`).
+  Map<String, dynamic> toCreateJson() {
+    final json = <String, dynamic>{
+      'name': name,
+      'artist': artist,
+      'date': date.toIso8601String(),
+      'festival': festival,
+      'venue': venue,
+      'rating': rating,
+      'liked': liked,
+    };
+
+    if (imageUrl.isNotEmpty) {
+      json['imageUrl'] = imageUrl;
+    }
+
+    return json;
+  }
+
+  /// Payload para `PUT /concerts/:id`.
+  ///
+  /// Misma forma que [toCreateJson]; el `id` viaja en la URL, no en el body.
+  Map<String, dynamic> toUpdateJson() => toCreateJson();
 }

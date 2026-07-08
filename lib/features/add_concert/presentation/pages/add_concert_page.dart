@@ -9,6 +9,8 @@ import '../../../../shared/widgets/app_page.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
+import '../../../concerts/data/services/upload_service.dart';
+
 class AddConcertPage extends StatefulWidget {
   final Concert? concert;
 
@@ -25,9 +27,11 @@ class _AddConcertPageState extends State<AddConcertPage> {
   final _festivalController = TextEditingController();
   final _dateController = TextEditingController();
   final _venueController = TextEditingController();
-  final _cityController = TextEditingController();
+  final _nameController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
+
+  final UploadService _uploadService = UploadService();
 
   DateTime? _selectedDate;
 
@@ -64,7 +68,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
       _artistController.text = widget.concert!.artist;
       _festivalController.text = widget.concert!.festival;
       _venueController.text = widget.concert!.venue;
-      _cityController.text = widget.concert?.city ?? '';
+      _nameController.text = widget.concert?.name ?? '';
 
       _selectedDate = widget.concert!.date;
 
@@ -102,17 +106,38 @@ class _AddConcertPageState extends State<AddConcertPage> {
 
     if (image == null) return;
 
-    final file = File(image.path);
-
-    final bytes = await file.readAsBytes();
-
-    final extension = image.path.split('.').last.toLowerCase();
-
     setState(() {
-      _selectedImage = file;
-
-      _imageBase64 = 'data:image/$extension;base64,${base64Encode(bytes)}';
+      _saving = true;
     });
+
+    try {
+      final imageUrl = await _uploadService.uploadImage(image.path);
+
+      setState(() {
+        _selectedImage = File(image.path);
+        _imageBase64 = imageUrl;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Imagen subida correctamente'),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error subiendo la imagen: $e'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _saving = false;
+        });
+      }
+    }
   }
 
   Future<void> _saveConcert() async {
@@ -131,9 +156,9 @@ class _AddConcertPageState extends State<AddConcertPage> {
             DateTime.now().millisecondsSinceEpoch.toString(),
         artist: _artistController.text.trim(),
         festival: _festivalController.text.trim(),
-        city: _cityController.text.trim(),
+        name: _nameController.text.trim(),
         date: _selectedDate!,
-        imageUrl: _imageBase64 ?? widget.concert?.imageUrl ?? '',
+        imageUrl: _imageBase64 ?? '',
         rating: _rating,
         liked: _liked,
         venue: _venueController.text.trim(),
@@ -172,7 +197,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
     _festivalController.dispose();
     _dateController.dispose();
     _venueController.dispose();
-    _cityController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -238,13 +263,13 @@ class _AddConcertPageState extends State<AddConcertPage> {
               const SizedBox(height: 16),
 
               TextFormField(
-                controller: _cityController,
+                controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Ubicación',
-                  hintText: 'Ej. Madrid',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.location_city),
-                ),
+                labelText: 'Nombre del concierto',
+                hintText: 'Ej. Iron Maiden - Future Past Tour',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.music_note),
+              ),
               ),
 
               const SizedBox(height: 16),

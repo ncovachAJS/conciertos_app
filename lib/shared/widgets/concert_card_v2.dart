@@ -264,8 +264,8 @@ class ConcertCardV2 extends StatelessWidget {
                         if (concert.venue.isNotEmpty)
                           _chip(Icons.stadium_rounded, concert.venue),
 
-                        if (concert.city.isNotEmpty)
-                          _chip(Icons.location_on_rounded, concert.city),
+                        if (concert.name.isNotEmpty)
+                          _chip(Icons.location_on_rounded, concert.name),
                       ],
                     ),
 
@@ -345,7 +345,7 @@ class ConcertCardV2 extends StatelessWidget {
 
                     // const SizedBox(height: 14),
 
-                    // _infoRow(Icons.location_on_rounded, 'Ciudad', concert.city),
+                    // _infoRow(Icons.location_on_rounded, 'Ciudad', concert.name),
 
                     // const SizedBox(height: 28),
                     Row(

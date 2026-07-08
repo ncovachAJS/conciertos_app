@@ -78,7 +78,9 @@ class FestivalImportService {
       id: '${DateTime.now().microsecondsSinceEpoch}$artist',
       artist: artist,
       festival: item['festival']?.toString() ?? '',
-      city: item['city']?.toString() ?? '',
+      name: item['name']?.toString() ??
+      item['city']?.toString() ??
+      '',
       venue: item['venue']?.toString() ?? '',
       date: DateTime.parse(item['date']?.toString() ?? ''),
       imageUrl: imageUrl,
