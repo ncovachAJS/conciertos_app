@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -27,6 +26,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
   final _festivalController = TextEditingController();
   final _dateController = TextEditingController();
   final _venueController = TextEditingController();
+  final _cityController = TextEditingController();
   final _nameController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
@@ -36,7 +36,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
   DateTime? _selectedDate;
 
   File? _selectedImage;
-  String? _imageBase64;
+  String? _imageUrl;
 
   bool _saving = false;
   int _rating = 0;
@@ -68,6 +68,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
       _artistController.text = widget.concert!.artist;
       _festivalController.text = widget.concert!.festival;
       _venueController.text = widget.concert!.venue;
+      _cityController.text = widget.concert!.city;
       _nameController.text = widget.concert?.name ?? '';
 
       _selectedDate = widget.concert!.date;
@@ -76,7 +77,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
           '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
 
       if (widget.concert!.imageUrl.isNotEmpty) {
-        _imageBase64 = widget.concert!.imageUrl;
+        _imageUrl = widget.concert!.imageUrl;
       }
     }
   }
@@ -113,9 +114,11 @@ class _AddConcertPageState extends State<AddConcertPage> {
     try {
       final imageUrl = await _uploadService.uploadImage(image.path);
 
+      if (!mounted) return;
+
       setState(() {
         _selectedImage = File(image.path);
-        _imageBase64 = imageUrl;
+        _imageUrl = imageUrl;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -127,8 +130,8 @@ class _AddConcertPageState extends State<AddConcertPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error subiendo la imagen: $e'),
+        const SnackBar(
+          content: Text('No se pudo subir la imagen. Inténtalo de nuevo.'),
         ),
       );
     } finally {
@@ -158,10 +161,11 @@ class _AddConcertPageState extends State<AddConcertPage> {
         festival: _festivalController.text.trim(),
         name: _nameController.text.trim(),
         date: _selectedDate!,
-        imageUrl: _imageBase64 ?? '',
+        imageUrl: _imageUrl ?? '',
         rating: _rating,
         liked: _liked,
         venue: _venueController.text.trim(),
+        city: _cityController.text.trim(),
       );
 
       if (widget.concert == null) {
@@ -173,15 +177,14 @@ class _AddConcertPageState extends State<AddConcertPage> {
       if (!mounted) return;
 
       context.pop(true);
-    } catch (e, s) {
-      debugPrint('ERROR GUARDANDO: $e');
-      debugPrintStack(stackTrace: s);
-
+    } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo guardar el concierto. Inténtalo de nuevo.'),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -197,6 +200,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
     _festivalController.dispose();
     _dateController.dispose();
     _venueController.dispose();
+    _cityController.dispose();
     _nameController.dispose();
     super.dispose();
   }
@@ -263,6 +267,17 @@ class _AddConcertPageState extends State<AddConcertPage> {
               const SizedBox(height: 16),
 
               TextFormField(
+                controller: _cityController,
+                decoration: const InputDecoration(
+                  labelText: 'Ciudad',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.location_city),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
                 labelText: 'Nombre del concierto',
@@ -317,7 +332,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
                           widget.concert!.imageUrl,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) {
+                          errorBuilder: (context, error, stackTrace) {
                             return _placeholderImage();
                           },
                         )

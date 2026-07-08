@@ -36,7 +36,7 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
       setlist = await _setlistService.searchSetlist(
         artist: widget.concert.artist,
         date: widget.concert.date,
-        city: '',
+        city: widget.concert.city,
         venue: widget.concert.venue,
       );
     } catch (e) {
@@ -107,6 +107,15 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
                   title: const Text('Recinto'),
                   subtitle: Text(widget.concert.venue),
                 ),
+
+                if (widget.concert.city.isNotEmpty) ...[
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.location_city),
+                    title: const Text('Ciudad'),
+                    subtitle: Text(widget.concert.city),
+                  ),
+                ],
 
                 const Divider(height: 1),
 
