@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/concert_photo.dart';
+import '../widgets/network_photo.dart';
 
 /// Visor a pantalla completa de una foto de recuerdo, con zoom, pie de foto
 /// y opción de borrado. Devuelve `true` al hacer `pop` si la foto se eliminó.
@@ -65,14 +66,11 @@ class PhotoViewerPage extends StatelessWidget {
               minScale: 0.8,
               maxScale: 4,
               child: Center(
-                child: Image.network(
-                  photo.imageUrl,
+                child: NetworkPhoto(
+                  url: photo.imageUrl,
                   fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.broken_image_outlined,
-                    color: Colors.white24,
-                    size: 80,
-                  ),
+                  loaderSize: 32,
+                  errorIconSize: 80,
                 ),
               ),
             ),

@@ -7,6 +7,7 @@ import '../../../concerts/data/services/upload_service.dart';
 import '../../data/models/concert_photo_model.dart';
 import '../../data/services/photo_api_service.dart';
 import '../pages/photo_viewer_page.dart';
+import 'network_photo.dart';
 
 /// Galería de fotos de recuerdo de un concierto: lista, añade (subiendo a
 /// Cloudinary) y borra fotos.
@@ -81,14 +82,15 @@ class _MemoriesSectionState extends State<MemoriesSection> {
         _photos = [photo, ..._photos];
         _uploading = false;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
 
       setState(() => _uploading = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se pudo subir la foto. Inténtalo de nuevo.'),
+        SnackBar(
+          content: Text('No se pudo subir la foto: $e'),
+          duration: const Duration(seconds: 8),
         ),
       );
     }
@@ -101,28 +103,31 @@ class _MemoriesSectionState extends State<MemoriesSection> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Nuevo recuerdo'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.file(
-                image,
-                height: 160,
-                width: double.infinity,
-                fit: BoxFit.cover,
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  image,
+                  height: 160,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Pie de foto (opcional)',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Pie de foto (opcional)',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -215,17 +220,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                 onTap: () => _openPhoto(photo),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    photo.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: const Color(0xFF2B2B2B),
-                      child: const Icon(
-                        Icons.broken_image_outlined,
-                        color: Colors.white24,
-                      ),
-                    ),
-                  ),
+                  child: NetworkPhoto(url: photo.imageUrl),
                 ),
               );
             },

@@ -5,6 +5,10 @@ import 'package:http/http.dart' as http;
 import '../../../../config/api_config.dart';
 
 class UploadService {
+  /// Margen amplio para tolerar el arranque en frío de Render, pero sin colgar
+  /// la app indefinidamente.
+  static const Duration _timeout = Duration(seconds: 60);
+
   Future<String> uploadImage(String imagePath) async {
     final request = http.MultipartRequest(
       'POST',
@@ -18,7 +22,7 @@ class UploadService {
       ),
     );
 
-    final response = await request.send();
+    final response = await request.send().timeout(_timeout);
 
     if (response.statusCode != 201 && response.statusCode != 200) {
       final errorBody = await response.stream.bytesToString();
