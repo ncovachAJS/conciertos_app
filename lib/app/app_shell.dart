@@ -14,10 +14,12 @@ class AppShell extends StatelessWidget {
         return 0;
       case '/concerts':
         return 1;
-      case '/favorites':
+      case '/feed':
         return 2;
-      case '/settings':
+      case '/favorites':
         return 3;
+      case '/settings':
+        return 4;
       default:
         return 0;
     }
@@ -38,9 +40,12 @@ class AppShell extends StatelessWidget {
               context.go('/concerts');
               break;
             case 2:
-              context.go('/favorites');
+              context.go('/feed');
               break;
             case 3:
+              context.go('/favorites');
+              break;
+            case 4:
               context.go('/settings');
               break;
           }
@@ -55,6 +60,11 @@ class AppShell extends StatelessWidget {
             icon: Icon(Icons.library_music_outlined),
             selectedIcon: Icon(Icons.library_music),
             label: 'Conciertos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.photo_library_outlined),
+            selectedIcon: Icon(Icons.photo_library),
+            label: 'Recuerdos',
           ),
           NavigationDestination(
             icon: Icon(Icons.favorite_border),

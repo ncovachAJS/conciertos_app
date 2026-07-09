@@ -10,45 +10,55 @@ class FestivalImportService {
 
   final ArtistImageService _artistImageService = ArtistImageService();
 
+  /// Lee el listado plano de conciertos y los agrupa por festival + año,
+  /// devolviendo una tarjeta por festival.
   Future<List<FestivalModel>> getFestivals() async {
     final jsonString = await rootBundle.loadString(
       'assets/imports/festivals.json',
     );
 
     final List<dynamic> json = jsonDecode(jsonString);
+    final items = json.whereType<Map<String, dynamic>>().toList();
 
-    return json.map((e) => FestivalModel.fromJson(e)).toList();
-  }
+    final groups = <String, List<Map<String, dynamic>>>{};
 
-  Future<List<Concert>> loadFestival(String fileName) async {
-    final jsonString = await rootBundle.loadString('assets/imports/$fileName');
+    for (final item in items) {
+      final festival = item['festival']?.toString() ?? '';
+      final year = _yearFromDate(item['date']?.toString());
+      final key = '$festival|$year';
 
-    final List<dynamic> json = jsonDecode(jsonString);
+      groups.putIfAbsent(key, () => []).add(item);
+    }
 
-    return _concertsFromJson(json.cast<Map<String, dynamic>>());
+    final festivals = groups.entries.map((entry) {
+      final concerts = entry.value;
+      final first = concerts.first;
+
+      final festival = first['festival']?.toString() ?? '';
+      final year = _yearFromDate(first['date']?.toString());
+
+      return FestivalModel(
+        id: '$festival $year',
+        title: festival,
+        year: year,
+        city: first['city']?.toString(),
+        venue: first['venue']?.toString(),
+        concerts: concerts,
+      );
+    }).toList();
+
+    // Más recientes primero.
+    festivals.sort((a, b) => b.year.compareTo(a.year));
+
+    return festivals;
   }
 
   Future<List<Concert>> loadFestivalModel(FestivalModel festival) async {
-    if (festival.concerts.isNotEmpty) {
-      return _concertsFromJson(
-        festival.concerts.map((concert) {
-          return {
-            'festival': festival.title,
-            'city': festival.city ?? '',
-            'venue': festival.venue ?? '',
-            ...concert,
-          };
-        }).toList(),
-      );
-    }
-
-    final file = festival.file;
-
-    if (file == null || file.isEmpty) {
+    if (festival.concerts.isEmpty) {
       return const [];
     }
 
-    return loadFestival(file);
+    return _concertsFromJson(festival.concerts);
   }
 
   Future<List<Concert>> _concertsFromJson(
@@ -78,14 +88,21 @@ class FestivalImportService {
       id: '${DateTime.now().microsecondsSinceEpoch}$artist',
       artist: artist,
       festival: item['festival']?.toString() ?? '',
-      name: item['name']?.toString() ??
-      item['city']?.toString() ??
-      '',
+      name: item['name']?.toString() ?? '',
+      city: item['city']?.toString() ?? '',
       venue: item['venue']?.toString() ?? '',
       date: DateTime.parse(item['date']?.toString() ?? ''),
       imageUrl: imageUrl,
       rating: int.tryParse((item['rating'] ?? 0).toString()) ?? 0,
       liked: item['liked'] == true || item['liked'].toString() == 'true',
     );
+  }
+
+  int _yearFromDate(String? date) {
+    if (date == null || date.isEmpty) {
+      return DateTime.now().year;
+    }
+
+    return DateTime.tryParse(date)?.year ?? DateTime.now().year;
   }
 }

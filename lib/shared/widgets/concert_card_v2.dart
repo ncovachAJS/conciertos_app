@@ -264,8 +264,8 @@ class ConcertCardV2 extends StatelessWidget {
                         if (concert.venue.isNotEmpty)
                           _chip(Icons.stadium_rounded, concert.venue),
 
-                        if (concert.name.isNotEmpty)
-                          _chip(Icons.location_on_rounded, concert.name),
+                        if (concert.city.isNotEmpty)
+                          _chip(Icons.location_on_rounded, concert.city),
                       ],
                     ),
 
