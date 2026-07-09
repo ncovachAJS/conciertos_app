@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/widgets/app_page.dart';
+import '../../../photos/presentation/widgets/memories_section.dart';
 import '../../domain/entities/concert.dart';
 
 import '../../../setlist/data/services/setlist_service.dart';
@@ -125,6 +126,15 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
                   subtitle: Text(widget.concert.name),
                 ),
               ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: MemoriesSection(concertId: widget.concert.id),
             ),
           ),
 

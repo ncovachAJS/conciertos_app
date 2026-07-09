@@ -130,7 +130,7 @@ class ConcertGridCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          concert.name,
+                          concert.city,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(color: Colors.white70),
                         ),

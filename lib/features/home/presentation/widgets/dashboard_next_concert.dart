@@ -200,7 +200,7 @@ class DashboardNextConcert extends StatelessWidget {
 
                       Expanded(
                         child: Text(
-                          concert.name,
+                          concert.city,
                           style: const TextStyle(color: Colors.white70),
                         ),
                       ),
