@@ -24,6 +24,7 @@ dependencies:
   shared_preferences: ^2.5.5
   uuid: ^4.5.3
   flutter_animate: ^4.5.2
+  audioplayers: ^6.5.0
 
 dev_dependencies:
   flutter_test:
@@ -39,6 +40,8 @@ flutter:
     - .env
     - assets/imports/
     - assets/icon/
+    - assets/audio/
+    - assets/images/
 
 flutter_launcher_icons:
   android: true
