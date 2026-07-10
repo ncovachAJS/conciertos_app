@@ -10,12 +10,14 @@ import '../features/home/presentation/pages/home_page.dart';
 import '../features/setlist/presentation/pages/setlist_test_page.dart';
 import '../features/import/presentation/pages/import_page.dart';
 import '../features/photos/presentation/pages/feed_page.dart';
+import '../features/splash/presentation/pages/splash_page.dart';
 
 import 'app_shell.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
+    GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
     ShellRoute(
       builder: (context, state, child) {
         return AppShell(child: child);
@@ -42,10 +44,7 @@ final appRouter = GoRouter(
             return AddConcertPage(concert: concert);
           },
         ),
-        GoRoute(
-          path: '/feed',
-          builder: (context, state) => const FeedPage(),
-        ),
+        GoRoute(path: '/feed', builder: (context, state) => const FeedPage()),
         GoRoute(
           path: '/favorites',
           builder: (context, state) => const FavoritesPage(),

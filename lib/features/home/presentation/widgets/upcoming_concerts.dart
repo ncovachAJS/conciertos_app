@@ -16,6 +16,7 @@ class UpcomingConcerts extends StatelessWidget {
     final upcoming = [
       Concert(
         id: '1',
+        name: 'Iron Maiden en Madrid',
         artist: 'Iron Maiden',
         festival: 'Rock Imperium Festival',
         city: 'Madrid',
@@ -24,6 +25,7 @@ class UpcomingConcerts extends StatelessWidget {
       ),
       Concert(
         id: '2',
+        name: 'Ghost en Viveiro',
         artist: 'Ghost',
         festival: 'Resurrection Fest',
         city: 'Viveiro',
@@ -32,6 +34,7 @@ class UpcomingConcerts extends StatelessWidget {
       ),
       Concert(
         id: '3',
+        name: 'Muse en Madrid',
         artist: 'Muse',
         festival: 'Mad Cool',
         city: 'Madrid',
