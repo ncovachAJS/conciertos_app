@@ -1,8 +1,12 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:conciertos_app/core/initialization/app_initializer.dart';
+import 'package:conciertos_app/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../widgets/splash_progress.dart';
+
+import 'package:go_router/go_router.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -21,6 +25,10 @@ class _SplashPageState extends State<SplashPage>
   late Animation<Offset> _titleSlideAnimation;
 
   final AudioPlayer _crowdPlayer = AudioPlayer();
+
+  final _dashboardController = DashboardController();
+
+  late final AppInitializer _initializer = AppInitializer(_dashboardController);
 
   String _loadingMessage = '';
   double _progress = 0;
@@ -73,24 +81,22 @@ class _SplashPageState extends State<SplashPage>
   }
 
   Future<void> _startLoadingSequence() async {
-    await Future.delayed(const Duration(seconds: 6));
+    await _initializer.initialize(
+      onProgress: (message, progress) {
+        if (!mounted) return;
 
-    for (int i = 0; i < _messages.length; i++) {
-      if (!mounted) return;
-
-      setState(() {
-        _loadingMessage = _messages[i];
-        _progress = (i + 1) / _messages.length;
-      });
-
-      await Future.delayed(const Duration(milliseconds: 1700));
-    }
+        setState(() {
+          _loadingMessage = message;
+          _progress = progress;
+        });
+      },
+    );
 
     await _fadeOutCrowd();
 
     if (!mounted) return;
 
-    // context.go('/');
+    context.go('/');
   }
 
   Future<void> _fadeOutCrowd() async {
