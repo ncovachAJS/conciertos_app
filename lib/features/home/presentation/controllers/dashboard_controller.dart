@@ -8,9 +8,13 @@ class DashboardController extends ChangeNotifier {
 
   bool loading = true;
 
+  bool get isLoaded => !loading && concerts.isNotEmpty;
+
   List<Concert> concerts = [];
 
   Future<void> load() async {
+    if (isLoaded) return;
+
     loading = true;
     notifyListeners();
 

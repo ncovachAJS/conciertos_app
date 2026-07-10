@@ -46,11 +46,9 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   void _openPhoto(ConcertPhotoModel photo) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => PhotoViewerPage(photo: photo),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => PhotoViewerPage(photo: photo)));
   }
 
   @override
@@ -61,7 +59,9 @@ class _FeedPageState extends State<FeedPage> {
         if (!_loading && _photos.isNotEmpty)
           IconButton(
             tooltip: _gridView ? 'Ver en lista' : 'Ver en cuadrícula',
-            icon: Icon(_gridView ? Icons.view_agenda_outlined : Icons.grid_view),
+            icon: Icon(
+              _gridView ? Icons.view_agenda_outlined : Icons.grid_view,
+            ),
             onPressed: () => setState(() => _gridView = !_gridView),
           ),
       ],
@@ -78,11 +78,7 @@ class _FeedPageState extends State<FeedPage> {
     return ListView(
       children: const [
         SizedBox(height: 120),
-        Icon(
-          Icons.photo_library_outlined,
-          size: 80,
-          color: Colors.white24,
-        ),
+        Icon(Icons.photo_library_outlined, size: 80, color: Colors.white24),
         SizedBox(height: 16),
         Center(
           child: Text(
@@ -101,17 +97,21 @@ class _FeedPageState extends State<FeedPage> {
         itemCount: _photos.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          crossAxisSpacing: 6,
-          mainAxisSpacing: 6,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 1,
         ),
         itemBuilder: (context, index) {
           final photo = _photos[index];
 
           return GestureDetector(
             onTap: () => _openPhoto(photo),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: NetworkPhoto(url: photo.imageUrl),
+            child: Hero(
+              tag: photo.id,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: NetworkPhoto(url: photo.imageUrl),
+              ),
             ),
           );
         },
@@ -183,9 +183,7 @@ class _FeedPost extends StatelessWidget {
         GestureDetector(
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => PhotoViewerPage(photo: photo),
-              ),
+              MaterialPageRoute(builder: (_) => PhotoViewerPage(photo: photo)),
             );
           },
           child: ClipRRect(
@@ -200,10 +198,7 @@ class _FeedPost extends StatelessWidget {
         if (photo.caption.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 10),
-            child: Text(
-              photo.caption,
-              style: const TextStyle(fontSize: 15),
-            ),
+            child: Text(photo.caption, style: const TextStyle(fontSize: 15)),
           ),
       ],
     );

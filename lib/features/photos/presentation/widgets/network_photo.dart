@@ -18,42 +18,44 @@ class NetworkPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      url,
-      fit: fit,
-      loadingBuilder: (context, child, progress) {
-        final loaded = progress == null;
+    return SizedBox.expand(
+      child: Image.network(
+        url,
+        fit: fit,
+        loadingBuilder: (context, child, progress) {
+          final loaded = progress == null;
 
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 400),
-          switchInCurve: Curves.easeOut,
-          child: loaded
-              ? child
-              : Container(
-                  key: const ValueKey('loader'),
-                  color: const Color(0xFF2B2B2B),
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    width: loaderSize,
-                    height: loaderSize,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      value: progress.expectedTotalBytes != null
-                          ? progress.cumulativeBytesLoaded /
-                              progress.expectedTotalBytes!
-                          : null,
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            switchInCurve: Curves.easeOut,
+            child: loaded
+                ? child
+                : Container(
+                    key: const ValueKey('loader'),
+                    color: const Color(0xFF2B2B2B),
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: loaderSize,
+                      height: loaderSize,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        value: progress.expectedTotalBytes != null
+                            ? progress.cumulativeBytesLoaded /
+                                  progress.expectedTotalBytes!
+                            : null,
+                      ),
                     ),
                   ),
-                ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) => Container(
-        color: const Color(0xFF2B2B2B),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.broken_image_outlined,
-          color: Colors.white24,
-          size: errorIconSize,
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: const Color(0xFF2B2B2B),
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.broken_image_outlined,
+            color: Colors.white24,
+            size: errorIconSize,
+          ),
         ),
       ),
     );

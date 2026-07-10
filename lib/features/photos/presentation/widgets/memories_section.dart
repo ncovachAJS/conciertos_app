@@ -210,17 +210,21 @@ class _MemoriesSectionState extends State<MemoriesSection> {
             itemCount: _photos.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 1,
             ),
             itemBuilder: (context, index) {
               final photo = _photos[index];
 
               return GestureDetector(
                 onTap: () => _openPhoto(photo),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: NetworkPhoto(url: photo.imageUrl),
+                child: Hero(
+                  tag: photo.id,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: NetworkPhoto(url: photo.imageUrl),
+                  ),
                 ),
               );
             },
