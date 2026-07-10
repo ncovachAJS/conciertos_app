@@ -1,12 +1,18 @@
+import 'package:conciertos_app/features/spotify/domain/entities/data/services/spotify_api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/widgets/app_page.dart';
+
 import '../../../photos/presentation/widgets/memories_section.dart';
+
 import '../../domain/entities/concert.dart';
 
 import '../../../setlist/data/services/setlist_service.dart';
 import '../../../setlist/domain/entities/setlist.dart';
+
+import '../../../spotify/domain/entities/spotify_artist.dart';
 
 class ConcertDetailPage extends StatefulWidget {
   final Concert concert;
@@ -19,17 +25,36 @@ class ConcertDetailPage extends StatefulWidget {
 
 class _ConcertDetailPageState extends State<ConcertDetailPage> {
   final SetlistService _setlistService = SetlistService();
+  final SpotifyApiService _spotifyService = SpotifyApiService();
 
   Setlist? setlist;
+  SpotifyArtist? spotifyArtist;
 
   bool loadingSetlist = true;
+  bool loadingSpotify = true;
 
   bool showFullSetlist = false;
 
   @override
   void initState() {
     super.initState();
+
     _loadSetlist();
+    _loadSpotify();
+  }
+
+  Future<void> _loadSpotify() async {
+    try {
+      spotifyArtist = await _spotifyService.searchArtist(widget.concert.artist);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+
+    if (mounted) {
+      setState(() {
+        loadingSpotify = false;
+      });
+    }
   }
 
   Future<void> _loadSetlist() async {
@@ -80,16 +105,6 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
             ),
           ),
 
-          // const SizedBox(height: 24),
-
-          // Text(
-          //   widget.concert.artist,
-          //   style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-          // ),
-          // Text(
-          //   widget.concert.festival,
-          //   style: const TextStyle(color: Colors.white70, fontSize: 18),
-          // ),
           const SizedBox(height: 30),
 
           Card(
@@ -128,6 +143,24 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
               ],
             ),
           ),
+
+          if (!loadingSpotify && spotifyArtist != null) ...[
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                icon: const Icon(Icons.music_note),
+                label: const Text('Escuchar en Spotify'),
+                onPressed: () async {
+                  await launchUrl(
+                    Uri.parse(spotifyArtist!.url),
+                    mode: LaunchMode.externalApplication,
+                  );
+                },
+              ),
+            ),
+          ],
 
           const SizedBox(height: 24),
 
