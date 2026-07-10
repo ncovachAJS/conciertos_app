@@ -10,23 +10,27 @@ class AppInitializer {
   }) async {
     final stopwatch = Stopwatch()..start();
 
-    onProgress('🎸 Preparando escenario...', 0.15);
-    await Future.delayed(const Duration(milliseconds: 350));
+    onProgress('🎸 Preparando escenario...', 0.10);
+    await Future.delayed(const Duration(milliseconds: 700));
 
-    onProgress('🔊 Probando sonido...', 0.30);
-    await Future.delayed(const Duration(milliseconds: 350));
+    onProgress('🔊 Probando sonido...', 0.25);
+    await Future.delayed(const Duration(milliseconds: 700));
 
-    onProgress('🎫 Cargando conciertos...', 0.45);
+    onProgress('💡 Encendiendo las luces...', 0.40);
+    await Future.delayed(const Duration(milliseconds: 700));
+
+    onProgress('🎫 Cargando conciertos...', 0.55);
 
     await dashboardController.load();
 
-    onProgress('📊 Preparando estadísticas...', 0.85);
-    await Future.delayed(const Duration(milliseconds: 300));
+    onProgress('📸 Organizando recuerdos...', 0.80);
+    await Future.delayed(const Duration(milliseconds: 600));
 
     onProgress('🤘 ¡Que empiece el concierto!', 1);
+    await Future.delayed(const Duration(milliseconds: 800));
 
     // La splash durará al menos 2,5 segundos.
-    const minimumDuration = Duration(milliseconds: 2500);
+    const minimumDuration = Duration(seconds: 8);
 
     final remaining = minimumDuration - stopwatch.elapsed;
 
