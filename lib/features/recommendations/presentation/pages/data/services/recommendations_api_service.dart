@@ -7,21 +7,23 @@ import '../models/recommended_event_model.dart';
 
 class RecommendationsApiService {
   Future<List<RecommendedEventModel>> getRecommendations({
-    required List<String> artists,
+    required String artist,
     String countryCode = '',
   }) async {
-    print(jsonEncode({'artists': artists, 'countryCode': countryCode}));
+    final body = {'artist': artist, 'countryCode': countryCode};
+
+    print(jsonEncode(body));
 
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/recommendations'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'artists': artists, 'countryCode': countryCode}),
+      body: jsonEncode(body),
     );
 
     print('STATUS => ${response.statusCode}');
     print('BODY => ${response.body}');
 
-    if (response.statusCode != 200 && response.statusCode != 201) {
+    if (response.statusCode != 200) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
 

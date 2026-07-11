@@ -40,10 +40,20 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
     try {
       final likedArtists = await concertRepository.getLikedArtists();
 
-      events = await api.getRecommendations(
-        artists: likedArtists,
-        countryCode: selectedCountry,
-      );
+      events.clear();
+
+      for (final artist in likedArtists) {
+        final result = await api.getRecommendations(
+          artists: [artist],
+          countryCode: selectedCountry,
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          events.addAll(result);
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {
