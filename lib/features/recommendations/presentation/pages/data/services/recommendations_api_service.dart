@@ -10,14 +10,19 @@ class RecommendationsApiService {
     required List<String> artists,
     String countryCode = '',
   }) async {
+    print(jsonEncode({'artists': artists, 'countryCode': countryCode}));
+
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/recommendations'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'artists': artists, 'countryCode': countryCode}),
     );
 
+    print('STATUS => ${response.statusCode}');
+    print('BODY => ${response.body}');
+
     if (response.statusCode != 200) {
-      throw Exception('Error obteniendo recomendaciones');
+      throw Exception('Error ${response.statusCode}: ${response.body}');
     }
 
     final List<dynamic> json = jsonDecode(response.body);

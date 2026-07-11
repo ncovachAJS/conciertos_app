@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/recommendations/presentation/pages/recommendations_page.dart';
 import '../features/concerts/domain/entities/concert.dart';
 import '../features/concerts/presentation/pages/concert_detail_page.dart';
 import '../features/concerts/presentation/pages/concerts_page.dart';
@@ -60,6 +61,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/setlist-test',
           builder: (context, state) => const SetlistTestPage(),
+        ),
+        GoRoute(
+          path: '/recommendations',
+          builder: (context, state) => const RecommendationsPage(),
         ),
       ],
     ),
