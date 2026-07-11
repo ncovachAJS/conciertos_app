@@ -35,16 +35,15 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
   Future<void> _loadRecommendations() async {
     setState(() {
       loading = true;
+      events.clear();
     });
 
     try {
       final likedArtists = await concertRepository.getLikedArtists();
 
-      events.clear();
-
       for (final artist in likedArtists) {
         final result = await api.getRecommendations(
-          artists: [artist],
+          artist: artist,
           countryCode: selectedCountry,
         );
 
