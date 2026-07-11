@@ -38,7 +38,7 @@ class DashboardController extends ChangeNotifier {
     }
   }
 
-  List<Concert> get favorites => concerts.where((c) => c.liked).toList();
+  List<Concert> get favorites => concerts.where((c) => c.favorite).toList();
 
   List<String> get favoriteArtists {
     final artists = concerts

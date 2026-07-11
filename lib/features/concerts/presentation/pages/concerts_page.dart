@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/app_page.dart';
-import '../../../../shared/widgets/concert_card_V2.dart';
+
 import '../../../../shared/widgets/concert_grid_card.dart';
 import '../../data/repositories/concert_repository_impl.dart';
 import '../../domain/repositories/concert_repository.dart';
 import '../../domain/entities/concert.dart';
+import '../../../../shared/widgets/concert_card.dart';
 
 class ConcertsPage extends StatefulWidget {
   const ConcertsPage({super.key});
@@ -192,7 +193,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                             'Eliminar concierto',
                                           ),
                                           content: Text(
-                                            '¿Seguro que quieres eliminar "${concert.name}"?'
+                                            '¿Seguro que quieres eliminar "${concert.name}"?',
                                           ),
                                           actions: [
                                             TextButton(
@@ -218,7 +219,9 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                       });
 
                                       try {
-                                        await repository.deleteConcert(concert.id);
+                                        await repository.deleteConcert(
+                                          concert.id,
+                                        );
 
                                         await _loadConcerts();
 
@@ -229,7 +232,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              '"${concert.name}" eliminado'
+                                              '"${concert.name}" eliminado',
                                             ),
                                           ),
                                         );
@@ -254,7 +257,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                 itemBuilder: (context, index) {
                                   final concert = filteredConcerts[index];
 
-                                  return ConcertCardV2(
+                                  return ConcertCard(
                                     concert: concert,
 
                                     onTap: () {
@@ -309,7 +312,9 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                       });
 
                                       try {
-                                        await repository.deleteConcert(concert.id);
+                                        await repository.deleteConcert(
+                                          concert.id,
+                                        );
 
                                         await _loadConcerts();
 
@@ -320,7 +325,7 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                         ).showSnackBar(
                                           SnackBar(
                                             content: Text(
-                                              '"${concert.name}" eliminado'
+                                              '"${concert.name}" eliminado',
                                             ),
                                           ),
                                         );

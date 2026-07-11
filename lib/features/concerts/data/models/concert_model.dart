@@ -10,20 +10,22 @@ class ConcertModel extends Concert {
     required String imageUrl,
     required int rating,
     required bool liked,
+    required bool favorite,
     required String venue,
     String city = '',
   }) : super(
-          id: id,
-          name: name,
-          artist: artist,
-          festival: festival,
-          date: date,
-          imageUrl: imageUrl,
-          rating: rating,
-          liked: liked,
-          venue: venue,
-          city: city,
-        );
+         id: id,
+         name: name,
+         artist: artist,
+         festival: festival,
+         date: date,
+         imageUrl: imageUrl,
+         rating: rating,
+         liked: liked,
+         favorite: favorite,
+         venue: venue,
+         city: city,
+       );
 
   factory ConcertModel.fromJson(Map<String, dynamic> json) {
     return ConcertModel(
@@ -32,12 +34,10 @@ class ConcertModel extends Concert {
       artist: json['artist']?.toString() ?? '',
       festival: json['festival']?.toString() ?? '',
       imageUrl: json['imageUrl']?.toString() ?? '',
+      favorite: json['favorite'] ?? false,
       venue: json['venue']?.toString() ?? '',
       city: json['city']?.toString() ?? '',
-      date: DateTime.tryParse(
-            json['date']?.toString() ?? '',
-          ) ??
-          DateTime.now(),
+      date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
       rating: json['rating'] ?? 0,
       liked: json['liked'] ?? false,
     );
@@ -53,6 +53,7 @@ class ConcertModel extends Concert {
       imageUrl: concert.imageUrl,
       rating: concert.rating,
       liked: concert.liked,
+      favorite: concert.favorite,
       venue: concert.venue,
       city: concert.city,
     );
@@ -71,6 +72,7 @@ class ConcertModel extends Concert {
       'imageUrl': imageUrl,
       'rating': rating,
       'liked': liked,
+      'favorite': favorite,
     };
   }
 
@@ -87,6 +89,7 @@ class ConcertModel extends Concert {
       'venue': venue,
       'rating': rating,
       'liked': liked,
+      'favorite': favorite,
     };
 
     if (city.isNotEmpty) {

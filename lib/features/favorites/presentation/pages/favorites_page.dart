@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/app_page.dart';
-import '../../../../shared/widgets/concert_card_v2.dart';
+import '../../../../shared/widgets/concert_card.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
@@ -43,7 +43,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     try {
       final concerts = await ConcertApiService().getConcerts();
 
-      favorites = concerts.where((c) => c.liked).toList()
+      favorites = concerts.where((c) => c.favorite).toList()
         ..sort((a, b) => b.date.compareTo(a.date));
 
       filteredFavorites = List.from(favorites);
@@ -92,10 +92,41 @@ class _FavoritesPageState extends State<FavoritesPage> {
       child: loading
           ? const Center(child: CircularProgressIndicator())
           : favorites.isEmpty
-          ? const Center(
-              child: Text(
-                'Todavía no tienes conciertos favoritos',
-                style: TextStyle(color: Colors.white70, fontSize: 18),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.star_border_rounded,
+                    size: 80,
+                    color: Colors.amber,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  const Text(
+                    'Todavía no tienes favoritos',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  const Text(
+                    'Marca con ⭐ los conciertos\nque quieras recordar siempre.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  FilledButton.icon(
+                    onPressed: () {
+                      context.go('/concerts');
+                    },
+                    icon: const Icon(Icons.library_music),
+                    label: const Text('Ir a conciertos'),
+                  ),
+                ],
               ),
             )
           : Column(
@@ -172,8 +203,19 @@ class _FavoritesPageState extends State<FavoritesPage> {
                             itemBuilder: (context, index) {
                               final concert = filteredFavorites[index];
 
-                              return ConcertCardV2(
+                              return ConcertCard(
                                 concert: concert,
+                                onFavorite: () async {
+                                  final updated = concert.copyWith(
+                                    favorite: !concert.favorite,
+                                  );
+
+                                  await ConcertApiService().updateConcert(
+                                    updated,
+                                  );
+
+                                  await _loadFavorites();
+                                },
                                 onTap: () {
                                   context.push(
                                     '/concert-detail',
