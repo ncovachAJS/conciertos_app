@@ -18,7 +18,7 @@ class AppShell extends StatelessWidget {
         return 2;
       case '/favorites':
         return 3;
-      case '/settings':
+      case '/recommendations':
         return 4;
       default:
         return 0;
@@ -46,7 +46,7 @@ class AppShell extends StatelessWidget {
               context.go('/favorites');
               break;
             case 4:
-              context.go('/settings');
+              context.go('/recommendations');
               break;
           }
         },
@@ -72,9 +72,9 @@ class AppShell extends StatelessWidget {
             label: 'Favoritos',
           ),
           NavigationDestination(
-            icon: Icon(Icons.handyman_outlined),
-            selectedIcon: Icon(Icons.handyman),
-            label: 'Tools',
+            icon: Icon(Icons.confirmation_number_outlined),
+            selectedIcon: Icon(Icons.confirmation_number),
+            label: 'Entradas',
           ),
         ],
       ),

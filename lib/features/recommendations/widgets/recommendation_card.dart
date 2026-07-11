@@ -1,9 +1,18 @@
 import 'package:conciertos_app/features/recommendations/presentation/pages/domain/entities/recommended_event.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RecommendationCard extends StatelessWidget {
   final RecommendedEvent event;
+
+  Future<void> _openTicketUrl() async {
+    final uri = Uri.parse(event.ticketUrl);
+
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw Exception('No se pudo abrir ${event.ticketUrl}');
+    }
+  }
 
   const RecommendationCard({super.key, required this.event});
 
@@ -64,9 +73,7 @@ class RecommendationCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: () {
-                      // siguiente paso
-                    },
+                    onPressed: _openTicketUrl,
                     icon: const Icon(Icons.confirmation_number),
                     label: const Text('Comprar entradas'),
                   ),
