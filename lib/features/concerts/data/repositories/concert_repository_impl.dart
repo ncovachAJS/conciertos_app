@@ -27,4 +27,16 @@ class ConcertRepositoryImpl implements ConcertRepository {
   Future<void> deleteConcert(String id) {
     return _apiService.deleteConcert(id);
   }
+
+  @override
+  Future<List<String>> getLikedArtists() async {
+    final concerts = await getConcerts();
+
+    return concerts
+        .where((concert) => concert.liked)
+        .map((concert) => concert.artist)
+        .toSet()
+        .toList()
+      ..sort();
+  }
 }

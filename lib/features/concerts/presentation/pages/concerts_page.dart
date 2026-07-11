@@ -9,6 +9,8 @@ import '../../domain/repositories/concert_repository.dart';
 import '../../domain/entities/concert.dart';
 import '../../../../shared/widgets/concert_card.dart';
 
+import '../../data/models/concert_model.dart';
+
 class ConcertsPage extends StatefulWidget {
   const ConcertsPage({super.key});
 
@@ -54,6 +56,139 @@ class _ConcertsPageState extends State<ConcertsPage> {
     if (!mounted) return;
 
     setState(() => loading = false);
+  }
+
+  Future<void> _toggleFavorite(Concert concert) async {
+    final updatedConcert = ConcertModel.fromEntity(
+      concert.copyWith(favorite: !concert.favorite),
+    );
+
+    setState(() {
+      final index = concerts.indexWhere((c) => c.id == concert.id);
+      if (index != -1) {
+        concerts[index] = updatedConcert;
+      }
+
+      final filteredIndex = filteredConcerts.indexWhere(
+        (c) => c.id == concert.id,
+      );
+      if (filteredIndex != -1) {
+        filteredConcerts[filteredIndex] = updatedConcert;
+      }
+    });
+
+    try {
+      await repository.updateConcert(updatedConcert);
+    } catch (e) {
+      // Volvemos al estado anterior si falla la API
+      setState(() {
+        final index = concerts.indexWhere((c) => c.id == concert.id);
+        if (index != -1) {
+          concerts[index] = concert;
+        }
+
+        final filteredIndex = filteredConcerts.indexWhere(
+          (c) => c.id == concert.id,
+        );
+        if (filteredIndex != -1) {
+          filteredConcerts[filteredIndex] = concert;
+        }
+      });
+
+      debugPrint(e.toString());
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo actualizar el favorito')),
+      );
+    }
+  }
+
+  Future<void> _updateRating(Concert concert, int rating) async {
+    final updatedConcert = ConcertModel.fromEntity(
+      concert.copyWith(rating: rating),
+    );
+
+    setState(() {
+      final index = concerts.indexWhere((c) => c.id == concert.id);
+      if (index != -1) {
+        concerts[index] = updatedConcert;
+      }
+
+      final filteredIndex = filteredConcerts.indexWhere(
+        (c) => c.id == concert.id,
+      );
+      if (filteredIndex != -1) {
+        filteredConcerts[filteredIndex] = updatedConcert;
+      }
+    });
+
+    try {
+      await repository.updateConcert(updatedConcert);
+    } catch (e) {
+      setState(() {
+        final index = concerts.indexWhere((c) => c.id == concert.id);
+        if (index != -1) {
+          concerts[index] = concert;
+        }
+
+        final filteredIndex = filteredConcerts.indexWhere(
+          (c) => c.id == concert.id,
+        );
+        if (filteredIndex != -1) {
+          filteredConcerts[filteredIndex] = concert;
+        }
+      });
+
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> _toggleLike(Concert concert) async {
+    final updatedConcert = ConcertModel.fromEntity(
+      concert.copyWith(liked: !concert.liked),
+    );
+
+    setState(() {
+      final index = concerts.indexWhere((c) => c.id == concert.id);
+      if (index != -1) {
+        concerts[index] = updatedConcert;
+      }
+
+      final filteredIndex = filteredConcerts.indexWhere(
+        (c) => c.id == concert.id,
+      );
+      if (filteredIndex != -1) {
+        filteredConcerts[filteredIndex] = updatedConcert;
+      }
+    });
+
+    try {
+      await repository.updateConcert(updatedConcert);
+    } catch (e) {
+      setState(() {
+        final index = concerts.indexWhere((c) => c.id == concert.id);
+        if (index != -1) {
+          concerts[index] = concert;
+        }
+
+        final filteredIndex = filteredConcerts.indexWhere(
+          (c) => c.id == concert.id,
+        );
+        if (filteredIndex != -1) {
+          filteredConcerts[filteredIndex] = concert;
+        }
+      });
+
+      debugPrint(e.toString());
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo actualizar "Me gusta"')),
+      );
+    }
   }
 
   void _filterConcerts(String value) {
@@ -260,12 +395,19 @@ class _ConcertsPageState extends State<ConcertsPage> {
                                   return ConcertCard(
                                     concert: concert,
 
-                                    onTap: () {
+                                    onImageTap: () {
                                       context.push(
                                         '/concert-detail',
                                         extra: concert,
                                       );
                                     },
+
+                                    onLike: () => _toggleLike(concert),
+
+                                    onFavorite: () => _toggleFavorite(concert),
+
+                                    onRatingChanged: (rating) =>
+                                        _updateRating(concert, rating),
 
                                     onEdit: () async {
                                       final result = await context.push(

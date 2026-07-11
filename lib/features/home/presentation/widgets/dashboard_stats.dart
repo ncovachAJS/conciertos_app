@@ -40,7 +40,7 @@ class DashboardStats extends StatelessWidget {
 
         _StatCard(
           value: controller.totalRecommended.toString(),
-          label: 'Recomendados',
+          label: 'Te gustan',
           icon: Icons.thumb_up_alt_rounded,
           color: const Color(0xFF4CAF50),
         ),

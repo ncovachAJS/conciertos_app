@@ -5,18 +5,22 @@ import '../../features/concerts/domain/entities/concert.dart';
 class ConcertCard extends StatelessWidget {
   final Concert concert;
 
-  final VoidCallback? onTap;
+  final VoidCallback? onImageTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onFavorite;
+  final VoidCallback? onLike;
+  final ValueChanged<int>? onRatingChanged;
 
   const ConcertCard({
     super.key,
     required this.concert,
-    this.onTap,
+    this.onImageTap,
     this.onEdit,
     this.onDelete,
     this.onFavorite,
+    this.onLike,
+    this.onRatingChanged,
   });
 
   Widget _chip(IconData icon, String text) {
@@ -126,7 +130,7 @@ class ConcertCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             InkWell(
-              onTap: onTap,
+              onTap: onImageTap,
               child: SizedBox(
                 height: 320,
                 width: double.infinity,
@@ -211,102 +215,50 @@ class ConcertCard extends StatelessWidget {
                   const SizedBox(height: 18),
 
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Row(
                         children: List.generate(5, (index) {
-                          return Icon(
-                            index < concert.rating
-                                ? Icons.star_rounded
-                                : Icons.star_outline_rounded,
-                            color: Colors.amber,
-                            size: 24,
+                          return GestureDetector(
+                            onTap: () => onRatingChanged?.call(index + 1),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: Icon(
+                                index < concert.rating
+                                    ? Icons.star_rounded
+                                    : Icons.star_outline_rounded,
+                                color: concert.isPastConcert
+                                    ? Colors.amber
+                                    : Colors.grey,
+                                size: 24,
+                              ),
+                            ),
                           );
                         }),
                       ),
 
                       const Spacer(),
 
-                      GestureDetector(
-                        onTap: () {
-                          debugPrint('Favorito pulsado');
-                          onFavorite?.call();
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: concert.favorite
-                                ? Colors.amber.withOpacity(.15)
-                                : Colors.white10,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                concert.favorite
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                color: concert.favorite
-                                    ? Colors.amber
-                                    : Colors.white70,
-                                size: 18,
-                              ),
+                      IconButton(
+                        onPressed: onLike,
+                        icon: Icon(
+                          concert.liked
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: concert.liked ? Colors.red : Colors.white70,
+                        ),
+                      ),
 
-                              const SizedBox(width: 6),
-
-                              Text(
-                                'Favorito',
-                                style: TextStyle(
-                                  color: concert.favorite
-                                      ? Colors.amber
-                                      : Colors.white70,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                      IconButton(
+                        onPressed: onFavorite,
+                        icon: Icon(
+                          concert.favorite ? Icons.star : Icons.star_border,
+                          color: concert.favorite
+                              ? Colors.amber
+                              : Colors.white70,
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 14),
-
-                  if (concert.liked)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(.15),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.thumb_up, color: Colors.green, size: 18),
-
-                            SizedBox(width: 6),
-
-                            Text(
-                              'Me gusta',
-                              style: TextStyle(
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
 
                   const SizedBox(height: 20),
 

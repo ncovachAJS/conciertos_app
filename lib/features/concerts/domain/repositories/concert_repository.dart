@@ -8,4 +8,6 @@ abstract class ConcertRepository {
   Future<void> updateConcert(Concert concert);
 
   Future<void> deleteConcert(String id);
+
+  Future<List<String>> getLikedArtists();
 }
