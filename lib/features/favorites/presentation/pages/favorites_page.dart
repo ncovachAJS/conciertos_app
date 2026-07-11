@@ -216,7 +216,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
                                   await _loadFavorites();
                                 },
-                                onTap: () {
+                                onImageTap: () {
                                   context.push(
                                     '/concert-detail',
                                     extra: concert,

@@ -99,16 +99,16 @@ class _DashboardViewState extends State<DashboardView> {
 
           DashboardRecentConcerts(controller: controller),
 
-          const SizedBox(height: 36),
+          // const SizedBox(height: 36),
 
-          const DashboardSectionTitle(
-            icon: Icons.flash_on,
-            title: 'Accesos rápidos',
-          ),
+          // const DashboardSectionTitle(
+          //   icon: Icons.flash_on,
+          //   title: 'Accesos rápidos',
+          // ),
 
-          const SizedBox(height: 18),
+          // const SizedBox(height: 18),
 
-          const DashboardQuickActions(),
+          // const DashboardQuickActions(),
         ],
       ),
     );
