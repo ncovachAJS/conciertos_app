@@ -70,7 +70,7 @@ class _DashboardViewState extends State<DashboardView> {
 
           const DashboardSectionTitle(
             icon: Icons.local_fire_department,
-            title: 'Recomendados para ti',
+            title: 'Recomendados',
           ),
 
           const SizedBox(height: 18),

@@ -41,6 +41,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
   bool _saving = false;
   int _rating = 0;
   bool _liked = false;
+  bool _favorite = false;
 
   bool get _isPastConcert {
     if (_selectedDate == null) return false;
@@ -65,6 +66,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
     if (widget.concert != null) {
       _rating = widget.concert!.rating;
       _liked = widget.concert!.liked;
+      _favorite = widget.concert!.favorite;
       _artistController.text = widget.concert!.artist;
       _festivalController.text = widget.concert!.festival;
       _venueController.text = widget.concert!.venue;
@@ -122,9 +124,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ Imagen subida correctamente'),
-        ),
+        const SnackBar(content: Text('✅ Imagen subida correctamente')),
       );
     } catch (e) {
       if (!mounted) return;
@@ -164,6 +164,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
         imageUrl: _imageUrl ?? '',
         rating: _rating,
         liked: _liked,
+        favorite: _favorite,
         venue: _venueController.text.trim(),
         city: _cityController.text.trim(),
       );
@@ -280,11 +281,11 @@ class _AddConcertPageState extends State<AddConcertPage> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
-                labelText: 'Nombre del concierto',
-                hintText: 'Ej. Iron Maiden - Future Past Tour',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.music_note),
-              ),
+                  labelText: 'Nombre del concierto',
+                  hintText: 'Ej. Iron Maiden - Future Past Tour',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.music_note),
+                ),
               ),
 
               const SizedBox(height: 16),
@@ -439,12 +440,69 @@ class _AddConcertPageState extends State<AddConcertPage> {
                               });
                             },
                             child: Text(
-                              _liked ? 'Lo recomendaría' : '¿Lo recomendarías?',
+                              _liked ? 'Me gusta' : '¿Te gustó?',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                                 color: _liked
                                     ? Colors.blueAccent
+                                    : Colors.white70,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    const Text(
+                      'Favoritos',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _favorite = !_favorite;
+                            });
+                          },
+                          icon: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: Icon(
+                              _favorite ? Icons.star : Icons.star_border,
+                              key: ValueKey(_favorite),
+                              color: _favorite ? Colors.amber : Colors.grey,
+                              size: 30,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _favorite = !_favorite;
+                              });
+                            },
+                            child: Text(
+                              _favorite
+                                  ? 'Añadido a favoritos'
+                                  : '¿Marcar como favorito?',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: _favorite
+                                    ? Colors.amber
                                     : Colors.white70,
                               ),
                             ),
