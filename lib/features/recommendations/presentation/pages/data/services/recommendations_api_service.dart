@@ -21,7 +21,7 @@ class RecommendationsApiService {
     print('STATUS => ${response.statusCode}');
     print('BODY => ${response.body}');
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
 

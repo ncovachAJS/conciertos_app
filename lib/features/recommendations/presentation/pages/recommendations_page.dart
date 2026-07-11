@@ -90,9 +90,12 @@ class _RecommendationsPageState extends State<RecommendationsPage> {
           Expanded(
             child: loading
                 ? const Center(child: CircularProgressIndicator())
+                : events.isEmpty
+                ? const Center(
+                    child: Text('No se han encontrado recomendaciones.'),
+                  )
                 : ListView.builder(
                     itemCount: events.length,
-
                     itemBuilder: (_, index) {
                       final event = events[index];
 
