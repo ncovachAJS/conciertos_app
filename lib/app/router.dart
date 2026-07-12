@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/profile/presentation/pages/profile_page.dart';
 import '../features/recommendations/presentation/pages/recommendations_page.dart';
 import '../features/concerts/domain/entities/concert.dart';
 import '../features/concerts/presentation/pages/concert_detail_page.dart';
@@ -12,13 +13,25 @@ import '../features/setlist/presentation/pages/setlist_test_page.dart';
 import '../features/import/presentation/pages/import_page.dart';
 import '../features/photos/presentation/pages/feed_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
+import '../features/auth/presentation/pages/login_page.dart';
+import '../features/auth/presentation/pages/register_page.dart';
+import '../features/auth/presentation/pages/session_gate_page.dart';
 
 import 'app_shell.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/splash',
+  initialLocation: '/gate',
   routes: [
     GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
+    GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+    GoRoute(
+      path: '/register',
+      builder: (context, state) => const RegisterPage(),
+    ),
+    GoRoute(
+      path: '/gate',
+      builder: (context, state) => const SessionGatePage(),
+    ),
     ShellRoute(
       builder: (context, state, child) {
         return AppShell(child: child);
@@ -65,6 +78,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/recommendations',
           builder: (context, state) => const RecommendationsPage(),
+        ),
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfilePage(),
         ),
       ],
     ),

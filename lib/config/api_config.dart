@@ -5,6 +5,10 @@ class ApiConfig {
 
   static const String concertsEndpoint = '$baseUrl/concerts';
 
+  static const String loginEndpoint = '$baseUrl/auth/login';
+
+  static const String registerEndpoint = '$baseUrl/auth/register';
+
   static const String uploadsEndpoint = '$baseUrl/uploads/image';
 
   static const String photosFeedEndpoint = '$baseUrl/photos/feed';

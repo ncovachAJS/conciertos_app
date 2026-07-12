@@ -25,16 +25,12 @@ class ConcertApiService {
 
     final response = await http.post(
       Uri.parse(ApiConfig.concertsEndpoint),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode(model.toCreateJson()),
     );
 
     if (response.statusCode != 201) {
-      throw Exception(
-        'Error ${response.statusCode}: ${response.body}',
-      );
+      throw Exception('Error ${response.statusCode}: ${response.body}');
     }
   }
 
@@ -43,16 +39,12 @@ class ConcertApiService {
 
     final response = await http.put(
       Uri.parse('${ApiConfig.concertsEndpoint}/${concert.id}'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode(model.toUpdateJson()),
     );
 
     if (response.statusCode != 200) {
-      throw Exception(
-        'Error ${response.statusCode}: ${response.body}',
-      );
+      throw Exception('Error ${response.statusCode}: ${response.body}');
     }
   }
 
@@ -62,9 +54,7 @@ class ConcertApiService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception(
-        'Error ${response.statusCode}: ${response.body}',
-      );
+      throw Exception('Error ${response.statusCode}: ${response.body}');
     }
   }
 }

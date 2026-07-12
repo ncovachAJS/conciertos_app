@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class DashboardHeader extends StatelessWidget {
   const DashboardHeader({super.key});
@@ -47,21 +48,30 @@ class DashboardHeader extends StatelessWidget {
 
             const SizedBox(width: 10),
 
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Color(0xFFE53935),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x55E53935),
-                    blurRadius: 18,
-                    offset: Offset(0, 8),
-                  ),
-                ],
+            GestureDetector(
+              onTap: () {
+                context.push('/profile');
+              },
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE53935),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x55E53935),
+                      blurRadius: 18,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.person_outline,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 30),
             ),
           ],
         ),

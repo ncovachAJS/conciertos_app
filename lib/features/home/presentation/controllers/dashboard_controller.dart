@@ -42,6 +42,7 @@ class DashboardController extends ChangeNotifier {
 
   List<String> get favoriteArtists {
     final artists = concerts
+        .where((c) => c.favorite)
         .map((c) => c.artist.trim())
         .where((artist) => artist.isNotEmpty)
         .toSet()

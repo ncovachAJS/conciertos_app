@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:conciertos_app/core/initialization/app_initializer.dart';
 import 'package:conciertos_app/features/home/presentation/controllers/dashboard_controller.dart';
+import 'package:conciertos_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,6 +28,8 @@ class _SplashPageState extends State<SplashPage>
   final AudioPlayer _crowdPlayer = AudioPlayer();
 
   final _dashboardController = DashboardController();
+
+  final _authController = AuthController.instance;
 
   late final AppInitializer _initializer = AppInitializer(_dashboardController);
 
@@ -81,6 +84,17 @@ class _SplashPageState extends State<SplashPage>
   }
 
   Future<void> _startLoadingSequence() async {
+    final hasSession = await _authController.hasSession();
+
+    if (!hasSession) {
+      if (!mounted) return;
+
+      context.go('/login');
+      return;
+    }
+
+    await _authController.loadSession();
+
     await _initializer.initialize(
       onProgress: (message, progress) {
         if (!mounted) return;
