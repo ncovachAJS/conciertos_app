@@ -20,11 +20,11 @@ class _SessionGatePageState extends State<SessionGatePage> {
   Future<void> _checkSession() async {
     final auth = AuthController.instance;
 
-    final hasSession = await auth.hasSession();
+    await auth.loadSession();
 
     if (!mounted) return;
 
-    if (hasSession) {
+    if (auth.user != null) {
       context.go('/splash');
     } else {
       context.go('/login');
