@@ -50,7 +50,7 @@ class DashboardNextConcert extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        context.go('/concert-detail', extra: concert);
+        context.push('/concert-detail', extra: concert);
       },
       child: Container(
         height: 260,
