@@ -84,17 +84,6 @@ class _SplashPageState extends State<SplashPage>
   }
 
   Future<void> _startLoadingSequence() async {
-    final hasSession = await _authController.hasSession();
-
-    if (!hasSession) {
-      if (!mounted) return;
-
-      context.go('/login');
-      return;
-    }
-
-    await _authController.loadSession();
-
     await _initializer.initialize(
       onProgress: (message, progress) {
         if (!mounted) return;

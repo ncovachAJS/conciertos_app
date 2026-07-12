@@ -37,13 +37,11 @@ class AuthApiService {
       headers: {'Authorization': 'Bearer $token'},
     );
 
-    if (response.statusCode != 200) {
-      return null;
+    if (response.statusCode == 200) {
+      return UserModel.fromJson(jsonDecode(response.body));
     }
 
-    final json = jsonDecode(response.body);
-
-    return UserModel.fromJson(json);
+    return null;
   }
 
   Future<(User, String)> register({

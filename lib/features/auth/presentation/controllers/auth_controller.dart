@@ -20,11 +20,6 @@ class AuthController extends ChangeNotifier {
 
   String? get token => _token;
 
-  Future<bool> hasSession() async {
-    final token = await _storage.read(key: 'token');
-    return token != null;
-  }
-
   String? _token;
 
   Future<void> register({
@@ -72,15 +67,33 @@ class AuthController extends ChangeNotifier {
       return;
     }
 
-    _token = savedToken;
+    try {
+      _token = savedToken;
 
-    user = await _api.me(savedToken);
+      user = await _api.me(savedToken);
 
-    notifyListeners();
+      if (user == null) {
+        await logout();
+        return;
+      }
+
+      notifyListeners();
+    } catch (_) {
+      await logout();
+    }
   }
 
   Future<void> logout() async {
     await _storage.delete(key: 'token');
+
+    _token = null;
+    user = null;
+
+    notifyListeners();
+  }
+
+  Future<void> clearStorage() async {
+    await _storage.deleteAll();
 
     _token = null;
     user = null;
