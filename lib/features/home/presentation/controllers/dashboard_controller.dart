@@ -63,7 +63,11 @@ class DashboardController extends ChangeNotifier {
 
   int get totalConcerts => concerts.length;
 
-  int get totalFestivals => concerts.map((e) => e.festival).toSet().length;
+  int get totalFestivals => concerts
+      .where((e) => e.festival.trim().isNotEmpty)
+      .map((e) => e.festival.trim())
+      .toSet()
+      .length;
 
   int get totalRecommended => concerts.where((e) => e.liked).length;
 
