@@ -7,6 +7,8 @@ import '../../data/services/photo_api_service.dart';
 import '../widgets/network_photo.dart';
 import 'photo_viewer_page.dart';
 
+import 'package:collection/collection.dart';
+
 /// Feed global tipo Instagram con todas las fotos de recuerdo de los conciertos.
 class FeedPage extends StatefulWidget {
   const FeedPage({super.key});
@@ -92,37 +94,78 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   Widget _buildContent() {
-    if (_gridView) {
-      return GridView.builder(
-        itemCount: _photos.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 1,
-        ),
-        itemBuilder: (context, index) {
-          final photo = _photos[index];
+    final grouped = groupBy<ConcertPhotoModel, int>(
+      _photos,
+      (photo) => photo.concert?.date.year ?? 0,
+    );
 
-          return GestureDetector(
-            onTap: () => _openPhoto(photo),
-            child: Hero(
-              tag: photo.id,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: NetworkPhoto(url: photo.imageUrl),
-              ),
-            ),
-          );
-        },
-      );
-    }
+    final years = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
-    return ListView.separated(
-      itemCount: _photos.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 20),
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 24),
+      itemCount: years.length,
       itemBuilder: (context, index) {
-        return _FeedPost(photo: _photos[index]);
+        final year = years[index];
+        final photos = grouped[year]!;
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                year == 0 ? 'Sin fecha' : year.toString(),
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              if (_gridView)
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: photos.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 4,
+                    mainAxisSpacing: 4,
+                    childAspectRatio: 1,
+                  ),
+                  itemBuilder: (context, i) {
+                    final photo = photos[i];
+
+                    return GestureDetector(
+                      onTap: () => _openPhoto(photo),
+                      child: Hero(
+                        tag: photo.id,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: NetworkPhoto(
+                            url: photo.imageUrl,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                )
+              else
+                Column(
+                  children: photos
+                      .map(
+                        (photo) => Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: _FeedPost(photo: photo),
+                        ),
+                      )
+                      .toList(),
+                ),
+            ],
+          ),
+        );
       },
     );
   }

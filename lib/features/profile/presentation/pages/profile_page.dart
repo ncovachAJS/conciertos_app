@@ -6,6 +6,8 @@ import '../../../concerts/domain/entities/concert.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
+import '../../../photos/data/services/photo_api_service.dart';
+
 import 'package:go_router/go_router.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -18,9 +20,13 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final ConcertApiService _api = ConcertApiService();
 
+  final PhotoApiService _photosApi = PhotoApiService();
+
   final AuthController auth = AuthController.instance;
 
   List<Concert> concerts = [];
+
+  int totalPhotos = 0;
 
   bool loading = true;
 
@@ -39,6 +45,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> load() async {
     concerts = await _api.getConcerts();
+
+    final photos = await _photosApi.getFeed();
+
+    for (final photo in photos) {
+      debugPrint(photo.id);
+    }
+
+    totalPhotos = photos.length;
 
     if (!mounted) return;
 
@@ -107,8 +121,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 : '${fanLevel(concerts.length)}\n${fanSince()}',
             totalConcerts: concerts.length,
             totalFavorites: concerts.where((c) => c.favorite).length,
-            totalPhotos: 0,
+            totalPhotos: totalPhotos,
             level: auth.user == null ? '' : fanLevel(concerts.length),
+            memberNumber: auth.user?.memberNumber ?? 0,
           ),
 
           const SizedBox(height: 30),

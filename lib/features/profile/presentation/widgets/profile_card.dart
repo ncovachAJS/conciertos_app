@@ -9,6 +9,7 @@ class ProfileCard extends StatelessWidget {
     required this.totalFavorites,
     required this.totalPhotos,
     required this.level,
+    required this.memberNumber,
   });
 
   final String name;
@@ -17,6 +18,7 @@ class ProfileCard extends StatelessWidget {
   final int totalFavorites;
   final int totalPhotos;
   final String level;
+  final int memberNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +89,7 @@ class ProfileCard extends StatelessWidget {
           const SizedBox(height: 8),
 
           Text(
-            "MIEMBRO #000001",
+            "MIEMBRO #${memberNumber.toString().padLeft(6, '0')}",
             style: TextStyle(
               color: Colors.white.withOpacity(.7),
               letterSpacing: 2,
