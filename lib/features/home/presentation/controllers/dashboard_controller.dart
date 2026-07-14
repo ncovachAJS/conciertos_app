@@ -29,13 +29,25 @@ class DashboardController extends ChangeNotifier {
   Concert? get nextConcert {
     final now = DateTime.now();
 
-    try {
-      return concerts.firstWhere(
-        (c) => !c.date.isBefore(DateTime(now.year, now.month, now.day)),
-      );
-    } catch (_) {
-      return null;
-    }
+    final upcoming = concerts
+        .where((c) => !c.date.isBefore(DateTime(now.year, now.month, now.day)))
+        .toList();
+
+    upcoming.sort((a, b) => a.date.compareTo(b.date));
+
+    return upcoming.isEmpty ? null : upcoming.first;
+  }
+
+  List<Concert> get upcomingConcerts {
+    final now = DateTime.now();
+
+    final upcoming = concerts
+        .where((c) => !c.date.isBefore(DateTime(now.year, now.month, now.day)))
+        .toList();
+
+    upcoming.sort((a, b) => a.date.compareTo(b.date));
+
+    return upcoming;
   }
 
   List<Concert> get favorites => concerts.where((c) => c.favorite).toList();
