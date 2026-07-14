@@ -8,6 +8,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AppPage(title: '🎸 My Concerts', child: DashboardView());
+    return const AppPage(child: DashboardView());
   }
 }

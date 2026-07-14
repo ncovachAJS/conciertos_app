@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../controllers/dashboard_controller.dart';
+import '../../../concerts/domain/entities/concert.dart';
 
 class DashboardNextConcert extends StatelessWidget {
-  final DashboardController controller;
+  final Concert? concert;
 
-  const DashboardNextConcert({super.key, required this.controller});
+  const DashboardNextConcert({super.key, required this.concert});
 
   @override
   Widget build(BuildContext context) {
-    final concert = controller.nextConcert;
-
-    if (concert == null) {
+    if (this.concert == null) {
       return Container(
         height: 220,
         decoration: BoxDecoration(
@@ -32,6 +30,8 @@ class DashboardNextConcert extends StatelessWidget {
       );
     }
 
+    final concert = this.concert!;
+
     const months = [
       '',
       'ENE',
@@ -48,6 +48,26 @@ class DashboardNextConcert extends StatelessWidget {
       'DIC',
     ];
 
+    final today = DateTime.now();
+
+    final days = concert.date
+        .difference(DateTime(today.year, today.month, today.day))
+        .inDays;
+
+    final double progress = days <= 0
+        ? 1
+        : ((180 - days) / 180).clamp(0.0, 1.0);
+
+    final String countdownText;
+
+    if (days <= 0) {
+      countdownText = '🎉 ¡Hoy hay concierto!';
+    } else if (days == 1) {
+      countdownText = '🔥 Mañana vuelves al directo';
+    } else {
+      countdownText = '⏳ Faltan $days días';
+    }
+
     return GestureDetector(
       onTap: () {
         context.push('/concert-detail', extra: concert);
@@ -55,6 +75,7 @@ class DashboardNextConcert extends StatelessWidget {
       child: Container(
         height: 260,
         clipBehavior: Clip.antiAlias,
+        width: double.infinity,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(28)),
         child: Stack(
           fit: StackFit.expand,
@@ -81,7 +102,12 @@ class DashboardNextConcert extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(.90)],
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(.10),
+                    Colors.black.withOpacity(.98),
+                  ],
+                  stops: const [0, .45, 1],
                 ),
               ),
             ),
@@ -154,36 +180,8 @@ class DashboardNextConcert extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
-                      fontSize: 30,
+                      fontSize: 26,
                     ),
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    concert.festival,
-                    style: const TextStyle(color: Colors.white70, fontSize: 18),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.stadium_rounded,
-                        color: Colors.white70,
-                        size: 18,
-                      ),
-
-                      const SizedBox(width: 6),
-
-                      Expanded(
-                        child: Text(
-                          concert.venue,
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                      ),
-                    ],
                   ),
 
                   const SizedBox(height: 6),
@@ -195,16 +193,66 @@ class DashboardNextConcert extends StatelessWidget {
                         color: Colors.white70,
                         size: 18,
                       ),
-
                       const SizedBox(width: 6),
-
                       Expanded(
                         child: Text(
-                          concert.city,
-                          style: const TextStyle(color: Colors.white70),
+                          '${concert.venue} · ${concert.city}',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Row(
+                    children: [
+                      const Text(
+                        'Hoy',
+                        style: TextStyle(color: Colors.white54, fontSize: 11),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: SizedBox(
+                            height: 6,
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: Colors.white24,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFFFFC107),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      const Text(
+                        'Directo',
+                        style: TextStyle(color: Colors.white54, fontSize: 11),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Center(
+                    child: Text(
+                      countdownText,
+                      style: const TextStyle(
+                        color: Color(0xFFFFC107),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
                 ],
               ),
