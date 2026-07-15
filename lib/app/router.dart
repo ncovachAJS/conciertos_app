@@ -16,6 +16,7 @@ import '../features/splash/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
 import '../features/auth/presentation/pages/session_gate_page.dart';
+import '../features/statistics/presentation/pages/statistics_page.dart';
 
 import 'app_shell.dart';
 
@@ -46,7 +47,6 @@ final appRouter = GoRouter(
           path: '/concert-detail',
           builder: (context, state) {
             final concert = state.extra as Concert;
-
             return ConcertDetailPage(concert: concert);
           },
         ),
@@ -54,7 +54,6 @@ final appRouter = GoRouter(
           path: '/add',
           builder: (context, state) {
             final concert = state.extra as Concert?;
-
             return AddConcertPage(concert: concert);
           },
         ),
@@ -62,6 +61,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/favorites',
           builder: (context, state) => const FavoritesPage(),
+        ),
+        GoRoute(
+          path: '/statistics',
+          builder: (context, state) => const StatisticsPage(),
         ),
         GoRoute(
           path: '/settings',
