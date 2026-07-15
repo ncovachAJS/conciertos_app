@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../shared/widgets/app_page.dart';
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../data/festival_import_service.dart';
@@ -18,14 +17,11 @@ class ImportPage extends ConsumerStatefulWidget {
 }
 
 class _ImportPageState extends ConsumerState<ImportPage> {
-  // ── Tab ──────────────────────────────────────────────────────────────────
   int _tab = 0;
 
-  // ── Artist search ────────────────────────────────────────────────────────
   final _searchController = TextEditingController();
   final _setlistService = SetlistImportService();
   final _imageService = ArtistImageService();
-
   List<SetlistConcertModel> _concerts = [];
   final Set<String> _selected = {};
   bool _searching = false;
@@ -37,8 +33,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
   int _importTotal = 0;
   String _importingArtist = '';
 
-  // ── Festivals ────────────────────────────────────────────────────────────
-  final FestivalImportService _festivalService = FestivalImportService();
+  final _festivalService = FestivalImportService();
   List<FestivalModel> _festivals = [];
   bool _loadingFestivals = true;
   bool _importingFestival = false;
@@ -58,14 +53,9 @@ class _ImportPageState extends ConsumerState<ImportPage> {
     super.dispose();
   }
 
-  // ── Artist methods ────────────────────────────────────────────────────────
-
   Future<void> _search({bool more = false}) async {
     final q = _searchController.text.trim();
     if (q.isEmpty) return;
-
-    final nextPage = more ? _page + 1 : 1;
-
     setState(() {
       _searching = true;
       if (!more) {
@@ -75,9 +65,11 @@ class _ImportPageState extends ConsumerState<ImportPage> {
         _total = 0;
       }
     });
-
     try {
-      final r = await _setlistService.searchArtistConcerts(q, page: nextPage);
+      final r = await _setlistService.searchArtistConcerts(
+        q,
+        page: more ? _page + 1 : 1,
+      );
       if (!mounted) return;
       setState(() {
         _concerts = more ? [..._concerts, ...r.concerts] : r.concerts;
@@ -98,13 +90,11 @@ class _ImportPageState extends ConsumerState<ImportPage> {
   Future<void> _importSelected() async {
     if (_selected.isEmpty) return;
     final toImport = _concerts.where((c) => _selected.contains(c.id)).toList();
-
     setState(() {
       _importing = true;
       _importTotal = toImport.length;
       _importedCount = 0;
     });
-
     try {
       final img = await _imageService.getImage(toImport.first.artist) ?? '';
       for (final c in toImport) {
@@ -150,8 +140,6 @@ class _ImportPageState extends ConsumerState<ImportPage> {
     }
   }
 
-  // ── Festival methods ──────────────────────────────────────────────────────
-
   Future<void> _loadFestivals() async {
     try {
       _festivals = await _festivalService.getFestivals();
@@ -162,7 +150,6 @@ class _ImportPageState extends ConsumerState<ImportPage> {
   Future<void> _importFestival(FestivalModel f) async {
     final concerts = await _festivalService.loadFestivalModel(f);
     if (!mounted) return;
-
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -206,15 +193,12 @@ class _ImportPageState extends ConsumerState<ImportPage> {
         ],
       ),
     );
-
     if (ok != true || !mounted) return;
-
     setState(() {
       _importingFestival = true;
       _festTotal = concerts.length;
       _festImported = 0;
     });
-
     try {
       for (final c in concerts) {
         if (!mounted) return;
@@ -222,28 +206,6 @@ class _ImportPageState extends ConsumerState<ImportPage> {
           _festArtist = c.artist;
           _festImported++;
         });
-        await _festivalService.loadFestivalModel(
-          FestivalModel(
-            id: f.id,
-            title: f.title,
-            year: f.year,
-            city: f.city,
-            venue: f.venue,
-            concerts: [
-              {
-                'artist': c.artist,
-                'festival': c.festival,
-                'name': c.name,
-                'city': c.city,
-                'venue': c.venue,
-                'date': c.date.toIso8601String(),
-                'imageUrl': c.imageUrl,
-                'rating': c.rating,
-                'liked': c.liked,
-              },
-            ],
-          ),
-        );
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -259,229 +221,289 @@ class _ImportPageState extends ConsumerState<ImportPage> {
     }
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
-    return AppPage(
-      title: 'Importar',
-      child: Column(
+    debugPrint('BUILD CALLED tab=$_tab');
+
+    final isArtist = _tab == 0;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Importar')),
+      floatingActionButton: isArtist && _selected.isNotEmpty && !_importing
+          ? FloatingActionButton.extended(
+              onPressed: _importSelected,
+              icon: const Icon(Icons.download_rounded),
+              label: Text('Importar ${_selected.length}'),
+            )
+          : null,
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          // Tab switcher
-          Row(
-            children: [
-              _TabBtn(
-                label: 'Por artista',
-                icon: Icons.person_search,
-                selected: _tab == 0,
-                onTap: () => setState(() => _tab = 0),
+          // CustomScrollView — no necesita constraints de altura del padre
+          CustomScrollView(
+            slivers: [
+              // Tab switcher
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => setState(() => _tab = 0),
+                        icon: Icon(
+                          Icons.person_search,
+                          color: isArtist
+                              ? const Color(0xFFE53935)
+                              : Colors.white54,
+                        ),
+                        label: Text(
+                          'Por artista',
+                          style: TextStyle(
+                            color: isArtist
+                                ? const Color(0xFFE53935)
+                                : Colors.white54,
+                          ),
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => setState(() => _tab = 1),
+                        icon: Icon(
+                          Icons.festival,
+                          color: !isArtist
+                              ? const Color(0xFFE53935)
+                              : Colors.white54,
+                        ),
+                        label: Text(
+                          'Festivales',
+                          style: TextStyle(
+                            color: !isArtist
+                                ? const Color(0xFFE53935)
+                                : Colors.white54,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              _TabBtn(
-                label: 'Festivales',
-                icon: Icons.festival,
-                selected: _tab == 1,
-                onTap: () => setState(() => _tab = 1),
-              ),
+
+              const SliverToBoxAdapter(child: Divider(height: 1)),
+
+              // Search bar (artist only)
+              if (isArtist)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: const InputDecoration(
+                              hintText: 'Nombre del artista...',
+                              prefixIcon: Icon(Icons.search),
+                            ),
+                            onSubmitted: (_) => _search(),
+                            textInputAction: TextInputAction.search,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        FilledButton(
+                          onPressed: _searching ? null : () => _search(),
+                          child: const Text('Buscar'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // Counter (artist only)
+              if (isArtist && _total > 0)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '$_total encontrados',
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (_selected.isNotEmpty)
+                          Text(
+                            '${_selected.length} seleccionados',
+                            style: const TextStyle(
+                              color: Color(0xFFE53935),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // Artist content
+              if (isArtist) ...[
+                if (_searching && _concerts.isEmpty)
+                  const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (_concerts.isEmpty)
+                  const SliverFillRemaining(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Text(
+                          'Busca un artista para ver sus conciertos.',
+                          style: TextStyle(color: Colors.white54, fontSize: 15),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  SliverList.builder(
+                    itemCount: _concerts.length + (_hasMore ? 1 : 0),
+                    itemBuilder: (_, i) {
+                      if (i == _concerts.length) {
+                        return Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: OutlinedButton(
+                            onPressed: _searching
+                                ? null
+                                : () => _search(more: true),
+                            child: const Text('Cargar más'),
+                          ),
+                        );
+                      }
+                      final c = _concerts[i];
+                      final sel = _selected.contains(c.id);
+                      return CheckboxListTile(
+                        value: sel,
+                        onChanged: (v) => setState(
+                          () => v == true
+                              ? _selected.add(c.id)
+                              : _selected.remove(c.id),
+                        ),
+                        title: Text(
+                          c.artist,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${c.formattedDate}  ·  ${c.venue}, ${c.city}',
+                          style: const TextStyle(
+                            color: Colors.white60,
+                            fontSize: 13,
+                          ),
+                        ),
+                        secondary: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: c.isPast
+                                ? const Color(0xFFE53935).withOpacity(.15)
+                                : const Color(0xFF42A5F5).withOpacity(.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            c.isPast ? Icons.music_note : Icons.event,
+                            color: c.isPast
+                                ? const Color(0xFFE53935)
+                                : const Color(0xFF42A5F5),
+                            size: 18,
+                          ),
+                        ),
+                        activeColor: const Color(0xFFE53935),
+                      );
+                    },
+                  ),
+              ],
+
+              // Festival content
+              if (!isArtist) ...[
+                if (_loadingFestivals)
+                  const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (_festivals.isEmpty)
+                  const SliverFillRemaining(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Text(
+                          'No hay festivales en assets/imports/festivals.json',
+                          style: TextStyle(color: Colors.white54),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  SliverList.builder(
+                    itemCount: _festivals.length,
+                    itemBuilder: (_, i) {
+                      final f = _festivals[i];
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  f.title,
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  '${f.year}',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton.icon(
+                                    onPressed: () => _importFestival(f),
+                                    icon: const Icon(Icons.download),
+                                    label: const Text('Importar'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+
+              // Bottom padding for FAB
+              const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           ),
 
-          const SizedBox(height: 16),
-
-          // Controles del tab artista
-          if (_tab == 0) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: 'Nombre del artista...',
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    onSubmitted: (_) => _search(),
-                    textInputAction: TextInputAction.search,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                FilledButton(
-                  onPressed: _searching ? null : () => _search(),
-                  child: const Text('Buscar'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (_total > 0)
-              Row(
-                children: [
-                  Text(
-                    '$_total encontrados',
-                    style: const TextStyle(color: Colors.white54, fontSize: 13),
-                  ),
-                  const Spacer(),
-                  if (_selected.isNotEmpty)
-                    Text(
-                      '${_selected.length} seleccionados',
-                      style: const TextStyle(
-                        color: Color(0xFFE53935),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                ],
-              ),
-            const SizedBox(height: 8),
-          ],
-
-          // Contenido principal (Expanded)
-          Expanded(
-            child: Stack(
-              children: [
-                if (_tab == 0) _buildArtistContent(),
-                if (_tab == 1) _buildFestivalContent(),
-
-                // Botón importar artista
-                if (_tab == 0 && _selected.isNotEmpty && !_importing)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 8,
-                    child: FilledButton.icon(
-                      onPressed: _importSelected,
-                      icon: const Icon(Icons.download_rounded),
-                      label: Text(
-                        'Importar ${_selected.length} concierto${_selected.length > 1 ? "s" : ""}',
-                      ),
-                    ),
-                  ),
-
-                // Overlay artista
-                if (_importing)
-                  _buildOverlay(_importedCount, _importTotal, _importingArtist),
-
-                // Overlay festival
-                if (_importingFestival)
-                  _buildOverlay(_festImported, _festTotal, _festArtist),
-              ],
-            ),
-          ),
+          // Progress overlay
+          if (_importing)
+            _buildOverlay(_importedCount, _importTotal, _importingArtist),
+          if (_importingFestival)
+            _buildOverlay(_festImported, _festTotal, _festArtist),
         ],
       ),
-    );
-  }
-
-  Widget _buildArtistContent() {
-    if (_searching && _concerts.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (_concerts.isEmpty) {
-      return const Center(
-        child: Text(
-          'Busca un artista para ver sus conciertos.',
-          style: TextStyle(color: Colors.white54, fontSize: 15),
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 80),
-      itemCount: _concerts.length + (_hasMore ? 1 : 0),
-      itemBuilder: (_, i) {
-        if (i == _concerts.length) {
-          return Padding(
-            padding: const EdgeInsets.all(12),
-            child: OutlinedButton(
-              onPressed: _searching ? null : () => _search(more: true),
-              child: const Text('Cargar más'),
-            ),
-          );
-        }
-        final c = _concerts[i];
-        final sel = _selected.contains(c.id);
-        return CheckboxListTile(
-          value: sel,
-          onChanged: (v) => setState(
-            () => v == true ? _selected.add(c.id) : _selected.remove(c.id),
-          ),
-          title: Text(
-            c.artist,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text(
-            '${c.formattedDate}  ·  ${c.venue}, ${c.city}',
-            style: const TextStyle(color: Colors.white60, fontSize: 13),
-          ),
-          secondary: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: c.isPast
-                  ? const Color(0xFFE53935).withOpacity(.15)
-                  : const Color(0xFF42A5F5).withOpacity(.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              c.isPast ? Icons.music_note : Icons.event,
-              color: c.isPast
-                  ? const Color(0xFFE53935)
-                  : const Color(0xFF42A5F5),
-              size: 18,
-            ),
-          ),
-          activeColor: const Color(0xFFE53935),
-        );
-      },
-    );
-  }
-
-  Widget _buildFestivalContent() {
-    if (_loadingFestivals)
-      return const Center(child: CircularProgressIndicator());
-    if (_festivals.isEmpty) {
-      return const Center(
-        child: Text(
-          'No hay festivales en assets/imports/festivals.json',
-          style: TextStyle(color: Colors.white54),
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
-    return ListView.builder(
-      itemCount: _festivals.length,
-      itemBuilder: (_, i) {
-        final f = _festivals[i];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  f.title,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${f.year}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 16),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () => _importFestival(f),
-                    icon: const Icon(Icons.download),
-                    label: const Text('Importar'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -519,53 +541,6 @@ class _ImportPageState extends ConsumerState<ImportPage> {
               current,
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white54, fontSize: 13),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Tab button
-// ---------------------------------------------------------------------------
-
-class _TabBtn extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _TabBtn({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? const Color(0xFFE53935) : Colors.white54;
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Container(
-              height: 2,
-              color: selected ? const Color(0xFFE53935) : Colors.transparent,
             ),
           ],
         ),

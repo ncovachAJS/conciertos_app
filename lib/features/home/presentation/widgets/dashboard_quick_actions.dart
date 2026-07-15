@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../import/presentation/pages/import_page.dart';
+
 class DashboardQuickActions extends StatelessWidget {
   const DashboardQuickActions({super.key});
 
@@ -40,7 +42,9 @@ class DashboardQuickActions extends StatelessWidget {
             icon: Icons.download_rounded,
             title: 'Importar',
             color: const Color(0xFF66BB6A),
-            onTap: () => context.push('/import'),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const ImportPage())),
           ),
         ),
       ],
