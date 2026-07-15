@@ -295,25 +295,37 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: const InputDecoration(
-                              hintText: 'Nombre del artista...',
-                              prefixIcon: Icon(Icons.search),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        const buttonWidth = 100.0;
+                        const spacing = 12.0;
+                        final textFieldWidth =
+                            constraints.maxWidth - buttonWidth - spacing;
+                        return Row(
+                          children: [
+                            SizedBox(
+                              width: textFieldWidth,
+                              child: TextField(
+                                controller: _searchController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Nombre del artista...',
+                                  prefixIcon: Icon(Icons.search),
+                                ),
+                                onSubmitted: (_) => _search(),
+                                textInputAction: TextInputAction.search,
+                              ),
                             ),
-                            onSubmitted: (_) => _search(),
-                            textInputAction: TextInputAction.search,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        FilledButton(
-                          onPressed: _searching ? null : () => _search(),
-                          child: const Text('Buscar'),
-                        ),
-                      ],
+                            const SizedBox(width: spacing),
+                            SizedBox(
+                              width: buttonWidth,
+                              child: FilledButton(
+                                onPressed: _searching ? null : () => _search(),
+                                child: const Text('Buscar'),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),
