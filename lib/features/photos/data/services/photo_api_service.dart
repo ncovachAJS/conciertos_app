@@ -13,7 +13,7 @@ class PhotoApiService {
       headers: _headers,
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
 
@@ -32,7 +32,7 @@ class PhotoApiService {
 
     final response = await http.get(uri, headers: _headers);
 
-    if (response.statusCode != 200) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
 
@@ -74,7 +74,7 @@ class PhotoApiService {
       headers: _headers,
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
   }

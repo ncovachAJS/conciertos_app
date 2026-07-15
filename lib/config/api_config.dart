@@ -13,6 +13,9 @@ class ApiConfig {
 
   static const String photosFeedEndpoint = '$baseUrl/photos/feed';
 
+  // 👇 NUEVO
+  static const String userAvatarEndpoint = '$baseUrl/users/avatar';
+
   /// Fotos de un concierto concreto: `/concerts/:id/photos`.
   static String concertPhotosEndpoint(String concertId) =>
       '$concertsEndpoint/$concertId/photos';

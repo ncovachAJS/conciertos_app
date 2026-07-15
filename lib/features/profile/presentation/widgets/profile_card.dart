@@ -10,6 +10,8 @@ class ProfileCard extends StatelessWidget {
     required this.totalPhotos,
     required this.level,
     required this.memberNumber,
+    required this.onAvatarTap,
+    this.avatarUrl,
   });
 
   final String name;
@@ -19,6 +21,8 @@ class ProfileCard extends StatelessWidget {
   final int totalPhotos;
   final String level;
   final int memberNumber;
+  final VoidCallback onAvatarTap;
+  final String? avatarUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +48,21 @@ class ProfileCard extends StatelessWidget {
         children: [
           const SizedBox(height: 12),
 
-          Container(
-            width: 84,
-            height: 84,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.person_outline,
-              color: Colors.white,
-              size: 48,
+          GestureDetector(
+            onTap: onAvatarTap,
+            child: CircleAvatar(
+              radius: 42,
+              backgroundColor: Colors.white.withOpacity(.15),
+              backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
+                  ? NetworkImage(avatarUrl!)
+                  : null,
+              child: avatarUrl == null || avatarUrl!.isEmpty
+                  ? const Icon(
+                      Icons.person_outline,
+                      color: Colors.white,
+                      size: 48,
+                    )
+                  : null,
             ),
           ),
 

@@ -26,7 +26,7 @@ class DashboardSectionTitle extends StatelessWidget {
           child: Text(
             title.toUpperCase(),
             style: const TextStyle(
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.8,
             ),
