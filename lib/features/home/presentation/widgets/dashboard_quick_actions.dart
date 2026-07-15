@@ -29,7 +29,7 @@ class DashboardQuickActions extends StatelessWidget {
         Expanded(
           child: _QuickAction(
             icon: Icons.bar_chart_rounded,
-            title: 'Estadísticas',
+            title: 'Stats',
             color: const Color(0xFFFFB300),
             onTap: () => context.push('/statistics'),
           ),
