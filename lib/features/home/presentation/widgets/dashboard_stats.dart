@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../controllers/dashboard_controller.dart';
+import '../../../concerts/presentation/providers/concerts_provider.dart';
 
 class DashboardStats extends StatelessWidget {
-  final DashboardController controller;
+  final ConcertStats stats;
 
-  const DashboardStats({super.key, required this.controller});
+  const DashboardStats({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -18,28 +18,25 @@ class DashboardStats extends StatelessWidget {
       childAspectRatio: 1,
       children: [
         _StatCard(
-          value: controller.totalConcerts.toString(),
+          value: stats.total.toString(),
           label: 'Conciertos',
           icon: Icons.music_note_rounded,
           color: const Color(0xFFE53935),
         ),
-
         _StatCard(
-          value: controller.totalFestivals.toString(),
+          value: stats.festivals.toString(),
           label: 'Festivales',
           icon: Icons.festival_rounded,
           color: const Color(0xFF42A5F5),
         ),
-
         _StatCard(
-          value: controller.averageRating.toStringAsFixed(1),
+          value: stats.avgRating.toStringAsFixed(1),
           label: 'Valoración',
           icon: Icons.star_rounded,
           color: const Color(0xFFFFC107),
         ),
-
         _StatCard(
-          value: controller.totalRecommended.toString(),
+          value: stats.liked.toString(),
           label: 'Te gustan',
           icon: Icons.thumb_up_alt_rounded,
           color: const Color(0xFF4CAF50),
@@ -82,16 +79,12 @@ class _StatCard extends StatelessWidget {
             ),
             child: Icon(icon, color: color),
           ),
-
           const Spacer(),
-
           Text(
             value,
             style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
           ),
-
           const SizedBox(height: 4),
-
           Text(
             label,
             style: const TextStyle(color: Colors.white60, fontSize: 14),

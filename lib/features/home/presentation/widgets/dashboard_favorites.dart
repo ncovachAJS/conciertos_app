@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../controllers/dashboard_controller.dart';
+import '../../../concerts/domain/entities/concert.dart';
 
 class DashboardFavorites extends StatelessWidget {
-  final DashboardController controller;
+  final List<Concert> concerts;
 
-  const DashboardFavorites({super.key, required this.controller});
+  const DashboardFavorites({super.key, required this.concerts});
 
   @override
   Widget build(BuildContext context) {
-    if (controller.favorites.isEmpty) {
+    if (concerts.isEmpty) {
       return const SizedBox(
         height: 200,
         child: Center(
           child: Text(
-            'Todavía no tienes conciertos recomendados.',
+            'Todavía no tienes conciertos favoritos.',
             style: TextStyle(color: Colors.white54, fontSize: 16),
           ),
         ),
@@ -25,18 +25,16 @@ class DashboardFavorites extends StatelessWidget {
       height: 215,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: controller.favorites.length,
+        itemCount: concerts.length,
         separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (_, index) {
-          return _FavoriteCard(concert: controller.favorites[index]);
-        },
+        itemBuilder: (_, index) => _FavoriteCard(concert: concerts[index]),
       ),
     );
   }
 }
 
 class _FavoriteCard extends StatelessWidget {
-  final dynamic concert;
+  final Concert concert;
 
   const _FavoriteCard({required this.concert});
 
@@ -68,7 +66,6 @@ class _FavoriteCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -83,7 +80,6 @@ class _FavoriteCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const Positioned(
                   top: 10,
                   right: 10,
@@ -96,7 +92,6 @@ class _FavoriteCard extends StatelessWidget {
               ],
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
@@ -111,9 +106,7 @@ class _FavoriteCard extends StatelessWidget {
                     fontSize: 17,
                   ),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
                   concert.festival,
                   maxLines: 1,

@@ -12,12 +12,10 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  final AuthController auth = AuthController.instance;
+  final AuthController _auth = AuthController.instance;
 
   @override
   void dispose() {
@@ -28,21 +26,21 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _register() async {
+    if (!_formKey.currentState!.validate()) return;
+
     try {
-      await auth.register(
+      await _auth.register(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       if (!mounted) return;
-
       context.go('/splash');
     } catch (e) {
       if (!mounted) return;
 
       String message = 'Ha ocurrido un error.';
-
       final error = e.toString().toLowerCase();
 
       if (error.contains('email must be an email')) {
@@ -61,56 +59,81 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Crear cuenta')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre',
-                  prefixIcon: Icon(Icons.person),
-                ),
+    return ListenableBuilder(
+      listenable: _auth,
+      builder: (context, _) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Crear cuenta')),
+          body: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
+                      labelText: 'Nombre',
+                      prefixIcon: Icon(Icons.person),
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Introduce tu nombre'
+                        : null,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email),
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Introduce tu correo'
+                        : null,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Contraseña',
+                      prefixIcon: Icon(Icons.lock),
+                    ),
+                    validator: (v) => (v == null || v.length < 6)
+                        ? 'Mínimo 6 caracteres'
+                        : null,
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: _auth.loading ? null : _register,
+                      child: _auth.loading
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Crear cuenta'),
+                    ),
+                  ),
+                ],
               ),
-
-              const SizedBox(height: 20),
-
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Contraseña',
-                  prefixIcon: Icon(Icons.lock),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _register,
-                  child: const Text('Crear cuenta'),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

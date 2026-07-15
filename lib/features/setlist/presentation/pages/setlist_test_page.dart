@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/services/setlist_service.dart';
+import '../../domain/entities/setlist.dart';
 
 class SetlistTestPage extends StatefulWidget {
   const SetlistTestPage({super.key});
@@ -10,47 +11,30 @@ class SetlistTestPage extends StatefulWidget {
 }
 
 class _SetlistTestPageState extends State<SetlistTestPage> {
-  final service = SetlistService();
+  final _service = SetlistService();
 
-  String result = 'Pulsa el botón para buscar un setlist';
+  Setlist? _setlist;
+  String _error = '';
+  bool _loading = false;
 
-  bool loading = false;
-
-  Future<void> search() async {
+  Future<void> _search() async {
     setState(() {
-      loading = true;
+      _loading = true;
+      _error = '';
+      _setlist = null;
     });
 
     try {
-      final setlist = await service.searchSetlist(
+      _setlist = await _service.searchSetlist(
         artist: 'Metallica',
         date: DateTime(2024, 7, 14),
         city: 'Madrid',
       );
-
-      if (setlist == null) {
-        result = 'No se encontró ningún setlist.';
-      } else {
-        result =
-            '''
-Artista: ${setlist.artist}
-
-Recinto: ${setlist.venue}
-
-Ciudad: ${setlist.city}
-
-Canciones:
-
-${setlist.songs.map((e) => "• ${e.name}").join("\n")}
-''';
-      }
     } catch (e) {
-      result = e.toString();
+      _error = e.toString();
     }
 
-    setState(() {
-      loading = false;
-    });
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
@@ -60,15 +44,52 @@ ${setlist.songs.map((e) => "• ${e.name}").join("\n")}
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ElevatedButton(
-              onPressed: loading ? null : search,
+              onPressed: _loading ? null : _search,
               child: const Text('Buscar Setlist'),
             ),
 
             const SizedBox(height: 20),
 
-            Expanded(child: SingleChildScrollView(child: Text(result))),
+            if (_loading)
+              const CircularProgressIndicator()
+            else if (_error.isNotEmpty)
+              Text(_error, style: const TextStyle(color: Colors.redAccent))
+            else if (_setlist == null)
+              const Text('Pulsa el botón para buscar un setlist')
+            else
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Artista: ${_setlist!.artist}'),
+                      Text('Recinto: ${_setlist!.venue}'),
+                      Text('Ciudad: ${_setlist!.city}'),
+                      Text('Total canciones: ${_setlist!.totalSongs}'),
+                      const SizedBox(height: 16),
+
+                      // Iteramos por sets (principal + encores)
+                      for (final set in _setlist!.sets) ...[
+                        Text(
+                          set.isEncore ? '🎸 ${set.name}' : '🎵 Set principal',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        for (final song in set.songs)
+                          Text(
+                            '  • ${song.name}'
+                            '${song.isTape ? ' 📼' : ''}'
+                            '${song.isCover ? ' (versión de ${song.coverOf})' : ''}'
+                            '${song.hasGuest ? ' con ${song.withArtist}' : ''}',
+                          ),
+                        const SizedBox(height: 12),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

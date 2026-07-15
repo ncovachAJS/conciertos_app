@@ -1,40 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/app_page.dart';
-
-import '../../../../shared/widgets/concert_grid_card.dart';
-import '../../data/repositories/concert_repository_impl.dart';
-import '../../domain/repositories/concert_repository.dart';
-import '../../domain/entities/concert.dart';
 import '../../../../shared/widgets/concert_card.dart';
-
+import '../../../../shared/widgets/concert_grid_card.dart';
 import '../../data/models/concert_model.dart';
+import '../../domain/entities/concert.dart';
+import '../providers/concerts_provider.dart';
 
-class ConcertsPage extends StatefulWidget {
+class ConcertsPage extends ConsumerStatefulWidget {
   const ConcertsPage({super.key});
 
   @override
-  State<ConcertsPage> createState() => _ConcertsPageState();
+  ConsumerState<ConcertsPage> createState() => _ConcertsPageState();
 }
 
-class _ConcertsPageState extends State<ConcertsPage> {
+class _ConcertsPageState extends ConsumerState<ConcertsPage> {
   final TextEditingController _searchController = TextEditingController();
 
-  final ConcertRepository repository = ConcertRepositoryImpl();
-
-  List<Concert> concerts = [];
-  List<Concert> filteredConcerts = [];
-
-  bool loading = true;
-  bool deleting = false;
-  bool gridView = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadConcerts();
-  }
+  String _searchQuery = '';
+  bool _gridView = false;
+  bool _deleting = false;
 
   @override
   void dispose() {
@@ -42,186 +29,105 @@ class _ConcertsPageState extends State<ConcertsPage> {
     super.dispose();
   }
 
-  Future<void> _loadConcerts() async {
-    setState(() => loading = true);
-
-    try {
-      concerts = await repository.getConcerts();
-      concerts.sort((a, b) => b.date.compareTo(a.date));
-      filteredConcerts = List.from(concerts);
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-
-    if (!mounted) return;
-
-    setState(() => loading = false);
+  // Filtramos la lista del provider en tiempo real, sin estado local duplicado.
+  List<Concert> _filtered(List<Concert> all) {
+    if (_searchQuery.trim().isEmpty) return all;
+    final q = _searchQuery.toLowerCase();
+    return all.where((c) {
+      return c.artist.toLowerCase().contains(q) ||
+          c.festival.toLowerCase().contains(q) ||
+          c.name.toLowerCase().contains(q);
+    }).toList();
   }
 
   Future<void> _toggleFavorite(Concert concert) async {
-    final updatedConcert = ConcertModel.fromEntity(
+    final updated = ConcertModel.fromEntity(
       concert.copyWith(favorite: !concert.favorite),
     );
-
-    setState(() {
-      final index = concerts.indexWhere((c) => c.id == concert.id);
-      if (index != -1) {
-        concerts[index] = updatedConcert;
-      }
-
-      final filteredIndex = filteredConcerts.indexWhere(
-        (c) => c.id == concert.id,
-      );
-      if (filteredIndex != -1) {
-        filteredConcerts[filteredIndex] = updatedConcert;
-      }
-    });
-
     try {
-      await repository.updateConcert(updatedConcert);
-    } catch (e) {
-      // Volvemos al estado anterior si falla la API
-      setState(() {
-        final index = concerts.indexWhere((c) => c.id == concert.id);
-        if (index != -1) {
-          concerts[index] = concert;
-        }
-
-        final filteredIndex = filteredConcerts.indexWhere(
-          (c) => c.id == concert.id,
-        );
-        if (filteredIndex != -1) {
-          filteredConcerts[filteredIndex] = concert;
-        }
-      });
-
-      debugPrint(e.toString());
-
+      await ref.read(concertsProvider.notifier).updateOne(updated);
+    } catch (_) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No se pudo actualizar el favorito')),
       );
     }
   }
 
-  Future<void> _updateRating(Concert concert, int rating) async {
-    final updatedConcert = ConcertModel.fromEntity(
-      concert.copyWith(rating: rating),
-    );
-
-    setState(() {
-      final index = concerts.indexWhere((c) => c.id == concert.id);
-      if (index != -1) {
-        concerts[index] = updatedConcert;
-      }
-
-      final filteredIndex = filteredConcerts.indexWhere(
-        (c) => c.id == concert.id,
-      );
-      if (filteredIndex != -1) {
-        filteredConcerts[filteredIndex] = updatedConcert;
-      }
-    });
-
-    try {
-      await repository.updateConcert(updatedConcert);
-    } catch (e) {
-      setState(() {
-        final index = concerts.indexWhere((c) => c.id == concert.id);
-        if (index != -1) {
-          concerts[index] = concert;
-        }
-
-        final filteredIndex = filteredConcerts.indexWhere(
-          (c) => c.id == concert.id,
-        );
-        if (filteredIndex != -1) {
-          filteredConcerts[filteredIndex] = concert;
-        }
-      });
-
-      debugPrint(e.toString());
-    }
-  }
-
   Future<void> _toggleLike(Concert concert) async {
-    final updatedConcert = ConcertModel.fromEntity(
+    final updated = ConcertModel.fromEntity(
       concert.copyWith(liked: !concert.liked),
     );
-
-    setState(() {
-      final index = concerts.indexWhere((c) => c.id == concert.id);
-      if (index != -1) {
-        concerts[index] = updatedConcert;
-      }
-
-      final filteredIndex = filteredConcerts.indexWhere(
-        (c) => c.id == concert.id,
-      );
-      if (filteredIndex != -1) {
-        filteredConcerts[filteredIndex] = updatedConcert;
-      }
-    });
-
     try {
-      await repository.updateConcert(updatedConcert);
-    } catch (e) {
-      setState(() {
-        final index = concerts.indexWhere((c) => c.id == concert.id);
-        if (index != -1) {
-          concerts[index] = concert;
-        }
-
-        final filteredIndex = filteredConcerts.indexWhere(
-          (c) => c.id == concert.id,
-        );
-        if (filteredIndex != -1) {
-          filteredConcerts[filteredIndex] = concert;
-        }
-      });
-
-      debugPrint(e.toString());
-
+      await ref.read(concertsProvider.notifier).updateOne(updated);
+    } catch (_) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No se pudo actualizar "Me gusta"')),
       );
     }
   }
 
-  void _filterConcerts(String value) {
-    setState(() {
-      if (value.trim().isEmpty) {
-        filteredConcerts = List.from(concerts);
-        return;
-      }
+  Future<void> _updateRating(Concert concert, int rating) async {
+    final updated = ConcertModel.fromEntity(concert.copyWith(rating: rating));
+    try {
+      await ref.read(concertsProvider.notifier).updateOne(updated);
+    } catch (_) {
+      // Fallo silencioso para el rating — el rollback lo hace el notifier.
+    }
+  }
 
-      final query = value.toLowerCase();
+  Future<void> _deleteConcert(Concert concert) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar concierto'),
+        content: Text('¿Seguro que quieres eliminar "${concert.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
 
-      filteredConcerts = concerts.where((concert) {
-        return concert.artist.toLowerCase().contains(query) ||
-            concert.festival.toLowerCase().contains(query) ||
-            concert.name.toLowerCase().contains(query);
-      }).toList();
-    });
+    if (confirmar != true) return;
+
+    setState(() => _deleting = true);
+
+    try {
+      await ref.read(concertsProvider.notifier).delete(concert.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('"${concert.name}" eliminado')));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo eliminar el concierto')),
+      );
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final concertsAsync = ref.watch(concertsProvider);
+
     return AppPage(
       title: 'Conciertos',
       actions: [
         IconButton(
-          tooltip: gridView ? 'Vista lista' : 'Vista tarjetas',
-          onPressed: () {
-            setState(() {
-              gridView = !gridView;
-            });
-          },
+          tooltip: _gridView ? 'Vista lista' : 'Vista tarjetas',
+          onPressed: () => setState(() => _gridView = !_gridView),
           icon: Icon(
-            gridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+            _gridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
           ),
         ),
         Padding(
@@ -229,9 +135,8 @@ class _ConcertsPageState extends State<ConcertsPage> {
           child: GestureDetector(
             onTap: () async {
               final result = await context.push('/add');
-
               if (result == true) {
-                await _loadConcerts();
+                await ref.read(concertsProvider.notifier).reload();
               }
             },
             child: Container(
@@ -248,247 +153,102 @@ class _ConcertsPageState extends State<ConcertsPage> {
       ],
       child: Stack(
         children: [
-          loading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: _searchController,
-                      onChanged: _filterConcerts,
-                      decoration: InputDecoration(
-                        hintText: 'Buscar concierto, artista o festival...',
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: const Icon(Icons.tune),
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide.none,
-                        ),
+          concertsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.wifi_off, size: 48, color: Colors.white38),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Error al cargar conciertos',
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () => ref.invalidate(concertsProvider),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            ),
+            data: (concerts) {
+              final filtered = _filtered(concerts);
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _searchController,
+                    onChanged: (v) => setState(() => _searchQuery = v),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar concierto, artista o festival...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: const Icon(Icons.tune),
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide.none,
                       ),
                     ),
-
-                    const SizedBox(height: 20),
-
-                    Text(
-                      '${filteredConcerts.length} conciertos',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleMedium?.copyWith(color: Colors.white70),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    '${filtered.length} conciertos',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(color: Colors.white70),
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      switchInCurve: Curves.easeInOut,
+                      switchOutCurve: Curves.easeInOut,
+                      child: _gridView
+                          ? _GridView(
+                              key: const ValueKey('grid'),
+                              concerts: filtered,
+                              onEdit: (c) async {
+                                final result = await context.push(
+                                  '/add',
+                                  extra: c,
+                                );
+                                if (result == true) {
+                                  await ref
+                                      .read(concertsProvider.notifier)
+                                      .reload();
+                                }
+                              },
+                              onDelete: _deleteConcert,
+                            )
+                          : _ListView(
+                              key: const ValueKey('list'),
+                              concerts: filtered,
+                              onLike: _toggleLike,
+                              onFavorite: _toggleFavorite,
+                              onRatingChanged: _updateRating,
+                              onEdit: (c) async {
+                                final result = await context.push(
+                                  '/add',
+                                  extra: c,
+                                );
+                                if (result == true) {
+                                  await ref
+                                      .read(concertsProvider.notifier)
+                                      .reload();
+                                }
+                              },
+                              onDelete: _deleteConcert,
+                            ),
                     ),
-
-                    const SizedBox(height: 20),
-
-                    Expanded(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        switchInCurve: Curves.easeInOut,
-                        switchOutCurve: Curves.easeInOut,
-                        child: gridView
-                            ? GridView.builder(
-                                key: const ValueKey('grid'),
-                                padding: EdgeInsets.zero,
-                                itemCount: filteredConcerts.length,
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 18,
-                                      mainAxisSpacing: 18,
-                                      childAspectRatio: .62,
-                                    ),
-                                itemBuilder: (context, index) {
-                                  final concert = filteredConcerts[index];
-
-                                  return ConcertGridCard(
-                                    concert: concert,
-
-                                    onTap: () {
-                                      context.push(
-                                        '/concert-detail',
-                                        extra: concert,
-                                      );
-                                    },
-
-                                    onEdit: () async {
-                                      final result = await context.push(
-                                        '/add',
-                                        extra: concert,
-                                      );
-
-                                      if (result == true) {
-                                        await _loadConcerts();
-                                      }
-                                    },
-
-                                    onDelete: () async {
-                                      final eliminar = await showDialog<bool>(
-                                        context: context,
-                                        builder: (dialogContext) => AlertDialog(
-                                          title: const Text(
-                                            'Eliminar concierto',
-                                          ),
-                                          content: Text(
-                                            '¿Seguro que quieres eliminar "${concert.name}"?',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.of(
-                                                dialogContext,
-                                              ).pop(false),
-                                              child: const Text('Cancelar'),
-                                            ),
-                                            FilledButton(
-                                              onPressed: () => Navigator.of(
-                                                dialogContext,
-                                              ).pop(true),
-                                              child: const Text('Eliminar'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-
-                                      if (eliminar != true) return;
-
-                                      setState(() {
-                                        deleting = true;
-                                      });
-
-                                      try {
-                                        await repository.deleteConcert(
-                                          concert.id,
-                                        );
-
-                                        await _loadConcerts();
-
-                                        if (!mounted) return;
-
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              '"${concert.name}" eliminado',
-                                            ),
-                                          ),
-                                        );
-                                      } catch (e) {
-                                        debugPrint(e.toString());
-                                      } finally {
-                                        if (mounted) {
-                                          setState(() {
-                                            deleting = false;
-                                          });
-                                        }
-                                      }
-                                    },
-                                  );
-                                },
-                              )
-                            : ListView.separated(
-                                key: const ValueKey('list'),
-                                itemCount: filteredConcerts.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: 24),
-                                itemBuilder: (context, index) {
-                                  final concert = filteredConcerts[index];
-
-                                  return ConcertCard(
-                                    concert: concert,
-
-                                    onImageTap: () {
-                                      context.push(
-                                        '/concert-detail',
-                                        extra: concert,
-                                      );
-                                    },
-
-                                    onLike: () => _toggleLike(concert),
-
-                                    onFavorite: () => _toggleFavorite(concert),
-
-                                    onRatingChanged: (rating) =>
-                                        _updateRating(concert, rating),
-
-                                    onEdit: () async {
-                                      final result = await context.push(
-                                        '/add',
-                                        extra: concert,
-                                      );
-
-                                      if (result == true) {
-                                        await _loadConcerts();
-                                      }
-                                    },
-
-                                    onDelete: () async {
-                                      final eliminar = await showDialog<bool>(
-                                        context: context,
-                                        builder: (dialogContext) => AlertDialog(
-                                          title: const Text(
-                                            'Eliminar concierto',
-                                          ),
-                                          content: Text(
-                                            '¿Seguro que quieres eliminar "${concert.artist}"?',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.of(
-                                                dialogContext,
-                                              ).pop(false),
-                                              child: const Text('Cancelar'),
-                                            ),
-                                            FilledButton(
-                                              onPressed: () => Navigator.of(
-                                                dialogContext,
-                                              ).pop(true),
-                                              child: const Text('Eliminar'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-
-                                      if (eliminar != true) return;
-
-                                      setState(() {
-                                        deleting = true;
-                                      });
-
-                                      try {
-                                        await repository.deleteConcert(
-                                          concert.id,
-                                        );
-
-                                        await _loadConcerts();
-
-                                        if (!mounted) return;
-
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              '"${concert.name}" eliminado',
-                                            ),
-                                          ),
-                                        );
-                                      } catch (e) {
-                                        debugPrint(e.toString());
-                                      } finally {
-                                        if (mounted) {
-                                          setState(() {
-                                            deleting = false;
-                                          });
-                                        }
-                                      }
-                                    },
-                                  );
-                                },
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-          if (deleting)
+                  ),
+                ],
+              );
+            },
+          ),
+          if (_deleting)
             Container(
               color: Colors.black54,
               child: const Center(
@@ -507,6 +267,85 @@ class _ConcertsPageState extends State<ConcertsPage> {
             ),
         ],
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sub-widgets internos para reducir el build method
+// ---------------------------------------------------------------------------
+
+class _GridView extends StatelessWidget {
+  final List<Concert> concerts;
+  final ValueChanged<Concert> onEdit;
+  final ValueChanged<Concert> onDelete;
+
+  const _GridView({
+    super.key,
+    required this.concerts,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: concerts.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 18,
+        mainAxisSpacing: 18,
+        childAspectRatio: .62,
+      ),
+      itemBuilder: (context, index) {
+        final concert = concerts[index];
+        return ConcertGridCard(
+          concert: concert,
+          onTap: () => context.push('/concert-detail', extra: concert),
+          onEdit: () => onEdit(concert),
+          onDelete: () => onDelete(concert),
+        );
+      },
+    );
+  }
+}
+
+class _ListView extends StatelessWidget {
+  final List<Concert> concerts;
+  final ValueChanged<Concert> onLike;
+  final ValueChanged<Concert> onFavorite;
+  final void Function(Concert, int) onRatingChanged;
+  final ValueChanged<Concert> onEdit;
+  final ValueChanged<Concert> onDelete;
+
+  const _ListView({
+    super.key,
+    required this.concerts,
+    required this.onLike,
+    required this.onFavorite,
+    required this.onRatingChanged,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      itemCount: concerts.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 24),
+      itemBuilder: (context, index) {
+        final concert = concerts[index];
+        return ConcertCard(
+          concert: concert,
+          onImageTap: () => context.push('/concert-detail', extra: concert),
+          onLike: () => onLike(concert),
+          onFavorite: () => onFavorite(concert),
+          onRatingChanged: (r) => onRatingChanged(concert, r),
+          onEdit: () => onEdit(concert),
+          onDelete: () => onDelete(concert),
+        );
+      },
     );
   }
 }

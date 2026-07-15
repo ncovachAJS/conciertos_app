@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../controllers/dashboard_controller.dart';
+import '../../../concerts/domain/entities/concert.dart';
 import 'dashboard_next_concert.dart';
 
 class DashboardUpcomingConcerts extends StatefulWidget {
-  final DashboardController controller;
+  final List<Concert> concerts;
   final ValueChanged<int>? onConcertChanged;
 
   const DashboardUpcomingConcerts({
     super.key,
-    required this.controller,
+    required this.concerts,
     this.onConcertChanged,
   });
 
@@ -23,7 +23,7 @@ class _DashboardUpcomingConcertsState extends State<DashboardUpcomingConcerts> {
 
   @override
   Widget build(BuildContext context) {
-    final concerts = widget.controller.upcomingConcerts;
+    final concerts = widget.concerts;
 
     if (concerts.isEmpty) {
       return const DashboardNextConcert(concert: null);
@@ -40,7 +40,6 @@ class _DashboardUpcomingConcertsState extends State<DashboardUpcomingConcerts> {
             setState(() {
               if (details.primaryVelocity == null) return;
 
-              // Swipe izquierda
               if (details.primaryVelocity! < -150 &&
                   _currentIndex < concerts.length - 1) {
                 _currentIndex++;
@@ -55,24 +54,20 @@ class _DashboardUpcomingConcertsState extends State<DashboardUpcomingConcerts> {
           },
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
             child: DashboardNextConcert(
               key: ValueKey(_currentIndex),
               concert: concerts[_currentIndex],
             ),
           ),
         ),
-
         if (concerts.length > 1) ...[
           const SizedBox(height: 16),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(concerts.length, (index) {
               final active = index == _currentIndex;
-
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 margin: const EdgeInsets.symmetric(horizontal: 5),

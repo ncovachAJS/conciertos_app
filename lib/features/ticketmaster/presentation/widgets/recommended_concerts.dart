@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../data/services/ticketmaster_service.dart';
-import '../../domain/entities/ticketmaster_event.dart';
-import '../../../home/presentation/controllers/dashboard_controller.dart';
+import '../../../ticketmaster/data/services/ticketmaster_service.dart';
+import '../../../ticketmaster/domain/entities/ticketmaster_event.dart';
 
 class RecommendedConcerts extends StatefulWidget {
-  final DashboardController controller;
+  final List<String> favoriteArtists;
 
-  const RecommendedConcerts({super.key, required this.controller});
+  const RecommendedConcerts({super.key, required this.favoriteArtists});
 
   @override
   State<RecommendedConcerts> createState() => _RecommendedConcertsState();
@@ -18,34 +17,26 @@ class _RecommendedConcertsState extends State<RecommendedConcerts> {
   final TicketmasterService _service = TicketmasterService();
 
   List<TicketmasterEvent> events = [];
-
   bool loading = true;
 
   @override
   void initState() {
     super.initState();
-    loadEvents();
+    _loadEvents();
   }
 
-  Future<void> loadEvents() async {
+  Future<void> _loadEvents() async {
     try {
-      events = await _service.getRecommendedEvents(
-        widget.controller.favoriteArtists,
-      );
+      events = await _service.getRecommendedEvents(widget.favoriteArtists);
     } catch (e) {
       debugPrint(e.toString());
     }
 
-    if (mounted) {
-      setState(() {
-        loading = false;
-      });
-    }
+    if (mounted) setState(() => loading = false);
   }
 
-  Future<void> openTicketmaster(String url) async {
+  Future<void> _openTicketmaster(String url) async {
     final uri = Uri.parse(url);
-
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -85,21 +76,18 @@ class _RecommendedConcertsState extends State<RecommendedConcerts> {
                     event.image,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) {
-                      return Container(
-                        color: Colors.black26,
-                        child: const Center(
-                          child: Icon(
-                            Icons.music_note,
-                            size: 60,
-                            color: Colors.white24,
-                          ),
+                    errorBuilder: (_, __, ___) => Container(
+                      color: Colors.black26,
+                      child: const Center(
+                        child: Icon(
+                          Icons.music_note,
+                          size: 60,
+                          color: Colors.white24,
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ),
-
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -123,9 +111,7 @@ class _RecommendedConcertsState extends State<RecommendedConcerts> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 12),
-
                       Text(
                         event.name,
                         maxLines: 2,
@@ -135,25 +121,19 @@ class _RecommendedConcertsState extends State<RecommendedConcerts> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       const SizedBox(height: 8),
-
                       Text(
                         event.venue,
                         style: const TextStyle(color: Colors.white70),
                       ),
-
                       const SizedBox(height: 4),
-
                       Text(
                         event.city,
                         style: const TextStyle(color: Colors.white54),
                       ),
-
                       const SizedBox(height: 16),
-
                       FilledButton(
-                        onPressed: () => openTicketmaster(event.url),
+                        onPressed: () => _openTicketmaster(event.url),
                         child: const Text('Ver en Ticketmaster'),
                       ),
                     ],
