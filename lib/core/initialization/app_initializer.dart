@@ -1,9 +1,12 @@
-import 'package:conciertos_app/features/home/presentation/controllers/dashboard_controller.dart';
-
+/// Inicializador de la app durante la splash screen.
+///
+/// En lugar de depender de [DashboardController] (singleton manual),
+/// recibe un callback [onLoadConcerts] que el caller inyecta.
+/// Esto permite que la splash page use el provider de Riverpod.
 class AppInitializer {
-  final DashboardController dashboardController;
+  final Future<void> Function() onLoadConcerts;
 
-  AppInitializer(this.dashboardController);
+  AppInitializer({required this.onLoadConcerts});
 
   Future<void> initialize({
     required Function(String message, double progress) onProgress,
@@ -20,8 +23,7 @@ class AppInitializer {
     await Future.delayed(const Duration(milliseconds: 1000));
 
     onProgress('🎫 Cargando conciertos...', 0.55);
-
-    await dashboardController.load();
+    await onLoadConcerts();
 
     onProgress('📸 Organizando recuerdos...', 0.80);
     await Future.delayed(const Duration(milliseconds: 1000));
@@ -29,11 +31,8 @@ class AppInitializer {
     onProgress('🤘 ¡Que empiece el concierto!', 1);
     await Future.delayed(const Duration(milliseconds: 1000));
 
-    // La splash durará al menos 2,5 segundos.
     const minimumDuration = Duration(seconds: 5);
-
     final remaining = minimumDuration - stopwatch.elapsed;
-
     if (remaining > Duration.zero) {
       await Future.delayed(remaining);
     }

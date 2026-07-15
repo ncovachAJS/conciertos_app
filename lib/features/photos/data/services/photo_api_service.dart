@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 
 import '../../../../config/api_config.dart';
 import '../models/concert_photo_model.dart';
-
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class PhotoApiService {
@@ -18,24 +17,30 @@ class PhotoApiService {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
 
+    // Este endpoint devuelve array plano (sin paginación)
     final List<dynamic> json = jsonDecode(response.body);
-
     return json.map((item) => ConcertPhotoModel.fromJson(item)).toList();
   }
 
-  Future<List<ConcertPhotoModel>> getFeed() async {
-    final response = await http.get(
-      Uri.parse(ApiConfig.photosFeedEndpoint),
-      headers: _headers,
-    );
+  Future<List<ConcertPhotoModel>> getFeed({
+    int page = 1,
+    int limit = 50,
+  }) async {
+    final uri = Uri.parse(
+      ApiConfig.photosFeedEndpoint,
+    ).replace(queryParameters: {'page': '$page', 'limit': '$limit'});
+
+    final response = await http.get(uri, headers: _headers);
 
     if (response.statusCode != 200) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
 
-    final List<dynamic> json = jsonDecode(response.body);
+    // El back ahora devuelve { data: [...], meta: {...} }
+    final Map<String, dynamic> body = jsonDecode(response.body);
+    final List<dynamic> items = body['data'];
 
-    return json.map((item) => ConcertPhotoModel.fromJson(item)).toList();
+    return items.map((item) => ConcertPhotoModel.fromJson(item)).toList();
   }
 
   Future<ConcertPhotoModel> addPhoto({
@@ -76,7 +81,6 @@ class PhotoApiService {
 
   Map<String, String> get _headers {
     final token = AuthController.instance.token;
-
     return {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',

@@ -1,48 +1,40 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:conciertos_app/core/initialization/app_initializer.dart';
-import 'package:conciertos_app/features/home/presentation/controllers/dashboard_controller.dart';
 import 'package:conciertos_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:conciertos_app/features/concerts/presentation/providers/concerts_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 
 import '../widgets/splash_progress.dart';
 
-import 'package:go_router/go_router.dart';
-
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
+class _SplashPageState extends ConsumerState<SplashPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
-
   late Animation<Offset> _titleSlideAnimation;
 
   final AudioPlayer _crowdPlayer = AudioPlayer();
-
-  final _dashboardController = DashboardController();
-
   final _authController = AuthController.instance;
 
-  late final AppInitializer _initializer = AppInitializer(_dashboardController);
+  // AppInitializer recibe un callback que pre-calienta el provider.
+  // Con ref.read(concertsProvider.future) el notifier arranca build()
+  // y la lista queda en caché para el resto de la app.
+  late final AppInitializer _initializer = AppInitializer(
+    onLoadConcerts: () => ref.read(concertsProvider.future),
+  );
 
   String _loadingMessage = '';
   double _progress = 0;
-
-  final List<String> _messages = [
-    '🎸 Preparando escenario...',
-    '🔊 Probando sonido...',
-    '💡 Encendiendo las luces...',
-    '🎫 Abriendo puertas...',
-    '🤘 ¡Que empiece el show!',
-  ];
 
   @override
   void initState() {
@@ -68,7 +60,6 @@ class _SplashPageState extends State<SplashPage>
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.forward();
-
     _startLoadingSequence();
   }
 
@@ -76,7 +67,6 @@ class _SplashPageState extends State<SplashPage>
     try {
       await _crowdPlayer.setReleaseMode(ReleaseMode.stop);
       await _crowdPlayer.setVolume(1.0);
-
       await _crowdPlayer.play(AssetSource('audio/crowd.mp3'));
     } catch (e) {
       debugPrint('ERROR CROWD: $e');
@@ -87,7 +77,6 @@ class _SplashPageState extends State<SplashPage>
     await _initializer.initialize(
       onProgress: (message, progress) {
         if (!mounted) return;
-
         setState(() {
           _loadingMessage = message;
           _progress = progress;
@@ -98,25 +87,16 @@ class _SplashPageState extends State<SplashPage>
     await _fadeOutCrowd();
 
     if (!mounted) return;
-
     context.go('/');
   }
 
   Future<void> _fadeOutCrowd() async {
     double volume = 1.0;
-
     while (volume > 0) {
-      volume -= 0.05;
-
-      if (volume < 0) {
-        volume = 0;
-      }
-
+      volume = (volume - 0.05).clamp(0, 1);
       await _crowdPlayer.setVolume(volume);
-
       await Future.delayed(const Duration(milliseconds: 150));
     }
-
     await _crowdPlayer.stop();
   }
 
@@ -134,7 +114,6 @@ class _SplashPageState extends State<SplashPage>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Fondo del escenario
           FadeTransition(
             opacity: _fadeAnimation,
             child: SlideTransition(
@@ -149,12 +128,10 @@ class _SplashPageState extends State<SplashPage>
             ),
           ),
 
-          // Capa oscura para mejorar la legibilidad
           Container(
             decoration: BoxDecoration(color: Colors.black.withOpacity(0.50)),
           ),
 
-          // Contenido principal
           SafeArea(
             child: Center(
               child: FadeTransition(

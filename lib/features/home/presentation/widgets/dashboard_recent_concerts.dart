@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../concerts/domain/entities/concert.dart';
-import '../controllers/dashboard_controller.dart';
 
 class DashboardRecentConcerts extends StatelessWidget {
-  final DashboardController controller;
+  final List<Concert> concerts;
 
-  const DashboardRecentConcerts({super.key, required this.controller});
+  const DashboardRecentConcerts({super.key, required this.concerts});
 
   @override
   Widget build(BuildContext context) {
-    if (controller.latest.isEmpty) {
+    if (concerts.isEmpty) {
       return const SizedBox(
         height: 200,
         child: Center(
@@ -26,11 +25,9 @@ class DashboardRecentConcerts extends StatelessWidget {
       height: 215,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: controller.latest.length,
+        itemCount: concerts.length,
         separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (_, index) {
-          return _RecentConcertCard(concert: controller.latest[index]);
-        },
+        itemBuilder: (_, index) => _RecentConcertCard(concert: concerts[index]),
       ),
     );
   }
@@ -69,7 +66,6 @@ class _RecentConcertCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -84,7 +80,6 @@ class _RecentConcertCard extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 if (concert.liked)
                   const Positioned(
                     top: 10,
@@ -102,7 +97,6 @@ class _RecentConcertCard extends StatelessWidget {
               ],
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(14),
             child: Column(
@@ -117,9 +111,7 @@ class _RecentConcertCard extends StatelessWidget {
                     fontSize: 17,
                   ),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
                   concert.festival,
                   maxLines: 1,

@@ -1,3 +1,4 @@
+import 'setlist_set.dart';
 import 'song.dart';
 
 class Setlist {
@@ -5,13 +6,20 @@ class Setlist {
   final String venue;
   final String city;
   final String eventDate;
-  final List<Song> songs;
+
+  /// Todos los bloques: set principal + encores.
+  final List<SetlistSet> sets;
 
   const Setlist({
     required this.artist,
     required this.venue,
     required this.city,
     required this.eventDate,
-    required this.songs,
+    required this.sets,
   });
+
+  /// Todas las canciones de todos los sets, en orden.
+  List<Song> get allSongs => sets.expand((s) => s.songs).toList();
+
+  int get totalSongs => allSongs.length;
 }
