@@ -11,6 +11,7 @@ import '../widgets/dashboard_recent_concerts.dart';
 import '../widgets/dashboard_section_title.dart';
 import '../widgets/dashboard_stats.dart';
 import '../widgets/dashboard_upcoming_concerts.dart';
+import '../widgets/dashboard_quick_actions.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
@@ -84,6 +85,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 children: [
                   const DashboardHeader(),
                   const SizedBox(height: 24),
+
+                  const DashboardQuickActions(),
+                  const SizedBox(height: 28),
 
                   const DashboardSectionTitle(
                     icon: Icons.calendar_month_rounded,

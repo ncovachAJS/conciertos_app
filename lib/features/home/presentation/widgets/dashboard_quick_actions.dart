@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class DashboardQuickActions extends StatelessWidget {
   const DashboardQuickActions({super.key});
@@ -6,42 +7,40 @@ class DashboardQuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: const [
+      children: [
         Expanded(
           child: _QuickAction(
             icon: Icons.add_rounded,
             title: 'Añadir',
-            color: Color(0xFFE53935),
+            color: const Color(0xFFE53935),
+            onTap: () => context.push('/add'),
           ),
         ),
-
-        SizedBox(width: 14),
-
+        const SizedBox(width: 14),
         Expanded(
           child: _QuickAction(
-            icon: Icons.calendar_month_rounded,
-            title: 'Calendario',
-            color: Color(0xFF42A5F5),
+            icon: Icons.confirmation_number_outlined,
+            title: 'Entradas',
+            color: const Color(0xFF42A5F5),
+            onTap: () => context.push('/recommendations'),
           ),
         ),
-
-        SizedBox(width: 14),
-
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.map_rounded,
-            title: 'Mapa',
-            color: Color(0xFF66BB6A),
-          ),
-        ),
-
-        SizedBox(width: 14),
-
+        const SizedBox(width: 14),
         Expanded(
           child: _QuickAction(
             icon: Icons.bar_chart_rounded,
             title: 'Estadísticas',
-            color: Color(0xFFFFB300),
+            color: const Color(0xFFFFB300),
+            onTap: () => context.push('/statistics'),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _QuickAction(
+            icon: Icons.download_rounded,
+            title: 'Importar',
+            color: const Color(0xFF66BB6A),
+            onTap: () => context.push('/import'),
           ),
         ),
       ],
@@ -53,18 +52,20 @@ class _QuickAction extends StatelessWidget {
   final IconData icon;
   final String title;
   final Color color;
+  final VoidCallback onTap;
 
   const _QuickAction({
     required this.icon,
     required this.title,
     required this.color,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(22),
-      onTap: () {},
+      onTap: onTap,
       child: Column(
         children: [
           Container(
@@ -76,9 +77,7 @@ class _QuickAction extends StatelessWidget {
             ),
             child: Icon(icon, color: color, size: 32),
           ),
-
           const SizedBox(height: 10),
-
           Text(
             title,
             textAlign: TextAlign.center,

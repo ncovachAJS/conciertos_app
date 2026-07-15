@@ -18,8 +18,8 @@ class AppShell extends StatelessWidget {
         return 2;
       case '/favorites':
         return 3;
-      // case '/recommendations':
-      //   return 4;
+      case '/statistics':
+        return 4;
       default:
         return 0;
     }
@@ -35,19 +35,14 @@ class AppShell extends StatelessWidget {
           switch (index) {
             case 0:
               context.go('/');
-              break;
             case 1:
               context.go('/concerts');
-              break;
             case 2:
               context.go('/feed');
-              break;
             case 3:
               context.go('/favorites');
-              break;
-            // case 4:
-            //   context.go('/recommendations');
-            //   break;
+            case 4:
+              context.go('/statistics');
           }
         },
         destinations: const [
@@ -71,11 +66,11 @@ class AppShell extends StatelessWidget {
             selectedIcon: Icon(Icons.favorite),
             label: 'Favoritos',
           ),
-          // NavigationDestination(
-          //   icon: Icon(Icons.confirmation_number_outlined),
-          //   selectedIcon: Icon(Icons.confirmation_number),
-          //   label: 'Entradas',
-          // ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart_outlined),
+            selectedIcon: Icon(Icons.bar_chart),
+            label: 'Stats',
+          ),
         ],
       ),
     );
