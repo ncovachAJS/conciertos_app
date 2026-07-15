@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../concerts/data/services/upload_service.dart';
+import '../../data/services/profile_api_service.dart';
 import '../widgets/profile_card.dart';
 
 import '../../../concerts/data/services/concert_api_service.dart';
@@ -9,6 +11,8 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../photos/data/services/photo_api_service.dart';
 
 import 'package:go_router/go_router.dart';
+
+import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -21,6 +25,10 @@ class _ProfilePageState extends State<ProfilePage> {
   final ConcertApiService _api = ConcertApiService();
 
   final PhotoApiService _photosApi = PhotoApiService();
+
+  final UploadService _uploadService = UploadService();
+  final ProfileApiService _profileApi = ProfileApiService();
+  final ImagePicker _picker = ImagePicker();
 
   final AuthController auth = AuthController.instance;
 
@@ -59,6 +67,76 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       loading = false;
     });
+  }
+
+  Future<void> _changeAvatar() async {
+    if (auth.user == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Hacer foto'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickAvatar(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Elegir de la galería'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickAvatar(ImageSource.gallery);
+              },
+            ),
+            if (auth.user?.avatarUrl != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Eliminar foto'),
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  await _profileApi.deleteAvatar();
+                  await auth.refreshUser();
+
+                  if (mounted) {
+                    setState(() {});
+                  }
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickAvatar(ImageSource source) async {
+    final file = await _picker.pickImage(source: source, imageQuality: 85);
+
+    if (file == null) return;
+
+    try {
+      final url = await _uploadService.uploadImage(file.path);
+
+      await _profileApi.updateAvatar(url);
+
+      await auth.refreshUser();
+
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
 
   String fanLevel(int concerts) {
@@ -124,6 +202,8 @@ class _ProfilePageState extends State<ProfilePage> {
             totalPhotos: totalPhotos,
             level: auth.user == null ? '' : fanLevel(concerts.length),
             memberNumber: auth.user?.memberNumber ?? 0,
+            avatarUrl: auth.user?.avatarUrl,
+            onAvatarTap: _changeAvatar,
           ),
 
           const SizedBox(height: 30),

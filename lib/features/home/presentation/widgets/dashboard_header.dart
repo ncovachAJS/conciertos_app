@@ -42,7 +42,7 @@ class DashboardHeader extends StatelessWidget {
                         TextSpan(
                           text: 'LA VIDA ',
                           style: GoogleFonts.teko(
-                            fontSize: 31,
+                            fontSize: 33,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
                             letterSpacing: 1.2,
@@ -51,7 +51,7 @@ class DashboardHeader extends StatelessWidget {
                         TextSpan(
                           text: 'EN DIRECTO',
                           style: GoogleFonts.teko(
-                            fontSize: 31,
+                            fontSize: 33,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFFFFC107),
                             letterSpacing: 1.2,
@@ -119,10 +119,10 @@ class DashboardHeader extends StatelessWidget {
 
         const SizedBox(height: 6),
 
-        const Text(
-          'Todo listo para volver al directo.',
-          style: TextStyle(color: Colors.white60, fontSize: 15),
-        ),
+        // const Text(
+        //   'Todo listo para volver al directo.',
+        //   style: TextStyle(color: Colors.white60, fontSize: 15),
+        // ),
       ],
     );
   }

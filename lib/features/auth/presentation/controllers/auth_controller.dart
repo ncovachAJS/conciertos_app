@@ -96,4 +96,11 @@ class AuthController extends ChangeNotifier {
     user = null;
     notifyListeners();
   }
+
+  Future<void> refreshUser() async {
+    if (_token == null) return;
+
+    user = await _api.me(_token!);
+    notifyListeners();
+  }
 }
