@@ -17,29 +17,46 @@ class ImportPage extends ConsumerStatefulWidget {
 }
 
 class _ImportPageState extends ConsumerState<ImportPage> {
-  int _tab = 0;
+  int _tab = 0; // 0 = artista, 1 = festival, 2 = json
 
-  final _searchController = TextEditingController();
+  // ── Tab Artista ───────────────────────────────────────────────────────────
+  final _artistController = TextEditingController();
   final _setlistService = SetlistImportService();
   final _imageService = ArtistImageService();
-  List<SetlistConcertModel> _concerts = [];
-  final Set<String> _selected = {};
-  bool _searching = false;
-  bool _importing = false;
-  bool _hasMore = false;
-  int _page = 1;
-  int _total = 0;
-  int _importedCount = 0;
-  int _importTotal = 0;
-  String _importingArtist = '';
+  List<SetlistConcertModel> _artistConcerts = [];
+  final Set<String> _artistSelected = {};
+  int _artistYear = 0; // 0 = todos los años
+  bool _artistSearching = false;
+  bool _artistImporting = false;
+  bool _artistHasMore = false;
+  int _artistPage = 1;
+  int _artistTotal = 0;
+  int _artistImportedCount = 0;
+  int _artistImportTotal = 0;
+  String _artistImportingCurrent = '';
 
+  // ── Tab Festival ──────────────────────────────────────────────────────────
+  final _festNameController = TextEditingController();
+  final _festArtistController = TextEditingController();
+  int _festYear = DateTime.now().year;
+  List<SetlistConcertModel> _festConcerts = [];
+  final Set<String> _festSelected = {};
+  bool _festSearching = false;
+  bool _festImporting = false;
+  bool _festHasMore = false;
+  int _festPage = 1;
+  int _festImportedCount = 0;
+  int _festImportTotal = 0;
+  String _festImportingCurrent = '';
+
+  // ── Tab JSON ──────────────────────────────────────────────────────────────
   final _festivalService = FestivalImportService();
   List<FestivalModel> _festivals = [];
   bool _loadingFestivals = true;
-  bool _importingFestival = false;
-  int _festImported = 0;
-  int _festTotal = 0;
-  String _festArtist = '';
+  bool _jsonImporting = false;
+  int _jsonImported = 0;
+  int _jsonTotal = 0;
+  String _jsonCurrentArtist = '';
 
   @override
   void initState() {
@@ -49,59 +66,104 @@ class _ImportPageState extends ConsumerState<ImportPage> {
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _artistController.dispose();
+    _festNameController.dispose();
+    _festArtistController.dispose();
     super.dispose();
   }
 
-  Future<void> _search({bool more = false}) async {
-    final q = _searchController.text.trim();
+  // ── Artista methods ───────────────────────────────────────────────────────
+
+  Future<void> _searchArtist({bool more = false}) async {
+    final q = _artistController.text.trim();
     if (q.isEmpty) return;
     setState(() {
-      _searching = true;
+      _artistSearching = true;
       if (!more) {
-        _concerts = [];
-        _selected.clear();
-        _page = 1;
-        _total = 0;
+        _artistConcerts = [];
+        _artistSelected.clear();
+        _artistPage = 1;
+        _artistTotal = 0;
       }
     });
     try {
-      final r = await _setlistService.searchArtistConcerts(
-        q,
-        page: more ? _page + 1 : 1,
-      );
-      if (!mounted) return;
-      setState(() {
-        _concerts = more ? [..._concerts, ...r.concerts] : r.concerts;
-        _total = r.total;
-        _page = r.page;
-        _hasMore = _concerts.length < _total && r.concerts.isNotEmpty;
-      });
+      // Sin filtro de año: una sola página
+      if (_artistYear == 0) {
+        final r = await _setlistService.searchArtistConcerts(
+          q,
+          page: more ? _artistPage + 1 : 1,
+        );
+        if (!mounted) return;
+        setState(() {
+          _artistConcerts = more
+              ? [..._artistConcerts, ...r.concerts]
+              : r.concerts;
+          _artistTotal = r.total;
+          _artistPage = r.page;
+          _artistHasMore =
+              _artistConcerts.length < _artistTotal && r.concerts.isNotEmpty;
+        });
+      } else {
+        // Con filtro de año: auto-paginamos hasta encontrar conciertos de ese año
+        int page = more ? _artistPage + 1 : 1;
+        final found = <SetlistConcertModel>[];
+        bool hasMore = true;
+        int safetyLimit = 15;
+        int total = 0;
+
+        while (found.isEmpty && hasMore && safetyLimit > 0) {
+          final r = await _setlistService.searchArtistConcerts(q, page: page);
+          total = r.total;
+          if (r.concerts.isEmpty) break;
+
+          for (final c in r.concerts) {
+            if (c.date.year == _artistYear) found.add(c);
+          }
+
+          final hasOlder = r.concerts.any((c) => c.date.year < _artistYear);
+          hasMore = !hasOlder && r.page * r.itemsPerPage < r.total;
+
+          await Future.delayed(const Duration(milliseconds: 500));
+          page++;
+          safetyLimit--;
+          if (hasOlder) break;
+        }
+
+        if (!mounted) return;
+        setState(() {
+          _artistConcerts = more ? [..._artistConcerts, ...found] : found;
+          _artistTotal = total;
+          _artistPage = page - 1;
+          _artistHasMore = hasMore;
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      if (mounted) setState(() => _searching = false);
+      if (mounted) setState(() => _artistSearching = false);
     }
   }
 
-  Future<void> _importSelected() async {
-    if (_selected.isEmpty) return;
-    final toImport = _concerts.where((c) => _selected.contains(c.id)).toList();
+  Future<void> _importArtistSelected() async {
+    if (_artistSelected.isEmpty) return;
+    final toImport = _artistConcerts
+        .where((c) => _artistSelected.contains(c.id))
+        .toList();
     setState(() {
-      _importing = true;
-      _importTotal = toImport.length;
-      _importedCount = 0;
+      _artistImporting = true;
+      _artistImportTotal = toImport.length;
+      _artistImportedCount = 0;
     });
     try {
       final img = await _imageService.getImage(toImport.first.artist) ?? '';
       for (final c in toImport) {
         if (!mounted) return;
         setState(() {
-          _importingArtist = '${c.venue} · ${c.city}';
-          _importedCount++;
+          _artistImportingCurrent = '${c.venue} · ${c.city}';
+          _artistImportedCount++;
         });
         await ref
             .read(concertsProvider.notifier)
@@ -122,7 +184,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
             );
       }
       if (!mounted) return;
-      setState(() => _selected.clear());
+      setState(() => _artistSelected.clear());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -136,9 +198,128 @@ class _ImportPageState extends ConsumerState<ImportPage> {
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      if (mounted) setState(() => _importing = false);
+      if (mounted) setState(() => _artistImporting = false);
     }
   }
+
+  // ── Festival methods ──────────────────────────────────────────────────────
+
+  Future<void> _searchFestival({bool more = false}) async {
+    final artist = _festArtistController.text.trim();
+    if (artist.isEmpty) return;
+
+    setState(() {
+      _festSearching = true;
+      if (!more) {
+        _festPage = 1;
+        _festConcerts = [];
+      }
+    });
+
+    try {
+      // Los conciertos vienen ordenados por fecha DESC.
+      // Avanzamos páginas automáticamente hasta encontrar el año buscado
+      // o hasta que los conciertos sean más antiguos que ese año.
+      int page = more ? _festPage + 1 : 1;
+      final found = <SetlistConcertModel>[];
+      bool hasMore = true;
+      int safetyLimit = 15; // máximo 15 páginas de búsqueda
+
+      while (found.isEmpty && hasMore && safetyLimit > 0) {
+        final r = await _setlistService.searchArtistConcerts(
+          artist,
+          page: page,
+        );
+
+        if (r.concerts.isEmpty) break;
+
+        for (final c in r.concerts) {
+          if (c.date.year == _festYear) found.add(c);
+        }
+
+        // Si hay conciertos más antiguos que el año buscado, ya no hay más
+        final hasOlder = r.concerts.any((c) => c.date.year < _festYear);
+        hasMore = !hasOlder && r.page * r.itemsPerPage < r.total;
+        await Future.delayed(const Duration(milliseconds: 500));
+        page++;
+        safetyLimit--;
+
+        if (hasOlder) break;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _festConcerts = more ? [..._festConcerts, ...found] : found;
+        _festPage = page - 1;
+        _festHasMore = hasMore;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _festSearching = false);
+    }
+  }
+
+  Future<void> _importFestSelected() async {
+    if (_festSelected.isEmpty) return;
+    final toImport = _festConcerts
+        .where((c) => _festSelected.contains(c.id))
+        .toList();
+    final festName = _festNameController.text.trim();
+    setState(() {
+      _festImporting = true;
+      _festImportTotal = toImport.length;
+      _festImportedCount = 0;
+    });
+    try {
+      for (final c in toImport) {
+        if (!mounted) return;
+        setState(() {
+          _festImportingCurrent = '${c.artist} · ${c.city}';
+          _festImportedCount++;
+        });
+        final img = await _imageService.getImage(c.artist) ?? '';
+        await ref
+            .read(concertsProvider.notifier)
+            .add(
+              ConcertModel(
+                id: '',
+                name: c.artist,
+                artist: c.artist,
+                festival: festName,
+                date: c.date,
+                venue: c.venue,
+                city: c.city,
+                imageUrl: img,
+                rating: 0,
+                liked: false,
+                favorite: false,
+              ),
+            );
+      }
+      if (!mounted) return;
+      setState(() => _festSelected.clear());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${toImport.length} concierto${toImport.length > 1 ? "s" : ""} importado${toImport.length > 1 ? "s" : ""} 🎸',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _festImporting = false);
+    }
+  }
+
+  // ── JSON methods ──────────────────────────────────────────────────────────
 
   Future<void> _loadFestivals() async {
     try {
@@ -147,7 +328,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
     if (mounted) setState(() => _loadingFestivals = false);
   }
 
-  Future<void> _importFestival(FestivalModel f) async {
+  Future<void> _importJsonFestival(FestivalModel f) async {
     final concerts = await _festivalService.loadFestivalModel(f);
     if (!mounted) return;
     final ok = await showDialog<bool>(
@@ -195,16 +376,16 @@ class _ImportPageState extends ConsumerState<ImportPage> {
     );
     if (ok != true || !mounted) return;
     setState(() {
-      _importingFestival = true;
-      _festTotal = concerts.length;
-      _festImported = 0;
+      _jsonImporting = true;
+      _jsonTotal = concerts.length;
+      _jsonImported = 0;
     });
     try {
       for (final c in concerts) {
         if (!mounted) return;
         setState(() {
-          _festArtist = c.artist;
-          _festImported++;
+          _jsonCurrentArtist = c.artist;
+          _jsonImported++;
         });
       }
       if (!mounted) return;
@@ -217,71 +398,134 @@ class _ImportPageState extends ConsumerState<ImportPage> {
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      if (mounted) setState(() => _importingFestival = false);
+      if (mounted) setState(() => _jsonImporting = false);
     }
+  }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
+
+  Widget _buildOverlay(int done, int total, String current) {
+    return Container(
+      color: Colors.black87,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 20),
+            const Text(
+              'Importando...',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: 260,
+              child: LinearProgressIndicator(
+                value: total == 0 ? 0 : done / total,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '$done / $total',
+              style: const TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              current,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white54, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConcertTile(
+    SetlistConcertModel c,
+    bool selected,
+    ValueChanged<bool?> onChanged,
+  ) {
+    return CheckboxListTile(
+      value: selected,
+      onChanged: onChanged,
+      title: Text(
+        c.artist,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(
+        '${c.formattedDate}  ·  ${c.venue}, ${c.city}',
+        style: const TextStyle(color: Colors.white60, fontSize: 13),
+      ),
+      secondary: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: c.isPast
+              ? const Color(0xFFE53935).withOpacity(.15)
+              : const Color(0xFF42A5F5).withOpacity(.15),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          c.isPast ? Icons.music_note : Icons.event,
+          color: c.isPast ? const Color(0xFFE53935) : const Color(0xFF42A5F5),
+          size: 18,
+        ),
+      ),
+      activeColor: const Color(0xFFE53935),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD CALLED tab=$_tab');
-
-    final isArtist = _tab == 0;
-
     return Scaffold(
       appBar: AppBar(title: const Text('Importar')),
-      floatingActionButton: isArtist && _selected.isNotEmpty && !_importing
+      floatingActionButton:
+          (_tab == 0 && _artistSelected.isNotEmpty && !_artistImporting) ||
+              (_tab == 1 && _festSelected.isNotEmpty && !_festImporting)
           ? FloatingActionButton.extended(
-              onPressed: _importSelected,
+              onPressed: _tab == 0
+                  ? _importArtistSelected
+                  : _importFestSelected,
               icon: const Icon(Icons.download_rounded),
-              label: Text('Importar ${_selected.length}'),
+              label: Text(
+                'Importar ${_tab == 0 ? _artistSelected.length : _festSelected.length}',
+              ),
             )
           : null,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // CustomScrollView — no necesita constraints de altura del padre
           CustomScrollView(
             slivers: [
-              // Tab switcher
+              // ── Tab switcher ──────────────────────────────────────────────
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      TextButton.icon(
-                        onPressed: () => setState(() => _tab = 0),
-                        icon: Icon(
-                          Icons.person_search,
-                          color: isArtist
-                              ? const Color(0xFFE53935)
-                              : Colors.white54,
-                        ),
-                        label: Text(
-                          'Por artista',
-                          style: TextStyle(
-                            color: isArtist
-                                ? const Color(0xFFE53935)
-                                : Colors.white54,
-                          ),
-                        ),
+                      _TabBtn(
+                        label: 'Artista',
+                        icon: Icons.person_search,
+                        selected: _tab == 0,
+                        onTap: () => setState(() => _tab = 0),
                       ),
-                      TextButton.icon(
-                        onPressed: () => setState(() => _tab = 1),
-                        icon: Icon(
-                          Icons.festival,
-                          color: !isArtist
-                              ? const Color(0xFFE53935)
-                              : Colors.white54,
-                        ),
-                        label: Text(
-                          'Festivales',
-                          style: TextStyle(
-                            color: !isArtist
-                                ? const Color(0xFFE53935)
-                                : Colors.white54,
-                          ),
-                        ),
+                      _TabBtn(
+                        label: 'Festival',
+                        icon: Icons.festival,
+                        selected: _tab == 1,
+                        onTap: () => setState(() => _tab = 1),
+                      ),
+                      _TabBtn(
+                        label: 'JSON',
+                        icon: Icons.upload_file,
+                        selected: _tab == 2,
+                        onTap: () => setState(() => _tab = 2),
                       ),
                     ],
                   ),
@@ -290,37 +534,68 @@ class _ImportPageState extends ConsumerState<ImportPage> {
 
               const SliverToBoxAdapter(child: Divider(height: 1)),
 
-              // Search bar (artist only)
-              if (isArtist)
+              // ── TAB 0: Artista ────────────────────────────────────────────
+              if (_tab == 0) ...[
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        const buttonWidth = 100.0;
-                        const spacing = 12.0;
-                        final textFieldWidth =
-                            constraints.maxWidth - buttonWidth - spacing;
+                      builder: (ctx, bc) {
+                        const bw = 88.0, yw = 104.0, sp = 8.0;
+                        final aw = bc.maxWidth - bw - yw - sp * 2;
+                        final years = [
+                          0,
+                          ...List.generate(
+                            DateTime.now().year - 1989,
+                            (i) => DateTime.now().year - i,
+                          ),
+                        ];
                         return Row(
                           children: [
                             SizedBox(
-                              width: textFieldWidth,
+                              width: aw,
                               child: TextField(
-                                controller: _searchController,
+                                controller: _artistController,
                                 decoration: const InputDecoration(
-                                  hintText: 'Nombre del artista...',
+                                  hintText: 'Artista...',
                                   prefixIcon: Icon(Icons.search),
                                 ),
-                                onSubmitted: (_) => _search(),
+                                onSubmitted: (_) => _searchArtist(),
                                 textInputAction: TextInputAction.search,
                               ),
                             ),
-                            const SizedBox(width: spacing),
+                            const SizedBox(width: sp),
                             SizedBox(
-                              width: buttonWidth,
+                              width: yw,
+                              child: DropdownButtonFormField<int>(
+                                value: _artistYear,
+                                decoration: const InputDecoration(
+                                  labelText: 'Año',
+                                ),
+                                items: years
+                                    .map(
+                                      (y) => DropdownMenuItem(
+                                        value: y,
+                                        child: Text(y == 0 ? 'Todos' : '$y'),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (y) =>
+                                    setState(() => _artistYear = y ?? 0),
+                              ),
+                            ),
+                            const SizedBox(width: sp),
+                            SizedBox(
+                              width: bw,
                               child: FilledButton(
-                                onPressed: _searching ? null : () => _search(),
-                                child: const Text('Buscar'),
+                                onPressed: _artistSearching
+                                    ? null
+                                    : () => _searchArtist(),
+                                child: const Text(
+                                  'Buscar',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.clip,
+                                ),
                               ),
                             ),
                           ],
@@ -329,46 +604,41 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                     ),
                   ),
                 ),
-
-              // Counter (artist only)
-              if (isArtist && _total > 0)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          '$_total encontrados',
-                          style: const TextStyle(
-                            color: Colors.white54,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const Spacer(),
-                        if (_selected.isNotEmpty)
+                if (_artistTotal > 0)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      child: Row(
+                        children: [
                           Text(
-                            '${_selected.length} seleccionados',
+                            '$_artistTotal encontrados',
                             style: const TextStyle(
-                              color: Color(0xFFE53935),
-                              fontWeight: FontWeight.bold,
+                              color: Colors.white54,
                               fontSize: 13,
                             ),
                           ),
-                      ],
+                          const Spacer(),
+                          if (_artistSelected.isNotEmpty)
+                            Text(
+                              '${_artistSelected.length} seleccionados',
+                              style: const TextStyle(
+                                color: Color(0xFFE53935),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-
-              // Artist content
-              if (isArtist) ...[
-                if (_searching && _concerts.isEmpty)
+                if (_artistSearching && _artistConcerts.isEmpty)
                   const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator()),
                   )
-                else if (_concerts.isEmpty)
+                else if (_artistConcerts.isEmpty)
                   const SliverFillRemaining(
                     child: Center(
                       child: Padding(
@@ -383,64 +653,180 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                   )
                 else
                   SliverList.builder(
-                    itemCount: _concerts.length + (_hasMore ? 1 : 0),
+                    itemCount:
+                        _artistConcerts.length + (_artistHasMore ? 1 : 0),
                     itemBuilder: (_, i) {
-                      if (i == _concerts.length) {
+                      if (i == _artistConcerts.length) {
                         return Padding(
                           padding: const EdgeInsets.all(16),
                           child: OutlinedButton(
-                            onPressed: _searching
+                            onPressed: _artistSearching
                                 ? null
-                                : () => _search(more: true),
+                                : () => _searchArtist(more: true),
                             child: const Text('Cargar más'),
                           ),
                         );
                       }
-                      final c = _concerts[i];
-                      final sel = _selected.contains(c.id);
-                      return CheckboxListTile(
-                        value: sel,
-                        onChanged: (v) => setState(
+                      final c = _artistConcerts[i];
+                      return _buildConcertTile(
+                        c,
+                        _artistSelected.contains(c.id),
+                        (v) => setState(
                           () => v == true
-                              ? _selected.add(c.id)
-                              : _selected.remove(c.id),
+                              ? _artistSelected.add(c.id)
+                              : _artistSelected.remove(c.id),
                         ),
-                        title: Text(
-                          c.artist,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          '${c.formattedDate}  ·  ${c.venue}, ${c.city}',
-                          style: const TextStyle(
-                            color: Colors.white60,
-                            fontSize: 13,
-                          ),
-                        ),
-                        secondary: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: c.isPast
-                                ? const Color(0xFFE53935).withOpacity(.15)
-                                : const Color(0xFF42A5F5).withOpacity(.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            c.isPast ? Icons.music_note : Icons.event,
-                            color: c.isPast
-                                ? const Color(0xFFE53935)
-                                : const Color(0xFF42A5F5),
-                            size: 18,
-                          ),
-                        ),
-                        activeColor: const Color(0xFFE53935),
                       );
                     },
                   ),
               ],
 
-              // Festival content
-              if (!isArtist) ...[
+              // ── TAB 1: Festival ───────────────────────────────────────────
+              if (_tab == 1) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: TextField(
+                      controller: _festNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nombre del festival (etiqueta)',
+                        hintText: 'ej. Download Festival 2024',
+                        prefixIcon: Icon(Icons.festival),
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: LayoutBuilder(
+                      builder: (ctx, bc) {
+                        const bw = 88.0, yw = 96.0, sp = 8.0;
+                        final aw = bc.maxWidth - bw - yw - sp * 2;
+                        final years = List.generate(
+                          DateTime.now().year - 1989,
+                          (i) => DateTime.now().year - i,
+                        );
+                        return Row(
+                          children: [
+                            SizedBox(
+                              width: aw,
+                              child: TextField(
+                                controller: _festArtistController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Artista',
+                                  hintText: 'Metallica...',
+                                  prefixIcon: Icon(Icons.person_search),
+                                ),
+                                onSubmitted: (_) => _searchFestival(),
+                                textInputAction: TextInputAction.search,
+                              ),
+                            ),
+                            const SizedBox(width: sp),
+                            SizedBox(
+                              width: yw,
+                              child: DropdownButtonFormField<int>(
+                                value: _festYear,
+                                decoration: const InputDecoration(
+                                  labelText: 'Año',
+                                ),
+                                items: years
+                                    .map(
+                                      (y) => DropdownMenuItem(
+                                        value: y,
+                                        child: Text('$y'),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: (y) =>
+                                    setState(() => _festYear = y ?? _festYear),
+                              ),
+                            ),
+                            const SizedBox(width: sp),
+                            SizedBox(
+                              width: bw,
+                              child: FilledButton(
+                                onPressed: _festSearching
+                                    ? null
+                                    : () => _searchFestival(),
+                                child: const Text(
+                                  'Buscar',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.clip,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                if (_festSelected.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      child: Text(
+                        '${_festSelected.length} seleccionados en total',
+                        style: const TextStyle(
+                          color: Color(0xFFE53935),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (_festSearching && _festConcerts.isEmpty)
+                  const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (_festConcerts.isEmpty)
+                  const SliverFillRemaining(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Text(
+                          'Escribe un artista y año para buscar sus conciertos de ese año.',
+                          style: TextStyle(color: Colors.white54, fontSize: 15),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  SliverList.builder(
+                    itemCount: _festConcerts.length + (_festHasMore ? 1 : 0),
+                    itemBuilder: (_, i) {
+                      if (i == _festConcerts.length) {
+                        return Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: OutlinedButton(
+                            onPressed: _festSearching
+                                ? null
+                                : () => _searchFestival(more: true),
+                            child: const Text('Cargar más'),
+                          ),
+                        );
+                      }
+                      final c = _festConcerts[i];
+                      return _buildConcertTile(
+                        c,
+                        _festSelected.contains(c.id),
+                        (v) => setState(
+                          () => v == true
+                              ? _festSelected.add(c.id)
+                              : _festSelected.remove(c.id),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+
+              // ── TAB 2: JSON ───────────────────────────────────────────────
+              if (_tab == 2) ...[
                 if (_loadingFestivals)
                   const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator()),
@@ -490,7 +876,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: FilledButton.icon(
-                                    onPressed: () => _importFestival(f),
+                                    onPressed: () => _importJsonFestival(f),
                                     icon: const Icon(Icons.download),
                                     label: const Text('Importar'),
                                   ),
@@ -504,58 +890,71 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                   ),
               ],
 
-              // Bottom padding for FAB
               const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           ),
 
-          // Progress overlay
-          if (_importing)
-            _buildOverlay(_importedCount, _importTotal, _importingArtist),
-          if (_importingFestival)
-            _buildOverlay(_festImported, _festTotal, _festArtist),
+          // Overlays
+          if (_artistImporting)
+            _buildOverlay(
+              _artistImportedCount,
+              _artistImportTotal,
+              _artistImportingCurrent,
+            ),
+          if (_festImporting)
+            _buildOverlay(
+              _festImportedCount,
+              _festImportTotal,
+              _festImportingCurrent,
+            ),
+          if (_jsonImporting)
+            _buildOverlay(_jsonImported, _jsonTotal, _jsonCurrentArtist),
         ],
       ),
     );
   }
+}
 
-  Widget _buildOverlay(int done, int total, String current) {
-    return Container(
-      color: Colors.black87,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 20),
-            const Text(
-              'Importando...',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+// ── Tab button ────────────────────────────────────────────────────────────────
+
+class _TabBtn extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TabBtn({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? const Color(0xFFE53935) : Colors.white54;
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
             ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: 260,
-              child: LinearProgressIndicator(
-                value: total == 0 ? 0 : done / total,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '$done / $total',
-              style: const TextStyle(color: Colors.white70),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              current,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white54, fontSize: 13),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            height: 2,
+            width: 60,
+            color: selected ? const Color(0xFFE53935) : Colors.transparent,
+          ),
+        ],
       ),
     );
   }

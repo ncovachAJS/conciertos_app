@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../concerts/data/services/upload_service.dart';
-import '../../data/services/profile_api_service.dart';
+import 'package:image_picker/image_picker.dart';
 import '../widgets/profile_card.dart';
 
 import '../../../concerts/data/services/concert_api_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
-
+import '../../../concerts/data/services/upload_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-
 import '../../../photos/data/services/photo_api_service.dart';
+import '../../data/services/avatar_api_service.dart';
 
 import 'package:go_router/go_router.dart';
-
-import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -23,20 +20,15 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final ConcertApiService _api = ConcertApiService();
-
   final PhotoApiService _photosApi = PhotoApiService();
-
   final UploadService _uploadService = UploadService();
-  final ProfileApiService _profileApi = ProfileApiService();
-  final ImagePicker _picker = ImagePicker();
-
+  final AvatarApiService _avatarService = AvatarApiService();
   final AuthController auth = AuthController.instance;
 
   List<Concert> concerts = [];
-
   int totalPhotos = 0;
-
   bool loading = true;
+  bool _uploadingAvatar = false;
 
   @override
   void initState() {
@@ -46,96 +38,84 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _refresh() {
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   Future<void> load() async {
-    concerts = await _api.getConcerts();
+    try {
+      final result = await _api.getConcerts();
+      concerts = result;
+    } catch (_) {}
 
-    final photos = await _photosApi.getFeed();
-
-    for (final photo in photos) {
-      debugPrint(photo.id);
-    }
-
-    totalPhotos = photos.length;
+    try {
+      final photos = await _photosApi.getFeed();
+      totalPhotos = photos.length;
+    } catch (_) {}
 
     if (!mounted) return;
-
-    setState(() {
-      loading = false;
-    });
+    setState(() => loading = false);
   }
 
   Future<void> _changeAvatar() async {
-    if (auth.user == null) return;
+    final picker = ImagePicker();
 
-    showModalBottomSheet(
+    final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      builder: (_) => SafeArea(
+      builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Hacer foto'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickAvatar(ImageSource.camera);
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.photo_library),
               title: const Text('Elegir de la galería'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickAvatar(ImageSource.gallery);
-              },
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
-            if (auth.user?.avatarUrl != null)
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Eliminar foto'),
-                onTap: () async {
-                  Navigator.pop(context);
-
-                  await _profileApi.deleteAvatar();
-                  await auth.refreshUser();
-
-                  if (mounted) {
-                    setState(() {});
-                  }
-                },
-              ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Hacer una foto'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
           ],
         ),
       ),
     );
-  }
 
-  Future<void> _pickAvatar(ImageSource source) async {
-    final file = await _picker.pickImage(source: source, imageQuality: 85);
+    if (source == null) return;
 
-    if (file == null) return;
+    final picked = await picker.pickImage(
+      source: source,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 85,
+    );
+
+    if (picked == null) return;
+
+    setState(() => _uploadingAvatar = true);
 
     try {
-      final url = await _uploadService.uploadImage(file.path);
+      // 1. Sube la imagen a Cloudinary
+      final imageUrl = await _uploadService.uploadImage(picked.path);
 
-      await _profileApi.updateAvatar(url);
+      // 2. Guarda la URL en el backend
+      await _avatarService.updateAvatar(imageUrl);
 
-      await auth.refreshUser();
-
-      if (mounted) {
-        setState(() {});
+      // 3. Actualiza el usuario en el AuthController
+      if (auth.user != null) {
+        auth.updateAvatarUrl(imageUrl);
       }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Foto de perfil actualizada ✅')),
+      );
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ).showSnackBar(SnackBar(content: Text('Error al subir la foto: $e')));
+    } finally {
+      if (mounted) setState(() => _uploadingAvatar = false);
     }
   }
 
@@ -147,18 +127,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   String fanSince() {
-    if (concerts.isEmpty) {
-      return 'Fan desde este año';
-    }
-
-    int oldestYear = concerts.first.date.year;
-
-    for (final concert in concerts) {
-      if (concert.date.year < oldestYear) {
-        oldestYear = concert.date.year;
-      }
-    }
-
+    if (concerts.isEmpty) return 'Fan desde este año';
+    int oldestYear = concerts
+        .map((c) => c.date.year)
+        .reduce((a, b) => a < b ? a : b);
     return 'Fan desde $oldestYear';
   }
 
@@ -176,121 +148,127 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Mi perfil'), centerTitle: true),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
+      body: Stack(
         children: [
-          const Text(
-            'Tu acreditación',
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-          ),
+          ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              const Text(
+                'Tu acreditación',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Tu historial musical en un vistazo.',
+                style: TextStyle(color: Colors.grey, fontSize: 15),
+              ),
+              const SizedBox(height: 24),
 
-          SizedBox(height: 6),
+              ProfileCard(
+                name: auth.user?.name ?? 'Invitado',
+                subtitle: auth.user != null
+                    ? auth.user!.email
+                    : '${fanLevel(concerts.length)}\n${fanSince()}',
+                totalConcerts: concerts.length,
+                totalFavorites: concerts.where((c) => c.favorite).length,
+                totalPhotos: totalPhotos,
+                level: auth.user == null ? '' : fanLevel(concerts.length),
+                memberNumber: auth.user?.memberNumber ?? 0,
+                avatarUrl: auth.user?.avatarUrl,
+                onAvatarTap: _uploadingAvatar ? null : _changeAvatar,
+              ),
 
-          Text(
-            'Tu historial musical en un vistazo.',
-            style: TextStyle(color: Colors.grey, fontSize: 15),
-          ),
+              const SizedBox(height: 30),
 
-          SizedBox(height: 24),
-          ProfileCard(
-            name: auth.user?.name ?? 'Invitado',
-            subtitle: auth.user != null
-                ? auth.user!.email
-                : '${fanLevel(concerts.length)}\n${fanSince()}',
-            totalConcerts: concerts.length,
-            totalFavorites: concerts.where((c) => c.favorite).length,
-            totalPhotos: totalPhotos,
-            level: auth.user == null ? '' : fanLevel(concerts.length),
-            memberNumber: auth.user?.memberNumber ?? 0,
-            avatarUrl: auth.user?.avatarUrl,
-            onAvatarTap: _changeAvatar,
-          ),
-
-          const SizedBox(height: 30),
-
-          if (auth.user == null) ...[
-            FilledButton.icon(
-              onPressed: () {
-                context.push('/login');
-              },
-              icon: const Icon(Icons.login),
-              label: const Text('Iniciar sesión'),
-            ),
-
-            const SizedBox(height: 12),
-
-            OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.person_add_alt_1),
-              label: const Text('Crear cuenta'),
-            ),
-          ] else ...[
-            FilledButton.icon(
-              onPressed: () async {
-                await auth.logout();
-
-                if (!context.mounted) return;
-
-                context.go('/login');
-              },
-              icon: const Icon(Icons.logout),
-              label: const Text('Cerrar sesión'),
-            ),
-          ],
-
-          const SizedBox(height: 12),
-
-          OutlinedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.person_add_alt_1),
-            label: const Text('Crear cuenta'),
-          ),
-
-          const SizedBox(height: 35),
-
-          const Text(
-            'Herramientas',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 12),
-
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.upload_file),
-                  title: const Text('Exportar colección'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
+              if (auth.user == null) ...[
+                FilledButton.icon(
+                  onPressed: () => context.push('/login'),
+                  icon: const Icon(Icons.login),
+                  label: const Text('Iniciar sesión'),
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Ajustes'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/register'),
+                  icon: const Icon(Icons.person_add_alt_1),
+                  label: const Text('Crear cuenta'),
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: const Text('Acerca de'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
+              ] else ...[
+                FilledButton.icon(
+                  onPressed: () async {
+                    await auth.logout();
+                    if (!context.mounted) return;
+                    context.go('/login');
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Cerrar sesión'),
                 ),
               ],
-            ),
+
+              const SizedBox(height: 35),
+
+              const Text(
+                'Herramientas',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.upload_file),
+                      title: const Text('Exportar colección'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {},
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.settings),
+                      title: const Text('Ajustes'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {},
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.info_outline),
+                      title: const Text('Acerca de'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              Center(
+                child: Text(
+                  'La Vida en Directo\nVersión 1.0',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey.shade500),
+                ),
+              ),
+            ],
           ),
 
-          const SizedBox(height: 40),
-
-          Center(
-            child: Text(
-              'La Vida en Directo\nVersión 1.0',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade500),
+          // Overlay mientras sube el avatar
+          if (_uploadingAvatar)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text(
+                      'Subiendo foto...',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );

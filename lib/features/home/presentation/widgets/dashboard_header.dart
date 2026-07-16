@@ -9,121 +9,120 @@ class DashboardHeader extends StatelessWidget {
 
   String _greeting() {
     final hour = DateTime.now().hour;
-
-    if (hour < 12) {
-      return 'Buenos días';
-    }
-
-    if (hour < 20) {
-      return 'Buenas tardes';
-    }
-
+    if (hour < 12) return 'Buenos días';
+    if (hour < 20) return 'Buenas tardes';
     return 'Buenas noches';
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthController.instance.user;
+    // ListenableBuilder reconstruye cuando el avatar cambia
+    return ListenableBuilder(
+      listenable: AuthController.instance,
+      builder: (context, _) {
+        final user = AuthController.instance.user;
+        final avatarUrl = user?.avatarUrl;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+        return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RichText(
-                    overflow: TextOverflow.visible,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'LA VIDA ',
-                          style: GoogleFonts.teko(
-                            fontSize: 33,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            letterSpacing: 1.2,
-                          ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        overflow: TextOverflow.visible,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'LA VIDA ',
+                              style: GoogleFonts.teko(
+                                fontSize: 31,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'EN DIRECTO',
+                              style: GoogleFonts.teko(
+                                fontSize: 31,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFFFFC107),
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ],
                         ),
-                        TextSpan(
-                          text: 'EN DIRECTO',
-                          style: GoogleFonts.teko(
-                            fontSize: 33,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFFFFC107),
-                            letterSpacing: 1.2,
-                          ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Cada concierto cuenta una historia.',
+                        style: TextStyle(color: Colors.white54, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Avatar — foto si existe, icono si no
+                GestureDetector(
+                  onTap: () => context.push('/profile'),
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE53935),
+                      shape: BoxShape.circle,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x55E53935),
+                          blurRadius: 18,
+                          offset: Offset(0, 8),
                         ),
                       ],
                     ),
+                    clipBehavior: Clip.antiAlias,
+                    child: avatarUrl != null && avatarUrl.isNotEmpty
+                        ? Image.network(
+                            avatarUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.person_outline,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.person_outline,
+                            color: Colors.white,
+                            size: 22,
+                          ),
                   ),
-
-                  const SizedBox(height: 2),
-
-                  const Text(
-                    'Cada concierto cuenta una historia.',
-                    style: TextStyle(color: Colors.white54, fontSize: 14),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
 
-            // Container(
-            //   width: 48,
-            //   height: 48,
-            //   decoration: BoxDecoration(
-            //     color: const Color(0xFF242731),
-            //     borderRadius: BorderRadius.circular(16),
-            //   ),
-            //   child: const Icon(
-            //     Icons.notifications_none_rounded,
-            //     color: Colors.white,
-            //   ),
-            // ),
-            const SizedBox(width: 12),
-            GestureDetector(
-              onTap: () => context.push('/profile'),
-              child: Container(
-                width: 42,
-                height: 42,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE53935),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x55E53935),
-                      blurRadius: 18,
-                      offset: Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.person_outline,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
+            const SizedBox(height: 26),
+
+            Text(
+              '${_greeting()}, ${user?.name ?? "Rockero"} 🤘',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 6),
+
+            const Text(
+              'Todo listo para volver al directo.',
+              style: TextStyle(color: Colors.white60, fontSize: 15),
             ),
           ],
-        ),
-
-        const SizedBox(height: 26),
-
-        Text(
-          '${_greeting()}, ${user?.name ?? "Rockero"} 🤘',
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-
-        const SizedBox(height: 6),
-
-        // const Text(
-        //   'Todo listo para volver al directo.',
-        //   style: TextStyle(color: Colors.white60, fontSize: 15),
-        // ),
-      ],
+        );
+      },
     );
   }
 }

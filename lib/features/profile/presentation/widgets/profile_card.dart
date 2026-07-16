@@ -10,8 +10,8 @@ class ProfileCard extends StatelessWidget {
     required this.totalPhotos,
     required this.level,
     required this.memberNumber,
-    required this.onAvatarTap,
     this.avatarUrl,
+    this.onAvatarTap,
   });
 
   final String name;
@@ -21,8 +21,8 @@ class ProfileCard extends StatelessWidget {
   final int totalPhotos;
   final String level;
   final int memberNumber;
-  final VoidCallback onAvatarTap;
   final String? avatarUrl;
+  final VoidCallback? onAvatarTap;
 
   @override
   Widget build(BuildContext context) {
@@ -48,21 +48,60 @@ class ProfileCard extends StatelessWidget {
         children: [
           const SizedBox(height: 12),
 
+          // Avatar — tappable para cambiar foto
           GestureDetector(
             onTap: onAvatarTap,
-            child: CircleAvatar(
-              radius: 42,
-              backgroundColor: Colors.white.withOpacity(.15),
-              backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
-                  ? NetworkImage(avatarUrl!)
-                  : null,
-              child: avatarUrl == null || avatarUrl!.isEmpty
-                  ? const Icon(
-                      Icons.person_outline,
+            child: Stack(
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white38, width: 2),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: avatarUrl != null && avatarUrl!.isNotEmpty
+                      ? Image.network(
+                          avatarUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.person_outline,
+                            color: Colors.white,
+                            size: 48,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.person_outline,
+                          color: Colors.white,
+                          size: 48,
+                        ),
+                ),
+
+                // Icono de cámara
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
                       color: Colors.white,
-                      size: 48,
-                    )
-                  : null,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFE53935),
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      size: 14,
+                      color: Color(0xFFE53935),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -78,8 +117,6 @@ class ProfileCard extends StatelessWidget {
           ),
 
           const SizedBox(height: 10),
-
-          const SizedBox(height: 14),
 
           Text(
             subtitle,
@@ -172,9 +209,7 @@ class _Stat extends StatelessWidget {
     return Column(
       children: [
         Icon(icon, color: Colors.white70, size: 20),
-
         const SizedBox(height: 8),
-
         Text(
           value,
           style: const TextStyle(
@@ -183,9 +218,7 @@ class _Stat extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-
         const SizedBox(height: 6),
-
         Text(
           label,
           textAlign: TextAlign.center,

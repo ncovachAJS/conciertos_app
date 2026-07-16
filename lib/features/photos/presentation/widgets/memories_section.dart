@@ -144,11 +144,13 @@ class _MemoriesSectionState extends State<MemoriesSection> {
   }
 
   Future<void> _openPhoto(ConcertPhotoModel photo) async {
+    final index = _photos.indexOf(photo);
     final deleted = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => PhotoViewerPage(
-          photo: photo,
-          onDelete: () => _photoService.deletePhoto(photo.id),
+          photos: _photos, // ← lista completa
+          initialIndex: index, // ← foto seleccionada
+          onDelete: (p) => _photoService.deletePhoto(p.id),
         ),
       ),
     );
