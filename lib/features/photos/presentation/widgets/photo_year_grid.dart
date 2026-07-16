@@ -40,7 +40,8 @@ class PhotoYearGrid extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => PhotoViewerPage(photo: photo),
+                      builder: (_) =>
+                          PhotoViewerPage(photos: photos, initialIndex: index),
                     ),
                   );
                 },

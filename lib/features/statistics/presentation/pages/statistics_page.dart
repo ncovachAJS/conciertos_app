@@ -48,11 +48,54 @@ class _Stats {
   List<MapEntry<String, int>> get topArtists =>
       _top(concerts.map((c) => c.artist.trim()).where((a) => a.isNotEmpty));
 
-  List<MapEntry<String, int>> get topFestivals =>
-      _top(concerts.map((c) => c.festival.trim()).where((f) => f.isNotEmpty));
+  List<MapEntry<String, int>> get topFestivals {
+    final uniqueVisits = <String>{};
 
-  List<MapEntry<String, int>> get topCities =>
-      _top(concerts.map((c) => c.city.trim()).where((c) => c.isNotEmpty));
+    for (final concert in concerts) {
+      if (concert.festival.trim().isEmpty) continue;
+
+      uniqueVisits.add('${concert.festival.trim()}_${concert.date.year}');
+    }
+
+    final counts = <String, int>{};
+
+    for (final visit in uniqueVisits) {
+      final festival = visit.substring(0, visit.lastIndexOf('_'));
+      counts[festival] = (counts[festival] ?? 0) + 1;
+    }
+
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return sorted.take(5).toList();
+  }
+
+  List<MapEntry<String, int>> get topCities {
+    final counts = <String, int>{};
+    final countedFestivals = <String>{};
+
+    for (final concert in concerts) {
+      if (concert.city.trim().isEmpty) continue;
+
+      if (concert.festival.trim().isNotEmpty) {
+        final festivalVisit =
+            '${concert.festival.trim()}_${concert.date.year}_${concert.city.trim()}';
+
+        if (countedFestivals.contains(festivalVisit)) {
+          continue;
+        }
+
+        countedFestivals.add(festivalVisit);
+      }
+
+      counts[concert.city] = (counts[concert.city] ?? 0) + 1;
+    }
+
+    final sorted = counts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return sorted.take(5).toList();
+  }
 
   Map<int, int> get byRating {
     final map = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
@@ -445,8 +488,11 @@ class _YearBarChart extends StatelessWidget {
                 Expanded(
                   child: Text(
                     '${entries[i].key}',
+                    maxLines: 1,
+                    overflow: TextOverflow.visible,
+                    softWrap: false,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white54, fontSize: 11),
+                    style: const TextStyle(color: Colors.white54, fontSize: 10),
                   ),
                 ),
               ],

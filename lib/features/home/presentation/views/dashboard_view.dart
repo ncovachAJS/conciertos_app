@@ -79,7 +79,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         return Stack(
           children: [
             SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+              padding: const EdgeInsets.fromLTRB(4, 4, 4, 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

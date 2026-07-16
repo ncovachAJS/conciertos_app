@@ -164,74 +164,86 @@ class _MemoriesSectionState extends State<MemoriesSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.photo_library_rounded, color: Colors.redAccent),
-            const SizedBox(width: 10),
-            const Text(
-              'Recuerdos',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                const Icon(
+                  Icons.photo_library_rounded,
+                  color: Colors.redAccent,
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  'Recuerdos',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: _uploading ? null : _addPhoto,
+                  icon: _uploading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.add_a_photo_outlined, size: 20),
+                  label: Text(_uploading ? 'Subiendo...' : 'Añadir'),
+                ),
+              ],
             ),
-            const Spacer(),
-            TextButton.icon(
-              onPressed: _uploading ? null : _addPhoto,
-              icon: _uploading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.add_a_photo_outlined, size: 20),
-              label: Text(_uploading ? 'Subiendo...' : 'Añadir'),
-            ),
+
+            const SizedBox(height: 12),
+
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_photos.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  'Todavía no hay recuerdos. ¡Añade tus fotos del concierto!',
+                  style: TextStyle(color: Colors.white60, fontSize: 15),
+                ),
+              )
+            else
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _photos.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 1,
+                  mainAxisSpacing: 1,
+                  childAspectRatio: 1,
+                ),
+                itemBuilder: (context, index) {
+                  final photo = _photos[index];
+                  debugPrint(photo.imageUrl);
+                  return GestureDetector(
+                    onTap: () => _openPhoto(photo),
+                    child: Hero(
+                      tag: photo.id,
+                      child: ClipRect(
+                        child: SizedBox.expand(
+                          child: Image.network(
+                            photo.imageUrl,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
           ],
         ),
-
-        const SizedBox(height: 12),
-
-        if (_loading)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(child: CircularProgressIndicator()),
-          )
-        else if (_photos.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Text(
-              'Todavía no hay recuerdos. ¡Añade tus fotos del concierto!',
-              style: TextStyle(color: Colors.white60, fontSize: 15),
-            ),
-          )
-        else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _photos.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 1,
-            ),
-            itemBuilder: (context, index) {
-              final photo = _photos[index];
-
-              return GestureDetector(
-                onTap: () => _openPhoto(photo),
-                child: Hero(
-                  tag: photo.id,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: NetworkPhoto(url: photo.imageUrl),
-                  ),
-                ),
-              );
-            },
-          ),
-      ],
+      ),
     );
   }
 }
