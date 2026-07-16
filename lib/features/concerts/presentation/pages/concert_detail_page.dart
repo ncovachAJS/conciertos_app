@@ -140,12 +140,9 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
           const SizedBox(height: 24),
 
           // Fotos / recuerdos
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: MemoriesSection(concertId: widget.concert.id),
-            ),
-          ),
+          const SizedBox(height: 24),
+
+          MemoriesSection(concertId: widget.concert.id),
 
           const SizedBox(height: 24),
 

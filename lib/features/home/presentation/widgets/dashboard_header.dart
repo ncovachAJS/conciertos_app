@@ -40,7 +40,7 @@ class DashboardHeader extends StatelessWidget {
                             TextSpan(
                               text: 'LA VIDA ',
                               style: GoogleFonts.teko(
-                                fontSize: 31,
+                                fontSize: 35,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
                                 letterSpacing: 1.2,
@@ -49,7 +49,7 @@ class DashboardHeader extends StatelessWidget {
                             TextSpan(
                               text: 'EN DIRECTO',
                               style: GoogleFonts.teko(
-                                fontSize: 31,
+                                fontSize: 35,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFFFFC107),
                                 letterSpacing: 1.2,
@@ -73,8 +73,8 @@ class DashboardHeader extends StatelessWidget {
                 GestureDetector(
                   onTap: () => context.push('/profile'),
                   child: Container(
-                    width: 44,
-                    height: 44,
+                    width: 54,
+                    height: 54,
                     decoration: BoxDecoration(
                       color: const Color(0xFFE53935),
                       shape: BoxShape.circle,

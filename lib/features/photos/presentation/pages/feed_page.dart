@@ -29,14 +29,19 @@ class _FeedPageState extends State<FeedPage> {
   Future<void> _load() async {
     try {
       final photos = await _service.getFeed();
+
       if (!mounted) return;
+
       setState(() {
         _photos = photos;
         _loading = false;
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _loading = false);
+
+      setState(() {
+        _loading = false;
+      });
     }
   }
 
@@ -87,14 +92,14 @@ class _FeedPageState extends State<FeedPage> {
     final years = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 32),
+      padding: EdgeInsets.zero,
       itemCount: years.length,
       itemBuilder: (_, i) {
         final year = years[i];
         final yearPhotos = grouped[year]!;
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+          padding: const EdgeInsets.only(top: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -105,19 +110,22 @@ class _FeedPageState extends State<FeedPage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               const SizedBox(height: 14),
+
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: yearPhotos.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
-                  crossAxisSpacing: 2,
-                  mainAxisSpacing: 2,
+                  crossAxisSpacing: 1,
+                  mainAxisSpacing: 1,
                   childAspectRatio: 1,
                 ),
                 itemBuilder: (_, j) {
                   final photo = yearPhotos[j];
+
                   return GestureDetector(
                     onTap: () => _openPhoto(yearPhotos, j),
                     child: Hero(
