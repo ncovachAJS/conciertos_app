@@ -1,25 +1,27 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../shared/widgets/app_page.dart';
+import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
-import '../../../concerts/domain/entities/concert.dart';
-
 import '../../../concerts/data/services/upload_service.dart';
+import '../../../concerts/domain/entities/concert.dart';
+import '../../../concerts/presentation/providers/concerts_provider.dart';
 
-class AddConcertPage extends StatefulWidget {
+class AddConcertPage extends ConsumerStatefulWidget {
   final Concert? concert;
 
   const AddConcertPage({super.key, this.concert});
 
   @override
-  State<AddConcertPage> createState() => _AddConcertPageState();
+  ConsumerState<AddConcertPage> createState() => _AddConcertPageState();
 }
 
-class _AddConcertPageState extends State<AddConcertPage> {
+class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   final _formKey = GlobalKey<FormState>();
 
   final _artistController = TextEditingController();
@@ -30,11 +32,9 @@ class _AddConcertPageState extends State<AddConcertPage> {
   final _nameController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
-
   final UploadService _uploadService = UploadService();
 
   DateTime? _selectedDate;
-
   File? _selectedImage;
   String? _imageUrl;
 
@@ -45,24 +45,19 @@ class _AddConcertPageState extends State<AddConcertPage> {
 
   bool get _isPastConcert {
     if (_selectedDate == null) return false;
-
     final today = DateTime.now();
-
-    final todayWithoutTime = DateTime(today.year, today.month, today.day);
-
+    final todayMidnight = DateTime(today.year, today.month, today.day);
     final concertDate = DateTime(
       _selectedDate!.year,
       _selectedDate!.month,
       _selectedDate!.day,
     );
-
-    return concertDate.isBefore(todayWithoutTime);
+    return concertDate.isBefore(todayMidnight);
   }
 
   @override
   void initState() {
     super.initState();
-
     if (widget.concert != null) {
       _rating = widget.concert!.rating;
       _liked = widget.concert!.liked;
@@ -72,12 +67,9 @@ class _AddConcertPageState extends State<AddConcertPage> {
       _venueController.text = widget.concert!.venue;
       _cityController.text = widget.concert!.city;
       _nameController.text = widget.concert?.name ?? '';
-
       _selectedDate = widget.concert!.date;
-
       _dateController.text =
           '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
-
       if (widget.concert!.imageUrl.isNotEmpty) {
         _imageUrl = widget.concert!.imageUrl;
       }
@@ -91,9 +83,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-
     if (pickedDate == null) return;
-
     setState(() {
       _selectedDate = pickedDate;
       _dateController.text =
@@ -106,57 +96,37 @@ class _AddConcertPageState extends State<AddConcertPage> {
       source: ImageSource.gallery,
       imageQuality: 85,
     );
-
     if (image == null) return;
-
-    setState(() {
-      _saving = true;
-    });
-
+    setState(() => _saving = true);
     try {
       final imageUrl = await _uploadService.uploadImage(image.path);
-
       if (!mounted) return;
-
       setState(() {
         _selectedImage = File(image.path);
         _imageUrl = imageUrl;
       });
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('✅ Imagen subida correctamente')),
       );
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No se pudo subir la imagen. Inténtalo de nuevo.'),
         ),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          _saving = false;
-        });
-      }
+      if (mounted) setState(() => _saving = false);
     }
   }
 
   Future<void> _saveConcert() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(() {
-      _saving = true;
-    });
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _saving = true);
 
     try {
-      final concert = Concert(
-        id:
-            widget.concert?.id ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
+      final concert = ConcertModel(
+        id: widget.concert?.id ?? '',
         artist: _artistController.text.trim(),
         festival: _festivalController.text.trim(),
         name: _nameController.text.trim(),
@@ -170,28 +140,31 @@ class _AddConcertPageState extends State<AddConcertPage> {
       );
 
       if (widget.concert == null) {
-        await ConcertApiService().addConcert(concert);
+        // Llamamos directamente a la API — devuelve el concierto con su ID real
+        final created = await ConcertApiService().addConcert(concert);
+
+        // Actualizamos el provider en background
+        ref.read(concertsProvider.notifier).reload().ignore();
+
+        if (!mounted) return;
+
+        // Navegamos al detalle usando el concierto recién creado
+        context.pushReplacement('/concert-detail', extra: created);
       } else {
+        // Edición — actualizamos y volvemos
         await ConcertApiService().updateConcert(concert);
+        if (!mounted) return;
+        context.pop(true);
       }
-
-      if (!mounted) return;
-
-      context.pop(true);
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No se pudo guardar el concierto. Inténtalo de nuevo.'),
         ),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          _saving = false;
-        });
-      }
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -333,9 +306,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
                           widget.concert!.imageUrl,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return _placeholderImage();
-                          },
+                          errorBuilder: (_, __, ___) => _placeholderImage(),
                         )
                       : _placeholderImage(),
                 ),
@@ -354,21 +325,14 @@ class _AddConcertPageState extends State<AddConcertPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
                     Center(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: List.generate(5, (index) {
                           final active = index < _rating;
-
                           return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _rating = index + 1;
-                              });
-                            },
+                            onTap: () => setState(() => _rating = index + 1),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               margin: const EdgeInsets.symmetric(horizontal: 2),
@@ -384,9 +348,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
                         }),
                       ),
                     ),
-
                     const SizedBox(height: 8),
-
                     Center(
                       child: Text(
                         _rating == 0
@@ -398,9 +360,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 24),
-
                     const Text(
                       '¿Qué te pareció?',
                       style: TextStyle(
@@ -408,17 +368,11 @@ class _AddConcertPageState extends State<AddConcertPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _liked = !_liked;
-                            });
-                          },
+                          onPressed: () => setState(() => _liked = !_liked),
                           icon: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),
                             child: Icon(
@@ -429,16 +383,10 @@ class _AddConcertPageState extends State<AddConcertPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(width: 8),
-
                         Expanded(
                           child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _liked = !_liked;
-                              });
-                            },
+                            onTap: () => setState(() => _liked = !_liked),
                             child: Text(
                               _liked ? 'Me gusta' : '¿Te gustó?',
                               style: TextStyle(
@@ -453,9 +401,7 @@ class _AddConcertPageState extends State<AddConcertPage> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 20),
-
                     const Text(
                       'Favoritos',
                       style: TextStyle(
@@ -463,17 +409,12 @@ class _AddConcertPageState extends State<AddConcertPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
                     Row(
                       children: [
                         IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _favorite = !_favorite;
-                            });
-                          },
+                          onPressed: () =>
+                              setState(() => _favorite = !_favorite),
                           icon: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),
                             child: Icon(
@@ -484,16 +425,10 @@ class _AddConcertPageState extends State<AddConcertPage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(width: 8),
-
                         Expanded(
                           child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _favorite = !_favorite;
-                              });
-                            },
+                            onTap: () => setState(() => _favorite = !_favorite),
                             child: Text(
                               _favorite
                                   ? 'Añadido a favoritos'
@@ -510,7 +445,6 @@ class _AddConcertPageState extends State<AddConcertPage> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 32),
                   ],
                 ),
