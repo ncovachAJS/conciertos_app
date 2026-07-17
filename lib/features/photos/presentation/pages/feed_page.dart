@@ -15,10 +15,14 @@ class FeedPage extends StatefulWidget {
   State<FeedPage> createState() => _FeedPageState();
 }
 
-class _FeedPageState extends State<FeedPage> {
+class _FeedPageState extends State<FeedPage>
+    with AutomaticKeepAliveClientMixin {
   final PhotoApiService _service = PhotoApiService();
   List<ConcertPhotoModel> _photos = [];
   bool _loading = true;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -29,19 +33,14 @@ class _FeedPageState extends State<FeedPage> {
   Future<void> _load() async {
     try {
       final photos = await _service.getFeed();
-
       if (!mounted) return;
-
       setState(() {
         _photos = photos;
         _loading = false;
       });
     } catch (_) {
       if (!mounted) return;
-
-      setState(() {
-        _loading = false;
-      });
+      setState(() => _loading = false);
     }
   }
 
@@ -56,6 +55,7 @@ class _FeedPageState extends State<FeedPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // required by AutomaticKeepAliveClientMixin
     return AppPage(
       title: 'Recuerdos',
       child: _loading
@@ -92,14 +92,14 @@ class _FeedPageState extends State<FeedPage> {
     final years = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
     return ListView.builder(
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(bottom: 32),
       itemCount: years.length,
       itemBuilder: (_, i) {
         final year = years[i];
         final yearPhotos = grouped[year]!;
 
         return Padding(
-          padding: const EdgeInsets.only(top: 20),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -110,22 +110,19 @@ class _FeedPageState extends State<FeedPage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 14),
-
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: yearPhotos.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
-                  crossAxisSpacing: 1,
-                  mainAxisSpacing: 1,
+                  crossAxisSpacing: 2,
+                  mainAxisSpacing: 2,
                   childAspectRatio: 1,
                 ),
                 itemBuilder: (_, j) {
                   final photo = yearPhotos[j];
-
                   return GestureDetector(
                     onTap: () => _openPhoto(yearPhotos, j),
                     child: Hero(

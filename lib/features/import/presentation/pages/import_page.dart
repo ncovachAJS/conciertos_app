@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../concerts/data/models/concert_model.dart';
+import '../../../concerts/data/services/concert_api_service.dart';
+import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../data/festival_import_service.dart';
 import '../../data/models/festival_model.dart';
@@ -165,49 +167,42 @@ class _ImportPageState extends ConsumerState<ImportPage> {
     });
 
     try {
-      // Guardamos los IDs existentes ANTES de importar
-      final beforeIds = (ref.read(concertsProvider).asData?.value ?? [])
-          .map((c) => c.id)
-          .toSet();
-
       final img = await _imageService.getImage(toImport.first.artist) ?? '';
+      Concert? lastCreated;
+
       for (final c in toImport) {
         if (!mounted) return;
         setState(() {
           _artistImportingCurrent = '${c.venue} · ${c.city}';
           _artistImportedCount++;
         });
-        await ref
-            .read(concertsProvider.notifier)
-            .add(
-              ConcertModel(
-                id: '',
-                name: c.artist,
-                artist: c.artist,
-                festival: '',
-                date: c.date,
-                venue: c.venue,
-                city: c.city,
-                imageUrl: img,
-                rating: 0,
-                liked: false,
-                favorite: false,
-              ),
-            );
+        // Llamamos directamente a la API — devuelve el concierto con ID real
+        lastCreated = await ConcertApiService().addConcert(
+          ConcertModel(
+            id: '',
+            name: c.artist,
+            artist: c.artist,
+            festival: '',
+            date: c.date,
+            venue: c.venue,
+            city: c.city,
+            imageUrl: img,
+            rating: 0,
+            liked: false,
+            favorite: false,
+          ),
+        );
       }
+
+      // Actualizamos el provider en background
+      ref.read(concertsProvider.notifier).reload().ignore();
+
       if (!mounted) return;
       setState(() => _artistSelected.clear());
 
-      if (toImport.length == 1) {
-        // Buscamos el concierto recién creado — el que NO estaba antes
-        final concerts = ref.read(concertsProvider).asData?.value ?? [];
-        final created = concerts
-            .where((c) => !beforeIds.contains(c.id))
-            .firstOrNull;
-        if (created != null && mounted) {
-          context.push('/concert-detail', extra: created);
-          return;
-        }
+      if (toImport.length == 1 && lastCreated != null) {
+        context.push('/concert-detail', extra: lastCreated);
+        return;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(

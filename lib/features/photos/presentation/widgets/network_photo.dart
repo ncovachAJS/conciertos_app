@@ -1,7 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-/// Imagen de red con loader de progreso mientras descarga y fade-in al aparecer.
-/// Se usa en la galería de recuerdos y en el feed.
+/// Imagen de red con caché en disco — no recarga al hacer scroll.
+/// Usa cached_network_image para persistir entre sesiones.
 class NetworkPhoto extends StatelessWidget {
   final String url;
   final BoxFit fit;
@@ -18,39 +19,42 @@ class NetworkPhoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      url,
+    if (url.isEmpty) return _error();
+
+    return CachedNetworkImage(
+      imageUrl: url,
       fit: fit,
       width: double.infinity,
       height: double.infinity,
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) return child;
-
-        return Container(
-          color: const Color(0xFF2B2B2B),
-          alignment: Alignment.center,
-          child: SizedBox(
-            width: loaderSize,
-            height: loaderSize,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              value: progress.expectedTotalBytes != null
-                  ? progress.cumulativeBytesLoaded /
-                        progress.expectedTotalBytes!
-                  : null,
-              valueColor: const AlwaysStoppedAnimation(Color(0xFFE53935)),
-            ),
-          ),
-        );
-      },
-      errorBuilder: (_, __, ___) => Container(
-        color: const Color(0xFF2B2B2B),
+      // Muestra placeholder mientras carga
+      placeholder: (context, url) => Container(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         alignment: Alignment.center,
-        child: Icon(
-          Icons.broken_image_outlined,
-          color: Colors.white24,
-          size: errorIconSize,
+        child: SizedBox(
+          width: loaderSize,
+          height: loaderSize,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: const AlwaysStoppedAnimation(Color(0xFFE53935)),
+          ),
         ),
+      ),
+      // Error
+      errorWidget: (context, url, error) => _error(),
+      // Sin fade para que las imágenes cacheadas aparezcan instantáneamente
+      fadeInDuration: Duration.zero,
+      fadeOutDuration: Duration.zero,
+    );
+  }
+
+  Widget _error() {
+    return Container(
+      color: const Color(0xFF2B2B2B),
+      alignment: Alignment.center,
+      child: Icon(
+        Icons.broken_image_outlined,
+        color: Colors.white24,
+        size: errorIconSize,
       ),
     );
   }

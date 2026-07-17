@@ -10,6 +10,7 @@ class AppSearchBar extends StatelessWidget {
         hintText: 'Buscar artista o festival...',
         prefixIcon: const Icon(Icons.search),
         filled: true,
+        fillColor: Theme.of(context).inputDecorationTheme.fillColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide.none,

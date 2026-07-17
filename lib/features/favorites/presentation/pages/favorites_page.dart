@@ -116,6 +116,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                 hintText: 'Buscar favorito...',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
+                fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
                   borderSide: BorderSide.none,
