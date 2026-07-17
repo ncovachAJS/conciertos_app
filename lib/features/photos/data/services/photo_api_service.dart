@@ -24,7 +24,7 @@ class PhotoApiService {
 
   Future<List<ConcertPhotoModel>> getFeed({
     int page = 1,
-    int limit = 50,
+    int limit = 1000,
   }) async {
     final uri = Uri.parse(
       ApiConfig.photosFeedEndpoint,
