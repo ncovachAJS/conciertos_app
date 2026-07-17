@@ -464,74 +464,97 @@ class _YearBarChart extends StatelessWidget {
     final maxVal = byYear.values.reduce((a, b) => a > b ? a : b);
     final entries = byYear.entries.toList();
 
+    // Ancho fijo por barra para que haya espacio aunque haya muchos años
+    const barWidth = 36.0;
+    const barSpacing = 10.0;
+    final totalWidth = entries.length * (barWidth + barSpacing);
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+      padding: const EdgeInsets.fromLTRB(0, 20, 0, 16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 120,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (int i = 0; i < entries.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 6),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${entries[i].value}',
-                          style: const TextStyle(
-                            color: Color(0xFFE53935),
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          height: maxVal > 0
-                              ? (entries[i].value / maxVal * 80).clamp(4, 80)
-                              : 4,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE53935),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              for (int i = 0; i < entries.length; i++) ...[
-                if (i > 0) const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    '${entries[i].key}',
-                    maxLines: 1,
-                    overflow: TextOverflow.visible,
-                    softWrap: false,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withOpacity(0.54),
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
-              ],
-            ],
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SizedBox(
+          width: totalWidth,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 130,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    for (int i = 0; i < entries.length; i++) ...[
+                      if (i > 0) const SizedBox(width: barSpacing),
+                      SizedBox(
+                        width: barWidth,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${entries[i].value}',
+                              style: const TextStyle(
+                                color: Color(0xFFE53935),
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              height: maxVal > 0
+                                  ? (entries[i].value / maxVal * 90).clamp(
+                                      4,
+                                      90,
+                                    )
+                                  : 4,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE53935),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  for (int i = 0; i < entries.length; i++) ...[
+                    if (i > 0) const SizedBox(width: barSpacing),
+                    SizedBox(
+                      width: barWidth,
+                      child: Text(
+                        '${entries[i].key}',
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.54),
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
