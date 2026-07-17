@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -77,6 +78,8 @@ class _ImportPageState extends ConsumerState<ImportPage> {
   Future<void> _searchArtist({bool more = false}) async {
     final q = _artistController.text.trim();
     if (q.isEmpty) return;
+
+    // Limpiamos siempre al empezar una búsqueda nueva
     setState(() {
       _artistSearching = true;
       if (!more) {
@@ -86,9 +89,10 @@ class _ImportPageState extends ConsumerState<ImportPage> {
         _artistTotal = 0;
       }
     });
+
     try {
-      // Sin filtro de año: una sola página
       if (_artistYear == 0) {
+        // Sin año: una sola página, resultados directos
         final r = await _setlistService.searchArtistConcerts(
           q,
           page: more ? _artistPage + 1 : 1,
@@ -104,22 +108,23 @@ class _ImportPageState extends ConsumerState<ImportPage> {
               _artistConcerts.length < _artistTotal && r.concerts.isNotEmpty;
         });
       } else {
-        // Con filtro de año: auto-paginamos hasta encontrar conciertos de ese año
+        // Con año: paginamos hasta recoger TODOS los del año buscado.
+        // ❌ Antes: el loop salía al encontrar el PRIMER concierto del año.
+        // ✅ Ahora: el loop sigue hasta encontrar conciertos MÁS ANTIGUOS que el año.
         int page = more ? _artistPage + 1 : 1;
         final found = <SetlistConcertModel>[];
         bool hasMore = true;
         int safetyLimit = 15;
-        int total = 0;
 
-        while (found.isEmpty && hasMore && safetyLimit > 0) {
+        while (hasMore && safetyLimit > 0) {
           final r = await _setlistService.searchArtistConcerts(q, page: page);
-          total = r.total;
           if (r.concerts.isEmpty) break;
 
           for (final c in r.concerts) {
             if (c.date.year == _artistYear) found.add(c);
           }
 
+          // Paramos cuando encontramos conciertos más antiguos que el año buscado
           final hasOlder = r.concerts.any((c) => c.date.year < _artistYear);
           hasMore = !hasOlder && r.page * r.itemsPerPage < r.total;
 
@@ -132,9 +137,10 @@ class _ImportPageState extends ConsumerState<ImportPage> {
         if (!mounted) return;
         setState(() {
           _artistConcerts = more ? [..._artistConcerts, ...found] : found;
-          _artistTotal = total;
+          // ✅ Mostramos cuántos hay del año, no el total de todos los conciertos
+          _artistTotal = found.length;
           _artistPage = page - 1;
-          _artistHasMore = hasMore;
+          _artistHasMore = hasMore && found.isNotEmpty;
         });
       }
     } catch (e) {
@@ -157,7 +163,13 @@ class _ImportPageState extends ConsumerState<ImportPage> {
       _artistImportTotal = toImport.length;
       _artistImportedCount = 0;
     });
+
     try {
+      // Guardamos los IDs existentes ANTES de importar
+      final beforeIds = (ref.read(concertsProvider).asData?.value ?? [])
+          .map((c) => c.id)
+          .toSet();
+
       final img = await _imageService.getImage(toImport.first.artist) ?? '';
       for (final c in toImport) {
         if (!mounted) return;
@@ -185,6 +197,19 @@ class _ImportPageState extends ConsumerState<ImportPage> {
       }
       if (!mounted) return;
       setState(() => _artistSelected.clear());
+
+      if (toImport.length == 1) {
+        // Buscamos el concierto recién creado — el que NO estaba antes
+        final concerts = ref.read(concertsProvider).asData?.value ?? [];
+        final created = concerts
+            .where((c) => !beforeIds.contains(c.id))
+            .firstOrNull;
+        if (created != null && mounted) {
+          context.push('/concert-detail', extra: created);
+          return;
+        }
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -240,7 +265,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
         // Si hay conciertos más antiguos que el año buscado, ya no hay más
         final hasOlder = r.concerts.any((c) => c.date.year < _festYear);
         hasMore = !hasOlder && r.page * r.itemsPerPage < r.total;
-        await Future.delayed(const Duration(milliseconds: 500));
+
         page++;
         safetyLimit--;
 

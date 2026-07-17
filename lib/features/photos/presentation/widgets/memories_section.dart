@@ -9,8 +9,6 @@ import '../../data/services/photo_api_service.dart';
 import '../pages/photo_viewer_page.dart';
 import 'network_photo.dart';
 
-/// Galería de fotos de recuerdo de un concierto: lista, añade (subiendo a
-/// Cloudinary) y borra fotos.
 class MemoriesSection extends StatefulWidget {
   final String concertId;
 
@@ -28,6 +26,8 @@ class _MemoriesSectionState extends State<MemoriesSection> {
   List<ConcertPhotoModel> _photos = [];
   bool _loading = true;
   bool _uploading = false;
+  int _uploadCurrent = 0;
+  int _uploadTotal = 0;
 
   @override
   void initState() {
@@ -38,70 +38,71 @@ class _MemoriesSectionState extends State<MemoriesSection> {
   Future<void> _load() async {
     try {
       final photos = await _photoService.getConcertPhotos(widget.concertId);
-
       if (!mounted) return;
-
       setState(() {
         _photos = photos;
         _loading = false;
       });
     } catch (_) {
       if (!mounted) return;
-
       setState(() => _loading = false);
     }
   }
 
-  Future<void> _addPhoto() async {
-    final image = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-    );
+  Future<void> _addPhotos() async {
+    // Selección múltiple
+    final images = await _picker.pickMultiImage(imageQuality: 85);
+    if (images.isEmpty || !mounted) return;
 
-    if (image == null || !mounted) return;
-
-    final caption = await _askCaption(File(image.path));
-
-    // caption == null => el usuario canceló.
-    if (caption == null || !mounted) return;
-
-    setState(() => _uploading = true);
-
-    try {
-      final imageUrl = await _uploadService.uploadImage(image.path);
-
-      final photo = await _photoService.addPhoto(
-        concertId: widget.concertId,
-        imageUrl: imageUrl,
-        caption: caption,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        _photos = [photo, ..._photos];
-        _uploading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() => _uploading = false);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('No se pudo subir la foto: $e'),
-          duration: const Duration(seconds: 8),
-        ),
-      );
+    // Si es una sola foto pedimos caption; si son varias, subimos directamente
+    String? caption;
+    if (images.length == 1) {
+      caption = await _askCaption(File(images.first.path));
+      if (caption == null || !mounted) return; // cancelado
     }
+
+    setState(() {
+      _uploading = true;
+      _uploadCurrent = 0;
+      _uploadTotal = images.length;
+    });
+
+    final newPhotos = <ConcertPhotoModel>[];
+
+    for (final image in images) {
+      if (!mounted) break;
+      setState(() => _uploadCurrent++);
+
+      try {
+        final imageUrl = await _uploadService.uploadImage(image.path);
+        final photo = await _photoService.addPhoto(
+          concertId: widget.concertId,
+          imageUrl: imageUrl,
+          caption: caption ?? '',
+        );
+        newPhotos.add(photo);
+      } catch (e) {
+        if (!mounted) break;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al subir foto: $e')));
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _photos = [...newPhotos, ..._photos];
+      _uploading = false;
+      _uploadCurrent = 0;
+      _uploadTotal = 0;
+    });
   }
 
   Future<String?> _askCaption(File image) {
     final controller = TextEditingController();
-
     return showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: const Text('Nuevo recuerdo'),
         content: SizedBox(
           width: double.maxFinite,
@@ -131,11 +132,11 @@ class _MemoriesSectionState extends State<MemoriesSection> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancelar'),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
             child: const Text('Publicar'),
           ),
         ],
@@ -148,17 +149,14 @@ class _MemoriesSectionState extends State<MemoriesSection> {
     final deleted = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => PhotoViewerPage(
-          photos: _photos, // ← lista completa
-          initialIndex: index, // ← foto seleccionada
+          photos: _photos,
+          initialIndex: index,
           onDelete: (p) => _photoService.deletePhoto(p.id),
         ),
       ),
     );
-
     if (deleted == true && mounted) {
-      setState(() {
-        _photos = _photos.where((p) => p.id != photo.id).toList();
-      });
+      setState(() => _photos = _photos.where((p) => p.id != photo.id).toList());
     }
   }
 
@@ -183,7 +181,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                 ),
                 const Spacer(),
                 TextButton.icon(
-                  onPressed: _uploading ? null : _addPhoto,
+                  onPressed: _uploading ? null : _addPhotos,
                   icon: _uploading
                       ? const SizedBox(
                           width: 16,
@@ -191,7 +189,11 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.add_a_photo_outlined, size: 20),
-                  label: Text(_uploading ? 'Subiendo...' : 'Añadir'),
+                  label: Text(
+                    _uploading
+                        ? 'Subiendo $_uploadCurrent/$_uploadTotal...'
+                        : 'Añadir',
+                  ),
                 ),
               ],
             ),
@@ -218,13 +220,12 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                 itemCount: _photos.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
-                  crossAxisSpacing: 1,
-                  mainAxisSpacing: 1,
+                  crossAxisSpacing: 2,
+                  mainAxisSpacing: 2,
                   childAspectRatio: 1,
                 ),
-                itemBuilder: (context, index) {
+                itemBuilder: (_, index) {
                   final photo = _photos[index];
-                  debugPrint(photo.imageUrl);
                   return GestureDetector(
                     onTap: () => _openPhoto(photo),
                     child: Hero(
