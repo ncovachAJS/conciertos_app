@@ -19,25 +19,38 @@ class ConcertsNotifier extends AsyncNotifier<List<Concert>> {
     return list;
   }
 
-  /// Recarga completa desde la API (p. ej. tras volver de AddConcertPage).
+  /// Recarga completa desde la API.
   Future<void> reload() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(_fetchSorted);
   }
 
-  /// Crea un concierto y recarga la lista.
-  Future<void> add(Concert concert) async {
-    await _api.addConcert(concert);
-    await reload();
+  /// Crea un concierto:
+  /// 1. Lo añade optimistamente a la lista para que aparezca de inmediato.
+  /// 2. Lanza reload en background para sincronizar con el backend.
+  /// Esto evita que el usuario vea nada y lo intente añadir de nuevo.
+  Future<Concert> add(Concert concert) async {
+    final created = await _api.addConcert(concert);
+
+    // Actualización optimista — sin esperar al reload
+    final current = state.asData?.value ?? [];
+    final alreadyExists = current.any((c) => c.id == created.id);
+    if (!alreadyExists) {
+      final updated = [created, ...current]
+        ..sort((a, b) => b.date.compareTo(a.date));
+      state = AsyncData(updated);
+    }
+
+    // Reload en background para sincronizar estado completo
+    reload().ignore();
+
+    return created;
   }
 
-  /// Actualiza un campo (favorite, liked, rating…) con optimistic update.
-  /// Si la API falla hace rollback automático y relanza la excepción para
-  /// que la página pueda mostrar un snackbar.
+  /// Actualiza un campo con optimistic update + rollback automático si falla.
   Future<void> updateOne(Concert updated) async {
     final prev = state.asData?.value ?? [];
 
-    // Optimistic: sustituimos el concierto en el estado local de inmediato.
     state = AsyncData(
       prev.map((c) => c.id == updated.id ? updated : c).toList(),
     );
@@ -45,12 +58,12 @@ class ConcertsNotifier extends AsyncNotifier<List<Concert>> {
     try {
       await _api.updateConcert(updated);
     } catch (e) {
-      state = AsyncData(prev); // rollback
+      state = AsyncData(prev);
       rethrow;
     }
   }
 
-  /// Borra un concierto con optimistic update.
+  /// Borra un concierto con optimistic update + rollback si falla.
   Future<void> delete(String id) async {
     final prev = state.asData?.value ?? [];
 
@@ -59,7 +72,7 @@ class ConcertsNotifier extends AsyncNotifier<List<Concert>> {
     try {
       await _api.deleteConcert(id);
     } catch (e) {
-      state = AsyncData(prev); // rollback
+      state = AsyncData(prev);
       rethrow;
     }
   }
@@ -74,8 +87,7 @@ final concertsProvider = AsyncNotifierProvider<ConcertsNotifier, List<Concert>>(
 );
 
 // ---------------------------------------------------------------------------
-// Providers derivados — se calculan a partir del estado del provider principal
-// sin tocar la red. Se actualizan automáticamente cuando cambia concertsProvider.
+// Providers derivados
 // ---------------------------------------------------------------------------
 
 /// Próximos conciertos ordenados de más cercano a más lejano.
@@ -112,9 +124,36 @@ final favoriteArtistsProvider = Provider<List<String>>((ref) {
     ..sort();
 });
 
+/// Artistas para recomendaciones: favoritos primero, luego liked, luego recientes.
+final recommendedArtistsProvider = Provider<List<String>>((ref) {
+  final concerts = ref.watch(concertsProvider).asData?.value ?? [];
+
+  final favArtists = concerts
+      .where((c) => c.favorite && c.artist.trim().isNotEmpty)
+      .map((c) => c.artist.trim())
+      .toSet()
+      .toList();
+
+  if (favArtists.isNotEmpty) return favArtists..sort();
+
+  final likedArtists = concerts
+      .where((c) => c.liked && c.artist.trim().isNotEmpty)
+      .map((c) => c.artist.trim())
+      .toSet()
+      .toList();
+
+  if (likedArtists.isNotEmpty) return likedArtists..sort();
+
+  return concerts
+      .map((c) => c.artist.trim())
+      .where((a) => a.isNotEmpty)
+      .toSet()
+      .take(5)
+      .toList();
+});
+
 /// Últimos 10 conciertos añadidos (más reciente primero).
 final recentConcertsProvider = Provider<List<Concert>>((ref) {
-  // La lista ya viene ordenada desc por fecha del notifier.
   return (ref.watch(concertsProvider).asData?.value ?? []).take(10).toList();
 });
 
