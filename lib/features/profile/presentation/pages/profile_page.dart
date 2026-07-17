@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import '../widgets/profile_card.dart';
 
-import '../../../concerts/data/services/concert_api_service.dart';
-import '../../../concerts/domain/entities/concert.dart';
-import '../../../concerts/data/services/upload_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../concerts/data/services/concert_api_service.dart';
+import '../../../concerts/data/services/upload_service.dart';
+import '../../../concerts/domain/entities/concert.dart';
+import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../photos/data/services/photo_api_service.dart';
 import '../../data/services/avatar_api_service.dart';
+import '../widgets/profile_card.dart';
+import 'about_page.dart';
+import 'settings_page.dart';
 
-import 'package:go_router/go_router.dart';
-
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   final ConcertApiService _api = ConcertApiService();
   final PhotoApiService _photosApi = PhotoApiService();
   final UploadService _uploadService = UploadService();
@@ -94,17 +97,9 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => _uploadingAvatar = true);
 
     try {
-      // 1. Sube la imagen a Cloudinary
       final imageUrl = await _uploadService.uploadImage(picked.path);
-
-      // 2. Guarda la URL en el backend
       await _avatarService.updateAvatar(imageUrl);
-
-      // 3. Actualiza el usuario en el AuthController
-      if (auth.user != null) {
-        auth.updateAvatarUrl(imageUrl);
-      }
-
+      if (auth.user != null) auth.updateAvatarUrl(imageUrl);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Foto de perfil actualizada ✅')),
@@ -195,6 +190,8 @@ class _ProfilePageState extends State<ProfilePage> {
               ] else ...[
                 FilledButton.icon(
                   onPressed: () async {
+                    // Limpiamos el provider antes de cerrar sesión
+                    ref.invalidate(concertsProvider);
                     await auth.logout();
                     if (!context.mounted) return;
                     context.go('/login');
@@ -216,24 +213,21 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.upload_file),
-                      title: const Text('Exportar colección'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {},
-                    ),
-                    const Divider(height: 1),
-                    ListTile(
                       leading: const Icon(Icons.settings),
                       title: const Text('Ajustes'),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () {},
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const SettingsPage()),
+                      ),
                     ),
                     const Divider(height: 1),
                     ListTile(
                       leading: const Icon(Icons.info_outline),
                       title: const Text('Acerca de'),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () {},
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const AboutPage()),
+                      ),
                     ),
                   ],
                 ),
@@ -251,7 +245,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
 
-          // Overlay mientras sube el avatar
           if (_uploadingAvatar)
             Container(
               color: Colors.black54,

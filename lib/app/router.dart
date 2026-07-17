@@ -7,7 +7,7 @@ import '../features/concerts/presentation/pages/concert_detail_page.dart';
 import '../features/concerts/presentation/pages/concerts_page.dart';
 import '../features/add_concert/presentation/pages/add_concert_page.dart';
 import '../features/favorites/presentation/pages/favorites_page.dart';
-import '../features/settings/presentation/pages/settings_page.dart';
+import '../features/profile/presentation/pages/settings_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/setlist/presentation/pages/setlist_test_page.dart';
 import '../features/import/presentation/pages/import_page.dart';
