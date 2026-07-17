@@ -1,9 +1,12 @@
 import 'package:conciertos_app/features/spotify/domain/entities/data/services/spotify_api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/widgets/app_page.dart';
+import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../photos/presentation/widgets/memories_section.dart';
 import '../../../setlist/data/services/setlist_service.dart';
 import '../../../setlist/domain/entities/setlist.dart';
@@ -11,16 +14,16 @@ import '../../../setlist/presentation/widgets/setlist_section.dart';
 import '../../../spotify/domain/entities/spotify_artist.dart';
 import '../../domain/entities/concert.dart';
 
-class ConcertDetailPage extends StatefulWidget {
+class ConcertDetailPage extends ConsumerStatefulWidget {
   final Concert concert;
 
   const ConcertDetailPage({super.key, required this.concert});
 
   @override
-  State<ConcertDetailPage> createState() => _ConcertDetailPageState();
+  ConsumerState<ConcertDetailPage> createState() => _ConcertDetailPageState();
 }
 
-class _ConcertDetailPageState extends State<ConcertDetailPage> {
+class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
   final SetlistService _setlistService = SetlistService();
   final SpotifyApiService _spotifyService = SpotifyApiService();
 
@@ -29,6 +32,7 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
 
   bool _loadingSetlist = true;
   bool _loadingSpotify = true;
+  bool _deleting = false;
 
   @override
   void initState() {
@@ -68,11 +72,84 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
     }
   }
 
+  Future<void> _edit() async {
+    final result = await context.push('/add', extra: widget.concert);
+    if (result == true && mounted) {
+      await ref.read(concertsProvider.notifier).reload();
+    }
+  }
+
+  Future<void> _delete() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar concierto'),
+        content: Text(
+          '¿Seguro que quieres eliminar "${widget.concert.name}"?\nEsta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    setState(() => _deleting = true);
+
+    try {
+      await ref.read(concertsProvider.notifier).delete(widget.concert.id);
+      if (!mounted) return;
+      context.pop();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _deleting = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('No se pudo eliminar: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_deleting) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Eliminando...'),
+            ],
+          ),
+        ),
+      );
+    }
+
     return AppPage(
       title: '🎸 ${widget.concert.artist}',
       showBackButton: true,
+      actions: [
+        IconButton(
+          tooltip: 'Editar',
+          onPressed: _edit,
+          icon: const Icon(Icons.edit_outlined),
+        ),
+        IconButton(
+          tooltip: 'Eliminar',
+          onPressed: _delete,
+          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+        ),
+      ],
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -131,7 +208,7 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
             ),
           ),
 
-          // Card de Spotify con imagen + géneros + botón
+          // Card de Spotify
           if (!_loadingSpotify && _spotifyArtist != null) ...[
             const SizedBox(height: 20),
             _SpotifyCard(artist: _spotifyArtist!),
@@ -140,8 +217,6 @@ class _ConcertDetailPageState extends State<ConcertDetailPage> {
           const SizedBox(height: 24),
 
           // Fotos / recuerdos
-          const SizedBox(height: 24),
-
           MemoriesSection(concertId: widget.concert.id),
 
           const SizedBox(height: 24),
@@ -189,7 +264,6 @@ class _SpotifyCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Imagen del artista
             if (artist.image != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
@@ -206,7 +280,6 @@ class _SpotifyCard extends StatelessWidget {
 
             const SizedBox(width: 16),
 
-            // Nombre + géneros
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,7 +315,6 @@ class _SpotifyCard extends StatelessWidget {
               ),
             ),
 
-            // Botón Spotify
             IconButton(
               onPressed: () async {
                 await launchUrl(

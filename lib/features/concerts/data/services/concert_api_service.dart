@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 
+import '../../../../config/api_config.dart';
 import '../../domain/entities/concert.dart';
 import '../models/concert_model.dart';
-import '../../../../config/api_config.dart';
 
 class ConcertApiService {
   final _storage = const FlutterSecureStorage();
@@ -26,14 +26,18 @@ class ConcertApiService {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
 
-    // El back ahora devuelve { data: [...], meta: {...} }
-    final Map<String, dynamic> body = jsonDecode(response.body);
-    final List<dynamic> items = body['data'];
+    final body = jsonDecode(response.body);
+
+    // Soporta respuesta paginada { data: [...] } y array plano
+    final List<dynamic> items = body is Map
+        ? (body['data'] ?? body['concerts'] ?? [])
+        : body;
 
     return items.map((item) => ConcertModel.fromJson(item)).toList();
   }
 
-  Future<void> addConcert(Concert concert) async {
+  /// Crea un concierto y devuelve el objeto creado por el backend (con el id).
+  Future<ConcertModel> addConcert(Concert concert) async {
     final model = ConcertModel.fromEntity(concert);
     final token = await _storage.read(key: 'token');
 
@@ -49,6 +53,8 @@ class ConcertApiService {
     if (response.statusCode != 201) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
+
+    return ConcertModel.fromJson(jsonDecode(response.body));
   }
 
   Future<void> updateConcert(Concert concert) async {
