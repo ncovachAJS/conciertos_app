@@ -4,7 +4,6 @@ import '../../features/concerts/domain/entities/concert.dart';
 
 class ConcertCard extends StatelessWidget {
   final Concert concert;
-
   final VoidCallback? onImageTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
@@ -23,22 +22,24 @@ class ConcertCard extends StatelessWidget {
     this.onRatingChanged,
   });
 
-  Widget _chip(IconData icon, String text) {
+  Widget _chip(BuildContext context, IconData icon, String text) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF262A33),
+        // ✅ Color adaptado al tema
+        color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white70, size: 16),
+          Icon(icon, color: cs.onSurface.withOpacity(0.7), size: 16),
           const SizedBox(width: 6),
           Text(
             text,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: cs.onSurface,
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
@@ -79,7 +80,6 @@ class ConcertCard extends StatelessWidget {
       'NOV',
       'DIC',
     ];
-
     return Container(
       width: 76,
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -119,11 +119,15 @@ class ConcertCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Material(
-        color: const Color(0xff181A20),
-        elevation: 10,
+        // ✅ Color de tarjeta adaptado al tema
+        color: cs.surface,
+        elevation: 4,
+        shadowColor: cs.shadow.withOpacity(0.15),
         borderRadius: BorderRadius.circular(28),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -140,7 +144,6 @@ class ConcertCard extends StatelessWidget {
                     concert.imageUrl.isNotEmpty
                         ? Image.network(concert.imageUrl, fit: BoxFit.cover)
                         : _placeholder(),
-
                     Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
@@ -154,9 +157,7 @@ class ConcertCard extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     Positioned(top: 18, left: 18, child: _buildDateBadge()),
-
                     Positioned(
                       left: 22,
                       right: 22,
@@ -201,16 +202,16 @@ class ConcertCard extends StatelessWidget {
                     runSpacing: 10,
                     children: [
                       if (concert.venue.isNotEmpty)
-                        _chip(Icons.stadium_rounded, concert.venue),
-
+                        _chip(context, Icons.stadium_rounded, concert.venue),
                       if (concert.city.isNotEmpty)
-                        _chip(Icons.location_on_rounded, concert.city),
+                        _chip(context, Icons.location_on_rounded, concert.city),
                     ],
                   ),
 
                   const SizedBox(height: 22),
 
-                  const Divider(color: Colors.white12, height: 1),
+                  // ✅ Divider adaptado al tema
+                  Divider(color: cs.onSurface.withOpacity(0.12), height: 1),
 
                   const SizedBox(height: 18),
 
@@ -235,26 +236,26 @@ class ConcertCard extends StatelessWidget {
                           );
                         }),
                       ),
-
                       const Spacer(),
-
                       IconButton(
                         onPressed: onLike,
                         icon: Icon(
                           concert.liked
                               ? Icons.favorite
                               : Icons.favorite_border,
-                          color: concert.liked ? Colors.red : Colors.white70,
+                          // ✅ Color adaptado
+                          color: concert.liked
+                              ? Colors.red
+                              : cs.onSurface.withOpacity(0.5),
                         ),
                       ),
-
                       IconButton(
                         onPressed: onFavorite,
                         icon: Icon(
                           concert.favorite ? Icons.star : Icons.star_border,
                           color: concert.favorite
                               ? Colors.amber
-                              : Colors.white70,
+                              : cs.onSurface.withOpacity(0.5),
                         ),
                       ),
                     ],
@@ -262,9 +263,10 @@ class ConcertCard extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  const Divider(color: Colors.white12),
+                  Divider(color: cs.onSurface.withOpacity(0.12)),
 
                   const SizedBox(height: 20),
+
                   Row(
                     children: [
                       Expanded(
@@ -281,9 +283,7 @@ class ConcertCard extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(width: 14),
-
                       Expanded(
                         child: FilledButton.icon(
                           onPressed: onDelete,

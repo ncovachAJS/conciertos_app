@@ -165,11 +165,21 @@ class StatisticsPage extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.wifi_off, size: 48, color: Colors.white38),
+              Icon(
+                Icons.wifi_off,
+                size: 48,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withOpacity(0.38),
+              ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Error al cargar',
-                style: TextStyle(color: Colors.white54),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.54),
+                ),
               ),
               const SizedBox(height: 16),
               FilledButton(
@@ -181,17 +191,28 @@ class StatisticsPage extends ConsumerWidget {
         ),
         data: (concerts) {
           if (concerts.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
                 padding: EdgeInsets.all(32),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.bar_chart, size: 64, color: Colors.white24),
+                    Icon(
+                      Icons.bar_chart,
+                      size: 64,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.24),
+                    ),
                     SizedBox(height: 16),
                     Text(
                       'Añade conciertos para ver tus estadísticas.',
-                      style: TextStyle(color: Colors.white54, fontSize: 16),
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.54),
+                        fontSize: 16,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -359,7 +380,7 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1F26),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -384,7 +405,10 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             data.label,
-            style: const TextStyle(color: Colors.white60, fontSize: 12),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -406,14 +430,18 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: Colors.white54, size: 18),
+        Icon(
+          icon,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+          size: 18,
+        ),
         const SizedBox(width: 8),
         Text(
           title.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: Colors.white54,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
             letterSpacing: 1.1,
           ),
         ),
@@ -439,7 +467,7 @@ class _YearBarChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1F26),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -492,7 +520,12 @@ class _YearBarChart extends StatelessWidget {
                     overflow: TextOverflow.visible,
                     softWrap: false,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white54, fontSize: 10),
+                    style: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.54),
+                      fontSize: 10,
+                    ),
                   ),
                 ),
               ],
@@ -522,7 +555,7 @@ class _HorizontalBars extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1F26),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -537,7 +570,10 @@ class _HorizontalBars extends StatelessWidget {
                     entries[i].key,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -552,7 +588,9 @@ class _HorizontalBars extends StatelessWidget {
                           Container(
                             height: 8,
                             decoration: BoxDecoration(
-                              color: Colors.white10,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -610,7 +648,7 @@ class _RatingBars extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1F26),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -628,7 +666,9 @@ class _RatingBars extends StatelessWidget {
                           : Icons.star_outline_rounded,
                       color: i < star
                           ? const Color(0xFFFFC107)
-                          : Colors.white24,
+                          : Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.24),
                       size: 14,
                     ),
                   ),
@@ -645,7 +685,9 @@ class _RatingBars extends StatelessWidget {
                           Container(
                             height: 8,
                             decoration: BoxDecoration(
-                              color: Colors.white10,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -668,7 +710,12 @@ class _RatingBars extends StatelessWidget {
                   child: Text(
                     '${byRating[star] ?? 0}',
                     textAlign: TextAlign.right,
-                    style: const TextStyle(color: Colors.white60, fontSize: 13),
+                    style: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.6),
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               ],

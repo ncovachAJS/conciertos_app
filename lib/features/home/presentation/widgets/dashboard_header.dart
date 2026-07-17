@@ -19,12 +19,10 @@ class DashboardHeader extends ConsumerWidget {
 
   int _badgeCount(List concerts) {
     final now = DateTime.now();
-    // Conciertos en los próximos 7 días
     final upcoming = concerts.where((c) {
       final days = c.date.difference(now).inDays;
       return days >= 0 && days <= 7;
     }).length;
-    // Recuerdos de hoy
     final memories = concerts
         .where(
           (c) =>
@@ -38,6 +36,8 @@ class DashboardHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+
     return ListenableBuilder(
       listenable: AuthController.instance,
       builder: (context, _) {
@@ -65,7 +65,7 @@ class DashboardHeader extends ConsumerWidget {
                               style: GoogleFonts.teko(
                                 fontSize: 33,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                                color: cs.onSurface,
                                 letterSpacing: 1.2,
                               ),
                             ),
@@ -82,9 +82,13 @@ class DashboardHeader extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      const Text(
+                      Text(
                         'Cada concierto cuenta una historia.',
-                        style: TextStyle(color: Colors.white54, fontSize: 14),
+                        // ✅ Adaptado al tema
+                        style: TextStyle(
+                          color: cs.onSurface.withOpacity(0.54),
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
@@ -103,15 +107,15 @@ class DashboardHeader extends ConsumerWidget {
                     clipBehavior: Clip.none,
                     children: [
                       Container(
-                        width: 46,
-                        height: 46,
+                        width: 43,
+                        height: 43,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.08),
+                          color: cs.onSurface.withOpacity(0.08),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.notifications_outlined,
-                          color: Colors.white70,
+                          color: cs.onSurface.withOpacity(0.7),
                           size: 24,
                         ),
                       ),
@@ -150,8 +154,8 @@ class DashboardHeader extends ConsumerWidget {
                 GestureDetector(
                   onTap: () => context.push('/profile'),
                   child: Container(
-                    width: 46,
-                    height: 46,
+                    width: 43,
+                    height: 43,
                     decoration: BoxDecoration(
                       color: const Color(0xFFE53935),
                       shape: BoxShape.circle,
@@ -188,14 +192,21 @@ class DashboardHeader extends ConsumerWidget {
 
             Text(
               '${_greeting()}, ${user?.name ?? "Rockero"} 🤘',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: cs.onSurface,
+              ),
             ),
 
             const SizedBox(height: 6),
 
-            const Text(
+            Text(
               'Todo listo para volver al directo.',
-              style: TextStyle(color: Colors.white60, fontSize: 15),
+              style: TextStyle(
+                color: cs.onSurface.withOpacity(0.6),
+                fontSize: 15,
+              ),
             ),
           ],
         );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../controllers/auth_controller.dart';
+import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -50,10 +51,14 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _forgotPassword() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ForgotPasswordPage()));
+  }
+
   @override
   Widget build(BuildContext context) {
-    // ListenableBuilder reconstruye solo este subtree cuando AuthController
-    // llama a notifyListeners(), sin necesidad de addListener manual.
     return ListenableBuilder(
       listenable: _auth,
       builder: (context, _) {
@@ -91,12 +96,20 @@ class _LoginPageState extends State<LoginPage> {
                         : null,
                   ),
 
-                  const SizedBox(height: 30),
+                  // ── ¿Olvidaste tu contraseña? ──────────────────────────
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _auth.loading ? null : _forgotPassword,
+                      child: const Text('¿Olvidaste tu contraseña?'),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
 
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
-                      // Deshabilitamos el botón mientras carga
                       onPressed: _auth.loading ? null : _login,
                       child: _auth.loading
                           ? const SizedBox(
