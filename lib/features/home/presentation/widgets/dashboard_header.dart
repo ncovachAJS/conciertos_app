@@ -63,7 +63,7 @@ class DashboardHeader extends ConsumerWidget {
                             TextSpan(
                               text: 'LA VIDA ',
                               style: GoogleFonts.teko(
-                                fontSize: 35,
+                                fontSize: 33,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
                                 letterSpacing: 1.2,
@@ -72,7 +72,7 @@ class DashboardHeader extends ConsumerWidget {
                             TextSpan(
                               text: 'EN DIRECTO',
                               style: GoogleFonts.teko(
-                                fontSize: 35,
+                                fontSize: 33,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFFFFC107),
                                 letterSpacing: 1.2,
@@ -103,8 +103,8 @@ class DashboardHeader extends ConsumerWidget {
                     clipBehavior: Clip.none,
                     children: [
                       Container(
-                        width: 54,
-                        height: 54,
+                        width: 46,
+                        height: 46,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.08),
                           shape: BoxShape.circle,
@@ -150,8 +150,8 @@ class DashboardHeader extends ConsumerWidget {
                 GestureDetector(
                   onTap: () => context.push('/profile'),
                   child: Container(
-                    width: 54,
-                    height: 54,
+                    width: 46,
+                    height: 46,
                     decoration: BoxDecoration(
                       color: const Color(0xFFE53935),
                       shape: BoxShape.circle,
