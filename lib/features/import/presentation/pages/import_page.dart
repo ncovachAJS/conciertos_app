@@ -412,10 +412,28 @@ class _ImportPageState extends ConsumerState<ImportPage> {
           _jsonCurrentArtist = c.artist;
           _jsonImported++;
         });
+        // ✅ Guardamos cada concierto en el backend
+        await ref
+            .read(concertsProvider.notifier)
+            .add(
+              ConcertModel(
+                id: '',
+                name: c.name.isNotEmpty ? c.name : c.artist,
+                artist: c.artist,
+                festival: c.festival,
+                date: c.date,
+                venue: c.venue,
+                city: c.city ?? '',
+                imageUrl: c.imageUrl,
+                rating: c.rating,
+                liked: c.liked,
+                favorite: false,
+              ),
+            );
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${concerts.length} conciertos importados')),
+        SnackBar(content: Text('${concerts.length} conciertos importados 🎸')),
       );
     } catch (e) {
       if (!mounted) return;

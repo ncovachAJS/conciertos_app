@@ -10,7 +10,10 @@ import '../models/concert_model.dart';
 class ConcertApiService {
   final _storage = const FlutterSecureStorage();
 
-  Future<List<ConcertModel>> getConcerts({int page = 1, int limit = 50}) async {
+  Future<List<ConcertModel>> getConcerts({
+    int page = 1,
+    int limit = 1000,
+  }) async {
     final token = await _storage.read(key: 'token');
 
     final uri = Uri.parse(
