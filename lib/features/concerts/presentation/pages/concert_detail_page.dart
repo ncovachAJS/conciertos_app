@@ -1,5 +1,8 @@
 import 'package:conciertos_app/features/spotify/domain/entities/data/services/spotify_api_service.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_content.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,6 +16,7 @@ import '../../../setlist/domain/entities/setlist.dart';
 import '../../../setlist/presentation/widgets/setlist_section.dart';
 import '../../../spotify/domain/entities/spotify_artist.dart';
 import '../../domain/entities/concert.dart';
+import '../../../concerts/data/models/concert_model.dart';
 
 class ConcertDetailPage extends ConsumerStatefulWidget {
   final Concert concert;
@@ -39,6 +43,18 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     super.initState();
     _loadSetlist();
     _loadSpotify();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (mounted) _showTutorialIfNeeded();
+    });
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.detail);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.detail);
+    if (!mounted) return;
+    await TutorialOverlay.show(context, steps: TutorialContent.concertDetail);
   }
 
   Future<void> _loadSetlist() async {
@@ -119,20 +135,20 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     if (query != null && mounted) await _searchSpotify(query);
   }
 
-  Future<void> _edit() async {
-    final result = await context.push('/add', extra: widget.concert);
+  Future<void> _edit(Concert concert) async {
+    final result = await context.push('/add', extra: concert);
     if (result == true && mounted) {
       await ref.read(concertsProvider.notifier).reload();
     }
   }
 
-  Future<void> _delete() async {
+  Future<void> _delete(Concert concert) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Eliminar concierto'),
         content: Text(
-          '¿Seguro que quieres eliminar "${widget.concert.name}"?\nEsta acción no se puede deshacer.',
+          '¿Seguro que quieres eliminar "${concert.name}"?\nEsta acción no se puede deshacer.',
         ),
         actions: [
           TextButton(
@@ -167,6 +183,13 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Obtenemos el concert desde el provider para que se actualice automáticamente
+    final concerts = ref.watch(concertsProvider).asData?.value ?? [];
+    final concert = concerts.firstWhere(
+      (c) => c.id == widget.concert.id,
+      orElse: () => widget.concert as ConcertModel,
+    );
+
     if (_deleting) {
       return const Scaffold(
         body: Center(
@@ -183,17 +206,17 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     }
 
     return AppPage(
-      title: '🎸 ${widget.concert.artist}',
+      title: '🎸 ${concert.artist}',
       showBackButton: true,
       actions: [
         IconButton(
           tooltip: 'Editar',
-          onPressed: _edit,
+          onPressed: () => _edit(concert),
           icon: const Icon(Icons.edit_outlined),
         ),
         IconButton(
           tooltip: 'Eliminar',
-          onPressed: _delete,
+          onPressed: () => _delete(concert),
           icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
         ),
       ],
@@ -206,7 +229,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
             child: AspectRatio(
               aspectRatio: 16 / 9,
               child: Image.network(
-                widget.concert.imageUrl,
+                concert.imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
                   color: const Color(0xFF2B2B2B),
@@ -229,48 +252,36 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
                   title: const Text('Fecha'),
-                  subtitle: Text(DateFormatter.short(widget.concert.date)),
+                  subtitle: Text(DateFormatter.short(concert.date)),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.stadium),
                   title: const Text('Recinto'),
-                  subtitle: Text(widget.concert.venue),
+                  subtitle: Text(concert.venue),
                 ),
-                if (widget.concert.city.isNotEmpty) ...[
+                if (concert.city.isNotEmpty) ...[
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.location_city),
                     title: const Text('Ciudad'),
-                    subtitle: Text(widget.concert.city),
+                    subtitle: Text(concert.city),
                   ),
                 ],
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.music_note),
                   title: const Text('Concierto'),
-                  subtitle: Text(widget.concert.name),
+                  subtitle: Text(concert.name),
                 ),
               ],
             ),
           ),
 
           // Card de Spotify
-          if (_loadingSpotify)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (_spotifyArtist != null) ...[
+          if (!_loadingSpotify && _spotifyArtist != null) ...[
             const SizedBox(height: 20),
-            _SpotifyCard(artist: _spotifyArtist!, onEdit: _showSpotifySearch),
-          ] else ...[
-            const SizedBox(height: 12),
-            TextButton.icon(
-              onPressed: _showSpotifySearch,
-              icon: const Icon(Icons.search),
-              label: const Text('Buscar artista en Spotify'),
-            ),
+            _SpotifyCard(artist: _spotifyArtist!),
           ],
 
           const SizedBox(height: 24),
@@ -281,7 +292,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
           const SizedBox(height: 24),
 
           // Setlist
-          if (widget.concert.isPastConcert)
+          if (concert.isPastConcert)
             SetlistSection(loading: _loadingSetlist, setlist: _setlist)
           else
             Card(
@@ -313,9 +324,8 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
 
 class _SpotifyCard extends StatelessWidget {
   final SpotifyArtist artist;
-  final VoidCallback? onEdit;
 
-  const _SpotifyCard({required this.artist, this.onEdit});
+  const _SpotifyCard({required this.artist});
 
   @override
   Widget build(BuildContext context) {
@@ -375,12 +385,6 @@ class _SpotifyCard extends StatelessWidget {
               ),
             ),
 
-            if (onEdit != null)
-              IconButton(
-                onPressed: onEdit,
-                icon: const Icon(Icons.edit_outlined, size: 20),
-                tooltip: 'Buscar otro artista',
-              ),
             IconButton(
               onPressed: () async {
                 await launchUrl(
