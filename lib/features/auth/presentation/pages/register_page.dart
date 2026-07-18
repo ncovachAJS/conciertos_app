@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/theme_picker_page.dart';
+
 import '../controllers/auth_controller.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -36,7 +38,10 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (!mounted) return;
-      context.go('/splash');
+      // Tras registrarse, elegir tema antes de entrar a la app
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const ThemePickerPage()),
+      );
     } catch (e) {
       if (!mounted) return;
 

@@ -72,6 +72,53 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     }
   }
 
+  Future<void> _searchSpotify(String query) async {
+    if (query.trim().isEmpty) return;
+    setState(() => _loadingSpotify = true);
+    try {
+      final artist = await _spotifyService.searchArtist(query.trim());
+      if (mounted) setState(() => _spotifyArtist = artist);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se encontró el artista: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loadingSpotify = false);
+    }
+  }
+
+  Future<void> _showSpotifySearch() async {
+    final controller = TextEditingController(text: widget.concert.artist);
+    final query = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Buscar artista en Spotify'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Nombre del artista...',
+            prefixIcon: Icon(Icons.search),
+          ),
+          onSubmitted: (v) => Navigator.pop(ctx, v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            child: const Text('Buscar'),
+          ),
+        ],
+      ),
+    );
+    if (query != null && mounted) await _searchSpotify(query);
+  }
+
   Future<void> _edit() async {
     final result = await context.push('/add', extra: widget.concert);
     if (result == true && mounted) {
@@ -209,9 +256,21 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
           ),
 
           // Card de Spotify
-          if (!_loadingSpotify && _spotifyArtist != null) ...[
+          if (_loadingSpotify)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_spotifyArtist != null) ...[
             const SizedBox(height: 20),
-            _SpotifyCard(artist: _spotifyArtist!),
+            _SpotifyCard(artist: _spotifyArtist!, onEdit: _showSpotifySearch),
+          ] else ...[
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: _showSpotifySearch,
+              icon: const Icon(Icons.search),
+              label: const Text('Buscar artista en Spotify'),
+            ),
           ],
 
           const SizedBox(height: 24),
@@ -254,8 +313,9 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
 
 class _SpotifyCard extends StatelessWidget {
   final SpotifyArtist artist;
+  final VoidCallback? onEdit;
 
-  const _SpotifyCard({required this.artist});
+  const _SpotifyCard({required this.artist, this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -315,6 +375,12 @@ class _SpotifyCard extends StatelessWidget {
               ),
             ),
 
+            if (onEdit != null)
+              IconButton(
+                onPressed: onEdit,
+                icon: const Icon(Icons.edit_outlined, size: 20),
+                tooltip: 'Buscar otro artista',
+              ),
             IconButton(
               onPressed: () async {
                 await launchUrl(
