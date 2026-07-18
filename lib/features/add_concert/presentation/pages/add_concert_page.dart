@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_content.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -58,6 +61,12 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.concert == null) {
+      // Solo en modo crear, no al editar
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _showTutorialIfNeeded(),
+      );
+    }
     if (widget.concert != null) {
       _rating = widget.concert!.rating;
       _liked = widget.concert!.liked;
@@ -74,6 +83,14 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         _imageUrl = widget.concert!.imageUrl;
       }
     }
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.addConcert);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.addConcert);
+    if (!mounted) return;
+    await TutorialOverlay.show(context, steps: TutorialContent.addConcert);
   }
 
   Future<void> _selectDate() async {

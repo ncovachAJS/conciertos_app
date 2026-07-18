@@ -63,7 +63,7 @@ class DashboardHeader extends ConsumerWidget {
                             TextSpan(
                               text: 'LA VIDA ',
                               style: GoogleFonts.teko(
-                                fontSize: 33,
+                                fontSize: 30,
                                 fontWeight: FontWeight.w700,
                                 color: cs.onSurface,
                                 letterSpacing: 1.2,
@@ -72,7 +72,7 @@ class DashboardHeader extends ConsumerWidget {
                             TextSpan(
                               text: 'EN DIRECTO',
                               style: GoogleFonts.teko(
-                                fontSize: 33,
+                                fontSize: 30,
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFFFFC107),
                                 letterSpacing: 1.2,

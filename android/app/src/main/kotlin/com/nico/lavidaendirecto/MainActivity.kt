@@ -1,4 +1,4 @@
-package com.example.conciertos_app
+package com.nico.lavidaendirecto
 
 import io.flutter.embedding.android.FlutterActivity
 
