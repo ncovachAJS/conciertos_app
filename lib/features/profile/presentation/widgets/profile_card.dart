@@ -170,27 +170,6 @@ class ProfileCard extends StatelessWidget {
               ),
             ],
           ),
-
-          const SizedBox(height: 28),
-
-          Container(
-            height: 52,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(.10),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Center(
-              child: Text(
-                "▌▌▌▌ ▌▌ ▌▌▌▌▌▌ ▌▌ ▌▌▌▌",
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  color: Colors.white70,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
