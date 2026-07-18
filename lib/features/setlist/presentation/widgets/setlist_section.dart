@@ -42,7 +42,12 @@ class _SetlistSectionState extends State<SetlistSection> {
                   const Spacer(),
                   Text(
                     '${widget.setlist!.totalSongs} canciones',
-                    style: const TextStyle(color: Colors.white54, fontSize: 13),
+                    style: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.54),
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ],
@@ -58,11 +63,16 @@ class _SetlistSectionState extends State<SetlistSection> {
                 ),
               )
             else if (widget.setlist == null || widget.setlist!.sets.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Text(
                   'No se encontró ningún setlist para este concierto.',
-                  style: TextStyle(color: Colors.white70, fontSize: 15),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.7),
+                    fontSize: 15,
+                  ),
                 ),
               )
             else
@@ -116,7 +126,10 @@ class _SetlistContent extends StatelessWidget {
     final widgets = <Widget>[
       Text(
         '${setlist.venue} · ${setlist.city}',
-        style: const TextStyle(color: Colors.white60, fontSize: 14),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          fontSize: 14,
+        ),
       ),
       const SizedBox(height: 18),
     ];
@@ -211,10 +224,12 @@ class _SongTile extends StatelessWidget {
           SizedBox(
             width: 32,
             child: song.isTape
-                ? const Icon(
+                ? Icon(
                     Icons.album_outlined,
                     size: 20,
-                    color: Colors.white38,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.38),
                   )
                 : Text(
                     '$number',
@@ -234,7 +249,11 @@ class _SongTile extends StatelessWidget {
                   song.name,
                   style: TextStyle(
                     fontSize: 15,
-                    color: song.isTape ? Colors.white54 : Colors.white,
+                    color: song.isTape
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.54)
+                        : Theme.of(context).colorScheme.onSurface,
                     fontStyle: song.isTape
                         ? FontStyle.italic
                         : FontStyle.normal,
@@ -245,8 +264,10 @@ class _SongTile extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 3),
                     child: Text(
                       'Versión de ${song.coverOf}',
-                      style: const TextStyle(
-                        color: Colors.white38,
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.38),
                         fontSize: 12,
                       ),
                     ),
@@ -277,8 +298,10 @@ class _SongTile extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 3),
                     child: Text(
                       song.info!,
-                      style: const TextStyle(
-                        color: Colors.white38,
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.38),
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
                       ),
