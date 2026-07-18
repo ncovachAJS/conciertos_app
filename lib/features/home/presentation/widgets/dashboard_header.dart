@@ -159,13 +159,10 @@ class DashboardHeader extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: const Color(0xFFE53935),
                       shape: BoxShape.circle,
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x55E53935),
-                          blurRadius: 18,
-                          offset: Offset(0, 8),
-                        ),
-                      ],
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.4),
+                        width: 2,
+                      ),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: avatarUrl != null && avatarUrl.isNotEmpty
