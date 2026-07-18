@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/concerts/domain/entities/concert.dart';
@@ -39,7 +40,9 @@ class ConcertGridCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) {
                       return Container(
-                        color: const Color(0xFF2B2B2B),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         child: const Icon(
                           Icons.music_note,
                           size: 60,
@@ -53,7 +56,7 @@ class ConcertGridCard extends StatelessWidget {
                     top: 10,
                     right: 10,
                     child: PopupMenuButton<String>(
-                      color: const Color(0xFF252932),
+                      color: Theme.of(context).colorScheme.surface,
                       onSelected: (value) {
                         if (value == 'edit') {
                           onEdit();
@@ -132,7 +135,11 @@ class ConcertGridCard extends StatelessWidget {
                         child: Text(
                           concert.city,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white70),
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.6),
+                          ),
                         ),
                       ),
                     ],
@@ -150,7 +157,11 @@ class ConcertGridCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         '${concert.date.day}/${concert.date.month}/${concert.date.year}',
-                        style: const TextStyle(color: Colors.white70),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.6),
+                        ),
                       ),
                     ],
                   ),

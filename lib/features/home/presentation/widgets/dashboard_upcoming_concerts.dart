@@ -39,13 +39,11 @@ class _DashboardUpcomingConcertsState extends State<DashboardUpcomingConcerts> {
           onHorizontalDragEnd: (details) {
             setState(() {
               if (details.primaryVelocity == null) return;
-
               if (details.primaryVelocity! < -150 &&
                   _currentIndex < concerts.length - 1) {
                 _currentIndex++;
                 widget.onConcertChanged?.call(_currentIndex);
               }
-
               if (details.primaryVelocity! > 150 && _currentIndex > 0) {
                 _currentIndex--;
                 widget.onConcertChanged?.call(_currentIndex);
@@ -62,23 +60,54 @@ class _DashboardUpcomingConcertsState extends State<DashboardUpcomingConcerts> {
             ),
           ),
         ),
+
+        // ✅ Contador en vez de puntos — más limpio con muchos conciertos
         if (concerts.length > 1) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(concerts.length, (index) {
-              final active = index == _currentIndex;
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                margin: const EdgeInsets.symmetric(horizontal: 5),
-                width: active ? 10 : 8,
-                height: active ? 10 : 8,
-                decoration: BoxDecoration(
-                  color: active ? const Color(0xFFE53935) : Colors.white24,
-                  shape: BoxShape.circle,
+            children: [
+              GestureDetector(
+                onTap: _currentIndex > 0
+                    ? () => setState(() {
+                        _currentIndex--;
+                        widget.onConcertChanged?.call(_currentIndex);
+                      })
+                    : null,
+                child: Icon(
+                  Icons.chevron_left_rounded,
+                  color: _currentIndex > 0
+                      ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                      : Colors.transparent,
                 ),
-              );
-            }),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${_currentIndex + 1} / ${concerts.length}',
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.5),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: _currentIndex < concerts.length - 1
+                    ? () => setState(() {
+                        _currentIndex++;
+                        widget.onConcertChanged?.call(_currentIndex);
+                      })
+                    : null,
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  color: _currentIndex < concerts.length - 1
+                      ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                      : Colors.transparent,
+                ),
+              ),
+            ],
           ),
         ],
       ],
