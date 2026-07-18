@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../concerts/domain/entities/concert.dart';
@@ -10,91 +11,97 @@ class DashboardRecentConcerts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (concerts.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 200,
         child: Center(
           child: Text(
             'Todavía no hay conciertos.',
-            style: TextStyle(color: Colors.white54, fontSize: 16),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+              fontSize: 16,
+            ),
           ),
         ),
       );
     }
 
     return SizedBox(
-      height: 215,
+      height: 240,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: concerts.length,
         separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (_, index) => _RecentConcertCard(concert: concerts[index]),
+        itemBuilder: (_, index) => _RecentCard(concert: concerts[index]),
       ),
     );
   }
 }
 
-class _RecentConcertCard extends StatelessWidget {
+class _RecentCard extends StatelessWidget {
   final Concert concert;
 
-  const _RecentConcertCard({required this.concert});
+  const _RecentCard({required this.concert});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       width: 165,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1F26),
-        borderRadius: BorderRadius.circular(24),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: cs.shadow.withOpacity(0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.network(
-                  concert.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: const Color(0xFF303542),
-                    child: const Icon(
-                      Icons.music_note,
-                      size: 60,
-                      color: Colors.white24,
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(.85),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                if (concert.liked)
-                  const Positioned(
-                    top: 10,
-                    right: 10,
-                    child: CircleAvatar(
-                      radius: 17,
-                      backgroundColor: Color(0xFFE53935),
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: concert.imageUrl,
+                    fit: BoxFit.cover,
+                    fadeInDuration: Duration.zero,
+                    errorWidget: (_, __, ___) => Container(
+                      color: cs.surfaceContainerHighest,
                       child: Icon(
-                        Icons.thumb_up,
-                        color: Colors.white,
-                        size: 18,
+                        Icons.music_note,
+                        size: 48,
+                        color: cs.onSurface.withOpacity(0.2),
                       ),
                     ),
                   ),
-              ],
+                  if (concert.liked)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.85),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.favorite,
+                          color: Color(0xFFE53935),
+                          size: 13,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
           Padding(
@@ -113,10 +120,15 @@ class _RecentConcertCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  concert.festival,
+                  concert.festival.isNotEmpty
+                      ? concert.festival
+                      : concert.venue,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                  style: TextStyle(
+                    color: cs.onSurface.withOpacity(0.5),
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),

@@ -26,6 +26,8 @@ class NetworkPhoto extends StatelessWidget {
       fit: fit,
       width: double.infinity,
       height: double.infinity,
+      // Solo ancho — mantiene proporción sin distorsionar
+      memCacheWidth: 600,
       // Muestra placeholder mientras carga
       placeholder: (context, url) => Container(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,

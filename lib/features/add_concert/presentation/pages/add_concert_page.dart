@@ -332,7 +332,11 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                         children: List.generate(5, (index) {
                           final active = index < _rating;
                           return GestureDetector(
-                            onTap: () => setState(() => _rating = index + 1),
+                            onTap: () => setState(
+                              () => _rating = (_rating == index + 1)
+                                  ? 0
+                                  : index + 1,
+                            ),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               margin: const EdgeInsets.symmetric(horizontal: 2),

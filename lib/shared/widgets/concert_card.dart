@@ -208,58 +208,55 @@ class ConcertCard extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 22),
-
-                  // ✅ Divider adaptado al tema
-                  Divider(color: cs.onSurface.withOpacity(0.12), height: 1),
-
-                  const SizedBox(height: 18),
-
-                  Row(
-                    children: [
-                      Row(
-                        children: List.generate(5, (index) {
-                          return GestureDetector(
-                            onTap: () => onRatingChanged?.call(index + 1),
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 4),
-                              child: Icon(
-                                index < concert.rating
-                                    ? Icons.star_rounded
-                                    : Icons.star_outline_rounded,
-                                color: concert.isPastConcert
-                                    ? Colors.amber
-                                    : Colors.grey,
-                                size: 24,
+                  if (concert.isPastConcert) ...[
+                    const SizedBox(height: 22),
+                    Divider(color: cs.onSurface.withOpacity(0.12), height: 1),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        Row(
+                          children: List.generate(5, (index) {
+                            return GestureDetector(
+                              onTap: () => onRatingChanged?.call(
+                                concert.rating == index + 1 ? 0 : index + 1,
                               ),
-                            ),
-                          );
-                        }),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: onLike,
-                        icon: Icon(
-                          concert.liked
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          // ✅ Color adaptado
-                          color: concert.liked
-                              ? Colors.red
-                              : cs.onSurface.withOpacity(0.5),
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 4),
+                                child: Icon(
+                                  index < concert.rating
+                                      ? Icons.star_rounded
+                                      : Icons.star_outline_rounded,
+                                  color: Colors.amber,
+                                  size: 24,
+                                ),
+                              ),
+                            );
+                          }),
                         ),
-                      ),
-                      IconButton(
-                        onPressed: onFavorite,
-                        icon: Icon(
-                          concert.favorite ? Icons.star : Icons.star_border,
-                          color: concert.favorite
-                              ? Colors.amber
-                              : cs.onSurface.withOpacity(0.5),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: onLike,
+                          icon: Icon(
+                            concert.liked
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: concert.liked
+                                ? Colors.red
+                                : cs.onSurface.withOpacity(0.5),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                        IconButton(
+                          onPressed: onFavorite,
+                          icon: Icon(
+                            concert.favorite ? Icons.star : Icons.star_border,
+                            color: concert.favorite
+                                ? Colors.amber
+                                : cs.onSurface.withOpacity(0.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ], // isPastConcert
 
                   const SizedBox(height: 20),
 

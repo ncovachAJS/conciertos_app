@@ -21,31 +21,35 @@ class AppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final showAppBar = title != null;
 
-    return Scaffold(
-      appBar: showAppBar
-          ? AppBar(
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              leading: showBackButton
-                  ? IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new),
-                      onPressed: () => context.pop(),
-                    )
-                  : null,
-              title: Text(title!),
-              actions: actions,
-            )
-          : null,
+    return GestureDetector(
+      // Oculta el teclado al tocar fuera de un input
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: showAppBar
+            ? AppBar(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                leading: showBackButton
+                    ? IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new),
+                        onPressed: () => context.pop(),
+                      )
+                    : null,
+                title: Text(title!),
+                actions: actions,
+              )
+            : null,
 
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: child,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: child,
+          ),
         ),
-      ),
 
-      floatingActionButton: floatingActionButton,
+        floatingActionButton: floatingActionButton,
+      ),
     );
   }
 }
