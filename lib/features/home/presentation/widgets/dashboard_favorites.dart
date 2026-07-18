@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../concerts/domain/entities/concert.dart';
 
@@ -10,12 +11,15 @@ class DashboardFavorites extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (concerts.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 200,
         child: Center(
           child: Text(
             'Todavía no tienes conciertos favoritos.',
-            style: TextStyle(color: Colors.white54, fontSize: 16),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+              fontSize: 16,
+            ),
           ),
         ),
       );
@@ -40,12 +44,21 @@ class _FavoriteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       width: 165,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1F26),
+        color: cs.surface,
         borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: cs.shadow.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,10 +67,11 @@ class _FavoriteCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.network(
-                  concert.imageUrl,
+                CachedNetworkImage(
+                  imageUrl: concert.imageUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  fadeInDuration: Duration.zero,
+                  errorWidget: (_, __, ___) => Container(
                     color: const Color(0xFF303542),
                     child: const Icon(
                       Icons.music_note,
@@ -80,13 +94,21 @@ class _FavoriteCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Positioned(
+                // ✅ Badge sutil en vez de CircleAvatar grande
+                Positioned(
                   top: 10,
                   right: 10,
-                  child: CircleAvatar(
-                    radius: 17,
-                    backgroundColor: Color(0xFFE53935),
-                    child: Icon(Icons.thumb_up, color: Colors.white, size: 18),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.favorite,
+                      color: Color(0xFFE53935),
+                      size: 14,
+                    ),
                   ),
                 ),
               ],
@@ -108,10 +130,15 @@ class _FavoriteCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  concert.festival,
+                  concert.festival.isNotEmpty
+                      ? concert.festival
+                      : concert.venue,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                  style: TextStyle(
+                    color: cs.onSurface.withOpacity(0.5),
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
