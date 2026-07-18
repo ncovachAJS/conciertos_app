@@ -296,7 +296,7 @@ class _GridView extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 18,
         mainAxisSpacing: 18,
-        childAspectRatio: .62,
+        mainAxisExtent: 307,
       ),
       itemBuilder: (context, index) {
         final concert = concerts[index];
