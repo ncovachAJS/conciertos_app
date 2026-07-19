@@ -50,15 +50,13 @@ class _MemoriesSectionState extends State<MemoriesSection> {
   }
 
   Future<void> _addPhotos() async {
-    // Selección múltiple
     final images = await _picker.pickMultiImage(imageQuality: 85);
     if (images.isEmpty || !mounted) return;
 
-    // Si es una sola foto pedimos caption; si son varias, subimos directamente
     String? caption;
     if (images.length == 1) {
       caption = await _askCaption(File(images.first.path));
-      if (caption == null || !mounted) return; // cancelado
+      if (caption == null || !mounted) return;
     }
 
     setState(() {
@@ -146,22 +144,31 @@ class _MemoriesSectionState extends State<MemoriesSection> {
 
   Future<void> _openPhoto(ConcertPhotoModel photo) async {
     final index = _photos.indexOf(photo);
-    final deleted = await Navigator.of(context).push<bool>(
+
+    // El viewer devuelve el id de la foto borrada (String) o null si no se borró
+    final deletedId = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => PhotoViewerPage(
           photos: _photos,
           initialIndex: index,
-          onDelete: (p) => _photoService.deletePhoto(p.id),
+          onDelete: (p) async {
+            await _photoService.deletePhoto(p.id);
+          },
         ),
       ),
     );
-    if (deleted == true && mounted) {
-      setState(() => _photos = _photos.where((p) => p.id != photo.id).toList());
+
+    if (deletedId != null && mounted) {
+      setState(
+        () => _photos = _photos.where((p) => p.id != deletedId).toList(),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -206,11 +213,14 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                 child: Center(child: CircularProgressIndicator()),
               )
             else if (_photos.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Text(
                   'Todavía no hay recuerdos. ¡Añade tus fotos del concierto!',
-                  style: TextStyle(color: Colors.white60, fontSize: 15),
+                  style: TextStyle(
+                    color: cs.onSurface.withOpacity(0.5), // adaptativo al tema
+                    fontSize: 15,
+                  ),
                 ),
               )
             else
