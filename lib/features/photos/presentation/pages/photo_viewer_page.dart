@@ -60,7 +60,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
     );
     if (confirm != true) return;
     await widget.onDelete?.call(_current);
-    if (mounted) Navigator.pop(context, true);
+    if (mounted) Navigator.pop(context, _current.id);
   }
 
   @override

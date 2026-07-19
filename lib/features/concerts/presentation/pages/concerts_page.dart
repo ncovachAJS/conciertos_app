@@ -36,7 +36,9 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
     return all.where((c) {
       return c.artist.toLowerCase().contains(q) ||
           c.festival.toLowerCase().contains(q) ||
-          c.name.toLowerCase().contains(q);
+          c.name.toLowerCase().contains(q) ||
+          c.city.toLowerCase().contains(q) ||
+          c.venue.toLowerCase().contains(q);
     }).toList();
   }
 
@@ -183,7 +185,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
                     controller: _searchController,
                     onChanged: (v) => setState(() => _searchQuery = v),
                     decoration: InputDecoration(
-                      hintText: 'Buscar concierto, artista o festival...',
+                      hintText: 'Artista, festival, ciudad, recinto...',
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: const Icon(Icons.tune),
                       filled: true,
