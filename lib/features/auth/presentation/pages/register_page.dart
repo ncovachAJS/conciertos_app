@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../app/theme_picker_page.dart';
-
+import '../../../../core/tutorial/tutorial_service.dart';
 import '../controllers/auth_controller.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -38,7 +39,15 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (!mounted) return;
-      // Tras registrarse, elegir tema antes de entrar a la app
+
+      // Resetear el flag para que la splash se muestre en el primer inicio
+      // después del registro (experiencia de bienvenida completa)
+      // Cuenta nueva: resetear splash y tutoriales para experiencia completa
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('hasSeenSplash', false);
+      await TutorialService.resetAll();
+
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const ThemePickerPage()),
       );
@@ -54,6 +63,8 @@ class _RegisterPageState extends State<RegisterPage> {
         message = 'Ya existe una cuenta con ese correo.';
       } else if (error.contains('password')) {
         message = 'La contraseña no es válida.';
+      } else if (error.contains('timeout') || error.contains('timed out')) {
+        message = 'El servidor tardó demasiado. Inténtalo de nuevo.';
       }
 
       ScaffoldMessenger.of(

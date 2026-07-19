@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
 import '../../../concerts/data/services/upload_service.dart';
@@ -191,8 +190,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ] else ...[
                 FilledButton.icon(
                   onPressed: () async {
-                    await TutorialService.resetAll();
-                    // Limpiamos el provider antes de cerrar sesión
+                    // NO reseteamos el tutorial — debe mantenerse entre sesiones
                     ref.invalidate(concertsProvider);
                     await auth.logout();
                     if (!context.mounted) return;
