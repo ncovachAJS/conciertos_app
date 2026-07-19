@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/tutorial/tutorial_content.dart';
@@ -7,6 +8,7 @@ import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../ticketmaster/presentation/widgets/recommended_concerts.dart';
+import '../../artist/presentation/pages/artist_page.dart';
 import '../widgets/dashboard_favorites.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_on_this_day.dart';
@@ -69,18 +71,33 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         final stats = ref.watch(concertStatsProvider);
         final favoriteArtists = ref.watch(recommendedArtistsProvider);
 
-        // "En tal día como hoy"
+        // "En tal día como hoy" — día exacto primero, luego esta semana
         final now = DateTime.now();
+        final todayMidnight = DateTime(now.year, now.month, now.day);
+
         final onThisDay =
-            concerts
-                .where(
-                  (c) =>
-                      c.date.day == now.day &&
-                      c.date.month == now.month &&
-                      c.date.year < now.year,
-                )
-                .toList()
-              ..sort((a, b) => b.date.year.compareTo(a.date.year));
+            concerts.where((c) {
+              if (c.date.year >= now.year) return false;
+              final concertDay = DateTime(
+                c.date.year,
+                c.date.month,
+                c.date.day,
+              );
+              // Mismo día y mes (aniversario exacto)
+              if (c.date.day == now.day && c.date.month == now.month)
+                return true;
+              // Dentro de los últimos 3 días o próximos 3 días del año actual
+              final thisYearDate = DateTime(now.year, c.date.month, c.date.day);
+              final diff = thisYearDate.difference(todayMidnight).inDays.abs();
+              return diff <= 3;
+            }).toList()..sort((a, b) {
+              // Aniversarios exactos primero, luego por cercanía
+              final aExact = a.date.day == now.day && a.date.month == now.month;
+              final bExact = b.date.day == now.day && b.date.month == now.month;
+              if (aExact && !bExact) return -1;
+              if (!aExact && bExact) return 1;
+              return b.date.year.compareTo(a.date.year);
+            });
 
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(4, 4, 4, 100),

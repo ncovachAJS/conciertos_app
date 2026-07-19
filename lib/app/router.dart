@@ -18,6 +18,7 @@ import '../features/auth/presentation/pages/register_page.dart';
 import '../features/auth/presentation/pages/session_gate_page.dart';
 import '../features/statistics/presentation/pages/statistics_page.dart';
 
+import '../features/home/artist/presentation/pages/artist_page.dart';
 import 'app_shell.dart';
 
 final appRouter = GoRouter(
@@ -81,6 +82,16 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/recommendations',
           builder: (context, state) => const RecommendationsPage(),
+        ),
+        GoRoute(
+          path: '/artist',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
+            return ArtistPage(
+              artist: extra['artist'] as String,
+              concerts: extra['concerts'] as List<Concert>,
+            );
+          },
         ),
         GoRoute(
           path: '/profile',
