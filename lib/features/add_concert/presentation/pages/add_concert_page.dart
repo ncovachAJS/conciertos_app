@@ -415,7 +415,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                                 fontWeight: FontWeight.w500,
                                 color: _liked
                                     ? Colors.blueAccent
-                                    : Colors.white70,
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface.withOpacity(0.6),
                               ),
                             ),
                           ),
@@ -459,7 +461,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                                 fontWeight: FontWeight.w500,
                                 color: _favorite
                                     ? Colors.amber
-                                    : Colors.white70,
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface.withOpacity(0.6),
                               ),
                             ),
                           ),

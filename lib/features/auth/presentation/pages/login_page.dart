@@ -34,7 +34,8 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (!mounted) return;
-      context.go('/splash');
+      // Login posterior al primer uso → directo a home, sin splash
+      context.go('/');
     } catch (e) {
       if (!mounted) return;
 
@@ -43,6 +44,8 @@ class _LoginPageState extends State<LoginPage> {
 
       if (error.contains('incorrectos') || error.contains('unauthorized')) {
         message = 'Correo o contraseña incorrectos.';
+      } else if (error.contains('timeout') || error.contains('timed out')) {
+        message = 'El servidor tardó demasiado. Inténtalo de nuevo.';
       }
 
       ScaffoldMessenger.of(
@@ -96,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
                         : null,
                   ),
 
-                  // ── ¿Olvidaste tu contraseña? ──────────────────────────
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(

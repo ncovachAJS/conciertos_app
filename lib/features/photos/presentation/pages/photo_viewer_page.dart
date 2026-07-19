@@ -72,6 +72,13 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         // Contador de posición
         title: total > 1
             ? Text(
