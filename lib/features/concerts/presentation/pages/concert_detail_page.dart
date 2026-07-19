@@ -1,3 +1,4 @@
+import 'package:share_plus/share_plus.dart';
 import 'package:conciertos_app/features/spotify/domain/entities/data/services/spotify_api_service.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -135,6 +136,22 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     if (query != null && mounted) await _searchSpotify(query);
   }
 
+  void _share(Concert concert) {
+    final lines = <String>[
+      '🎸 ${concert.artist}',
+      if (concert.name.isNotEmpty && concert.name != concert.artist)
+        concert.name,
+      '📅 ${DateFormatter.short(concert.date)}',
+      if (concert.venue.isNotEmpty) '📍 ${concert.venue}',
+      if (concert.city.isNotEmpty) '🏙 ${concert.city}',
+      if (concert.festival.isNotEmpty) '🎪 ${concert.festival}',
+      if (concert.rating > 0) '${'⭐' * concert.rating}',
+      '',
+      'Compartido desde La Vida en Directo 🎶',
+    ];
+    Share.share(lines.join('\n'));
+  }
+
   Future<void> _edit(Concert concert) async {
     final result = await context.push('/add', extra: concert);
     if (result == true && mounted) {
@@ -206,9 +223,14 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     }
 
     return AppPage(
-      title: '🎸 ${concert.artist}',
+      title: concert.artist,
       showBackButton: true,
       actions: [
+        IconButton(
+          tooltip: 'Compartir',
+          onPressed: () => _share(concert),
+          icon: const Icon(Icons.share_outlined),
+        ),
         IconButton(
           tooltip: 'Editar',
           onPressed: () => _edit(concert),
