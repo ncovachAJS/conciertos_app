@@ -156,8 +156,21 @@ class _FeedPageState extends State<FeedPage>
       );
     }
 
+    // Deduplicar por id — el backend puede devolver la misma foto varias veces
+    // si el usuario es dueño del concierto y además está etiquetado
+    final seen = <String>{};
+    final uniquePhotos = _photos.where((p) => seen.add(p.id)).toList();
+
+    // Clave para fusionar conciertos del mismo artista y día aunque tengan distinto ID
+    String concertKey(ConcertPhotoModel p) {
+      final artist = (p.concert?.artist ?? '').toLowerCase().trim();
+      final date = p.concert?.date;
+      if (artist.isEmpty || date == null) return p.concertId;
+      return '$artist|${date.year}-${date.month}-${date.day}';
+    }
+
     final byYear = groupBy<ConcertPhotoModel, int>(
-      _photos,
+      uniquePhotos,
       (p) => p.concert?.date.year ?? 0,
     );
     final years = byYear.keys.toList()..sort((a, b) => b.compareTo(a));
@@ -372,7 +385,7 @@ class _FeedPageState extends State<FeedPage>
                           final yearPhotos = byYear[year]!;
                           final byConcert = groupBy<ConcertPhotoModel, String>(
                             yearPhotos,
-                            (p) => p.concertId,
+                            (p) => concertKey(p),
                           );
                           final concertIds = byConcert.keys.toList();
                           concertIds.sort((a, b) {
@@ -523,7 +536,7 @@ class _FeedPageState extends State<FeedPage>
                         },
                         childCount: groupBy<ConcertPhotoModel, String>(
                           byYear[year]!,
-                          (p) => p.concertId,
+                          (p) => concertKey(p),
                         ).length,
                       ),
                     ),

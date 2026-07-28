@@ -42,6 +42,24 @@ class ConcertModel extends Concert {
         .where((p) => p.id.isNotEmpty)
         .toList();
 
+    // Añadir el dueño del concierto a la lista de participantes si viene
+    final ownerJson = json['user'] as Map<String, dynamic>?;
+    final ownerId = json['userId']?.toString() ?? '';
+    if (ownerJson != null && ownerId.isNotEmpty) {
+      final ownerParticipant = ConcertParticipant(
+        id: ownerId,
+        name: ownerJson['name']?.toString() ?? '',
+        avatarUrl: ownerJson['avatarUrl']?.toString(),
+      );
+      // Solo añadir si no está ya en participants
+      if (!participants.any((p) => p.id == ownerId)) {
+        participants.insert(0, ownerParticipant);
+      }
+      if (!participantIds.contains(ownerId)) {
+        participantIds.insert(0, ownerId);
+      }
+    }
+
     return ConcertModel(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -56,7 +74,7 @@ class ConcertModel extends Concert {
       liked: json['liked'] ?? false,
       participantIds: participantIds,
       participants: participants,
-      userId: json['userId']?.toString() ?? '',
+      userId: ownerId,
     );
   }
 

@@ -87,15 +87,17 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       }
       _taggedFriendIds = List.from(widget.concert!.participantIds);
 
-      // Si el editor es participante (no dueño), el dueño también debe aparecer seleccionado
       final currentUserId = AuthController.instance.user?.id ?? '';
       final ownerId = widget.concert!.userId;
-      if (currentUserId != ownerId && ownerId.isNotEmpty) {
-        if (!_taggedFriendIds.contains(ownerId)) {
-          _taggedFriendIds.add(ownerId);
-        }
-        // Quitamos el propio usuario de la lista (no puede etiquetarse a sí mismo)
-        _taggedFriendIds.remove(currentUserId);
+
+      // Siempre excluir al usuario actual (no puede etiquetarse a sí mismo)
+      _taggedFriendIds.remove(currentUserId);
+
+      // Si el editor NO es el dueño, añadir al dueño como preseleccionado
+      if (currentUserId != ownerId &&
+          ownerId.isNotEmpty &&
+          !_taggedFriendIds.contains(ownerId)) {
+        _taggedFriendIds.add(ownerId);
       }
     }
   }
