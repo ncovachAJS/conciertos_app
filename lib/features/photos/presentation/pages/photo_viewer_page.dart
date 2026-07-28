@@ -11,8 +11,10 @@ class PhotoViewerPage extends StatefulWidget {
   final List<ConcertPhotoModel> photos;
   final int initialIndex;
   final Future<void> Function(ConcertPhoto)? onDelete;
-  final Future<void> Function(ConcertPhoto, String friendId)? onTagFriend;
-  final Future<void> Function(ConcertPhoto, String friendId)? onUntagFriend;
+  final Future<ConcertPhotoModel?> Function(ConcertPhoto, String friendId)?
+  onTagFriend;
+  final Future<ConcertPhotoModel?> Function(ConcertPhoto, String friendId)?
+  onUntagFriend;
 
   const PhotoViewerPage({
     super.key,
@@ -103,16 +105,32 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
               initialSelectedIds: taggedIds,
               isPast: true,
               onChanged: (newIds) async {
-                // Añadir los que no estaban
                 for (final id in newIds) {
                   if (!taggedIds.contains(id)) {
-                    await widget.onTagFriend?.call(photo, id);
+                    final updated = await widget.onTagFriend?.call(photo, id);
+                    taggedIds.add(id);
+                    if (updated != null && mounted) {
+                      setState(() {
+                        final idx = _photos.indexWhere(
+                          (x) => x.id == updated.id,
+                        );
+                        if (idx != -1) _photos[idx] = updated;
+                      });
+                    }
                   }
                 }
-                // Quitar los que ya no están
-                for (final id in taggedIds) {
+                for (final id in List.from(taggedIds)) {
                   if (!newIds.contains(id)) {
-                    await widget.onUntagFriend?.call(photo, id);
+                    final updated = await widget.onUntagFriend?.call(photo, id);
+                    taggedIds.remove(id);
+                    if (updated != null && mounted) {
+                      setState(() {
+                        final idx = _photos.indexWhere(
+                          (x) => x.id == updated.id,
+                        );
+                        if (idx != -1) _photos[idx] = updated;
+                      });
+                    }
                   }
                 }
               },

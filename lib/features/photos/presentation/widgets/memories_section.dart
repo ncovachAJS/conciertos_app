@@ -203,22 +203,11 @@ class _MemoriesSectionState extends State<MemoriesSection> {
             await _photoService.deletePhoto(p.id);
           },
           onTagFriend: (p, friendId) async {
-            final updated = await _photoService.tagFriend(p.id, friendId);
-            if (mounted) {
-              setState(() {
-                final idx = _photos.indexWhere((x) => x.id == p.id);
-                if (idx != -1) _photos[idx] = updated;
-              });
-            }
+            debugPrint('🏷️ onTagFriend foto: ${p.id} friend: $friendId');
+            return await _photoService.tagFriend(p.id, friendId);
           },
           onUntagFriend: (p, friendId) async {
-            final updated = await _photoService.untagFriend(p.id, friendId);
-            if (mounted) {
-              setState(() {
-                final idx = _photos.indexWhere((x) => x.id == p.id);
-                if (idx != -1) _photos[idx] = updated;
-              });
-            }
+            return await _photoService.untagFriend(p.id, friendId);
           },
         ),
       ),
