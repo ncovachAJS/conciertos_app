@@ -14,6 +14,8 @@ import '../../../concerts/data/services/concert_api_service.dart';
 import '../../../concerts/data/services/upload_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
+import '../../../friends/presentation/widgets/tag_friends_selector.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class AddConcertPage extends ConsumerStatefulWidget {
   final Concert? concert;
@@ -45,6 +47,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   int _rating = 0;
   bool _liked = false;
   bool _favorite = false;
+  List<String> _taggedFriendIds = [];
 
   bool get _isPastConcert {
     if (_selectedDate == null) return false;
@@ -81,6 +84,18 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
           '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
       if (widget.concert!.imageUrl.isNotEmpty) {
         _imageUrl = widget.concert!.imageUrl;
+      }
+      _taggedFriendIds = List.from(widget.concert!.participantIds);
+
+      // Si el editor es participante (no dueño), el dueño también debe aparecer seleccionado
+      final currentUserId = AuthController.instance.user?.id ?? '';
+      final ownerId = widget.concert!.userId;
+      if (currentUserId != ownerId && ownerId.isNotEmpty) {
+        if (!_taggedFriendIds.contains(ownerId)) {
+          _taggedFriendIds.add(ownerId);
+        }
+        // Quitamos el propio usuario de la lista (no puede etiquetarse a sí mismo)
+        _taggedFriendIds.remove(currentUserId);
       }
     }
   }
@@ -139,6 +154,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
   Future<void> _saveConcert() async {
     if (!_formKey.currentState!.validate()) return;
+    debugPrint('🏷️ taggedFriendIds al guardar: $_taggedFriendIds');
     setState(() => _saving = true);
 
     try {
@@ -154,6 +170,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         favorite: _favorite,
         venue: _venueController.text.trim(),
         city: _cityController.text.trim(),
+        taggedFriendIds: _taggedFriendIds,
+        participantIds: widget.concert?.participantIds ?? [],
+        participants: widget.concert?.participants ?? [],
+        userId: widget.concert?.userId ?? '',
       );
 
       if (widget.concert == null) {
@@ -473,6 +493,20 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                     const SizedBox(height: 32),
                   ],
                 ),
+
+              // ── Etiquetar amigos ───────────────────────────────────
+              const SizedBox(height: 32),
+              TagFriendsSelector(
+                key: const ValueKey('tag_friends'),
+                initialSelectedIds: _taggedFriendIds,
+                isPast: _isPastConcert,
+                onChanged: (ids) {
+                  _taggedFriendIds = List.from(ids);
+                  debugPrint('🏷️ onChanged padre: $_taggedFriendIds');
+                },
+              ),
+
+              const SizedBox(height: 32),
 
               SizedBox(
                 height: 55,

@@ -213,6 +213,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Column(
                   children: [
                     ListTile(
+                      leading: const Icon(
+                        Icons.group_rounded,
+                        color: Color(0xFFE53935),
+                      ),
+                      title: const Text('Amigos'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/friends'),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
                       leading: const Icon(Icons.settings),
                       title: const Text('Ajustes'),
                       trailing: const Icon(Icons.chevron_right),

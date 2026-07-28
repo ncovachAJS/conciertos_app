@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:conciertos_app/features/spotify/domain/entities/data/services/spotify_api_service.dart';
+import 'package:conciertos_app/features/friends/presentation/widgets/friend_avatar.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -19,9 +19,10 @@ import '../../../photos/presentation/widgets/memories_section.dart';
 import '../../../setlist/data/services/setlist_service.dart';
 import '../../../setlist/domain/entities/setlist.dart';
 import '../../../setlist/presentation/widgets/setlist_section.dart';
+import '../../../spotify/domain/entities/data/services/spotify_api_service.dart';
 import '../../../spotify/domain/entities/spotify_artist.dart';
+import '../../data/models/concert_model.dart';
 import '../../domain/entities/concert.dart';
-import '../../../concerts/data/models/concert_model.dart';
 
 class ConcertDetailPage extends ConsumerStatefulWidget {
   final Concert concert;
@@ -140,60 +141,6 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     if (query != null && mounted) await _searchSpotify(query);
   }
 
-  final _shareKey = GlobalKey();
-
-  Future<void> _share(Concert concert) async {
-    // Renderizamos la tarjeta offscreen y la capturamos como PNG
-    try {
-      // Mostramos la tarjeta en un overlay invisible para poder capturarla
-      final completer = OverlayEntry(
-        builder: (_) => Positioned(
-          left: -9999, // fuera de pantalla
-          top: 0,
-          child: RepaintBoundary(
-            key: _shareKey,
-            child: _ShareCard(concert: concert),
-          ),
-        ),
-      );
-      Overlay.of(context).insert(completer);
-
-      // Esperamos un frame para que Flutter lo pinte
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      final boundary =
-          _shareKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
-      final image = await boundary?.toImage(pixelRatio: 3.0);
-      completer.remove();
-
-      if (image == null || !mounted) return;
-
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      final bytes = byteData!.buffer.asUint8List();
-
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/concierto_${concert.id}.png');
-      await file.writeAsBytes(bytes);
-
-      await Share.shareXFiles([
-        XFile(file.path),
-      ], text: 'La Vida en Directo 🎶');
-    } catch (e) {
-      // Fallback a texto plano si algo falla
-      final lines = [
-        '🎸 ${concert.artist}',
-        '📅 ${DateFormatter.short(concert.date)}',
-        if (concert.venue.isNotEmpty) '📍 ${concert.venue}',
-        if (concert.city.isNotEmpty) '🏙 ${concert.city}',
-        if (concert.rating > 0) '${'⭐' * concert.rating}',
-        '',
-        'La Vida en Directo 🎶',
-      ];
-      Share.share(lines.join('\n'));
-    }
-  }
-
   Future<void> _edit(Concert concert) async {
     final result = await context.push('/add', extra: concert);
     if (result == true && mounted) {
@@ -246,7 +193,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     final concerts = ref.watch(concertsProvider).asData?.value ?? [];
     final concert = concerts.firstWhere(
       (c) => c.id == widget.concert.id,
-      orElse: () => widget.concert as ConcertModel,
+      orElse: () => ConcertModel.fromEntity(widget.concert),
     );
 
     if (_deleting) {
@@ -265,14 +212,9 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     }
 
     return AppPage(
-      title: concert.artist,
+      title: '🎸 ${concert.artist}',
       showBackButton: true,
       actions: [
-        IconButton(
-          tooltip: 'Compartir',
-          onPressed: () => _share(concert),
-          icon: const Icon(Icons.share_outlined),
-        ),
         IconButton(
           tooltip: 'Editar',
           onPressed: () => _edit(concert),
@@ -342,6 +284,12 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
             ),
           ),
 
+          // Participantes
+          if (concert.participants.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            _ParticipantsCard(concert: concert),
+          ],
+
           // Card de Spotify
           if (!_loadingSpotify && _spotifyArtist != null) ...[
             const SizedBox(height: 20),
@@ -378,192 +326,6 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
           const SizedBox(height: 24),
         ],
       ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Tarjeta visual para compartir
-// ---------------------------------------------------------------------------
-
-class _ShareCard extends StatelessWidget {
-  final Concert concert;
-
-  const _ShareCard({required this.concert});
-
-  @override
-  Widget build(BuildContext context) {
-    final hasRating = concert.rating > 0;
-
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        width: 380,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1A1A1A), Color(0xFF2C1A1A), Color(0xFF1A1A1A)],
-          ),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Color(0xFFE53935).withOpacity(0.4),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Imagen de cabecera
-            if (concert.imageUrl.isNotEmpty)
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
-                child: Image.network(
-                  concert.imageUrl,
-                  width: 380,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    height: 200,
-                    color: const Color(0xFF2B2B2B),
-                    child: const Center(
-                      child: Icon(
-                        Icons.music_note,
-                        color: Color(0xFFE53935),
-                        size: 64,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-            // Franja roja con el artista
-            Container(
-              width: double.infinity,
-              color: const Color(0xFFE53935),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Text(
-                concert.artist,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.5,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-
-            // Datos del concierto
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (concert.name.isNotEmpty && concert.name != concert.artist)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        concert.name,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 15,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-
-                  _InfoRow(
-                    Icons.calendar_today_rounded,
-                    DateFormatter.short(concert.date),
-                  ),
-                  if (concert.venue.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _InfoRow(Icons.stadium_rounded, concert.venue),
-                  ],
-                  if (concert.city.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _InfoRow(Icons.location_city_rounded, concert.city),
-                  ],
-                  if (concert.festival.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _InfoRow(Icons.festival_rounded, concert.festival),
-                  ],
-
-                  if (hasRating) ...[
-                    const SizedBox(height: 16),
-                    Row(
-                      children: List.generate(
-                        5,
-                        (i) => Icon(
-                          i < concert.rating
-                              ? Icons.star_rounded
-                              : Icons.star_outline_rounded,
-                          color: i < concert.rating
-                              ? const Color(0xFFFFC107)
-                              : Colors.white24,
-                          size: 22,
-                        ),
-                      ),
-                    ),
-                  ],
-
-                  const SizedBox(height: 20),
-
-                  // Pie de marca
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.music_note,
-                        color: Color(0xFFE53935),
-                        size: 14,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'La Vida en Directo',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.35),
-                          fontSize: 12,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _InfoRow(this.icon, this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: const Color(0xFFE53935), size: 16),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -671,6 +433,74 @@ class _SpotifyPlaceholder extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Icon(Icons.music_note, color: Color(0xFF1DB954), size: 32),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sección de participantes
+// ---------------------------------------------------------------------------
+
+class _ParticipantsCard extends StatelessWidget {
+  final Concert concert;
+  const _ParticipantsCard({required this.concert});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final label = concert.isPastConcert ? 'También estuvieron' : 'También irán';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.group_rounded,
+                  color: Color(0xFFE53935),
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 16,
+              runSpacing: 12,
+              children: concert.participants.map((p) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FriendAvatar(
+                      name: p.name,
+                      avatarUrl: p.avatarUrl,
+                      radius: 24,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      p.name.split(' ').first, // solo el primer nombre
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: cs.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
