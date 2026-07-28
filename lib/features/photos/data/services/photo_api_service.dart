@@ -12,12 +12,9 @@ class PhotoApiService {
       Uri.parse(ApiConfig.concertPhotosEndpoint(concertId)),
       headers: _headers,
     );
-
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
-
-    // Este endpoint devuelve array plano (sin paginación)
     final List<dynamic> json = jsonDecode(response.body);
     return json.map((item) => ConcertPhotoModel.fromJson(item)).toList();
   }
@@ -29,17 +26,12 @@ class PhotoApiService {
     final uri = Uri.parse(
       ApiConfig.photosFeedEndpoint,
     ).replace(queryParameters: {'page': '$page', 'limit': '$limit'});
-
     final response = await http.get(uri, headers: _headers);
-
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
-
-    // El back ahora devuelve { data: [...], meta: {...} }
     final Map<String, dynamic> body = jsonDecode(response.body);
     final List<dynamic> items = body['data'];
-
     return items.map((item) => ConcertPhotoModel.fromJson(item)).toList();
   }
 
@@ -47,24 +39,22 @@ class PhotoApiService {
     required String concertId,
     required String imageUrl,
     String caption = '',
+    List<String> taggedFriendIds = const [],
   }) async {
-    final model = ConcertPhotoModel(
-      id: '',
-      concertId: concertId,
-      imageUrl: imageUrl,
-      caption: caption,
-    );
+    final body = <String, dynamic>{
+      'imageUrl': imageUrl,
+      'taggedFriendIds': taggedFriendIds,
+    };
+    if (caption.isNotEmpty) body['caption'] = caption;
 
     final response = await http.post(
       Uri.parse(ApiConfig.concertPhotosEndpoint(concertId)),
       headers: _headers,
-      body: jsonEncode(model.toCreateJson()),
+      body: jsonEncode(body),
     );
-
     if (response.statusCode != 201) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
-
     return ConcertPhotoModel.fromJson(jsonDecode(response.body));
   }
 
@@ -73,10 +63,31 @@ class PhotoApiService {
       Uri.parse(ApiConfig.photoEndpoint(photoId)),
       headers: _headers,
     );
-
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
+  }
+
+  Future<ConcertPhotoModel> tagFriend(String photoId, String friendId) async {
+    final response = await http.post(
+      Uri.parse(ApiConfig.photoTagEndpoint(photoId, friendId)),
+      headers: _headers,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Error ${response.statusCode}: ${response.body}');
+    }
+    return ConcertPhotoModel.fromJson(jsonDecode(response.body));
+  }
+
+  Future<ConcertPhotoModel> untagFriend(String photoId, String friendId) async {
+    final response = await http.delete(
+      Uri.parse(ApiConfig.photoTagEndpoint(photoId, friendId)),
+      headers: _headers,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Error ${response.statusCode}: ${response.body}');
+    }
+    return ConcertPhotoModel.fromJson(jsonDecode(response.body));
   }
 
   Map<String, String> get _headers {

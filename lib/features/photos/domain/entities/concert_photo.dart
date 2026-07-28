@@ -1,4 +1,5 @@
-/// Datos mínimos del concierto que acompañan a una foto en el feed global.
+import '../../../friends/domain/entities/friend.dart';
+
 class PhotoConcertRef {
   final String id;
   final String name;
@@ -19,16 +20,53 @@ class PhotoConcertRef {
   });
 }
 
-/// Foto de recuerdo asociada a un concierto.
+class PhotoUploader {
+  final String id;
+  final String name;
+  final String? avatarUrl;
+
+  const PhotoUploader({required this.id, required this.name, this.avatarUrl});
+
+  factory PhotoUploader.fromJson(Map<String, dynamic> json) {
+    return PhotoUploader(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      avatarUrl: json['avatarUrl']?.toString(),
+    );
+  }
+}
+
+class PhotoParticipant {
+  final String id;
+  final String name;
+  final String? avatarUrl;
+
+  const PhotoParticipant({
+    required this.id,
+    required this.name,
+    this.avatarUrl,
+  });
+
+  factory PhotoParticipant.fromJson(Map<String, dynamic> json) {
+    // Viene como { id, user: { id, name, avatarUrl } }
+    final user = json['user'] as Map<String, dynamic>? ?? json;
+    return PhotoParticipant(
+      id: user['id']?.toString() ?? '',
+      name: user['name']?.toString() ?? '',
+      avatarUrl: user['avatarUrl']?.toString(),
+    );
+  }
+}
+
 class ConcertPhoto {
   final String id;
   final String concertId;
   final String imageUrl;
   final String caption;
   final DateTime? createdAt;
-
-  /// Solo presente en las respuestas del feed global.
   final PhotoConcertRef? concert;
+  final PhotoUploader? uploader;
+  final List<PhotoParticipant> participants;
 
   const ConcertPhoto({
     required this.id,
@@ -37,5 +75,7 @@ class ConcertPhoto {
     this.caption = '',
     this.createdAt,
     this.concert,
+    this.uploader,
+    this.participants = const [],
   });
 }

@@ -29,4 +29,6 @@ class ApiConfig {
   static String concertPhotosEndpoint(String concertId) =>
       '$concertsEndpoint/$concertId/photos';
   static String photoEndpoint(String photoId) => '$baseUrl/photos/$photoId';
+  static String photoTagEndpoint(String photoId, String friendId) =>
+      '$baseUrl/photos/$photoId/tag/$friendId';
 }
