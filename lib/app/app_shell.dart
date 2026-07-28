@@ -1,14 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class AppShell extends StatelessWidget {
-  final Widget child;
+import '../features/notifications/presentation/controllers/notifications_controller.dart';
 
+class AppShell extends StatefulWidget {
+  final Widget child;
   const AppShell({super.key, required this.child});
+
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  final NotificationsController _notif = NotificationsController.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _notif.addListener(_rebuild);
+    _notif.refreshUnreadCount();
+  }
+
+  void _rebuild() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _notif.removeListener(_rebuild);
+    super.dispose();
+  }
 
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
-
     switch (location) {
       case '/':
         return 0;
@@ -27,8 +51,10 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final unread = _notif.unreadCount;
+
     return Scaffold(
-      body: child,
+      body: widget.child,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex(context),
         onDestinationSelected: (index) {
@@ -45,34 +71,62 @@ class AppShell extends StatelessWidget {
               context.go('/statistics');
           }
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
+            icon: _BadgeIcon(icon: Icons.home_outlined, count: unread),
+            selectedIcon: _BadgeIcon(
+              icon: Icons.home,
+              count: unread,
+              selected: true,
+            ),
             label: 'Inicio',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.library_music_outlined),
             selectedIcon: Icon(Icons.library_music),
             label: 'Conciertos',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.photo_library_outlined),
             selectedIcon: Icon(Icons.photo_library),
             label: 'Recuerdos',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.favorite_border),
             selectedIcon: Icon(Icons.favorite),
             label: 'Favoritos',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.bar_chart_outlined),
             selectedIcon: Icon(Icons.bar_chart),
             label: 'Stats',
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BadgeIcon extends StatelessWidget {
+  final IconData icon;
+  final int count;
+  final bool selected;
+
+  const _BadgeIcon({
+    required this.icon,
+    required this.count,
+    this.selected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (count == 0) return Icon(icon);
+
+    return Badge(
+      label: Text(count > 99 ? '99+' : '$count'),
+      backgroundColor: const Color(0xFFE53935),
+      textColor: Colors.white,
+      child: Icon(icon),
     );
   }
 }

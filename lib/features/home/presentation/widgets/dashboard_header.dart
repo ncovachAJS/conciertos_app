@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../concerts/presentation/providers/concerts_provider.dart';
+import '../../../notifications/presentation/controllers/notifications_controller.dart';
 import '../../notificaciones/pages/notifications_page.dart';
 
 class DashboardHeader extends ConsumerWidget {
@@ -17,34 +17,19 @@ class DashboardHeader extends ConsumerWidget {
     return 'Buenas noches';
   }
 
-  int _badgeCount(List concerts) {
-    final now = DateTime.now();
-    final upcoming = concerts.where((c) {
-      final days = c.date.difference(now).inDays;
-      return days >= 0 && days <= 7;
-    }).length;
-    final memories = concerts
-        .where(
-          (c) =>
-              c.date.day == now.day &&
-              c.date.month == now.month &&
-              c.date.year < now.year,
-        )
-        .length;
-    return upcoming + memories;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
 
     return ListenableBuilder(
-      listenable: AuthController.instance,
+      listenable: Listenable.merge([
+        AuthController.instance,
+        NotificationsController.instance,
+      ]),
       builder: (context, _) {
         final user = AuthController.instance.user;
         final avatarUrl = user?.avatarUrl;
-        final concerts = ref.watch(concertsProvider).asData?.value ?? [];
-        final badge = _badgeCount(concerts);
+        final badge = NotificationsController.instance.unreadCount;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,7 +69,6 @@ class DashboardHeader extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         'Cada concierto cuenta una historia.',
-                        // ✅ Adaptado al tema
                         style: TextStyle(
                           color: cs.onSurface.withOpacity(0.54),
                           fontSize: 14,
@@ -96,7 +80,7 @@ class DashboardHeader extends ConsumerWidget {
 
                 const SizedBox(width: 12),
 
-                // Campanita con badge
+                // Campanita con badge de notificaciones reales
                 GestureDetector(
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
@@ -114,8 +98,12 @@ class DashboardHeader extends ConsumerWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          Icons.notifications_outlined,
-                          color: cs.onSurface.withOpacity(0.7),
+                          badge > 0
+                              ? Icons.notifications_rounded
+                              : Icons.notifications_outlined,
+                          color: badge > 0
+                              ? const Color(0xFFE53935)
+                              : cs.onSurface.withOpacity(0.7),
                           size: 24,
                         ),
                       ),
@@ -134,7 +122,7 @@ class DashboardHeader extends ConsumerWidget {
                               minHeight: 18,
                             ),
                             child: Text(
-                              badge > 9 ? '9+' : '$badge',
+                              badge > 99 ? '99+' : '$badge',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,

@@ -20,6 +20,7 @@ import '../features/statistics/presentation/pages/statistics_page.dart';
 
 import '../features/home/artist/presentation/pages/artist_page.dart';
 import '../features/friends/presentation/pages/friends_page.dart';
+import '../features/notifications/presentation/pages/notifications_page.dart';
 import 'app_shell.dart';
 
 final appRouter = GoRouter(
@@ -83,6 +84,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/recommendations',
           builder: (context, state) => const RecommendationsPage(),
+        ),
+        GoRoute(
+          path: '/notifications',
+          builder: (context, state) => const NotificationsPage(),
         ),
         GoRoute(
           path: '/friends',
