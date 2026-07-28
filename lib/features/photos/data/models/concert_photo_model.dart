@@ -1,6 +1,8 @@
 import '../../domain/entities/concert_photo.dart';
 
 class ConcertPhotoModel extends ConcertPhoto {
+  final List<String> taggedFriendIds;
+
   const ConcertPhotoModel({
     required super.id,
     required super.concertId,
@@ -8,10 +10,27 @@ class ConcertPhotoModel extends ConcertPhoto {
     super.caption,
     super.createdAt,
     super.concert,
+    super.uploader,
+    super.participants = const [],
+    this.taggedFriendIds = const [],
   });
 
   factory ConcertPhotoModel.fromJson(Map<String, dynamic> json) {
     final concertJson = json['concert'];
+
+    // Parsear participantes
+    final participantsList = json['participants'] as List<dynamic>? ?? [];
+    final participants = participantsList
+        .where((p) => p is Map)
+        .map((p) => PhotoParticipant.fromJson(p as Map<String, dynamic>))
+        .where((p) => p.id.isNotEmpty)
+        .toList();
+
+    // Parsear uploader
+    final uploaderJson = json['user'] as Map<String, dynamic>?;
+    final uploader = uploaderJson != null
+        ? PhotoUploader.fromJson(uploaderJson)
+        : null;
 
     return ConcertPhotoModel(
       id: json['id']?.toString() ?? '',
@@ -22,6 +41,8 @@ class ConcertPhotoModel extends ConcertPhoto {
       concert: concertJson is Map<String, dynamic>
           ? _refFromJson(concertJson)
           : null,
+      uploader: uploader,
+      participants: participants,
     );
   }
 
@@ -37,14 +58,12 @@ class ConcertPhotoModel extends ConcertPhoto {
     );
   }
 
-  /// Payload para `POST /concerts/:id/photos`.
-  Map<String, dynamic> toCreateJson() {
-    final json = <String, dynamic>{'imageUrl': imageUrl};
-
-    if (caption.isNotEmpty) {
-      json['caption'] = caption;
-    }
-
+  Map<String, dynamic> toCreateJson({List<String> taggedFriendIds = const []}) {
+    final json = <String, dynamic>{
+      'imageUrl': imageUrl,
+      'taggedFriendIds': taggedFriendIds,
+    };
+    if (caption.isNotEmpty) json['caption'] = caption;
     return json;
   }
 }
