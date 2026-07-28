@@ -31,7 +31,6 @@ class ConcertApiService {
 
     final body = jsonDecode(response.body);
 
-    // Soporta respuesta paginada { data: [...] } y array plano
     final List<dynamic> items = body is Map
         ? (body['data'] ?? body['concerts'] ?? [])
         : body;
@@ -39,10 +38,17 @@ class ConcertApiService {
     return items.map((item) => ConcertModel.fromJson(item)).toList();
   }
 
-  /// Crea un concierto y devuelve el objeto creado por el backend (con el id).
+  /// Crea un concierto. Acepta ConcertModel directamente para preservar
+  /// taggedFriendIds, o un Concert genérico sin etiquetas.
   Future<ConcertModel> addConcert(Concert concert) async {
-    final model = ConcertModel.fromEntity(concert);
     final token = await _storage.read(key: 'token');
+
+    // Si ya es ConcertModel lo usamos directamente, sino convertimos
+    final model = concert is ConcertModel
+        ? concert
+        : ConcertModel.fromEntity(concert);
+
+    final body = model.toCreateJson();
 
     final response = await http.post(
       Uri.parse(ApiConfig.concertsEndpoint),
@@ -50,7 +56,7 @@ class ConcertApiService {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(model.toCreateJson()),
+      body: jsonEncode(body),
     );
 
     if (response.statusCode != 201) {
@@ -61,8 +67,11 @@ class ConcertApiService {
   }
 
   Future<void> updateConcert(Concert concert) async {
-    final model = ConcertModel.fromEntity(concert);
     final token = await _storage.read(key: 'token');
+
+    final model = concert is ConcertModel
+        ? concert
+        : ConcertModel.fromEntity(concert);
 
     final response = await http.put(
       Uri.parse('${ApiConfig.concertsEndpoint}/${concert.id}'),

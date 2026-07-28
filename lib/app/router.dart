@@ -19,6 +19,7 @@ import '../features/auth/presentation/pages/session_gate_page.dart';
 import '../features/statistics/presentation/pages/statistics_page.dart';
 
 import '../features/home/artist/presentation/pages/artist_page.dart';
+import '../features/friends/presentation/pages/friends_page.dart';
 import 'app_shell.dart';
 
 final appRouter = GoRouter(
@@ -82,6 +83,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/recommendations',
           builder: (context, state) => const RecommendationsPage(),
+        ),
+        GoRoute(
+          path: '/friends',
+          builder: (context, state) => const FriendsPage(),
         ),
         GoRoute(
           path: '/artist',

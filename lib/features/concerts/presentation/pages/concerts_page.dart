@@ -16,20 +16,29 @@ class ConcertsPage extends ConsumerStatefulWidget {
   ConsumerState<ConcertsPage> createState() => _ConcertsPageState();
 }
 
-class _ConcertsPageState extends ConsumerState<ConcertsPage> {
+class _ConcertsPageState extends ConsumerState<ConcertsPage>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
+  late final TabController _tabController;
 
   String _searchQuery = '';
   bool _gridView = false;
   bool _deleting = false;
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
+    // Pasados primero — pestaña 0. Próximos — pestaña 1.
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
-  // Filtramos la lista del provider en tiempo real, sin estado local duplicado.
   List<Concert> _filtered(List<Concert> all) {
     if (_searchQuery.trim().isEmpty) return all;
     final q = _searchQuery.toLowerCase();
@@ -74,9 +83,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
     final updated = ConcertModel.fromEntity(concert.copyWith(rating: rating));
     try {
       await ref.read(concertsProvider.notifier).updateOne(updated);
-    } catch (_) {
-      // Fallo silencioso para el rating — el rollback lo hace el notifier.
-    }
+    } catch (_) {}
   }
 
   Future<void> _deleteConcert(Concert concert) async {
@@ -101,7 +108,6 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
     if (confirmar != true) return;
 
     setState(() => _deleting = true);
-
     try {
       await ref.read(concertsProvider.notifier).delete(concert.id);
       if (!mounted) return;
@@ -118,9 +124,24 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
     }
   }
 
+  Future<void> _onEdit(Concert c) async {
+    final result = await context.push('/add', extra: c);
+    if (result == true) {
+      await ref.read(concertsProvider.notifier).reload();
+    }
+  }
+
+  Future<void> _onAdd() async {
+    final result = await context.push('/add');
+    if (result == true) {
+      await ref.read(concertsProvider.notifier).reload();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final concertsAsync = ref.watch(concertsProvider);
+    final cs = Theme.of(context).colorScheme;
 
     return AppPage(
       title: 'Conciertos',
@@ -135,12 +156,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
         Padding(
           padding: const EdgeInsets.only(right: 12),
           child: GestureDetector(
-            onTap: () async {
-              final result = await context.push('/add');
-              if (result == true) {
-                await ref.read(concertsProvider.notifier).reload();
-              }
-            },
+            onTap: _onAdd,
             child: Container(
               width: 46,
               height: 46,
@@ -161,11 +177,15 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.wifi_off, size: 48, color: Colors.white38),
+                  Icon(
+                    Icons.wifi_off,
+                    size: 48,
+                    color: cs.onSurface.withOpacity(0.3),
+                  ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Error al cargar conciertos',
-                    style: TextStyle(color: Colors.white54),
+                    style: TextStyle(color: cs.onSurface.withOpacity(0.5)),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
@@ -177,17 +197,25 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
             ),
             data: (concerts) {
               final filtered = _filtered(concerts);
+              final past = filtered.where((c) => c.isPastConcert).toList()
+                ..sort(
+                  (a, b) => b.date.compareTo(a.date),
+                ); // más reciente primero
+              final upcoming = filtered.where((c) => !c.isPastConcert).toList()
+                ..sort(
+                  (a, b) => a.date.compareTo(b.date),
+                ); // más próximo primero
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ── Buscador ──────────────────────────────────────────
                   TextField(
                     controller: _searchController,
                     onChanged: (v) => setState(() => _searchQuery = v),
                     decoration: InputDecoration(
                       hintText: 'Artista, festival, ciudad, recinto...',
                       prefixIcon: const Icon(Icons.search),
-                      suffixIcon: const Icon(Icons.tune),
                       filled: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
@@ -195,55 +223,54 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    '${filtered.length} conciertos',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(color: Colors.white70),
+                  const SizedBox(height: 16),
+
+                  // ── Pestañas ──────────────────────────────────────────
+                  TabBar(
+                    controller: _tabController,
+                    labelColor: const Color(0xFFE53935),
+                    unselectedLabelColor: cs.onSurface.withOpacity(0.5),
+                    indicatorColor: const Color(0xFFE53935),
+                    indicatorWeight: 2,
+                    dividerColor: cs.onSurface.withOpacity(0.08),
+                    tabs: [
+                      Tab(text: 'Pasados (${past.length})'),
+                      Tab(text: 'Próximos (${upcoming.length})'),
+                    ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
+
+                  // ── Contenido de cada pestaña ─────────────────────────
                   Expanded(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      switchInCurve: Curves.easeInOut,
-                      switchOutCurve: Curves.easeInOut,
-                      child: _gridView
-                          ? _GridView(
-                              key: const ValueKey('grid'),
-                              concerts: filtered,
-                              onEdit: (c) async {
-                                final result = await context.push(
-                                  '/add',
-                                  extra: c,
-                                );
-                                if (result == true) {
-                                  await ref
-                                      .read(concertsProvider.notifier)
-                                      .reload();
-                                }
-                              },
-                              onDelete: _deleteConcert,
-                            )
-                          : _ListView(
-                              key: const ValueKey('list'),
-                              concerts: filtered,
-                              onLike: _toggleLike,
-                              onFavorite: _toggleFavorite,
-                              onRatingChanged: _updateRating,
-                              onEdit: (c) async {
-                                final result = await context.push(
-                                  '/add',
-                                  extra: c,
-                                );
-                                if (result == true) {
-                                  await ref
-                                      .read(concertsProvider.notifier)
-                                      .reload();
-                                }
-                              },
-                              onDelete: _deleteConcert,
-                            ),
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        // Pestaña 0 — Pasados
+                        _TabContent(
+                          concerts: past,
+                          gridView: _gridView,
+                          emptyIcon: Icons.history_rounded,
+                          emptyText: 'Aún no tienes conciertos pasados.',
+                          onLike: _toggleLike,
+                          onFavorite: _toggleFavorite,
+                          onRatingChanged: _updateRating,
+                          onEdit: _onEdit,
+                          onDelete: _deleteConcert,
+                        ),
+                        // Pestaña 1 — Próximos
+                        _TabContent(
+                          concerts: upcoming,
+                          gridView: _gridView,
+                          emptyIcon: Icons.calendar_month_rounded,
+                          emptyText:
+                              'No tienes conciertos próximos.\n¡Añade uno!',
+                          onLike: _toggleLike,
+                          onFavorite: _toggleFavorite,
+                          onRatingChanged: _updateRating,
+                          onEdit: _onEdit,
+                          onDelete: _deleteConcert,
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -274,7 +301,80 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage> {
 }
 
 // ---------------------------------------------------------------------------
-// Sub-widgets internos para reducir el build method
+// Contenido de una pestaña (lista o grid + estado vacío)
+// ---------------------------------------------------------------------------
+
+class _TabContent extends StatelessWidget {
+  final List<Concert> concerts;
+  final bool gridView;
+  final IconData emptyIcon;
+  final String emptyText;
+  final ValueChanged<Concert> onLike;
+  final ValueChanged<Concert> onFavorite;
+  final void Function(Concert, int) onRatingChanged;
+  final ValueChanged<Concert> onEdit;
+  final ValueChanged<Concert> onDelete;
+
+  const _TabContent({
+    required this.concerts,
+    required this.gridView,
+    required this.emptyIcon,
+    required this.emptyText,
+    required this.onLike,
+    required this.onFavorite,
+    required this.onRatingChanged,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    if (concerts.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(emptyIcon, size: 64, color: cs.onSurface.withOpacity(0.15)),
+            const SizedBox(height: 16),
+            Text(
+              emptyText,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: cs.onSurface.withOpacity(0.4),
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: gridView
+          ? _GridView(
+              key: const ValueKey('grid'),
+              concerts: concerts,
+              onEdit: onEdit,
+              onDelete: onDelete,
+            )
+          : _ListView(
+              key: const ValueKey('list'),
+              concerts: concerts,
+              onLike: onLike,
+              onFavorite: onFavorite,
+              onRatingChanged: onRatingChanged,
+              onEdit: onEdit,
+              onDelete: onDelete,
+            ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Vista grid
 // ---------------------------------------------------------------------------
 
 class _GridView extends StatelessWidget {
@@ -312,6 +412,10 @@ class _GridView extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Vista lista
+// ---------------------------------------------------------------------------
 
 class _ListView extends StatelessWidget {
   final List<Concert> concerts;

@@ -1,3 +1,5 @@
+import 'concert_participant.dart';
+
 class Concert {
   final String id;
   final String name;
@@ -10,6 +12,9 @@ class Concert {
   final bool liked;
   final String venue;
   final String city;
+  final List<String> participantIds;
+  final List<ConcertParticipant> participants;
+  final String userId;
 
   const Concert({
     required this.id,
@@ -23,16 +28,15 @@ class Concert {
     this.imageUrl = '',
     this.rating = 0,
     this.liked = false,
+    this.participantIds = const [],
+    this.participants = const [],
+    this.userId = '',
   });
 
-  /// Indica si el concierto ya ha pasado.
   bool get isPastConcert {
     final now = DateTime.now();
-
     final today = DateTime(now.year, now.month, now.day);
-
     final concertDay = DateTime(date.year, date.month, date.day);
-
     return concertDay.isBefore(today);
   }
 
@@ -48,6 +52,9 @@ class Concert {
     bool? liked,
     String? venue,
     String? city,
+    List<String>? participantIds,
+    List<ConcertParticipant>? participants,
+    String? userId,
   }) {
     return Concert(
       id: id ?? this.id,
@@ -61,6 +68,9 @@ class Concert {
       liked: liked ?? this.liked,
       venue: venue ?? this.venue,
       city: city ?? this.city,
+      participantIds: participantIds ?? this.participantIds,
+      participants: participants ?? this.participants,
+      userId: userId ?? this.userId,
     );
   }
 }

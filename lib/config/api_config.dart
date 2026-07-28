@@ -4,22 +4,29 @@ class ApiConfig {
   static const String baseUrl = 'https://conciertos-backend.onrender.com';
 
   static const String concertsEndpoint = '$baseUrl/concerts';
-
   static const String loginEndpoint = '$baseUrl/auth/login';
-
   static const String registerEndpoint = '$baseUrl/auth/register';
-
   static const String uploadsEndpoint = '$baseUrl/uploads/image';
-
   static const String photosFeedEndpoint = '$baseUrl/photos/feed';
-
-  // 👇 NUEVO
   static const String userAvatarEndpoint = '$baseUrl/users/avatar';
 
-  /// Fotos de un concierto concreto: `/concerts/:id/photos`.
+  // Amigos
+  static const String friendsEndpoint = '$baseUrl/friends';
+  static const String friendsSearchEndpoint = '$baseUrl/friends/search';
+  static const String friendsPendingEndpoint = '$baseUrl/friends/pending';
+  static String friendRequestEndpoint(String receiverId) =>
+      '$baseUrl/friends/request/$receiverId';
+  static String friendAcceptEndpoint(String friendshipId) =>
+      '$baseUrl/friends/accept/$friendshipId';
+  static String friendEndpoint(String friendshipId) =>
+      '$baseUrl/friends/$friendshipId';
+
+  // Etiquetado en conciertos
+  static String concertTagEndpoint(String concertId, String friendId) =>
+      '$concertsEndpoint/$concertId/tag/$friendId';
+
+  // Fotos
   static String concertPhotosEndpoint(String concertId) =>
       '$concertsEndpoint/$concertId/photos';
-
-  /// Una foto concreta: `/photos/:id`.
   static String photoEndpoint(String photoId) => '$baseUrl/photos/$photoId';
 }

@@ -16,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final AuthController _auth = AuthController.instance;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -26,18 +27,23 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
+    debugPrint('📧 email: "${_emailController.text.trim()}"');
+    debugPrint('🔑 password length: ${_passwordController.text.length}');
 
     try {
       await _auth.login(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+        email: _emailController.text
+            .trim()
+            .replaceAll('\n', '')
+            .replaceAll('\r', ''),
+        password: _passwordController.text.trim(),
       );
 
       if (!mounted) return;
-      // Login posterior al primer uso → directo a home, sin splash
       context.go('/');
     } catch (e) {
       if (!mounted) return;
+      debugPrint('❌ LOGIN ERROR: $e');
 
       String message = 'No se ha podido iniciar sesión.';
       final error = e.toString().toLowerCase();
@@ -76,6 +82,8 @@ class _LoginPageState extends State<LoginPage> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    autocorrect: false,
                     decoration: const InputDecoration(
                       labelText: 'Email',
                       prefixIcon: Icon(Icons.email_outlined),
@@ -89,10 +97,20 @@ class _LoginPageState extends State<LoginPage> {
 
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
                       labelText: 'Contraseña',
-                      prefixIcon: Icon(Icons.lock_outline),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                      ),
                     ),
                     validator: (v) => (v == null || v.isEmpty)
                         ? 'Introduce tu contraseña'
