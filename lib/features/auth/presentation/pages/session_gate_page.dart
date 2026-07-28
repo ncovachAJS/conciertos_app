@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../controllers/auth_controller.dart';
+import '../../../notifications/presentation/controllers/notifications_controller.dart';
 
 class SessionGatePage extends StatefulWidget {
   const SessionGatePage({super.key});
@@ -27,12 +28,14 @@ class _SessionGatePageState extends State<SessionGatePage> {
     if (!mounted) return;
 
     if (auth.user == null) {
-      // Sin sesión → siempre al login
       context.go('/login');
       return;
     }
 
-    // Con sesión: splash solo si es la primera vez
+    // Inicializar notificaciones push
+    NotificationsController.instance.init().ignore();
+    NotificationsController.instance.refreshUnreadCount().ignore();
+
     final hasSeenSplash = prefs.getBool('hasSeenSplash') ?? false;
     if (!hasSeenSplash) {
       context.go('/splash');

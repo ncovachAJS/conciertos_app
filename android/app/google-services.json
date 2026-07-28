@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "988375120062",
+    "project_id": "la-vida-en-directo",
+    "storage_bucket": "la-vida-en-directo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988375120062:android:a8b1cee2618d81656106ef",
+        "android_client_info": {
+          "package_name": "com.nico.lavidaendirecto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJ1UdY8ve5VRPlLxZHYvL1LnfWJFZZnag"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
