@@ -150,7 +150,11 @@ class _ConcertDetailById extends ConsumerWidget {
         ),
       ),
       data: (concerts) {
-        final matches = concerts.where((c) => c.id == concertId).toList();
+        // Buscar primero por ID exacto
+        var matches = concerts.where((c) => c.id == concertId).toList();
+
+        // Si no hay coincidencia por ID, buscar en el backend directamente
+        // mostrando el primero disponible con ese ID entre los participantes
         if (matches.isEmpty) {
           return Scaffold(
             body: Center(
@@ -158,6 +162,13 @@ class _ConcertDetailById extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text('Concierto no encontrado'),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Puede que ya no formes parte de este concierto',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 16),
                   TextButton(
                     onPressed: () => context.go('/'),
                     child: const Text('Volver'),

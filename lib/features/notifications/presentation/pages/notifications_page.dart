@@ -33,10 +33,33 @@ class _NotificationsPageState extends State<NotificationsPage> {
     super.dispose();
   }
 
+  Future<void> _confirmDeleteAll() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar notificaciones'),
+        content: const Text(
+          '¿Seguro que quieres eliminar todas las notificaciones?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Eliminar todo'),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) _ctrl.deleteAll();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    const red = Color(0xFFE53935);
 
     return Scaffold(
       appBar: AppBar(
@@ -46,11 +69,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          if (_ctrl.unreadCount > 0)
-            TextButton(
-              onPressed: _ctrl.markAllRead,
-              child: const Text('Marcar todo leído'),
+          if (_ctrl.notifications.isNotEmpty) ...[
+            if (_ctrl.unreadCount > 0)
+              TextButton(
+                onPressed: _ctrl.markAllRead,
+                child: const Text('Leído'),
+              ),
+            IconButton(
+              icon: const Icon(Icons.delete_sweep_outlined),
+              tooltip: 'Eliminar todo',
+              onPressed: _confirmDeleteAll,
             ),
+          ],
         ],
       ),
       body: _ctrl.loading
@@ -78,9 +108,23 @@ class _NotificationsPageState extends State<NotificationsPage> {
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (_, i) {
                 final n = _ctrl.notifications[i];
-                return _NotificationTile(
-                  notification: n,
-                  onTap: () => _onTap(n),
+                return Dismissible(
+                  key: ValueKey(n.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    color: Colors.red.shade700,
+                    child: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.white,
+                    ),
+                  ),
+                  onDismissed: (_) => _ctrl.deleteOne(n.id),
+                  child: _NotificationTile(
+                    notification: n,
+                    onTap: () => _onTap(n),
+                  ),
                 );
               },
             ),
@@ -89,14 +133,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   void _onTap(AppNotificationModel n) {
     if (!n.read) _ctrl.markRead(n.id);
-
     final data = n.data ?? {};
     switch (n.type) {
       case 'CONCERT_TAG':
       case 'FRIEND_CONCERT':
-        final concertId = data['concertId']?.toString();
-        if (concertId != null) context.push('/concert-detail-by-id/$concertId');
-        break;
       case 'PHOTO_TAG':
         final concertId = data['concertId']?.toString();
         if (concertId != null) context.push('/concert-detail-by-id/$concertId');
@@ -146,7 +186,6 @@ class _NotificationTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar del sender o icono de tipo
             notification.sender != null
                 ? FriendAvatar(
                     name: notification.sender!.name,

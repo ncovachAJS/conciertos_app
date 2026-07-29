@@ -120,6 +120,24 @@ class NotificationsController extends ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<void> deleteOne(String id) async {
+    try {
+      await _api.deleteOne(id);
+      notifications.removeWhere((n) => n.id == id);
+      unreadCount = notifications.where((n) => !n.read).length;
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<void> deleteAll() async {
+    try {
+      await _api.deleteAll();
+      notifications = [];
+      unreadCount = 0;
+      notifyListeners();
+    } catch (_) {}
+  }
+
   Future<void> logout(String? fcmToken) async {
     if (fcmToken != null) {
       try {

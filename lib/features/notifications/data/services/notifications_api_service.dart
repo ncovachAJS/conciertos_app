@@ -52,6 +52,20 @@ class NotificationsApiService {
     );
   }
 
+  Future<void> deleteOne(String id) async {
+    await http.delete(
+      Uri.parse('${ApiConfig.baseUrl}/notifications/$id'),
+      headers: _headers,
+    );
+  }
+
+  Future<void> deleteAll() async {
+    await http.delete(
+      Uri.parse('${ApiConfig.baseUrl}/notifications'),
+      headers: _headers,
+    );
+  }
+
   Future<void> saveToken(String token, String platform) async {
     await http.post(
       Uri.parse('${ApiConfig.baseUrl}/notifications/token'),
