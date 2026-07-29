@@ -1,4 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../features/concerts/presentation/providers/concerts_provider.dart';
 
 import '../features/profile/presentation/pages/profile_page.dart';
 import '../features/recommendations/presentation/pages/recommendations_page.dart';
@@ -51,6 +55,13 @@ final appRouter = GoRouter(
           builder: (context, state) {
             final concert = state.extra as Concert;
             return ConcertDetailPage(concert: concert);
+          },
+        ),
+        GoRoute(
+          path: '/concert-detail-by-id/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return _ConcertDetailById(concertId: id);
           },
         ),
         GoRoute(
@@ -111,3 +122,53 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
+// Widget que busca el concierto por ID y abre el detalle
+class _ConcertDetailById extends ConsumerWidget {
+  final String concertId;
+  const _ConcertDetailById({required this.concertId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final concertsAsync = ref.watch(concertsProvider);
+
+    return concertsAsync.when(
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (_, __) => Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('No se encontró el concierto'),
+              TextButton(
+                onPressed: () => context.go('/'),
+                child: const Text('Volver'),
+              ),
+            ],
+          ),
+        ),
+      ),
+      data: (concerts) {
+        final matches = concerts.where((c) => c.id == concertId).toList();
+        if (matches.isEmpty) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Concierto no encontrado'),
+                  TextButton(
+                    onPressed: () => context.go('/'),
+                    child: const Text('Volver'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return ConcertDetailPage(concert: matches.first);
+      },
+    );
+  }
+}

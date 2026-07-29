@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/concerts/domain/entities/concert.dart';
 
 class ConcertCard extends StatelessWidget {
@@ -22,12 +23,17 @@ class ConcertCard extends StatelessWidget {
     this.onRatingChanged,
   });
 
+  bool get _isOwner {
+    final currentUserId = AuthController.instance.user?.id ?? '';
+    if (concert.userId.isEmpty) return true; // concierto antiguo sin userId
+    return concert.userId == currentUserId;
+  }
+
   Widget _chip(BuildContext context, IconData icon, String text) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        // ✅ Color adaptado al tema
         color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(30),
       ),
@@ -120,11 +126,11 @@ class ConcertCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isOwner = _isOwner;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Material(
-        // ✅ Color de tarjeta adaptado al tema
         color: cs.surface,
         elevation: 4,
         shadowColor: cs.shadow.withOpacity(0.15),
@@ -187,6 +193,41 @@ class ConcertCard extends StatelessWidget {
                         ],
                       ),
                     ),
+
+                    // Badge "compartido" si no eres el dueño
+                    if (!isOwner)
+                      Positioned(
+                        top: 18,
+                        right: 18,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.group_rounded,
+                                color: Colors.white70,
+                                size: 14,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Compartido',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -208,7 +249,8 @@ class ConcertCard extends StatelessWidget {
                     ],
                   ),
 
-                  if (concert.isPastConcert) ...[
+                  // Valoración solo si es el dueño y el concierto es pasado
+                  if (concert.isPastConcert && isOwner) ...[
                     const SizedBox(height: 22),
                     Divider(color: cs.onSurface.withOpacity(0.12), height: 1),
                     const SizedBox(height: 18),
@@ -256,47 +298,64 @@ class ConcertCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ], // isPastConcert
+                  ],
 
                   const SizedBox(height: 20),
-
                   Divider(color: cs.onSurface.withOpacity(0.12)),
-
                   const SizedBox(height: 20),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: onEdit,
-                          icon: const Icon(Icons.edit_rounded),
-                          label: const Text('Editar'),
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size.fromHeight(54),
-                            backgroundColor: Colors.blueGrey.shade700,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                  // Botones editar/eliminar solo si es el dueño
+                  if (isOwner)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: onEdit,
+                            icon: const Icon(Icons.edit_rounded),
+                            label: const Text('Editar'),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(54),
+                              backgroundColor: Colors.blueGrey.shade700,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: onDelete,
-                          icon: const Icon(Icons.delete_rounded),
-                          label: const Text('Eliminar'),
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size.fromHeight(54),
-                            backgroundColor: Colors.red.shade700,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: onDelete,
+                            icon: const Icon(Icons.delete_rounded),
+                            label: const Text('Eliminar'),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(54),
+                              backgroundColor: Colors.red.shade700,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
                           ),
                         ),
+                      ],
+                    )
+                  else
+                    // Para conciertos compartidos, solo botón ver detalle
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: onImageTap,
+                        icon: const Icon(Icons.visibility_outlined),
+                        label: const Text('Ver concierto'),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size.fromHeight(54),
+                          backgroundColor: Colors.blueGrey.shade700,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
                 ],
               ),
             ),
