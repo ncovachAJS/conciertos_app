@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../concerts/domain/entities/concert.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 
 /// Muestra el último concierto pasado sin valorar con CTA para puntuarlo.
+/// Solo para conciertos propios — los compartidos no se pueden valorar.
 class DashboardRatePending extends ConsumerWidget {
   const DashboardRatePending({super.key});
 
@@ -13,10 +14,12 @@ class DashboardRatePending extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final concerts = ref.watch(concertsProvider).asData?.value ?? [];
     final now = DateTime.now();
+    final currentUserId = AuthController.instance.user?.id ?? '';
 
-    final pending =
-        concerts.where((c) => c.date.isBefore(now) && c.rating == 0).toList()
-          ..sort((a, b) => b.date.compareTo(a.date));
+    final pending = concerts.where((c) {
+      final isOwn = c.userId.isEmpty || c.userId == currentUserId;
+      return isOwn && c.date.isBefore(now) && c.rating == 0;
+    }).toList()..sort((a, b) => b.date.compareTo(a.date));
 
     if (pending.isEmpty) return const SizedBox.shrink();
 
