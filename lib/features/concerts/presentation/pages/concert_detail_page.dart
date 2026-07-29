@@ -14,14 +14,15 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/widgets/app_page.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
+import '../../../concerts/data/models/concert_model.dart';
 import '../../../photos/presentation/widgets/memories_section.dart';
 import '../../../setlist/data/services/setlist_service.dart';
 import '../../../setlist/domain/entities/setlist.dart';
 import '../../../setlist/presentation/widgets/setlist_section.dart';
 import '../../../spotify/domain/entities/data/services/spotify_api_service.dart';
 import '../../../spotify/domain/entities/spotify_artist.dart';
-import '../../data/models/concert_model.dart';
 import '../../domain/entities/concert.dart';
 
 class ConcertDetailPage extends ConsumerStatefulWidget {
@@ -211,20 +212,25 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
       );
     }
 
+    final currentUserId = AuthController.instance.user?.id ?? '';
+    final isOwner = concert.userId == currentUserId;
+
     return AppPage(
       title: '🎸 ${concert.artist}',
       showBackButton: true,
       actions: [
-        IconButton(
-          tooltip: 'Editar',
-          onPressed: () => _edit(concert),
-          icon: const Icon(Icons.edit_outlined),
-        ),
-        IconButton(
-          tooltip: 'Eliminar',
-          onPressed: () => _delete(concert),
-          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-        ),
+        if (isOwner) ...[
+          IconButton(
+            tooltip: 'Editar',
+            onPressed: () => _edit(concert),
+            icon: const Icon(Icons.edit_outlined),
+          ),
+          IconButton(
+            tooltip: 'Eliminar',
+            onPressed: () => _delete(concert),
+            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+          ),
+        ],
       ],
       child: ListView(
         padding: const EdgeInsets.all(16),

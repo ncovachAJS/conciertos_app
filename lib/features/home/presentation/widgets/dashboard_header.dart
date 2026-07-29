@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../notifications/presentation/controllers/notifications_controller.dart';
-import '../../notificaciones/pages/notifications_page.dart';
+import '../../../notifications/presentation/pages/notifications_page.dart';
 
 class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});

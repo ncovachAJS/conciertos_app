@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../../config/api_config.dart';
@@ -20,6 +21,8 @@ class NotificationsApiService {
       Uri.parse('${ApiConfig.baseUrl}/notifications'),
       headers: _headers,
     );
+    debugPrint('🔔 notifications status: ${response.statusCode}');
+    debugPrint('🔔 notifications body: ${response.body}');
     if (response.statusCode != 200) throw Exception(response.body);
     final List list = jsonDecode(response.body);
     return list.map((e) => AppNotificationModel.fromJson(e)).toList();
