@@ -524,6 +524,55 @@ class AppLocalizationsEs extends AppLocalizations {
   String get searchFriendHint => 'Buscar por nombre o email...';
 
   @override
+  String get friendsSearchPeople => 'Buscar personas';
+
+  @override
+  String friendsTabFriends(int count) {
+    return 'Amigos ($count)';
+  }
+
+  @override
+  String get friendsTabRequests => 'Solicitudes';
+
+  @override
+  String friendsTabRequestsCount(int count) {
+    return 'Solicitudes ($count)';
+  }
+
+  @override
+  String get friendsTypeToSearch => 'Escribe al menos 2 caracteres';
+
+  @override
+  String get friendsNoUsersFound => 'No se encontraron usuarios';
+
+  @override
+  String get friendAlreadyFriend => 'Amigo ✓';
+
+  @override
+  String get friendRequestSent => 'Enviada';
+
+  @override
+  String get friendAccept => 'Aceptar';
+
+  @override
+  String get friendReject => 'Rechazar';
+
+  @override
+  String get friendAdd => 'Añadir';
+
+  @override
+  String get friendsNoFriendsHere =>
+      'Aún no tienes amigos.\nBúscalos con el icono de arriba.';
+
+  @override
+  String friendDeleteConfirm(String name) {
+    return '¿Seguro que quieres eliminar a $name?';
+  }
+
+  @override
+  String get friendsNoPendingRequests => 'No tienes solicitudes pendientes.';
+
+  @override
   String get notificationsTitle => 'Notificaciones';
 
   @override
@@ -1102,4 +1151,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mapNotAvailable => 'Mapa no disponible';
+
+  @override
+  String get concertMapTitle => 'Mapa de conciertos';
+
+  @override
+  String get concertMapDashboardSubtitle => 'Todos tus recintos en un mapa';
+
+  @override
+  String get concertMapLoading => 'Localizando recintos…';
+
+  @override
+  String concertMapProgress(int done, int total) {
+    return '$done de $total recintos';
+  }
+
+  @override
+  String get concertMapNoData =>
+      'Añade conciertos con recinto o ciudad\npara verlos en el mapa.';
+
+  @override
+  String get concertMapConcertsHere => 'Conciertos aquí';
+
+  @override
+  String get concertMapOpenInMaps => 'Abrir en Maps';
 }

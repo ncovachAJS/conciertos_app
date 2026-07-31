@@ -521,6 +521,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchFriendHint => 'Search by name or email...';
 
   @override
+  String get friendsSearchPeople => 'Search people';
+
+  @override
+  String friendsTabFriends(int count) {
+    return 'Friends ($count)';
+  }
+
+  @override
+  String get friendsTabRequests => 'Requests';
+
+  @override
+  String friendsTabRequestsCount(int count) {
+    return 'Requests ($count)';
+  }
+
+  @override
+  String get friendsTypeToSearch => 'Type at least 2 characters';
+
+  @override
+  String get friendsNoUsersFound => 'No users found';
+
+  @override
+  String get friendAlreadyFriend => 'Friend ✓';
+
+  @override
+  String get friendRequestSent => 'Sent';
+
+  @override
+  String get friendAccept => 'Accept';
+
+  @override
+  String get friendReject => 'Decline';
+
+  @override
+  String get friendAdd => 'Add';
+
+  @override
+  String get friendsNoFriendsHere =>
+      'No friends yet.\nSearch with the icon above.';
+
+  @override
+  String friendDeleteConfirm(String name) {
+    return 'Are you sure you want to remove $name?';
+  }
+
+  @override
+  String get friendsNoPendingRequests => 'No pending requests.';
+
+  @override
   String get notificationsTitle => 'Notifications';
 
   @override
@@ -1096,4 +1145,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapNotAvailable => 'Map not available';
+
+  @override
+  String get concertMapTitle => 'Concert map';
+
+  @override
+  String get concertMapDashboardSubtitle => 'All your venues on a map';
+
+  @override
+  String get concertMapLoading => 'Locating venues…';
+
+  @override
+  String concertMapProgress(int done, int total) {
+    return '$done of $total venues';
+  }
+
+  @override
+  String get concertMapNoData =>
+      'Add concerts with a venue or city\nto see them on the map.';
+
+  @override
+  String get concertMapConcertsHere => 'Concerts here';
+
+  @override
+  String get concertMapOpenInMaps => 'Open in Maps';
 }

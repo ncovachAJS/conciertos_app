@@ -220,6 +220,29 @@
   "deleteFriendTitle": "Eliminar amigo",
   "friendRequestReceived": "Quiere ser tu amigo",
   "searchFriendHint": "Buscar por nombre o email...",
+  "friendsSearchPeople": "Buscar personas",
+  "friendsTabFriends": "Amigos ({count})",
+  "@friendsTabFriends": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "friendsTabRequests": "Solicitudes",
+  "friendsTabRequestsCount": "Solicitudes ({count})",
+  "@friendsTabRequestsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "friendsTypeToSearch": "Escribe al menos 2 caracteres",
+  "friendsNoUsersFound": "No se encontraron usuarios",
+  "friendAlreadyFriend": "Amigo ✓",
+  "friendRequestSent": "Enviada",
+  "friendAccept": "Aceptar",
+  "friendReject": "Rechazar",
+  "friendAdd": "Añadir",
+  "friendsNoFriendsHere": "Aún no tienes amigos.\nBúscalos con el icono de arriba.",
+  "friendDeleteConfirm": "¿Seguro que quieres eliminar a {name}?",
+  "@friendDeleteConfirm": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "friendsNoPendingRequests": "No tienes solicitudes pendientes.",
 
   "notificationsTitle": "Notificaciones",
   "markRead": "Leído",
@@ -528,5 +551,19 @@
 
   "mapVenueLocation": "Ubicación del recinto",
   "mapOpenIn": "Abrir en mapas",
-  "mapNotAvailable": "Mapa no disponible"
+  "mapNotAvailable": "Mapa no disponible",
+
+  "concertMapTitle": "Mapa de conciertos",
+  "concertMapDashboardSubtitle": "Todos tus recintos en un mapa",
+  "concertMapLoading": "Localizando recintos…",
+  "concertMapProgress": "{done} de {total} recintos",
+  "@concertMapProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "concertMapNoData": "Añade conciertos con recinto o ciudad\npara verlos en el mapa.",
+  "concertMapConcertsHere": "Conciertos aquí",
+  "concertMapOpenInMaps": "Abrir en Maps"
 }
