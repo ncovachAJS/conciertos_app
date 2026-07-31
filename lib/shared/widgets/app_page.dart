@@ -22,7 +22,9 @@ class AppPage extends StatelessWidget {
     final showAppBar = title != null;
 
     return GestureDetector(
-      // Oculta el teclado al tocar fuera de un input
+      // Oculta el teclado al tocar fuera de un input.
+      // translucent: permite que los gestos lleguen a los widgets hijo (scroll, InkWell)
+      behavior: HitTestBehavior.translucent,
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: showAppBar
