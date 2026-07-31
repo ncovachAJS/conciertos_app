@@ -97,12 +97,15 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
     _geocodeAll();
   }
 
+  // Cache en memoria: evita re-geocodificar si el usuario vuelve a abrir el mapa
+  static final Map<String, LatLng> _geoCache = {};
+
   Future<void> _geocodeAll() async {
-    for (final group in _groups) {
-      await _geocodeGroup(group);
-      // Esperar 400ms entre peticiones para respetar el rate-limit de Nominatim
-      await Future.delayed(const Duration(milliseconds: 400));
-    }
+    // Todas las peticiones en paralelo — Photon no tiene rate-limit estricto
+    await Future.wait(
+      _groups.map(_geocodeGroup),
+      eagerError: false,
+    );
     if (mounted) {
       setState(() => _loading = false);
       _fitBounds();
@@ -110,29 +113,40 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
   }
 
   Future<void> _geocodeGroup(_VenueGroup group) async {
+    final query = group.geocodeQuery;
+
+    // Devolver desde cache si ya fue geocodificado
+    if (_geoCache.containsKey(query)) {
+      group.location = _geoCache[query];
+      if (mounted) setState(() => _geocoded++);
+      return;
+    }
+
     try {
+      // Photon (backed by OSM): sin rate-limit, acepta peticiones paralelas,
+      // mejor para nombres de recintos/POI que Nominatim
       final uri = Uri.parse(
-        'https://nominatim.openstreetmap.org/search'
-        '?q=${Uri.encodeComponent(group.geocodeQuery)}&format=json&limit=1',
+        'https://photon.komoot.io/api/?q=${Uri.encodeComponent(query)}&limit=1',
       );
       final response = await http.get(uri, headers: {
         'User-Agent': 'ConciertosApp/1.0',
       });
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as List;
-        if (data.isNotEmpty) {
-          final lat = double.tryParse(data[0]['lat'] as String);
-          final lng = double.tryParse(data[0]['lon'] as String);
-          if (lat != null && lng != null) {
-            group.location = LatLng(lat, lng);
-          }
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final features = data['features'] as List?;
+        if (features != null && features.isNotEmpty) {
+          // GeoJSON: coordinates = [lng, lat]
+          final coords = features[0]['geometry']['coordinates'] as List;
+          final lat = (coords[1] as num).toDouble();
+          final lng = (coords[0] as num).toDouble();
+          final location = LatLng(lat, lng);
+          group.location = location;
+          _geoCache[query] = location;
         }
       }
     } catch (_) {}
 
-    if (mounted) {
-      setState(() => _geocoded++);
-    }
+    if (mounted) setState(() => _geocoded++);
   }
 
   void _fitBounds() {
