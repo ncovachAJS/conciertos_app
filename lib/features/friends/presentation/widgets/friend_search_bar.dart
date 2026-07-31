@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 class FriendSearchBar extends StatefulWidget {
   final ValueChanged<String> onChanged;
@@ -20,12 +21,13 @@ class _FriendSearchBarState extends State<FriendSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return TextField(
       controller: _controller,
       autofocus: true,
       onChanged: widget.onChanged,
       decoration: InputDecoration(
-        hintText: 'Buscar por nombre o email...',
+        hintText: l.searchFriendHint,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: _controller.text.isNotEmpty
             ? IconButton(

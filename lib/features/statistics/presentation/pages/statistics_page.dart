@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 
@@ -105,29 +107,13 @@ class _Stats {
     return map;
   }
 
-  String get favoriteMonth {
+  int? get favoriteMonthIndex {
     final map = <int, int>{};
     for (final c in concerts) {
       map[c.date.month] = (map[c.date.month] ?? 0) + 1;
     }
-    if (map.isEmpty) return '—';
-    final top = map.entries.reduce((a, b) => a.value >= b.value ? a : b);
-    const names = [
-      '',
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre',
-    ];
-    return names[top.key];
+    if (map.isEmpty) return null;
+    return map.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   }
 
   List<MapEntry<String, int>> _top(Iterable<String> values, {int take = 5}) {
@@ -142,6 +128,29 @@ class _Stats {
 }
 
 // ---------------------------------------------------------------------------
+// Helper de localización de mes
+// ---------------------------------------------------------------------------
+
+String _monthName(AppLocalizations l, int? index) {
+  if (index == null) return l.noDataDash;
+  switch (index) {
+    case 1: return l.monthJanuary;
+    case 2: return l.monthFebruary;
+    case 3: return l.monthMarch;
+    case 4: return l.monthApril;
+    case 5: return l.monthMay;
+    case 6: return l.monthJune;
+    case 7: return l.monthJuly;
+    case 8: return l.monthAugust;
+    case 9: return l.monthSeptember;
+    case 10: return l.monthOctober;
+    case 11: return l.monthNovember;
+    case 12: return l.monthDecember;
+    default: return l.noDataDash;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Página
 // ---------------------------------------------------------------------------
 
@@ -150,6 +159,7 @@ class StatisticsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final concertsAsync = ref.watch(concertsProvider);
 
     return Scaffold(
@@ -157,7 +167,7 @@ class StatisticsPage extends ConsumerWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        title: const Text('Estadísticas'),
+        title: Text(l.statisticsTitle),
       ),
       body: concertsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -174,7 +184,7 @@ class StatisticsPage extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Error al cargar',
+                l.error,
                 style: TextStyle(
                   color: Theme.of(
                     context,
@@ -184,7 +194,7 @@ class StatisticsPage extends ConsumerWidget {
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => ref.invalidate(concertsProvider),
-                child: const Text('Reintentar'),
+                child: Text(l.retry),
               ),
             ],
           ),
@@ -206,7 +216,7 @@ class StatisticsPage extends ConsumerWidget {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Añade conciertos para ver tus estadísticas.',
+                      l.addConcertsForStats,
                       style: TextStyle(
                         color: Theme.of(
                           context,
@@ -221,7 +231,63 @@ class StatisticsPage extends ConsumerWidget {
             );
           }
 
-          final stats = _Stats(concerts);
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final currentUserId =
+              AuthController.instance.user?.id ?? '';
+
+          final pastAll = concerts
+              .where((c) => !c.date.isAfter(today))
+              .toList();
+
+          final myDates = pastAll
+              .where((c) => c.userId == currentUserId || c.userId.isEmpty)
+              .map((c) => DateTime(c.date.year, c.date.month, c.date.day))
+              .toSet();
+
+          final past = pastAll
+              .where(
+                (c) =>
+                    c.userId == currentUserId ||
+                    c.userId.isEmpty ||
+                    !myDates.contains(
+                      DateTime(c.date.year, c.date.month, c.date.day),
+                    ),
+              )
+              .toList();
+
+          if (past.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.bar_chart,
+                      size: 64,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.24),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      l.addConcertsForStats,
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.54),
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final stats = _Stats(past);
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
@@ -232,7 +298,7 @@ class StatisticsPage extends ConsumerWidget {
               if (stats.byYear.length > 1) ...[
                 _SectionTitle(
                   icon: Icons.calendar_month,
-                  title: 'Conciertos por año',
+                  title: l.concertsByYear,
                 ),
                 const SizedBox(height: 16),
                 _YearBarChart(byYear: stats.byYear),
@@ -240,7 +306,7 @@ class StatisticsPage extends ConsumerWidget {
               ],
 
               if (stats.topArtists.isNotEmpty) ...[
-                _SectionTitle(icon: Icons.person, title: 'Artistas más vistos'),
+                _SectionTitle(icon: Icons.person, title: l.topArtists),
                 const SizedBox(height: 16),
                 _HorizontalBars(
                   entries: stats.topArtists,
@@ -252,7 +318,7 @@ class StatisticsPage extends ConsumerWidget {
               if (stats.topFestivals.isNotEmpty) ...[
                 _SectionTitle(
                   icon: Icons.festival,
-                  title: 'Festivales más visitados',
+                  title: l.topFestivals,
                 ),
                 const SizedBox(height: 16),
                 _HorizontalBars(
@@ -265,7 +331,7 @@ class StatisticsPage extends ConsumerWidget {
               if (stats.topCities.isNotEmpty) ...[
                 _SectionTitle(
                   icon: Icons.location_city,
-                  title: 'Ciudades favoritas',
+                  title: l.favoriteCities,
                 ),
                 const SizedBox(height: 16),
                 _HorizontalBars(
@@ -277,7 +343,7 @@ class StatisticsPage extends ConsumerWidget {
 
               _SectionTitle(
                 icon: Icons.star_rounded,
-                title: 'Distribución de valoraciones',
+                title: l.ratingDistribution,
               ),
               const SizedBox(height: 16),
               _RatingBars(byRating: stats.byRating),
@@ -301,40 +367,41 @@ class _SummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final items = [
       _CardData(
         '${stats.total}',
-        'Conciertos',
+        l.totalConcertsLabel,
         Icons.music_note_rounded,
         const Color(0xFFE53935),
       ),
       _CardData(
         '${stats.uniqueArtists}',
-        'Artistas',
+        l.uniqueArtistsLabel,
         Icons.person_rounded,
         const Color(0xFF42A5F5),
       ),
       _CardData(
         '${stats.uniqueFestivals}',
-        'Festivales',
+        l.uniqueFestivalsLabel,
         Icons.festival_rounded,
         const Color(0xFF66BB6A),
       ),
       _CardData(
-        stats.avgRating > 0 ? stats.avgRating.toStringAsFixed(1) : '—',
-        'Valoración media',
+        stats.avgRating > 0 ? stats.avgRating.toStringAsFixed(1) : l.noDataDash,
+        l.avgRatingLabel,
         Icons.star_rounded,
         const Color(0xFFFFC107),
       ),
       _CardData(
         '${stats.activeYears}',
-        stats.activeYears == 1 ? 'Año activo' : 'Años activo',
+        stats.activeYears == 1 ? l.activeYearLabel : l.activeYearsLabel,
         Icons.timeline_rounded,
         const Color(0xFFAB47BC),
       ),
       _CardData(
-        stats.favoriteMonth,
-        'Mes favorito',
+        _monthName(l, stats.favoriteMonthIndex),
+        l.favoriteMonthLabel,
         Icons.calendar_today_rounded,
         const Color(0xFFFF7043),
       ),

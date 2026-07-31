@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -73,7 +74,7 @@ class RecommendationCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: _openTicketUrl,
                     icon: const Icon(Icons.confirmation_number),
-                    label: const Text('Comprar entradas'),
+                    label: Text(AppLocalizations.of(context).buyTickets),
                   ),
                 ),
               ],

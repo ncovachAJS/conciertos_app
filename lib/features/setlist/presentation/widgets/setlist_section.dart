@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/setlist.dart';
@@ -34,14 +35,14 @@ class _SetlistSectionState extends State<SetlistSection> {
               children: [
                 const Icon(Icons.queue_music, color: Colors.redAccent),
                 const SizedBox(width: 10),
-                const Text(
-                  'Setlist',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context).setlistTitle,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 if (widget.setlist != null) ...[
                   const Spacer(),
                   Text(
-                    '${widget.setlist!.totalSongs} canciones',
+                    AppLocalizations.of(context).setlistSongCount(widget.setlist!.totalSongs),
                     style: TextStyle(
                       color: Theme.of(
                         context,
@@ -64,9 +65,9 @@ class _SetlistSectionState extends State<SetlistSection> {
               )
             else if (widget.setlist == null || widget.setlist!.sets.isEmpty)
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(
-                  'No se encontró ningún setlist para este concierto.',
+                  AppLocalizations.of(context).setlistNotFound,
                   style: TextStyle(
                     color: Theme.of(
                       context,
@@ -154,14 +155,15 @@ class _SetlistContent extends StatelessWidget {
     }
 
     if (hasMore) {
+      final l = AppLocalizations.of(context);
       widgets.add(
         TextButton.icon(
           onPressed: onToggle,
           icon: Icon(showAll ? Icons.expand_less : Icons.expand_more),
           label: Text(
             showAll
-                ? 'Ver menos'
-                : 'Ver las ${allSongs.length - previewCount} canciones restantes',
+                ? l.setlistShowLess
+                : l.setlistShowRemaining(allSongs.length - previewCount),
           ),
         ),
       );
@@ -263,7 +265,7 @@ class _SongTile extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 3),
                     child: Text(
-                      'Versión de ${song.coverOf}',
+                      AppLocalizations.of(context).setlistCoverOf(song.coverOf ?? ''),
                       style: TextStyle(
                         color: Theme.of(
                           context,
@@ -284,7 +286,7 @@ class _SongTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'con ${song.withArtist}',
+                          AppLocalizations.of(context).setlistWith(song.withArtist ?? ''),
                           style: const TextStyle(
                             color: Colors.amber,
                             fontSize: 12,

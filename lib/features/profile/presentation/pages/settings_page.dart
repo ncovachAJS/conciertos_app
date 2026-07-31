@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+import 'package:conciertos_app/app/locale_provider.dart';
 
 import '../../../../app/theme_provider.dart';
 
@@ -18,29 +20,29 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   final _auth = AuthController.instance;
 
   bool _notifications = true;
-  String _language = 'Español';
 
   Future<void> _changeName() async {
+    final l = AppLocalizations.of(context);
     final controller = TextEditingController(text: _auth.user?.name ?? '');
 
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cambiar nombre'),
+        title: Text(l.changeNameTitle),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(labelText: 'Nuevo nombre'),
+          decoration: InputDecoration(labelText: l.newNameLabel),
           autofocus: true,
           textCapitalization: TextCapitalization.words,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Guardar'),
+            child: Text(l.save),
           ),
         ],
       ),
@@ -54,7 +56,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Nombre actualizado ✅')));
+      ).showSnackBar(SnackBar(content: Text(l.nameUpdated)));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -64,6 +66,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _changePassword() async {
+    final l = AppLocalizations.of(context);
     final currentCtrl = TextEditingController();
     final newCtrl = TextEditingController();
     final confirmCtrl = TextEditingController();
@@ -71,27 +74,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cambiar contraseña'),
+        title: Text(l.changePasswordTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: currentCtrl,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Contraseña actual'),
+              decoration: InputDecoration(labelText: l.currentPasswordLabel),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: newCtrl,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Nueva contraseña'),
+              decoration: InputDecoration(labelText: l.newPasswordLabel),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: confirmCtrl,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Confirmar nueva contraseña',
+              decoration: InputDecoration(
+                labelText: l.confirmPasswordLabel,
               ),
             ),
           ],
@@ -99,19 +102,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             onPressed: () {
               if (newCtrl.text != confirmCtrl.text) {
                 ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(content: Text('Las contraseñas no coinciden')),
+                  SnackBar(content: Text(l.passwordsNoMatch)),
                 );
                 return;
               }
               Navigator.pop(ctx, true);
             },
-            child: const Text('Cambiar'),
+            child: Text(l.changePassword),
           ),
         ],
       ),
@@ -127,7 +130,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Contraseña actualizada ✅')));
+      ).showSnackBar(SnackBar(content: Text(l.passwordUpdated)));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -137,11 +140,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _changeTheme() async {
+    final l = AppLocalizations.of(context);
     final current = ref.read(themeProvider);
     final selected = await showDialog<ThemeMode>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('Apariencia'),
+        title: Text(l.appearanceSection),
         children:
             [
                   _ThemeOption(
@@ -198,47 +202,51 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _changeLanguage() async {
-    final selected = await showDialog<String>(
+    final l = AppLocalizations.of(context);
+    final currentLocale = ref.read(localeProvider);
+    showDialog(
       context: context,
-      builder: (ctx) => SimpleDialog(
-        title: const Text('Idioma'),
-        children: ['Español', 'English'].map((lang) {
-          return SimpleDialogOption(
-            onPressed: () => Navigator.pop(ctx, lang),
-            child: Row(
-              children: [
-                Icon(
-                  _language == lang
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_off,
-                  color: const Color(0xFFE53935),
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Text(lang),
-              ],
+      builder: (ctx) => AlertDialog(
+        title: Text(l.changeLanguageTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String>(
+              title: Text(l.languageSpanish),
+              value: 'es',
+              groupValue: currentLocale.languageCode,
+              onChanged: (v) {
+                ref.read(localeProvider.notifier).setLocale(const Locale('es'));
+                Navigator.pop(ctx);
+              },
             ),
-          );
-        }).toList(),
+            RadioListTile<String>(
+              title: Text(l.languageEnglish),
+              value: 'en',
+              groupValue: currentLocale.languageCode,
+              onChanged: (v) {
+                ref.read(localeProvider.notifier).setLocale(const Locale('en'));
+                Navigator.pop(ctx);
+              },
+            ),
+          ],
+        ),
       ),
     );
-
-    if (selected != null && mounted) {
-      setState(() => _language = selected);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final currentLocale = ref.watch(localeProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajustes')),
+      appBar: AppBar(title: Text(l.settingsTitle)),
       body: ListView(
         children: [
-          // Cuenta
-          _SectionHeader(title: 'Cuenta'),
+          _SectionHeader(title: l.accountSection),
           ListTile(
             leading: const Icon(Icons.person_outline),
-            title: const Text('Nombre de usuario'),
+            title: Text(l.usernameLabel),
             subtitle: Text(_auth.user?.name ?? '—'),
             trailing: const Icon(Icons.chevron_right),
             onTap: _changeName,
@@ -246,17 +254,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const Divider(height: 1, indent: 56),
           ListTile(
             leading: const Icon(Icons.lock_outline),
-            title: const Text('Cambiar contraseña'),
+            title: Text(l.changePassword),
             trailing: const Icon(Icons.chevron_right),
             onTap: _changePassword,
           ),
 
-          // Preferencias
-          _SectionHeader(title: 'Preferencias'),
+          _SectionHeader(title: l.preferencesSection),
           SwitchListTile(
             secondary: const Icon(Icons.notifications_outlined),
-            title: const Text('Notificaciones'),
-            subtitle: const Text('Avisos de conciertos próximos'),
+            title: Text(l.notificationsLabel),
+            subtitle: Text(l.upcomingConcertAlerts),
             value: _notifications,
             activeColor: const Color(0xFFE53935),
             onChanged: (v) => setState(() => _notifications = v),
@@ -264,15 +271,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const Divider(height: 1, indent: 56),
           ListTile(
             leading: const Icon(Icons.language),
-            title: const Text('Idioma'),
-            subtitle: Text(_language),
+            title: Text(l.languageSection),
+            subtitle: Text(currentLocale.languageCode == 'es' ? l.languageSpanish : l.languageEnglish),
             trailing: const Icon(Icons.chevron_right),
             onTap: _changeLanguage,
           ),
           const Divider(height: 1, indent: 56),
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
-            title: const Text('Apariencia'),
+            title: Text(l.appearanceSection),
             subtitle: Text(_themeName(ref.watch(themeProvider))),
             trailing: const Icon(Icons.chevron_right),
             onTap: _changeTheme,

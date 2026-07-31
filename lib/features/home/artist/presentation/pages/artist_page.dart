@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../l10n/generated/app_localizations.dart';
 import '../../../../../core/utils/date_formatter.dart';
 import '../../../../concerts/domain/entities/concert.dart';
 
@@ -14,6 +15,7 @@ class ArtistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     const red = Color(0xFFE53935);
 
@@ -117,7 +119,7 @@ class ArtistPage extends StatelessWidget {
                       _StatChip(
                         icon: Icons.music_note_rounded,
                         label: '$totalPast',
-                        sublabel: totalPast == 1 ? 'concierto' : 'conciertos',
+                        sublabel: totalPast == 1 ? l.artistConcertSingular : l.artistConcertPlural,
                         color: red,
                       ),
                       const SizedBox(width: 10),
@@ -125,7 +127,7 @@ class ArtistPage extends StatelessWidget {
                         _StatChip(
                           icon: Icons.star_rounded,
                           label: avgRating.toStringAsFixed(1),
-                          sublabel: 'valoración media',
+                          sublabel: l.artistAvgRating,
                           color: const Color(0xFFFFC107),
                         ),
                       if (avgRating > 0) const SizedBox(width: 10),
@@ -133,7 +135,7 @@ class ArtistPage extends StatelessWidget {
                         _StatChip(
                           icon: Icons.location_city_rounded,
                           label: '${cities.length}',
-                          sublabel: cities.length == 1 ? 'ciudad' : 'ciudades',
+                          sublabel: cities.length == 1 ? l.artistCitySingular : l.artistCityPlural,
                           color: const Color(0xFF42A5F5),
                         ),
                     ],
@@ -151,7 +153,7 @@ class ArtistPage extends StatelessWidget {
                           Expanded(
                             child: _HighlightCard(
                               icon: Icons.history_rounded,
-                              label: 'Primer concierto',
+                              label: l.artistFirstConcert,
                               value: DateFormatter.short(firstConcert.date),
                               sub: firstConcert.venue.isNotEmpty
                                   ? firstConcert.venue
@@ -165,7 +167,7 @@ class ArtistPage extends StatelessWidget {
                           Expanded(
                             child: _HighlightCard(
                               icon: Icons.emoji_events_rounded,
-                              label: 'El mejor',
+                              label: l.artistBest,
                               value: DateFormatter.short(bestConcert.date),
                               sub: bestConcert.venue.isNotEmpty
                                   ? bestConcert.venue
@@ -184,7 +186,7 @@ class ArtistPage extends StatelessWidget {
                   const SizedBox(height: 28),
                   _SectionHeader(
                     icon: Icons.calendar_month_rounded,
-                    title: 'PRÓXIMOS',
+                    title: l.artistUpcoming,
                   ),
                   const SizedBox(height: 12),
                   ...upcoming.map((c) => _ConcertRow(concert: c, cs: cs)),
@@ -195,7 +197,7 @@ class ArtistPage extends StatelessWidget {
                   const SizedBox(height: 28),
                   _SectionHeader(
                     icon: Icons.history_rounded,
-                    title: 'HISTORIAL',
+                    title: l.artistHistory,
                   ),
                   const SizedBox(height: 12),
                   // Más reciente primero en historial

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
 /// Widget de racha — muestra cuántos conciertos este mes o tiempo sin ir.
@@ -27,6 +28,8 @@ class DashboardStreak extends StatelessWidget {
     // Días desde el último concierto
     final daysSinceLast = now.difference(past.first.date).inDays;
 
+    final l = AppLocalizations.of(context);
+
     final String emoji;
     final String title;
     final String subtitle;
@@ -34,23 +37,23 @@ class DashboardStreak extends StatelessWidget {
 
     if (thisMonth >= 5) {
       emoji = '🔥';
-      title = '¡Mes épico!';
-      subtitle = '$thisMonth conciertos este mes — estás en racha';
+      title = l.epicMonth;
+      subtitle = l.epicMonthDesc(thisMonth);
       color = const Color(0xFFE53935);
     } else if (thisMonth >= 2) {
       emoji = '🎸';
-      title = 'Buen mes';
-      subtitle = '$thisMonth conciertos este mes';
+      title = l.goodMonth;
+      subtitle = l.goodMonthDesc(thisMonth);
       color = const Color(0xFF42A5F5);
     } else if (daysSinceLast <= 7) {
       emoji = '⚡';
-      title = 'Acabas de salir';
-      subtitle = 'Último concierto hace $daysSinceLast días';
+      title = l.justGotOut;
+      subtitle = l.lastConcertDaysAgo(daysSinceLast);
       color = const Color(0xFF66BB6A);
     } else if (daysSinceLast > 90) {
       emoji = '😴';
-      title = 'Llevas tiempo sin ir';
-      subtitle = '$daysSinceLast días sin conciertos — ¡es hora de volver!';
+      title = l.longTime;
+      subtitle = l.longTimeDesc(daysSinceLast);
       color = const Color(0xFFFFC107);
     } else {
       return const SizedBox.shrink();

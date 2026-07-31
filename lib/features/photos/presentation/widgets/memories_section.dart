@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -85,7 +86,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error al subir foto: $e')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).photoUploadError(e.toString()))));
       } finally {
         if (mounted)
           setState(() {
@@ -119,7 +120,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
         if (!mounted) break;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error al subir foto: $e')));
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).photoUploadError(e.toString()))));
       }
     }
 
@@ -141,7 +142,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setStateDialog) => AlertDialog(
-          title: const Text('Nuevo recuerdo'),
+          title: Text(AppLocalizations.of(ctx).newMemory),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -162,9 +163,9 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                   TextField(
                     controller: controller,
                     maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Pie de foto (opcional)',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(ctx).captionHint,
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -179,12 +180,12 @@ class _MemoriesSectionState extends State<MemoriesSection> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar'),
+              child: Text(AppLocalizations.of(ctx).cancel),
             ),
             FilledButton(
               onPressed: () =>
                   Navigator.pop(ctx, (controller.text.trim(), taggedIds)),
-              child: const Text('Publicar'),
+              child: Text(AppLocalizations.of(ctx).publish),
             ),
           ],
         ),
@@ -222,6 +223,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return Card(
@@ -237,9 +239,9 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                   color: Colors.redAccent,
                 ),
                 const SizedBox(width: 10),
-                const Text(
-                  'Recuerdos',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  l.memoriesTitle,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 TextButton.icon(
@@ -253,8 +255,8 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                       : const Icon(Icons.add_a_photo_outlined, size: 20),
                   label: Text(
                     _uploading
-                        ? 'Subiendo $_uploadCurrent/$_uploadTotal...'
-                        : 'Añadir',
+                        ? l.uploadingPhotos(_uploadCurrent, _uploadTotal)
+                        : l.add,
                   ),
                 ),
               ],
@@ -271,7 +273,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Text(
-                  'Todavía no hay recuerdos. ¡Añade tus fotos del concierto!',
+                  l.noMemoriesShort,
                   style: TextStyle(
                     color: cs.onSurface.withOpacity(0.5),
                     fontSize: 15,

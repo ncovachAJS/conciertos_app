@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:conciertos_app/core/initialization/app_initializer.dart';
 import 'package:conciertos_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:conciertos_app/features/concerts/presentation/providers/concerts_provider.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -60,7 +61,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.forward();
-    _startLoadingSequence();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startLoadingSequence());
   }
 
   Future<void> _playCrowd() async {
@@ -74,6 +75,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 
   Future<void> _startLoadingSequence() async {
+    final l = AppLocalizations.of(context);
     await _initializer.initialize(
       onProgress: (message, progress) {
         if (!mounted) return;
@@ -82,6 +84,14 @@ class _SplashPageState extends ConsumerState<SplashPage>
           _progress = progress;
         });
       },
+      stepMessages: [
+        l.splashLoading1,
+        l.splashLoading2,
+        l.splashLoading3,
+        l.splashLoading4,
+        l.splashLoading5,
+        l.splashLoading6,
+      ],
     );
 
     await _fadeOutCrowd();
@@ -109,6 +119,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -150,7 +161,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: 'LA VIDA\n',
+                                  text: '${l.appTitleLine1}\n',
                                   style: GoogleFonts.teko(
                                     fontSize: 68,
                                     fontWeight: FontWeight.w700,
@@ -167,7 +178,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                                   ),
                                 ),
                                 TextSpan(
-                                  text: 'EN DIRECTO',
+                                  text: l.appTitleLine2,
                                   style: GoogleFonts.teko(
                                     fontSize: 62,
                                     fontWeight: FontWeight.w700,
@@ -190,7 +201,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                           const SizedBox(height: 8),
 
                           Text(
-                            'Cada concierto cuenta una historia.',
+                            l.splashTagline,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.oswald(
                               fontSize: 18,

@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/models/friend_model.dart';
@@ -52,11 +53,13 @@ class _TagFriendsSelectorState extends State<TagFriendsSelector> {
       );
     }
 
+    final l = AppLocalizations.of(context);
+
     if (_friends.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Text(
-          'Aún no tienes amigos. Añádelos desde tu perfil.',
+          l.noFriendsYet,
           style: TextStyle(color: cs.onSurface.withOpacity(0.4), fontSize: 13),
         ),
       );
@@ -66,7 +69,7 @@ class _TagFriendsSelectorState extends State<TagFriendsSelector> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.isPast ? '¿Quién más estuvo?' : '¿Quién más irá?',
+          widget.isPast ? l.whoElseWas : l.whoElseGoing,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,

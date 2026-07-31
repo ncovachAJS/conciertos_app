@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -125,7 +126,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context).error}: $e')));
     } finally {
       if (mounted) setState(() => _searching = false);
     }
@@ -179,9 +180,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '${toImport.length} concierto${toImport.length > 1 ? "s" : ""} importado${toImport.length > 1 ? "s" : ""} 🎸',
-            ),
+            content: Text(AppLocalizations.of(context).importSuccess(toImport.length)),
           ),
         );
       }
@@ -189,7 +188,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context).error}: $e')));
     } finally {
       if (mounted) setState(() => _importing = false);
     }
@@ -197,6 +196,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final years = [
       0,
@@ -208,16 +208,14 @@ class _ImportPageState extends ConsumerState<ImportPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Importar conciertos'),
+        title: Text(l.importTitle),
         centerTitle: false,
       ),
       floatingActionButton: _selected.isNotEmpty && !_importing
           ? FloatingActionButton.extended(
               onPressed: _importSelected,
               icon: const Icon(Icons.download_rounded),
-              label: Text(
-                'Importar ${_selected.length} concierto${_selected.length > 1 ? "s" : ""}',
-              ),
+              label: Text(l.importButton(_selected.length)),
               backgroundColor: const Color(0xFFE53935),
               foregroundColor: Colors.white,
             )
@@ -235,7 +233,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Busca un artista',
+                        l.importSearchArtist,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -244,7 +242,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Importa conciertos desde Setlist.fm',
+                        l.importFromSetlist,
                         style: TextStyle(
                           color: cs.onSurface.withOpacity(0.54),
                           fontSize: 14,
@@ -273,7 +271,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                               textInputAction: TextInputAction.search,
                               style: TextStyle(color: cs.onSurface),
                               decoration: InputDecoration(
-                                hintText: 'Artista...',
+                                hintText: l.artistHint,
                                 hintStyle: TextStyle(
                                   color: cs.onSurface.withOpacity(0.4),
                                 ),
@@ -301,7 +299,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                               ),
                               dropdownColor: cs.surface,
                               decoration: InputDecoration(
-                                labelText: 'Año',
+                                labelText: l.year,
                                 labelStyle: TextStyle(
                                   color: cs.onSurface.withOpacity(0.6),
                                 ),
@@ -321,7 +319,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                                     (y) => DropdownMenuItem(
                                       value: y,
                                       child: Text(
-                                        y == 0 ? 'Todos' : '$y',
+                                        y == 0 ? l.all : '$y',
                                         style: TextStyle(color: cs.onSurface),
                                       ),
                                     ),
@@ -366,8 +364,8 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Text(
-                                      'Buscar',
+                                  : Text(
+                                      l.search,
                                       maxLines: 1,
                                       overflow: TextOverflow.clip,
                                     ),
@@ -388,7 +386,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                     child: Row(
                       children: [
                         Text(
-                          '$_total encontrados',
+                          l.importFoundCount(_total),
                           style: TextStyle(
                             color: cs.onSurface.withOpacity(0.54),
                             fontSize: 13,
@@ -397,7 +395,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                         const Spacer(),
                         if (_selected.isNotEmpty)
                           Text(
-                            '${_selected.length} seleccionados',
+                            l.importSelectedCount(_selected.length),
                             style: const TextStyle(
                               color: Color(0xFFE53935),
                               fontWeight: FontWeight.bold,
@@ -427,7 +425,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Busca un artista para\nver sus conciertos',
+                          l.importSearchPrompt,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: cs.onSurface.withOpacity(0.54),
@@ -449,7 +447,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                           onPressed: _searching
                               ? null
                               : () => _search(more: true),
-                          child: const Text('Cargar más'),
+                          child: Text(l.loadMore),
                         ),
                       );
                     }
@@ -568,9 +566,9 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                   children: [
                     const CircularProgressIndicator(color: Color(0xFFE53935)),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Importando...',
-                      style: TextStyle(
+                    Text(
+                      l.importing,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,

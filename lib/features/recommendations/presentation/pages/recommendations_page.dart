@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -67,12 +68,13 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        title: const Text('Recomendados'),
+        title: Text(l.recommendedTitle),
       ),
       body: Column(
         children: [
@@ -80,8 +82,8 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: DropdownButtonFormField<String>(
               value: _selectedCountry,
-              decoration: const InputDecoration(labelText: 'País'),
-              items: countries.entries
+              decoration: InputDecoration(labelText: l.country),
+              items: localizedCountries(Localizations.localeOf(context).languageCode).entries
                   .map(
                     (e) => DropdownMenuItem(value: e.value, child: Text(e.key)),
                   )
@@ -97,12 +99,12 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _events.isEmpty
-                ? const Center(
+                ? Center(
                     child: Padding(
-                      padding: EdgeInsets.all(32),
+                      padding: const EdgeInsets.all(32),
                       child: Text(
-                        'Marca artistas con "me gusta" para recibir recomendaciones.',
-                        style: TextStyle(color: Colors.white54, fontSize: 15),
+                        l.noLikesForRecommendations,
+                        style: const TextStyle(color: Colors.white54, fontSize: 15),
                         textAlign: TextAlign.center,
                       ),
                     ),

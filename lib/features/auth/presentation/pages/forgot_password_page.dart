@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -41,7 +42,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error de conexión. Inténtalo de nuevo.')),
+        SnackBar(content: Text(AppLocalizations.of(context).connectionError)),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -50,8 +51,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Recuperar contraseña')),
+      appBar: AppBar(title: Text(l.forgotPasswordTitle)),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: _sent ? _buildConfirmation() : _buildForm(),
@@ -60,6 +62,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Widget _buildForm() {
+    final l = AppLocalizations.of(context);
     return Form(
       key: _formKey,
       child: Column(
@@ -67,9 +70,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         children: [
           const Icon(Icons.lock_reset, size: 56, color: Color(0xFFE53935)),
           const SizedBox(height: 20),
-          const Text(
-            'Recuperar contraseña',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            l.forgotPasswordTitle,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
@@ -108,7 +111,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Enviar enlace'),
+                  : Text(l.sendLink),
             ),
           ),
         ],
@@ -117,6 +120,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Widget _buildConfirmation() {
+    final l = AppLocalizations.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -143,7 +147,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         const SizedBox(height: 32),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Volver al login'),
+          child: Text(l.backToLogin),
         ),
       ],
     );

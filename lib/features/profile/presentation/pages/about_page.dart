@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -22,10 +23,11 @@ class AboutPage extends StatelessWidget {
   }
 
   void _showPrivacyPolicy(BuildContext context) {
+    final l = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Política de privacidad'),
+        title: Text(l.privacyPolicy),
         content: const SingleChildScrollView(
           child: Text(
             'La Vida en Directo recoge únicamente los datos necesarios para '
@@ -40,7 +42,7 @@ class AboutPage extends StatelessWidget {
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Entendido'),
+            child: Text(l.understood),
           ),
         ],
       ),
@@ -48,21 +50,22 @@ class AboutPage extends StatelessWidget {
   }
 
   void _showCredits(BuildContext context) {
+    final l = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Créditos'),
-        content: const Column(
+        title: Text(l.creditsLabel),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Desarrollado con ❤️ por Nico',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
-            Text('Tecnologías utilizadas:'),
-            SizedBox(height: 8),
+            const SizedBox(height: 16),
+            Text(l.technologiesUsed),
+            const SizedBox(height: 8),
             _CreditRow(name: 'Flutter', description: 'Frontend móvil'),
             _CreditRow(name: 'NestJS', description: 'Backend API'),
             _CreditRow(name: 'Prisma', description: 'Base de datos'),
@@ -81,7 +84,7 @@ class AboutPage extends StatelessWidget {
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cerrar'),
+            child: Text(l.close),
           ),
         ],
       ),
@@ -90,8 +93,9 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Acerca de')),
+      appBar: AppBar(title: Text(l.aboutTitle)),
       body: ListView(
         children: [
           // Logo / header
@@ -131,21 +135,21 @@ class AboutPage extends StatelessWidget {
 
           ListTile(
             leading: const Icon(Icons.code),
-            title: const Text('Créditos'),
+            title: Text(l.creditsLabel),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showCredits(context),
           ),
           const Divider(height: 1, indent: 56),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('Política de privacidad'),
+            title: Text(l.privacyPolicy),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showPrivacyPolicy(context),
           ),
           const Divider(height: 1, indent: 56),
           ListTile(
             leading: const Icon(Icons.mail_outline),
-            title: const Text('Contacto'),
+            title: Text(l.contact),
             subtitle: const Text(_contactEmail),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _openEmail(context),

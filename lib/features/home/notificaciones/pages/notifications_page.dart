@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -69,6 +70,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final concerts = ref.watch(concertsProvider).asData?.value ?? [];
     final upcoming = _upcoming(concerts);
     final memories = _onThisDay(concerts);
@@ -80,19 +82,19 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notificaciones'),
+        title: Text(l.notificationsTitle),
         actions: [
           if (hasAnything)
             TextButton(
               onPressed: () {},
-              child: const Text('Marcar todo como leído'),
+              child: Text(l.notifMarkAllRead),
             ),
         ],
       ),
       body: RefreshIndicator(
         onRefresh: _loadRecommendations,
         child: !hasAnything && !_loadingRecs
-            ? _buildEmpty()
+            ? _buildEmpty(l)
             : ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
@@ -100,15 +102,14 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                   if (memories.isNotEmpty) ...[
                     _SectionHeader(
                       icon: Icons.history,
-                      title: 'Recuerdos de hoy',
+                      title: l.notifMemoriesToday,
                       color: const Color(0xFFFFC107),
                     ),
                     ...memories.map(
                       (c) => _NotificationTile(
                         icon: Icons.celebration,
                         color: const Color(0xFFFFC107),
-                        title:
-                            'Hace ${_yearsAgo(c.date)} año${_yearsAgo(c.date) > 1 ? "s" : ""}: ${c.artist}',
+                        title: l.notifYearsAgoArtist(_yearsAgo(c.date), c.artist),
                         subtitle:
                             '${c.venue}, ${c.city} · ${c.date.day}/${c.date.month}/${c.date.year}',
                         tag: '🎂',
@@ -121,7 +122,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                   if (upcoming.isNotEmpty) ...[
                     _SectionHeader(
                       icon: Icons.event_available,
-                      title: 'Conciertos próximos',
+                      title: l.notifUpcomingSection,
                       color: const Color(0xFF42A5F5),
                     ),
                     ...upcoming.take(10).map((c) {
@@ -131,10 +132,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                         color: const Color(0xFF42A5F5),
                         title: c.artist,
                         subtitle: days == 0
-                            ? '¡Es hoy! · ${c.venue}, ${c.city}'
+                            ? l.notifTodaySubtitle(c.venue, c.city)
                             : days == 1
-                            ? '¡Mañana! · ${c.venue}, ${c.city}'
-                            : 'Faltan $days días · ${c.venue}, ${c.city}',
+                            ? l.notifTomorrowSubtitle(c.venue, c.city)
+                            : l.notifDaysSubtitle(days, c.venue, c.city),
                         tag: days <= 3 ? '🔥' : '📅',
                         highlight: days <= 3,
                       );
@@ -145,7 +146,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                   // ── Recomendaciones ───────────────────────────────────────
                   _SectionHeader(
                     icon: Icons.local_fire_department,
-                    title: 'Recomendaciones',
+                    title: l.notifRecommendationsSection,
                     color: const Color(0xFFE53935),
                   ),
                   if (_loadingRecs)
@@ -154,11 +155,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                       child: Center(child: CircularProgressIndicator()),
                     )
                   else if (_recommendations.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                       child: Text(
-                        'Añade conciertos favoritos para recibir recomendaciones.',
-                        style: TextStyle(color: Colors.white54),
+                        l.notifNoRecsHint,
+                        style: const TextStyle(color: Colors.white54),
                       ),
                     )
                   else
@@ -181,17 +182,17 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     );
   }
 
-  Widget _buildEmpty() {
+  Widget _buildEmpty(AppLocalizations l) {
     return ListView(
-      children: const [
-        SizedBox(height: 100),
-        Icon(Icons.notifications_none, size: 80, color: Colors.white24),
-        SizedBox(height: 16),
+      children: [
+        const SizedBox(height: 100),
+        const Icon(Icons.notifications_none, size: 80, color: Colors.white24),
+        const SizedBox(height: 16),
         Center(
           child: Text(
-            'Sin notificaciones por ahora.\nAñade conciertos para empezar.',
+            l.notifEmpty,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white54, fontSize: 15),
+            style: const TextStyle(color: Colors.white54, fontSize: 15),
           ),
         ),
       ],

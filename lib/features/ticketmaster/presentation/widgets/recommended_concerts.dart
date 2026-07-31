@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
+
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../ticketmaster/data/services/ticketmaster_service.dart';
 import '../../../ticketmaster/domain/entities/ticketmaster_event.dart';
@@ -45,6 +47,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     if (loading) {
       return const SizedBox(
         height: 80,
@@ -53,7 +56,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
     }
 
     if (events.isEmpty) {
-      return _buildLocalFallback(context);
+      return _buildLocalFallback(context, l);
     }
 
     final cs = Theme.of(context).colorScheme;
@@ -115,7 +118,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Text(
-                          'Porque te gusta ${event.recommendedBecause}',
+                          l.becauseYouLike(event.recommendedBecause),
                           style: const TextStyle(
                             color: Colors.redAccent,
                             fontWeight: FontWeight.bold,
@@ -146,7 +149,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
                       const SizedBox(height: 16),
                       FilledButton(
                         onPressed: () => _openTicketmaster(event.url),
-                        child: const Text('Ver en Ticketmaster'),
+                        child: Text(l.viewOnTicketmaster),
                       ),
                     ],
                   ),
@@ -159,14 +162,13 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
     );
   }
 
-  /// Fallback local: top artistas más vistos de tu colección
-  Widget _buildLocalFallback(BuildContext context) {
+  Widget _buildLocalFallback(BuildContext context, AppLocalizations l) {
     final concerts = ref.read(concertsProvider).asData?.value ?? [];
     final cs = Theme.of(context).colorScheme;
 
     if (concerts.isEmpty) {
       return Text(
-        'Añade conciertos para ver recomendaciones.',
+        l.noConcertsAddForRec,
         style: TextStyle(color: cs.onSurface.withOpacity(0.54), fontSize: 14),
       );
     }
@@ -187,7 +189,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'No encontramos eventos próximos. Tus artistas más vistos:',
+          l.noUpcomingEvents,
           style: TextStyle(color: cs.onSurface.withOpacity(0.54), fontSize: 13),
         ),
         const SizedBox(height: 12),

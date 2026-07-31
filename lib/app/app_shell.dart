@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/notifications/presentation/controllers/notifications_controller.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class AppShell extends StatefulWidget {
   final Widget child;
@@ -52,6 +53,7 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final unread = _notif.unreadCount;
+    final l = AppLocalizations.of(context);
 
     return Scaffold(
       body: widget.child,
@@ -79,27 +81,27 @@ class _AppShellState extends State<AppShell> {
               count: unread,
               selected: true,
             ),
-            label: 'Inicio',
+            label: l.navHome,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.library_music_outlined),
-            selectedIcon: Icon(Icons.library_music),
-            label: 'Conciertos',
+          NavigationDestination(
+            icon: const Icon(Icons.library_music_outlined),
+            selectedIcon: const Icon(Icons.library_music),
+            label: l.navConcerts,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.photo_library_outlined),
-            selectedIcon: Icon(Icons.photo_library),
-            label: 'Recuerdos',
+          NavigationDestination(
+            icon: const Icon(Icons.photo_library_outlined),
+            selectedIcon: const Icon(Icons.photo_library),
+            label: l.navMemories,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite),
-            label: 'Favoritos',
+          NavigationDestination(
+            icon: const Icon(Icons.favorite_border),
+            selectedIcon: const Icon(Icons.favorite),
+            label: l.navFavorites,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: 'Stats',
+          NavigationDestination(
+            icon: const Icon(Icons.bar_chart_outlined),
+            selectedIcon: const Icon(Icons.bar_chart),
+            label: l.navStats,
           ),
         ],
       ),

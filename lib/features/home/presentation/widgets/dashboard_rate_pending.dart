@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 
@@ -24,6 +26,7 @@ class DashboardRatePending extends ConsumerWidget {
     if (pending.isEmpty) return const SizedBox.shrink();
 
     final concert = pending.first;
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return GestureDetector(
@@ -47,7 +50,7 @@ class DashboardRatePending extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '¿Qué tal estuvo ${concert.artist}?',
+                    l.howWasArtist(concert.artist),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -57,7 +60,7 @@ class DashboardRatePending extends ConsumerWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    'Aún no has valorado este concierto',
+                    l.noRatingYet,
                     style: TextStyle(
                       color: cs.onSurface.withOpacity(0.54),
                       fontSize: 13,

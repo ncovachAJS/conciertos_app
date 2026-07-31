@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -48,6 +49,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final concertsAsync = ref.watch(concertsProvider);
     final favorites = ref.watch(favoriteConcertsProvider);
     final grouped = _groupByArtist(favorites);
@@ -55,7 +57,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
     final cs = Theme.of(context).colorScheme;
 
     return AppPage(
-      title: 'Favoritos',
+      title: l.favoritesTitle,
       child: concertsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -69,13 +71,13 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Error al cargar favoritos',
+                l.favoritesError,
                 style: TextStyle(color: cs.onSurface.withOpacity(0.54)),
               ),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => ref.invalidate(concertsProvider),
-                child: const Text('Reintentar'),
+                child: Text(l.retry),
               ),
             ],
           ),
@@ -88,7 +90,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
               controller: _searchController,
               onChanged: (v) => setState(() => _searchQuery = v),
               decoration: InputDecoration(
-                hintText: 'Buscar artista...',
+                hintText: l.searchArtistHint,
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Theme.of(context).inputDecorationTheme.fillColor,
@@ -114,7 +116,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
               child: filtered.isEmpty
                   ? Center(
                       child: Text(
-                        'Todavía no tienes favoritos.',
+                        l.noFavoritesMessage,
                         style: TextStyle(
                           color: cs.onSurface.withOpacity(0.54),
                           fontSize: 16,
@@ -187,6 +189,7 @@ class _ArtistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return GestureDetector(
@@ -276,7 +279,7 @@ class _ArtistCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    '$concertCount concierto${concertCount != 1 ? "s" : ""}',
+                    l.concertCountLabel(concertCount),
                     style: TextStyle(
                       color: cs.onSurface.withOpacity(0.5),
                       fontSize: 12,
@@ -302,6 +305,7 @@ class _ArtistConcertsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return DraggableScrollableSheet(
@@ -341,7 +345,7 @@ class _ArtistConcertsSheet extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${concerts.length} concierto${concerts.length != 1 ? "s" : ""}',
+                    l.concertCountLabel(concerts.length),
                     style: TextStyle(
                       color: cs.onSurface.withOpacity(0.5),
                       fontSize: 13,
