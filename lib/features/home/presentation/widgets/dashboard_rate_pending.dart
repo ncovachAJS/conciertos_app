@@ -29,13 +29,18 @@ class DashboardRatePending extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
-    return GestureDetector(
-      onTap: () => context.push('/concert-detail', extra: concert),
-      child: Container(
+    const radius = BorderRadius.all(Radius.circular(18));
+
+    return Material(
+      color: const Color(0xFFFFC107).withOpacity(0.1),
+      borderRadius: radius,
+      child: InkWell(
+        borderRadius: radius,
+        onTap: () => context.push('/concert-detail', extra: concert),
+        child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFC107).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: radius,
           border: Border.all(
             color: const Color(0xFFFFC107).withOpacity(0.3),
             width: 1,
@@ -76,6 +81,7 @@ class DashboardRatePending extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
