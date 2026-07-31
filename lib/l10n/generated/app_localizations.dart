@@ -1022,6 +1022,90 @@ abstract class AppLocalizations {
   /// **'Buscar por nombre o email...'**
   String get searchFriendHint;
 
+  /// No description provided for @friendsSearchPeople.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar personas'**
+  String get friendsSearchPeople;
+
+  /// No description provided for @friendsTabFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigos ({count})'**
+  String friendsTabFriends(int count);
+
+  /// No description provided for @friendsTabRequests.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes'**
+  String get friendsTabRequests;
+
+  /// No description provided for @friendsTabRequestsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'Solicitudes ({count})'**
+  String friendsTabRequestsCount(int count);
+
+  /// No description provided for @friendsTypeToSearch.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe al menos 2 caracteres'**
+  String get friendsTypeToSearch;
+
+  /// No description provided for @friendsNoUsersFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No se encontraron usuarios'**
+  String get friendsNoUsersFound;
+
+  /// No description provided for @friendAlreadyFriend.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigo ✓'**
+  String get friendAlreadyFriend;
+
+  /// No description provided for @friendRequestSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviada'**
+  String get friendRequestSent;
+
+  /// No description provided for @friendAccept.
+  ///
+  /// In es, this message translates to:
+  /// **'Aceptar'**
+  String get friendAccept;
+
+  /// No description provided for @friendReject.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazar'**
+  String get friendReject;
+
+  /// No description provided for @friendAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir'**
+  String get friendAdd;
+
+  /// No description provided for @friendsNoFriendsHere.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes amigos.\nBúscalos con el icono de arriba.'**
+  String get friendsNoFriendsHere;
+
+  /// No description provided for @friendDeleteConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Seguro que quieres eliminar a {name}?'**
+  String friendDeleteConfirm(String name);
+
+  /// No description provided for @friendsNoPendingRequests.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes solicitudes pendientes.'**
+  String get friendsNoPendingRequests;
+
   /// No description provided for @notificationsTitle.
   ///
   /// In es, this message translates to:
@@ -1957,6 +2041,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Mapa no disponible'**
   String get mapNotAvailable;
+
+  /// No description provided for @concertMapTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mapa de conciertos'**
+  String get concertMapTitle;
+
+  /// No description provided for @concertMapDashboardSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos tus recintos en un mapa'**
+  String get concertMapDashboardSubtitle;
+
+  /// No description provided for @concertMapLoading.
+  ///
+  /// In es, this message translates to:
+  /// **'Localizando recintos…'**
+  String get concertMapLoading;
+
+  /// No description provided for @concertMapProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'{done} de {total} recintos'**
+  String concertMapProgress(int done, int total);
+
+  /// No description provided for @concertMapNoData.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade conciertos con recinto o ciudad\npara verlos en el mapa.'**
+  String get concertMapNoData;
+
+  /// No description provided for @concertMapConcertsHere.
+  ///
+  /// In es, this message translates to:
+  /// **'Conciertos aquí'**
+  String get concertMapConcertsHere;
+
+  /// No description provided for @concertMapOpenInMaps.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir en Maps'**
+  String get concertMapOpenInMaps;
 }
 
 class _AppLocalizationsDelegate

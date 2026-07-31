@@ -220,6 +220,29 @@
   "deleteFriendTitle": "Remove friend",
   "friendRequestReceived": "Wants to be your friend",
   "searchFriendHint": "Search by name or email...",
+  "friendsSearchPeople": "Search people",
+  "friendsTabFriends": "Friends ({count})",
+  "@friendsTabFriends": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "friendsTabRequests": "Requests",
+  "friendsTabRequestsCount": "Requests ({count})",
+  "@friendsTabRequestsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "friendsTypeToSearch": "Type at least 2 characters",
+  "friendsNoUsersFound": "No users found",
+  "friendAlreadyFriend": "Friend ✓",
+  "friendRequestSent": "Sent",
+  "friendAccept": "Accept",
+  "friendReject": "Decline",
+  "friendAdd": "Add",
+  "friendsNoFriendsHere": "No friends yet.\nSearch with the icon above.",
+  "friendDeleteConfirm": "Are you sure you want to remove {name}?",
+  "@friendDeleteConfirm": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "friendsNoPendingRequests": "No pending requests.",
 
   "notificationsTitle": "Notifications",
   "markRead": "Read",
@@ -528,5 +551,19 @@
 
   "mapVenueLocation": "Venue location",
   "mapOpenIn": "Open in maps",
-  "mapNotAvailable": "Map not available"
+  "mapNotAvailable": "Map not available",
+
+  "concertMapTitle": "Concert map",
+  "concertMapDashboardSubtitle": "All your venues on a map",
+  "concertMapLoading": "Locating venues…",
+  "concertMapProgress": "{done} of {total} venues",
+  "@concertMapProgress": {
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "concertMapNoData": "Add concerts with a venue or city\nto see them on the map.",
+  "concertMapConcertsHere": "Concerts here",
+  "concertMapOpenInMaps": "Open in Maps"
 }

@@ -25,6 +25,7 @@ import '../features/statistics/presentation/pages/statistics_page.dart';
 import '../features/home/artist/presentation/pages/artist_page.dart';
 import '../features/friends/presentation/pages/friends_page.dart';
 import '../features/notifications/presentation/pages/notifications_page.dart';
+import '../features/concerts/presentation/pages/concert_map_page.dart';
 import 'app_shell.dart';
 
 final appRouter = GoRouter(
@@ -117,6 +118,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfilePage(),
+        ),
+        GoRoute(
+          path: '/concert-map',
+          builder: (context, state) => const ConcertMapPage(),
         ),
       ],
     ),

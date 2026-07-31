@@ -37,7 +37,11 @@ class _FriendsPageState extends State<FriendsPage>
   }
 
   void _openSearch() {
-    showSearch(context: context, delegate: _FriendSearchDelegate(_ctrl));
+    final l = AppLocalizations.of(context);
+    showSearch(
+      context: context,
+      delegate: _FriendSearchDelegate(_ctrl, searchHint: l.searchFriendHint),
+    );
   }
 
   @override
@@ -57,7 +61,7 @@ class _FriendsPageState extends State<FriendsPage>
         actions: [
           IconButton(
             icon: const Icon(Icons.person_search_rounded),
-            tooltip: 'Buscar personas',
+            tooltip: AppLocalizations.of(context).friendsSearchPeople,
             onPressed: _openSearch,
           ),
         ],
@@ -67,11 +71,11 @@ class _FriendsPageState extends State<FriendsPage>
           unselectedLabelColor: cs.onSurface.withOpacity(0.5),
           indicatorColor: red,
           tabs: [
-            Tab(text: 'Amigos (${_ctrl.friends.length})'),
+            Tab(text: AppLocalizations.of(context).friendsTabFriends(_ctrl.friends.length)),
             Tab(
               text: _ctrl.pendingRequests.isEmpty
-                  ? 'Solicitudes'
-                  : 'Solicitudes (${_ctrl.pendingRequests.length})',
+                  ? AppLocalizations.of(context).friendsTabRequests
+                  : AppLocalizations.of(context).friendsTabRequestsCount(_ctrl.pendingRequests.length),
             ),
           ],
         ),
@@ -93,11 +97,12 @@ class _FriendsPageState extends State<FriendsPage>
 
 class _FriendSearchDelegate extends SearchDelegate<void> {
   final FriendsController ctrl;
+  final String searchHint;
 
-  _FriendSearchDelegate(this.ctrl);
+  _FriendSearchDelegate(this.ctrl, {required this.searchHint});
 
   @override
-  String get searchFieldLabel => 'Buscar por nombre o email...';
+  String get searchFieldLabel => searchHint;
 
   @override
   List<Widget> buildActions(BuildContext context) => [
@@ -150,6 +155,7 @@ class _FriendSearchDelegate extends SearchDelegate<void> {
         }
 
         if (query.trim().length < 2) {
+          final l = AppLocalizations.of(context);
           return Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -161,7 +167,7 @@ class _FriendSearchDelegate extends SearchDelegate<void> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Escribe al menos 2 caracteres',
+                  l.friendsTypeToSearch,
                   style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
                 ),
               ],
@@ -172,7 +178,7 @@ class _FriendSearchDelegate extends SearchDelegate<void> {
         if (ctrl.searchResults.isEmpty) {
           return Center(
             child: Text(
-              'No se encontraron usuarios',
+              AppLocalizations.of(context).friendsNoUsersFound,
               style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
             ),
           );
@@ -200,11 +206,12 @@ class _SearchResultTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     const red = Color(0xFFE53935);
 
+    final l = AppLocalizations.of(context);
     Widget trailing;
     if (user.isAccepted) {
-      trailing = const Text(
-        'Amigo ✓',
-        style: TextStyle(
+      trailing = Text(
+        l.friendAlreadyFriend,
+        style: const TextStyle(
           color: Color(0xFFE53935),
           fontSize: 12,
           fontWeight: FontWeight.w600,
@@ -213,7 +220,7 @@ class _SearchResultTile extends StatelessWidget {
     } else if (user.isPending) {
       trailing = user.isSender == true
           ? Text(
-              'Enviada',
+              l.friendRequestSent,
               style: TextStyle(
                 color: cs.onSurface.withOpacity(0.5),
                 fontSize: 12,
@@ -230,9 +237,12 @@ class _SearchResultTile extends StatelessWidget {
                   color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'Aceptar',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                child: Text(
+                  l.friendAccept,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             );
@@ -245,9 +255,9 @@ class _SearchResultTile extends StatelessWidget {
             color: const Color(0xFFE53935),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Text(
-            'Añadir',
-            style: TextStyle(
+          child: Text(
+            l.friendAdd,
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -299,7 +309,7 @@ class _FriendsList extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Aún no tienes amigos.\nBúscalos con el icono de arriba.',
+              l.friendsNoFriendsHere,
               textAlign: TextAlign.center,
               style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
             ),
@@ -334,7 +344,7 @@ class _FriendsList extends StatelessWidget {
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: Text(l.deleteFriendTitle),
-                  content: Text('¿Seguro que quieres eliminar a ${f.name}?'),
+                  content: Text(l.friendDeleteConfirm(f.name)),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
@@ -370,7 +380,7 @@ class _PendingList extends StatelessWidget {
     if (ctrl.pendingRequests.isEmpty) {
       return Center(
         child: Text(
-          'No tienes solicitudes pendientes.',
+          l.friendsNoPendingRequests,
           style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
         ),
       );
@@ -400,7 +410,7 @@ class _PendingList extends StatelessWidget {
                   Icons.check_circle_outline,
                   color: Color(0xFFE53935),
                 ),
-                tooltip: 'Aceptar',
+                tooltip: l.friendAccept,
                 onPressed: () => ctrl.acceptRequest(r.friendshipId!, r.id),
               ),
               IconButton(
@@ -408,7 +418,7 @@ class _PendingList extends StatelessWidget {
                   Icons.cancel_outlined,
                   color: cs.onSurface.withOpacity(0.4),
                 ),
-                tooltip: 'Rechazar',
+                tooltip: l.friendReject,
                 onPressed: () => ctrl.removeFriend(r.friendshipId!),
               ),
             ],
