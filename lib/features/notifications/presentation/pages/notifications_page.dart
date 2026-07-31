@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -34,22 +35,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Future<void> _confirmDeleteAll() async {
+    final l = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar notificaciones'),
-        content: const Text(
-          '¿Seguro que quieres eliminar todas las notificaciones?',
-        ),
+        title: Text(l.deleteNotificationsTitle),
+        content: Text(l.deleteNotificationsConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar todo'),
+            child: Text(l.deleteAll),
           ),
         ],
       ),
@@ -59,11 +59,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notificaciones'),
+        title: Text(l.notificationsTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.of(context).pop(),
@@ -73,11 +74,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
             if (_ctrl.unreadCount > 0)
               TextButton(
                 onPressed: _ctrl.markAllRead,
-                child: const Text('Leído'),
+                child: Text(l.markRead),
               ),
             IconButton(
               icon: const Icon(Icons.delete_sweep_outlined),
-              tooltip: 'Eliminar todo',
+              tooltip: l.deleteAll,
               onPressed: _confirmDeleteAll,
             ),
           ],
@@ -97,7 +98,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Sin notificaciones',
+                    l.noNotifications,
                     style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
                   ),
                 ],

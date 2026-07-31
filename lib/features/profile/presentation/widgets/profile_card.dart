@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 class ProfileCard extends StatelessWidget {
   const ProfileCard({
@@ -26,6 +27,7 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
@@ -134,7 +136,7 @@ class ProfileCard extends StatelessWidget {
           const SizedBox(height: 8),
 
           Text(
-            "MIEMBRO #${memberNumber.toString().padLeft(6, '0')}",
+            l.memberNumber(memberNumber.toString().padLeft(6, '0')),
             style: TextStyle(
               color: Colors.white.withOpacity(.7),
               letterSpacing: 2,
@@ -151,21 +153,21 @@ class ProfileCard extends StatelessWidget {
                 child: _Stat(
                   icon: Icons.music_note,
                   value: totalConcerts.toString(),
-                  label: 'Conciertos',
+                  label: l.concertsStatLabel,
                 ),
               ),
               Expanded(
                 child: _Stat(
                   icon: Icons.star,
                   value: totalFavorites.toString(),
-                  label: 'Favoritos',
+                  label: l.favoritesStatLabel,
                 ),
               ),
               Expanded(
                 child: _Stat(
                   icon: Icons.photo_camera,
                   value: totalPhotos.toString(),
-                  label: 'Recuerdos',
+                  label: l.memoriesStatLabel,
                 ),
               ),
             ],

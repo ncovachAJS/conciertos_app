@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
+import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/concerts/domain/entities/concert.dart';
 
 class ConcertGridCard extends StatelessWidget {
@@ -17,9 +19,17 @@ class ConcertGridCard extends StatelessWidget {
     this.onDelete,
   });
 
+  bool get _isOwner {
+    final currentUserId = AuthController.instance.user?.id ?? '';
+    if (concert.userId.isEmpty) return true;
+    return concert.userId == currentUserId;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
+    final isOwner = _isOwner;
 
     return GestureDetector(
       onTap: onTap,
@@ -80,56 +90,68 @@ class ConcertGridCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                    // Menu
-                    if (onEdit != null || onDelete != null)
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: PopupMenuButton<String>(
-                          icon: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.more_vert,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                          onSelected: (value) {
-                            if (value == 'edit') onEdit?.call();
-                            if (value == 'delete') onDelete?.call();
-                          },
-                          itemBuilder: (_) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: ListTile(
-                                leading: Icon(Icons.edit_outlined),
-                                title: Text('Editar'),
-                                contentPadding: EdgeInsets.zero,
-                                dense: true,
+                    // Menu propietario / badge compartido
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: isOwner
+                          ? PopupMenuButton<String>(
+                              icon: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.4),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.more_vert,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                              onSelected: (value) {
+                                if (value == 'edit') onEdit?.call();
+                                if (value == 'delete') onDelete?.call();
+                              },
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: ListTile(
+                                    leading: const Icon(Icons.edit_outlined),
+                                    title: Text(l.edit),
+                                    contentPadding: EdgeInsets.zero,
+                                    dense: true,
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: ListTile(
+                                    leading: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.red,
+                                    ),
+                                    title: Text(
+                                      l.delete,
+                                      style: const TextStyle(color: Colors.red),
+                                    ),
+                                    contentPadding: EdgeInsets.zero,
+                                    dense: true,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.4),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.group_rounded,
+                                color: Colors.white70,
+                                size: 16,
                               ),
                             ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: ListTile(
-                                leading: Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.red,
-                                ),
-                                title: Text(
-                                  'Eliminar',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                                contentPadding: EdgeInsets.zero,
-                                dense: true,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    ),
                   ],
                 ),
               ),

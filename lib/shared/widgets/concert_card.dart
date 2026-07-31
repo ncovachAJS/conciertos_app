@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/controllers/auth_controller.dart';
@@ -125,6 +126,7 @@ class ConcertCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final isOwner = _isOwner;
 
@@ -208,18 +210,18 @@ class ConcertCard extends StatelessWidget {
                             color: Colors.black54,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.group_rounded,
                                 color: Colors.white70,
                                 size: 14,
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               Text(
-                                'Compartido',
-                                style: TextStyle(
+                                l.sharedBadge,
+                                style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 11,
                                 ),
@@ -312,7 +314,7 @@ class ConcertCard extends StatelessWidget {
                           child: FilledButton.icon(
                             onPressed: onEdit,
                             icon: const Icon(Icons.edit_rounded),
-                            label: const Text('Editar'),
+                            label: Text(l.edit),
                             style: FilledButton.styleFrom(
                               minimumSize: const Size.fromHeight(54),
                               backgroundColor: Colors.blueGrey.shade700,
@@ -327,7 +329,7 @@ class ConcertCard extends StatelessWidget {
                           child: FilledButton.icon(
                             onPressed: onDelete,
                             icon: const Icon(Icons.delete_rounded),
-                            label: const Text('Eliminar'),
+                            label: Text(l.delete),
                             style: FilledButton.styleFrom(
                               minimumSize: const Size.fromHeight(54),
                               backgroundColor: Colors.red.shade700,
@@ -346,7 +348,7 @@ class ConcertCard extends StatelessWidget {
                       child: FilledButton.icon(
                         onPressed: onImageTap,
                         icon: const Icon(Icons.visibility_outlined),
-                        label: const Text('Ver concierto'),
+                        label: Text(l.viewConcert),
                         style: FilledButton.styleFrom(
                           minimumSize: const Size.fromHeight(54),
                           backgroundColor: Colors.blueGrey.shade700,

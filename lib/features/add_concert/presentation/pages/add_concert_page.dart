@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -107,7 +108,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     if (!should || !mounted) return;
     await TutorialService.markShown(TutorialService.addConcert);
     if (!mounted) return;
-    await TutorialOverlay.show(context, steps: TutorialContent.addConcert);
+    await TutorialOverlay.show(context, steps: TutorialContent.addConcert(AppLocalizations.of(context)));
   }
 
   Future<void> _selectDate() async {
@@ -132,6 +133,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     );
     if (image == null) return;
     setState(() => _saving = true);
+    final l = AppLocalizations.of(context);
     try {
       final imageUrl = await _uploadService.uploadImage(image.path);
       if (!mounted) return;
@@ -140,14 +142,12 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         _imageUrl = imageUrl;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ Imagen subida correctamente')),
+        SnackBar(content: Text(l.imageUploadedSuccess)),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se pudo subir la imagen. Inténtalo de nuevo.'),
-        ),
+        SnackBar(content: Text(l.imageUploadError)),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -158,6 +158,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     if (!_formKey.currentState!.validate()) return;
     debugPrint('🏷️ taggedFriendIds al guardar: $_taggedFriendIds');
     setState(() => _saving = true);
+    final l = AppLocalizations.of(context);
 
     try {
       final concert = ConcertModel(
@@ -198,9 +199,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se pudo guardar el concierto. Inténtalo de nuevo.'),
-        ),
+        SnackBar(content: Text(l.concertSaveError)),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -220,10 +219,11 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return AppPage(
       title: widget.concert == null
-          ? '➕ Nuevo concierto'
-          : '✏️ Editar concierto',
+          ? '➕ ${l.addConcertTitle}'
+          : '✏️ ${l.editConcertTitle}',
       child: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -231,7 +231,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                widget.concert == null ? 'Nuevo concierto' : 'Editar concierto',
+                widget.concert == null ? l.addConcertTitle : l.editConcertTitle,
                 style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -242,14 +242,14 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
               TextFormField(
                 controller: _artistController,
-                decoration: const InputDecoration(
-                  labelText: 'Artista',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
+                decoration: InputDecoration(
+                  labelText: l.artistLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.person),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Introduce el nombre del artista';
+                    return l.artistRequired;
                   }
                   return null;
                 },
@@ -259,10 +259,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
               TextFormField(
                 controller: _festivalController,
-                decoration: const InputDecoration(
-                  labelText: 'Festival',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.festival),
+                decoration: InputDecoration(
+                  labelText: l.festivalLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.festival),
                 ),
               ),
 
@@ -270,10 +270,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
               TextFormField(
                 controller: _venueController,
-                decoration: const InputDecoration(
-                  labelText: 'Sala / Estadio',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.stadium),
+                decoration: InputDecoration(
+                  labelText: l.venueLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.stadium),
                 ),
               ),
 
@@ -281,10 +281,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
               TextFormField(
                 controller: _cityController,
-                decoration: const InputDecoration(
-                  labelText: 'Ciudad',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.location_city),
+                decoration: InputDecoration(
+                  labelText: l.cityLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.location_city),
                 ),
               ),
 
@@ -292,11 +292,11 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre del concierto',
-                  hintText: 'Ej. Iron Maiden - Future Past Tour',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.music_note),
+                decoration: InputDecoration(
+                  labelText: l.concertNameLabel,
+                  hintText: l.concertNameHint,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.music_note),
                 ),
               ),
 
@@ -306,15 +306,15 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                 controller: _dateController,
                 readOnly: true,
                 onTap: _selectDate,
-                decoration: const InputDecoration(
-                  labelText: 'Fecha',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.calendar_month),
-                  suffixIcon: Icon(Icons.arrow_drop_down),
+                decoration: InputDecoration(
+                  labelText: l.dateLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.calendar_month),
+                  suffixIcon: const Icon(Icons.arrow_drop_down),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Selecciona una fecha';
+                    return l.dateRequired;
                   }
                   return null;
                 },
@@ -325,7 +325,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
               FilledButton.icon(
                 onPressed: _pickImage,
                 icon: const Icon(Icons.photo),
-                label: const Text('Seleccionar imagen'),
+                label: Text(l.selectImage),
               ),
 
               const SizedBox(height: 16),
@@ -357,9 +357,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Valoración',
-                      style: TextStyle(
+                    Text(
+                      l.ratingTitle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -395,8 +395,8 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                     Center(
                       child: Text(
                         _rating == 0
-                            ? 'Sin valorar'
-                            : '$_rating de 5 estrellas',
+                            ? l.ratingNone
+                            : l.ratingStars(_rating),
                         style: const TextStyle(
                           color: Colors.white54,
                           fontSize: 15,
@@ -404,9 +404,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      '¿Qué te pareció?',
-                      style: TextStyle(
+                    Text(
+                      l.howWasItTitle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -431,7 +431,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                           child: GestureDetector(
                             onTap: () => setState(() => _liked = !_liked),
                             child: Text(
-                              _liked ? 'Me gusta' : '¿Te gustó?',
+                              _liked ? l.likedYes : l.likedNo,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -447,9 +447,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const Text(
-                      'Favoritos',
-                      style: TextStyle(
+                    Text(
+                      l.favoritesTitle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -476,8 +476,8 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                             onTap: () => setState(() => _favorite = !_favorite),
                             child: Text(
                               _favorite
-                                  ? 'Añadido a favoritos'
-                                  : '¿Marcar como favorito?',
+                                  ? l.addedToFavorites
+                                  : l.markAsFavorite,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -526,10 +526,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                       : const Icon(Icons.save),
                   label: Text(
                     _saving
-                        ? 'Guardando...'
+                        ? l.savingLabel
                         : widget.concert == null
-                        ? 'Guardar concierto'
-                        : 'Guardar cambios',
+                        ? l.saveConcert
+                        : l.saveChanges,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),

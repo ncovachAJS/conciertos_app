@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,7 @@ import '../../../../shared/widgets/concert_grid_card.dart';
 import '../../data/models/concert_model.dart';
 import '../../domain/entities/concert.dart';
 import '../providers/concerts_provider.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class ConcertsPage extends ConsumerStatefulWidget {
   const ConcertsPage({super.key});
@@ -28,8 +30,8 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
-    // Pasados primero — pestaña 0. Próximos — pestaña 1.
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
+    // Pestaña 0: Pasados, 1: Próximos, 2: Compartidos
   }
 
   @override
@@ -52,6 +54,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   }
 
   Future<void> _toggleFavorite(Concert concert) async {
+    final l = AppLocalizations.of(context);
     final updated = ConcertModel.fromEntity(
       concert.copyWith(favorite: !concert.favorite),
     );
@@ -60,12 +63,13 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo actualizar el favorito')),
+        SnackBar(content: Text(l.couldNotUpdateFavorite)),
       );
     }
   }
 
   Future<void> _toggleLike(Concert concert) async {
+    final l = AppLocalizations.of(context);
     final updated = ConcertModel.fromEntity(
       concert.copyWith(liked: !concert.liked),
     );
@@ -74,7 +78,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo actualizar "Me gusta"')),
+        SnackBar(content: Text(l.couldNotUpdateLike)),
       );
     }
   }
@@ -87,19 +91,20 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   }
 
   Future<void> _deleteConcert(Concert concert) async {
+    final l = AppLocalizations.of(context);
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar concierto'),
-        content: Text('¿Seguro que quieres eliminar "${concert.name}"?'),
+        title: Text(l.deleteConcert),
+        content: Text(l.deleteConcertConfirm(concert.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Eliminar'),
+            child: Text(l.delete),
           ),
         ],
       ),
@@ -113,11 +118,11 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('"${concert.name}" eliminado')));
+      ).showSnackBar(SnackBar(content: Text(l.concertDeleted(concert.name))));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo eliminar el concierto')),
+        SnackBar(content: Text(l.concertDeleteFailed)),
       );
     } finally {
       if (mounted) setState(() => _deleting = false);
@@ -140,14 +145,15 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final concertsAsync = ref.watch(concertsProvider);
     final cs = Theme.of(context).colorScheme;
 
     return AppPage(
-      title: 'Conciertos',
+      title: l.concertsTitle,
       actions: [
         IconButton(
-          tooltip: _gridView ? 'Vista lista' : 'Vista tarjetas',
+          tooltip: _gridView ? l.listViewTooltip : l.cardViewTooltip,
           onPressed: () => setState(() => _gridView = !_gridView),
           icon: Icon(
             _gridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
@@ -184,27 +190,36 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Error al cargar conciertos',
+                    l.error,
                     style: TextStyle(color: cs.onSurface.withOpacity(0.5)),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: () => ref.invalidate(concertsProvider),
-                    child: const Text('Reintentar'),
+                    child: Text(l.retry),
                   ),
                 ],
               ),
             ),
             data: (concerts) {
+              final currentUserId = AuthController.instance.user?.id ?? '';
               final filtered = _filtered(concerts);
-              final past = filtered.where((c) => c.isPastConcert).toList()
-                ..sort(
-                  (a, b) => b.date.compareTo(a.date),
-                ); // más reciente primero
-              final upcoming = filtered.where((c) => !c.isPastConcert).toList()
-                ..sort(
-                  (a, b) => a.date.compareTo(b.date),
-                ); // más próximo primero
+
+              // Mis conciertos: creados por mí
+              final mine = filtered
+                  .where((c) => c.userId == currentUserId || c.userId.isEmpty)
+                  .toList();
+              // Compartidos: creados por otro usuario (amigos)
+              final shared = filtered
+                  .where((c) => c.userId.isNotEmpty && c.userId != currentUserId)
+                  .toList();
+
+              final past = mine.where((c) => c.isPastConcert).toList()
+                ..sort((a, b) => b.date.compareTo(a.date));
+              final upcoming = mine.where((c) => !c.isPastConcert).toList()
+                ..sort((a, b) => a.date.compareTo(b.date));
+              final sharedSorted = shared.toList()
+                ..sort((a, b) => b.date.compareTo(a.date));
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +229,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                     controller: _searchController,
                     onChanged: (v) => setState(() => _searchQuery = v),
                     decoration: InputDecoration(
-                      hintText: 'Artista, festival, ciudad, recinto...',
+                      hintText: l.searchConcertsHint,
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       border: OutlineInputBorder(
@@ -234,8 +249,9 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                     indicatorWeight: 2,
                     dividerColor: cs.onSurface.withOpacity(0.08),
                     tabs: [
-                      Tab(text: 'Pasados (${past.length})'),
-                      Tab(text: 'Próximos (${upcoming.length})'),
+                      Tab(text: '${l.tabPast} (${past.length})'),
+                      Tab(text: '${l.tabUpcoming} (${upcoming.length})'),
+                      Tab(text: '${l.tabShared} (${sharedSorted.length})'),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -250,7 +266,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                           concerts: past,
                           gridView: _gridView,
                           emptyIcon: Icons.history_rounded,
-                          emptyText: 'Aún no tienes conciertos pasados.',
+                          emptyText: l.noPastConcerts,
                           onLike: _toggleLike,
                           onFavorite: _toggleFavorite,
                           onRatingChanged: _updateRating,
@@ -262,13 +278,25 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                           concerts: upcoming,
                           gridView: _gridView,
                           emptyIcon: Icons.calendar_month_rounded,
-                          emptyText:
-                              'No tienes conciertos próximos.\n¡Añade uno!',
+                          emptyText: l.noUpcomingConcertsAdd,
                           onLike: _toggleLike,
                           onFavorite: _toggleFavorite,
                           onRatingChanged: _updateRating,
                           onEdit: _onEdit,
                           onDelete: _deleteConcert,
+                        ),
+                        // Pestaña 2 — Compartidos
+                        _TabContent(
+                          concerts: sharedSorted,
+                          gridView: _gridView,
+                          emptyIcon: Icons.group_outlined,
+                          emptyText: l.noSharedConcerts,
+                          onLike: _toggleLike,
+                          onFavorite: _toggleFavorite,
+                          onRatingChanged: _updateRating,
+                          onEdit: _onEdit,
+                          onDelete: _deleteConcert,
+                          readOnly: true,
                         ),
                       ],
                     ),
@@ -280,15 +308,15 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
           if (_deleting)
             Container(
               color: Colors.black54,
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 20),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 20),
                     Text(
-                      'Eliminando concierto...',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                      l.deletingConcert,
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   ],
                 ),
@@ -314,6 +342,7 @@ class _TabContent extends StatelessWidget {
   final void Function(Concert, int) onRatingChanged;
   final ValueChanged<Concert> onEdit;
   final ValueChanged<Concert> onDelete;
+  final bool readOnly;
 
   const _TabContent({
     required this.concerts,
@@ -325,6 +354,7 @@ class _TabContent extends StatelessWidget {
     required this.onRatingChanged,
     required this.onEdit,
     required this.onDelete,
+    this.readOnly = false,
   });
 
   @override
@@ -359,6 +389,7 @@ class _TabContent extends StatelessWidget {
               concerts: concerts,
               onEdit: onEdit,
               onDelete: onDelete,
+              readOnly: readOnly,
             )
           : _ListView(
               key: const ValueKey('list'),
@@ -368,6 +399,7 @@ class _TabContent extends StatelessWidget {
               onRatingChanged: onRatingChanged,
               onEdit: onEdit,
               onDelete: onDelete,
+              readOnly: readOnly,
             ),
     );
   }
@@ -381,12 +413,14 @@ class _GridView extends StatelessWidget {
   final List<Concert> concerts;
   final ValueChanged<Concert> onEdit;
   final ValueChanged<Concert> onDelete;
+  final bool readOnly;
 
   const _GridView({
     super.key,
     required this.concerts,
     required this.onEdit,
     required this.onDelete,
+    this.readOnly = false,
   });
 
   @override
@@ -405,8 +439,8 @@ class _GridView extends StatelessWidget {
         return ConcertGridCard(
           concert: concert,
           onTap: () => context.push('/concert-detail', extra: concert),
-          onEdit: () => onEdit(concert),
-          onDelete: () => onDelete(concert),
+          onEdit: readOnly ? null : () => onEdit(concert),
+          onDelete: readOnly ? null : () => onDelete(concert),
         );
       },
     );
@@ -424,6 +458,7 @@ class _ListView extends StatelessWidget {
   final void Function(Concert, int) onRatingChanged;
   final ValueChanged<Concert> onEdit;
   final ValueChanged<Concert> onDelete;
+  final bool readOnly;
 
   const _ListView({
     super.key,
@@ -433,6 +468,7 @@ class _ListView extends StatelessWidget {
     required this.onRatingChanged,
     required this.onEdit,
     required this.onDelete,
+    this.readOnly = false,
   });
 
   @override
@@ -448,8 +484,8 @@ class _ListView extends StatelessWidget {
           onLike: () => onLike(concert),
           onFavorite: () => onFavorite(concert),
           onRatingChanged: (r) => onRatingChanged(concert, r),
-          onEdit: () => onEdit(concert),
-          onDelete: () => onDelete(concert),
+          onEdit: readOnly ? null : () => onEdit(concert),
+          onDelete: readOnly ? null : () => onDelete(concert),
         );
       },
     );

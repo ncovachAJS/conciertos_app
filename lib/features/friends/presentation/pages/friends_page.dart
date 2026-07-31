@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 import '../../data/models/friend_model.dart';
 import '../controllers/friends_controller.dart';
@@ -46,7 +47,7 @@ class _FriendsPageState extends State<FriendsPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Amigos'),
+        title: Text(AppLocalizations.of(context).friendsTitle),
         leading: Navigator.of(context).canPop()
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -283,6 +284,7 @@ class _FriendsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     if (ctrl.friends.isEmpty) {
@@ -326,21 +328,21 @@ class _FriendsList extends StatelessWidget {
               Icons.person_remove_outlined,
               color: cs.onSurface.withOpacity(0.4),
             ),
-            tooltip: 'Eliminar amigo',
+            tooltip: l.deleteFriendTitle,
             onPressed: () async {
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Eliminar amigo'),
+                  title: Text(l.deleteFriendTitle),
                   content: Text('¿Seguro que quieres eliminar a ${f.name}?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
+                      child: Text(l.cancel),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Eliminar'),
+                      child: Text(l.delete),
                     ),
                   ],
                 ),
@@ -362,6 +364,7 @@ class _PendingList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     if (ctrl.pendingRequests.isEmpty) {
@@ -388,7 +391,7 @@ class _PendingList extends StatelessWidget {
             r.name,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-          subtitle: const Text('Quiere ser tu amigo'),
+          subtitle: Text(l.friendRequestReceived),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

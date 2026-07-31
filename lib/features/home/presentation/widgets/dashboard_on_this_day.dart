@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../artist/presentation/pages/artist_page.dart';
@@ -15,6 +17,7 @@ class DashboardOnThisDay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (concerts.isEmpty) return const SizedBox.shrink();
 
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final now = DateTime.now();
 
@@ -35,13 +38,11 @@ class DashboardOnThisDay extends ConsumerWidget {
 
         String timeLabel;
         if (isExactDay) {
-          timeLabel = 'Hace $yearsAgo año${yearsAgo > 1 ? 's' : ''}';
+          timeLabel = l.onThisDayYearsAgo(yearsAgo);
         } else if (diffDays > 0) {
-          timeLabel =
-              'En $diffDays día${diffDays > 1 ? 's' : ''}, hace $yearsAgo año${yearsAgo > 1 ? 's' : ''}';
+          timeLabel = l.onThisDayInDays(diffDays, yearsAgo);
         } else {
-          timeLabel =
-              'Hace ${diffDays.abs()} día${diffDays.abs() > 1 ? 's' : ''}, hace $yearsAgo año${yearsAgo > 1 ? 's' : ''}';
+          timeLabel = l.onThisDayAgoDays(diffDays.abs(), yearsAgo);
         }
 
         return GestureDetector(

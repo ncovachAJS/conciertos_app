@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -71,8 +72,9 @@ class _LoginPageState extends State<LoginPage> {
     return ListenableBuilder(
       listenable: _auth,
       builder: (context, _) {
+        final l = AppLocalizations.of(context);
         return Scaffold(
-          appBar: AppBar(title: const Text('Iniciar sesión')),
+          appBar: AppBar(title: Text(l.loginTitle)),
           body: Padding(
             padding: const EdgeInsets.all(24),
             child: Form(
@@ -121,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: _auth.loading ? null : _forgotPassword,
-                      child: const Text('¿Olvidaste tu contraseña?'),
+                      child: Text(l.forgotPasswordLink),
                     ),
                   ),
 
@@ -140,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Iniciar sesión'),
+                          : Text(l.loginTitle),
                     ),
                   ),
 
@@ -150,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: _auth.loading
                         ? null
                         : () => context.push('/register'),
-                    child: const Text('¿No tienes cuenta? Crear una cuenta'),
+                    child: Text(l.noAccountSignUp),
                   ),
                 ],
               ),

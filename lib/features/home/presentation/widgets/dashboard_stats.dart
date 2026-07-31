@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 
 class DashboardStats extends StatelessWidget {
@@ -9,6 +10,7 @@ class DashboardStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -19,25 +21,25 @@ class DashboardStats extends StatelessWidget {
       children: [
         _StatCard(
           value: stats.total.toString(),
-          label: 'Conciertos',
+          label: l.totalConcertsLabel,
           icon: Icons.music_note_rounded,
           color: const Color(0xFFE53935),
         ),
         _StatCard(
           value: stats.festivals.toString(),
-          label: 'Festivales',
+          label: l.uniqueFestivalsLabel,
           icon: Icons.festival_rounded,
           color: const Color(0xFF42A5F5),
         ),
         _StatCard(
           value: stats.avgRating.toStringAsFixed(1),
-          label: 'Valoración',
+          label: l.avgRatingLabel,
           icon: Icons.star_rounded,
           color: const Color(0xFFFFC107),
         ),
         _StatCard(
           value: stats.liked.toString(),
-          label: 'Te gustan',
+          label: l.likedLabel,
           icon: Icons.thumb_up_alt_rounded,
           color: const Color(0xFF4CAF50),
         ),

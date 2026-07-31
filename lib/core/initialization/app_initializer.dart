@@ -1,34 +1,47 @@
 /// Inicializador de la app durante la splash screen.
 ///
-/// En lugar de depender de [DashboardController] (singleton manual),
-/// recibe un callback [onLoadConcerts] que el caller inyecta.
-/// Esto permite que la splash page use el provider de Riverpod.
+/// Recibe un callback [onLoadConcerts] que pre-calienta el provider de Riverpod
+/// y opcionalmente una lista de [stepMessages] para mostrar texto localizado.
 class AppInitializer {
   final Future<void> Function() onLoadConcerts;
 
   AppInitializer({required this.onLoadConcerts});
 
+  static const _defaultMessages = [
+    '🎸 Preparando escenario...',
+    '🔊 Probando sonido...',
+    '💡 Encendiendo las luces...',
+    '🎫 Cargando conciertos...',
+    '📸 Organizando recuerdos...',
+    '🤘 ¡Que empiece el concierto!',
+  ];
+
   Future<void> initialize({
     required Function(String message, double progress) onProgress,
+    List<String>? stepMessages,
   }) async {
+    final msgs = (stepMessages != null && stepMessages.length >= 6)
+        ? stepMessages
+        : _defaultMessages;
+
     final stopwatch = Stopwatch()..start();
 
-    onProgress('🎸 Preparando escenario...', 0.10);
+    onProgress(msgs[0], 0.10);
     await Future.delayed(const Duration(milliseconds: 1000));
 
-    onProgress('🔊 Probando sonido...', 0.25);
+    onProgress(msgs[1], 0.25);
     await Future.delayed(const Duration(milliseconds: 1000));
 
-    onProgress('💡 Encendiendo las luces...', 0.40);
+    onProgress(msgs[2], 0.40);
     await Future.delayed(const Duration(milliseconds: 1000));
 
-    onProgress('🎫 Cargando conciertos...', 0.55);
+    onProgress(msgs[3], 0.55);
     await onLoadConcerts();
 
-    onProgress('📸 Organizando recuerdos...', 0.80);
+    onProgress(msgs[4], 0.80);
     await Future.delayed(const Duration(milliseconds: 1000));
 
-    onProgress('🤘 ¡Que empiece el concierto!', 1);
+    onProgress(msgs[5], 1);
     await Future.delayed(const Duration(milliseconds: 1000));
 
     const minimumDuration = Duration(seconds: 5);

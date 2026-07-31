@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
@@ -70,12 +71,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Elegir de la galería'),
+              title: Text(AppLocalizations.of(context).chooseFromGallery),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Hacer una foto'),
+              title: Text(AppLocalizations.of(context).takePhoto),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
           ],
@@ -102,7 +103,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       if (auth.user != null) auth.updateAvatarUrl(imageUrl);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Foto de perfil actualizada ✅')),
+        SnackBar(content: Text(AppLocalizations.of(context).profilePhotoUpdated)),
       );
     } catch (e) {
       if (!mounted) return;
@@ -137,12 +138,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     if (loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mi perfil'), centerTitle: true),
+      appBar: AppBar(title: Text(l.myProfile), centerTitle: true),
       body: Stack(
         children: [
           ListView(
@@ -179,13 +181,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 FilledButton.icon(
                   onPressed: () => context.push('/login'),
                   icon: const Icon(Icons.login),
-                  label: const Text('Iniciar sesión'),
+                  label: Text(l.signIn),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: () => context.push('/register'),
                   icon: const Icon(Icons.person_add_alt_1),
-                  label: const Text('Crear cuenta'),
+                  label: Text(l.createAccount),
                 ),
               ] else ...[
                 FilledButton.icon(
@@ -197,7 +199,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     context.go('/login');
                   },
                   icon: const Icon(Icons.logout),
-                  label: const Text('Cerrar sesión'),
+                  label: Text(l.signOut),
                 ),
               ],
 
@@ -217,14 +219,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         Icons.group_rounded,
                         color: Color(0xFFE53935),
                       ),
-                      title: const Text('Amigos'),
+                      title: Text(l.friendsTitle),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.push('/friends'),
                     ),
                     const Divider(height: 1),
                     ListTile(
                       leading: const Icon(Icons.settings),
-                      title: const Text('Ajustes'),
+                      title: Text(l.settingsTitle),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const SettingsPage()),
@@ -233,7 +235,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const Divider(height: 1),
                     ListTile(
                       leading: const Icon(Icons.info_outline),
-                      title: const Text('Acerca de'),
+                      title: Text(l.aboutTitle),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const AboutPage()),

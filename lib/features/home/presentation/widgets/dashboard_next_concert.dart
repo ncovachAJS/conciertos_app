@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+
 import '../../../concerts/domain/entities/concert.dart';
 
 class DashboardNextConcert extends StatelessWidget {
@@ -10,6 +12,7 @@ class DashboardNextConcert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     if (this.concert == null) {
       return Container(
         height: 220,
@@ -17,10 +20,10 @@ class DashboardNextConcert extends StatelessWidget {
           color: const Color(0xFF1C1F26),
           borderRadius: BorderRadius.circular(28),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
-            'No hay conciertos próximos 🎸',
-            style: TextStyle(
+            l.noConcertsUpcoming,
+            style: const TextStyle(
               fontSize: 18,
               color: Colors.white70,
               fontWeight: FontWeight.w600,
@@ -61,11 +64,11 @@ class DashboardNextConcert extends StatelessWidget {
     final String countdownText;
 
     if (days <= 0) {
-      countdownText = '🎉 ¡Hoy hay concierto!';
+      countdownText = l.concertToday;
     } else if (days == 1) {
-      countdownText = '🔥 Mañana vuelves al directo';
+      countdownText = l.concertTomorrow;
     } else {
-      countdownText = '⏳ Faltan $days días';
+      countdownText = l.daysLeft(days);
     }
 
     return GestureDetector(
@@ -210,9 +213,9 @@ class DashboardNextConcert extends StatelessWidget {
 
                   Row(
                     children: [
-                      const Text(
-                        'Hoy',
-                        style: TextStyle(color: Colors.white54, fontSize: 11),
+                      Text(
+                        l.today,
+                        style: const TextStyle(color: Colors.white54, fontSize: 11),
                       ),
 
                       const SizedBox(width: 10),
@@ -235,9 +238,9 @@ class DashboardNextConcert extends StatelessWidget {
 
                       const SizedBox(width: 10),
 
-                      const Text(
-                        'Directo',
-                        style: TextStyle(color: Colors.white54, fontSize: 11),
+                      Text(
+                        l.live,
+                        style: const TextStyle(color: Colors.white54, fontSize: 11),
                       ),
                     ],
                   ),

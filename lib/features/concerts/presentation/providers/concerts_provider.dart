@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../data/services/concert_api_service.dart';
 import '../../domain/entities/concert.dart';
 
@@ -166,7 +167,27 @@ typedef ConcertStats = ({
 });
 
 final concertStatsProvider = Provider<ConcertStats>((ref) {
-  final concerts = ref.watch(concertsProvider).asData?.value ?? [];
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final currentUserId = AuthController.instance.user?.id ?? '';
+
+  final all = (ref.watch(concertsProvider).asData?.value ?? [])
+      .where((c) => !c.date.isAfter(today))
+      .toList();
+
+  final myDates = all
+      .where((c) => c.userId == currentUserId || c.userId.isEmpty)
+      .map((c) => DateTime(c.date.year, c.date.month, c.date.day))
+      .toSet();
+
+  final concerts = all
+      .where(
+        (c) =>
+            c.userId == currentUserId ||
+            c.userId.isEmpty ||
+            !myDates.contains(DateTime(c.date.year, c.date.month, c.date.day)),
+      )
+      .toList();
 
   final total = concerts.length;
   final festivals = concerts

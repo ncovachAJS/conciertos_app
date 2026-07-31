@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/widgets/app_page.dart';
@@ -62,23 +63,22 @@ class _FeedPageState extends State<FeedPage>
   void _cancelSelection() => setState(() => _selected.clear());
 
   Future<void> _deleteSelected() async {
+    final l = AppLocalizations.of(context);
     final count = _selected.length;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar fotos'),
-        content: Text(
-          '¿Seguro que quieres eliminar $count ${count == 1 ? 'foto' : 'fotos'}?\nEsta acción no se puede deshacer.',
-        ),
+        title: Text(l.deletePhotosTitle),
+        content: Text(l.deletePhotosConfirm(count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar'),
+            child: Text(l.delete),
           ),
         ],
       ),
@@ -114,17 +114,18 @@ class _FeedPageState extends State<FeedPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l = AppLocalizations.of(context);
 
     if (_loading) {
-      return const AppPage(
-        title: 'Recuerdos',
-        child: Center(child: CircularProgressIndicator()),
+      return AppPage(
+        title: l.memoriesTitle,
+        child: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_photos.isEmpty) {
       return AppPage(
-        title: 'Recuerdos',
+        title: l.memoriesTitle,
         child: RefreshIndicator(
           onRefresh: _load,
           child: ListView(
@@ -140,7 +141,7 @@ class _FeedPageState extends State<FeedPage>
               const SizedBox(height: 16),
               Center(
                 child: Text(
-                  'Aún no hay recuerdos.\nAñade fotos desde el detalle de un concierto.',
+                  l.noMemories,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Theme.of(
@@ -175,6 +176,20 @@ class _FeedPageState extends State<FeedPage>
     );
     final years = byYear.keys.toList()..sort((a, b) => b.compareTo(a));
 
+    // Agrupación por concierto para el modo timeline, precalculada una vez por
+    // año (antes se recalculaba dentro de cada itemBuilder).
+    final concertGroupsByYear = <int, List<List<ConcertPhotoModel>>>{
+      for (final year in years)
+        year: groupBy<ConcertPhotoModel, String>(byYear[year]!, concertKey)
+            .values
+            .toList()
+          ..sort((a, b) {
+            final da = a.first.concert?.date ?? DateTime(0);
+            final db = b.first.concert?.date ?? DateTime(0);
+            return db.compareTo(da);
+          }),
+    };
+
     final cs = Theme.of(context).colorScheme;
     const lineColor = Color(0xFFE53935);
     const dotSize = 14.0;
@@ -197,10 +212,8 @@ class _FeedPageState extends State<FeedPage>
                   surfaceTintColor: Colors.transparent,
                   elevation: 0,
                   title: _selecting
-                      ? Text(
-                          '${_selected.length} seleccionada${_selected.length == 1 ? '' : 's'}',
-                        )
-                      : const Text('Recuerdos'),
+                      ? Text(l.selectedCount(_selected.length))
+                      : Text(l.memoriesTitle),
                   leading: _selecting
                       ? IconButton(
                           icon: const Icon(Icons.close),
@@ -210,7 +223,7 @@ class _FeedPageState extends State<FeedPage>
                   actions: [
                     if (_selecting)
                       IconButton(
-                        tooltip: 'Eliminar selección',
+                        tooltip: l.deleteSelection,
                         icon: const Icon(
                           Icons.delete_outline,
                           color: Colors.redAccent,
@@ -220,8 +233,8 @@ class _FeedPageState extends State<FeedPage>
                     else ...[
                       IconButton(
                         tooltip: _timelineMode
-                            ? 'Ver en cuadrícula'
-                            : 'Ver en timeline',
+                            ? l.gridView
+                            : l.timelineView,
                         icon: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 200),
                           child: Icon(
@@ -247,7 +260,7 @@ class _FeedPageState extends State<FeedPage>
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
                         child: Text(
-                          year == 0 ? 'Sin fecha' : '$year',
+                          year == 0 ? l.noDate : '$year',
                           style: const TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
@@ -359,7 +372,7 @@ class _FeedPageState extends State<FeedPage>
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                year == 0 ? 'Sin fecha' : '$year',
+                                year == 0 ? l.noDate : '$year',
                                 style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -382,31 +395,12 @@ class _FeedPageState extends State<FeedPage>
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, i) {
-                          final yearPhotos = byYear[year]!;
-                          final byConcert = groupBy<ConcertPhotoModel, String>(
-                            yearPhotos,
-                            (p) => concertKey(p),
-                          );
-                          final concertIds = byConcert.keys.toList();
-                          concertIds.sort((a, b) {
-                            final da =
-                                byConcert[a]!.first.concert?.date ??
-                                DateTime(0);
-                            final db =
-                                byConcert[b]!.first.concert?.date ??
-                                DateTime(0);
-                            return db.compareTo(da);
-                          });
+                          final groups = concertGroupsByYear[year]!;
+                          if (i >= groups.length) return null;
 
-                          if (i >= concertIds.length) return null;
-
-                          final concertId = concertIds[i];
-                          final concertPhotos = byConcert[concertId]!;
+                          final concertPhotos = groups[i];
                           final ref = concertPhotos.first.concert;
-                          final isLast = i == concertIds.length - 1;
-                          final globalStart = yearPhotos.indexWhere(
-                            (p) => p.concertId == concertId,
-                          );
+                          final isLast = i == groups.length - 1;
 
                           return IntrinsicHeight(
                             child: Row(
@@ -504,10 +498,8 @@ class _FeedPageState extends State<FeedPage>
                                           child: concertPhotos.length == 1
                                               ? _SinglePhoto(
                                                   photo: concertPhotos.first,
-                                                  onTap: () => _openPhoto(
-                                                    yearPhotos,
-                                                    globalStart,
-                                                  ),
+                                                  onTap: () =>
+                                                      _openPhoto(concertPhotos, 0),
                                                 )
                                               : ListView.separated(
                                                   scrollDirection:
@@ -520,8 +512,8 @@ class _FeedPageState extends State<FeedPage>
                                                       _ThumbPhoto(
                                                         photo: concertPhotos[j],
                                                         onTap: () => _openPhoto(
-                                                          yearPhotos,
-                                                          globalStart + j,
+                                                          concertPhotos,
+                                                          j,
                                                         ),
                                                       ),
                                                 ),
@@ -534,10 +526,7 @@ class _FeedPageState extends State<FeedPage>
                             ),
                           );
                         },
-                        childCount: groupBy<ConcertPhotoModel, String>(
-                          byYear[year]!,
-                          (p) => concertKey(p),
-                        ).length,
+                        childCount: concertGroupsByYear[year]!.length,
                       ),
                     ),
                   ],
@@ -552,15 +541,15 @@ class _FeedPageState extends State<FeedPage>
         if (_deleting)
           Container(
             color: Colors.black54,
-            child: const Center(
+            child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
                   Text(
-                    'Eliminando fotos...',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    l.deletingPhotos,
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ],
               ),

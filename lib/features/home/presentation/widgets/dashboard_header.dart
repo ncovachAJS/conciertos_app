@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../notifications/presentation/controllers/notifications_controller.dart';
@@ -11,15 +13,16 @@ import '../../../notifications/presentation/pages/notifications_page.dart';
 class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});
 
-  String _greeting() {
+  String _greeting(AppLocalizations l) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Buenos días';
-    if (hour < 20) return 'Buenas tardes';
-    return 'Buenas noches';
+    if (hour < 12) return l.greetingMorning;
+    if (hour < 20) return l.greetingAfternoon;
+    return l.greetingEvening;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return ListenableBuilder(
@@ -47,7 +50,7 @@ class DashboardHeader extends ConsumerWidget {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: 'LA VIDA ',
+                              text: '${l.appTitleLine1} ',
                               style: GoogleFonts.teko(
                                 fontSize: 30,
                                 fontWeight: FontWeight.w700,
@@ -56,7 +59,7 @@ class DashboardHeader extends ConsumerWidget {
                               ),
                             ),
                             TextSpan(
-                              text: 'EN DIRECTO',
+                              text: l.appTitleLine2,
                               style: GoogleFonts.teko(
                                 fontSize: 30,
                                 fontWeight: FontWeight.w700,
@@ -69,7 +72,7 @@ class DashboardHeader extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Cada concierto cuenta una historia.',
+                        l.tagline,
                         style: TextStyle(
                           color: cs.onSurface.withOpacity(0.54),
                           fontSize: 14,
@@ -177,7 +180,7 @@ class DashboardHeader extends ConsumerWidget {
             const SizedBox(height: 26),
 
             Text(
-              '${_greeting()}, ${user?.name ?? "Rockero"} 🤘',
+              '${_greeting(l)}, ${user?.name ?? l.defaultNickname} 🤘',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -188,7 +191,7 @@ class DashboardHeader extends ConsumerWidget {
             const SizedBox(height: 6),
 
             Text(
-              'Todo listo para volver al directo.',
+              l.readyForNext,
               style: TextStyle(
                 color: cs.onSurface.withOpacity(0.6),
                 fontSize: 15,

@@ -1,0 +1,532 @@
+{
+  "@@locale": "en",
+
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "retry": "Retry",
+  "close": "Close",
+  "search": "Search",
+  "add": "Add",
+  "publish": "Publish",
+  "done": "Done",
+  "tag": "Tag",
+  "all": "All",
+  "understood": "Got it",
+  "error": "Error",
+  "loading": "Loading...",
+  "importing": "Importing...",
+  "deleting": "Deleting...",
+  "year": "Year",
+  "country": "Country",
+
+  "loginTitle": "Sign in",
+  "registerTitle": "Create account",
+  "forgotPasswordTitle": "Recover password",
+  "forgotPasswordLink": "Forgot your password?",
+  "noAccountSignUp": "Don't have an account? Create one",
+  "sendLink": "Send link",
+  "backToLogin": "Back to login",
+  "connectionError": "Connection error. Try again.",
+
+  "concertsTitle": "Concerts",
+  "searchConcertsHint": "Artist, festival, city, venue...",
+  "deleteConcert": "Delete concert",
+  "sharedBadge": "Shared",
+  "viewConcert": "View concert",
+  "couldNotUpdateFavorite": "Could not update favorite",
+  "couldNotUpdateLike": "Could not update like",
+  "deletingConcert": "Deleting...",
+  "searchArtistSpotify": "Search artist on Spotify",
+  "artistNameHint": "Artist name...",
+  "dateLabel": "Date",
+  "venueLabel": "Venue / Stadium",
+  "cityLabel": "City",
+  "concertLabel": "Concert",
+  "addConcertsForStats": "Add concerts to see your statistics.",
+  "noConcerts": "No concerts yet.",
+  "noConcertsYet": "You have no concerts yet.",
+
+  "addConcertTitle": "Add concert",
+  "editConcertTitle": "Edit concert",
+  "artistLabel": "Artist",
+  "festivalLabel": "Festival",
+  "concertNameLabel": "Concert name",
+  "concertNameHint": "e.g. Iron Maiden - Future Past Tour",
+  "imageUploadedSuccess": "✅ Image uploaded successfully",
+  "imageUploadError": "Could not upload image. Try again.",
+  "concertSaveError": "Could not save concert. Try again.",
+
+  "onThisDay": "ON THIS DAY",
+  "upcomingConcerts": "UPCOMING CONCERTS",
+  "statisticsSection": "STATISTICS",
+  "recommendedSection": "RECOMMENDED",
+  "yourFavorites": "YOUR FAVORITES",
+  "recentlyAdded": "RECENTLY ADDED",
+  "errorLoadingData": "Error loading: {error}",
+  "@errorLoadingData": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "noConcertsUpcoming": "No upcoming concerts 🎸",
+  "concertToday": "🎉 Concert today!",
+  "concertTomorrow": "🔥 Back live tomorrow",
+  "daysLeft": "⏳ {days} days left",
+  "@daysLeft": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "today": "Today",
+  "live": "Live",
+  "noFavorites": "No favorite concerts yet.",
+
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "tagline": "Every concert tells a story.",
+  "readyForNext": "Ready for the next one.",
+  "defaultNickname": "Rocker",
+
+  "epicMonth": "Epic month!",
+  "epicMonthDesc": "{count} concerts this month — you're on a roll",
+  "@epicMonthDesc": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "goodMonth": "Good month",
+  "goodMonthDesc": "{count} concerts this month",
+  "@goodMonthDesc": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "justGotOut": "Just got back",
+  "lastConcertDaysAgo": "Last concert {days} days ago",
+  "@lastConcertDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "longTime": "It's been a while",
+  "longTimeDesc": "{days} days without concerts — time to go back!",
+  "@longTimeDesc": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "howWasArtist": "How was {artist}?",
+  "@howWasArtist": {
+    "placeholders": {
+      "artist": { "type": "String" }
+    }
+  },
+  "noRatingYet": "You haven't rated this concert yet",
+
+  "onThisDayYearsAgo": "{years, plural, =1{1 year ago} other{{years} years ago}}",
+  "@onThisDayYearsAgo": {
+    "placeholders": {
+      "years": { "type": "int" }
+    }
+  },
+  "onThisDayInDays": "In {days, plural, =1{1 day} other{{days} days}}, {years, plural, =1{1 year ago} other{{years} years ago}}",
+  "@onThisDayInDays": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "years": { "type": "int" }
+    }
+  },
+  "onThisDayAgoDays": "{days, plural, =1{1 day ago} other{{days} days ago}}, {years, plural, =1{1 year ago} other{{years} years ago}}",
+  "@onThisDayAgoDays": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "years": { "type": "int" }
+    }
+  },
+
+  "statisticsTitle": "Statistics",
+  "totalConcertsLabel": "Concerts",
+  "uniqueArtistsLabel": "Artists",
+  "uniqueFestivalsLabel": "Festivals",
+  "avgRatingLabel": "Avg. rating",
+  "activeYearLabel": "Active year",
+  "activeYearsLabel": "Active years",
+  "favoriteMonthLabel": "Favorite month",
+  "concertsByYear": "Concerts per year",
+  "topArtists": "Most seen artists",
+  "topFestivals": "Most visited festivals",
+  "favoriteCities": "Favorite cities",
+  "ratingDistribution": "Rating distribution",
+  "noDataDash": "—",
+
+  "monthJanuary": "January",
+  "monthFebruary": "February",
+  "monthMarch": "March",
+  "monthApril": "April",
+  "monthMay": "May",
+  "monthJune": "June",
+  "monthJuly": "July",
+  "monthAugust": "August",
+  "monthSeptember": "September",
+  "monthOctober": "October",
+  "monthNovember": "November",
+  "monthDecember": "December",
+
+  "myProfile": "My profile",
+  "signIn": "Sign in",
+  "createAccount": "Create account",
+  "signOut": "Sign out",
+  "friendsTitle": "Friends",
+  "settingsTitle": "Settings",
+  "aboutTitle": "About",
+  "chooseFromGallery": "Choose from gallery",
+  "takePhoto": "Take a photo",
+  "profilePhotoUpdated": "Profile photo updated ✅",
+  "concertsStatLabel": "Concerts",
+  "favoritesStatLabel": "Favorites",
+  "memoriesStatLabel": "Memories",
+  "likedLabel": "Liked",
+
+  "accountSection": "Account",
+  "changeName": "Change name",
+  "usernameLabel": "Username",
+  "changePassword": "Change password",
+  "preferencesSection": "Preferences",
+  "notificationsLabel": "Notifications",
+  "upcomingConcertAlerts": "Upcoming concert alerts",
+  "languageSection": "Language",
+  "appearanceSection": "Appearance",
+  "newNameLabel": "New name",
+  "currentPasswordLabel": "Current password",
+  "newPasswordLabel": "New password",
+  "confirmPasswordLabel": "Confirm password",
+  "passwordsNoMatch": "Passwords don't match",
+  "nameUpdated": "Name updated ✅",
+  "passwordUpdated": "Password updated ✅",
+  "changeNameTitle": "Change name",
+  "changePasswordTitle": "Change password",
+  "languageSpanish": "Español",
+  "languageEnglish": "English",
+  "changeLanguageTitle": "Language",
+
+  "privacyPolicy": "Privacy policy",
+  "creditsLabel": "Credits",
+  "technologiesUsed": "Technologies used:",
+  "contact": "Contact",
+
+  "deleteFriendTitle": "Remove friend",
+  "friendRequestReceived": "Wants to be your friend",
+  "searchFriendHint": "Search by name or email...",
+
+  "notificationsTitle": "Notifications",
+  "markRead": "Read",
+  "deleteAll": "Delete all",
+  "deleteNotificationsTitle": "Delete notifications",
+  "deleteNotificationsConfirm": "Are you sure you want to delete all notifications?",
+  "noNotifications": "No notifications",
+
+  "favoritesTitle": "Favorites",
+  "favoritesError": "Error loading favorites",
+  "searchArtistHint": "Search artist...",
+  "noFavoritesMessage": "No favorites yet.",
+  "concertCountLabel": "{count, plural, =1{1 concert} other{{count} concerts}}",
+  "@concertCountLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "memoriesTitle": "Memories",
+  "deletePhotosTitle": "Delete photos",
+  "deletePhotosConfirm": "Are you sure you want to delete {count, plural, =1{1 photo} other{{count} photos}}?\nThis action cannot be undone.",
+  "@deletePhotosConfirm": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "deletePhotoTitle": "Delete photo",
+  "deletePhotoConfirm": "Are you sure you want to delete this memory?",
+  "noMemories": "No memories yet.\nAdd photos from a concert's detail.",
+  "noMemoriesShort": "No memories yet. Add your concert photos!",
+  "deletingPhotos": "Deleting photos...",
+  "tagPeople": "Tag people",
+  "newMemory": "New memory",
+  "captionHint": "Caption (optional)",
+  "photoUploadError": "Error uploading photo: {error}",
+  "@photoUploadError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "gridView": "Grid view",
+  "timelineView": "Timeline view",
+  "noDate": "No date",
+  "deleteSelection": "Delete selection",
+  "selectedCount": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "@selectedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "uploadingPhotos": "Uploading {current}/{total}...",
+  "@uploadingPhotos": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "importTitle": "Import concerts",
+  "importSearchArtist": "Search for an artist",
+  "importFromSetlist": "Import concerts from Setlist.fm",
+  "artistHint": "Artist...",
+  "importFoundCount": "{count} found",
+  "@importFoundCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "importSelectedCount": "{count} selected",
+  "@importSelectedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "importSearchPrompt": "Search for an artist\nto see their concerts",
+  "loadMore": "Load more",
+  "importButton": "{count, plural, =1{Import 1 concert} other{Import {count} concerts}}",
+  "@importButton": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "importSuccess": "{count, plural, =1{1 concert imported 🎸} other{{count} concerts imported 🎸}}",
+  "@importSuccess": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "recommendedTitle": "Recommended",
+  "noLikesForRecommendations": "Like artists to get recommendations.",
+  "becauseYouLike": "Because you like {artist}",
+  "@becauseYouLike": {
+    "placeholders": {
+      "artist": { "type": "String" }
+    }
+  },
+  "viewOnTicketmaster": "View on Ticketmaster",
+  "noConcertsAddForRec": "Add concerts to see recommendations.",
+  "noUpcomingEvents": "No upcoming events found. Your most visited artists:",
+
+  "searchHintBar": "Search artist or festival...",
+
+  "artistConcertSingular": "concert",
+  "artistConcertPlural": "concerts",
+  "artistAvgRating": "avg. rating",
+  "artistCitySingular": "city",
+  "artistCityPlural": "cities",
+  "artistFirstConcert": "First concert",
+  "artistBest": "Best",
+  "artistUpcoming": "UPCOMING",
+  "artistHistory": "HISTORY",
+
+  "actionAdd": "Add",
+  "actionTickets": "Tickets",
+  "actionStats": "Stats",
+  "actionImport": "Import",
+
+  "tutorialWelcomeTitle": "Welcome to La Vida en Directo!",
+  "tutorialWelcomeDesc": "Your personal concert diary. Here you'll find everything you need to remember every live show.",
+  "tutorialAddTitle": "Add your first concert",
+  "tutorialAddDesc": "Tap the \"Add\" button to log a concert. You can add the date, venue, photos and rate it.",
+  "tutorialImportTitle": "Import from Setlist.fm",
+  "tutorialImportDesc": "Use the \"Import\" button to automatically bring concerts from Setlist.fm with a single tap.",
+  "tutorialFavoritesTitle": "Save your favorites",
+  "tutorialFavoritesDesc": "Mark your favorite artists. You'll find them grouped in the Favorites tab.",
+  "tutorialMemoriesTitle": "Save your memories",
+  "tutorialMemoriesDesc": "In the Memories tab you can see all your concert photos organized by year.",
+  "tutorialAddConcertTitle": "Add a concert",
+  "tutorialAddConcertDesc": "Fill in the artist name, date and venue. Everything else is optional.",
+  "tutorialAddImageTitle": "Add an image",
+  "tutorialAddImageDesc": "You can add a photo of the concert or the artist. It will be used as the cover in your collection.",
+  "tutorialRateTitle": "Rate your experience",
+  "tutorialRateDesc": "For past concerts you can add a rating from 1 to 5 stars. Tap the active star to remove it.",
+  "tutorialLikeTitle": "Like and Favorite",
+  "tutorialLikeDesc": "👍 \"Like\" marks concerts you enjoyed. ⭐ \"Favorite\" groups the artist in your favorites list.",
+  "tutorialDetailTitle": "Concert detail",
+  "tutorialDetailDesc": "Here you see all the concert info: date, venue, city and your photos.",
+  "tutorialEditTitle": "Edit anytime",
+  "tutorialEditDesc": "Tap the ✏️ icon at the top right to edit any detail or change the image.",
+  "tutorialSetlistTitle": "Automatic setlist",
+  "tutorialSetlistDesc": "If the concert is on Setlist.fm, you'll automatically see the songs they played that night.",
+  "tutorialPhotosTitle": "Add your photos",
+  "tutorialPhotosDesc": "In the Memories section you can add as many photos as you want from the concert. Multi-selection supported.",
+
+  "splashTagline": "Every concert tells a story.",
+
+  "navHome": "Home",
+  "navConcerts": "Concerts",
+  "navMemories": "Memories",
+  "navFavorites": "Favorites",
+  "navStats": "Stats",
+
+  "setlistTitle": "Setlist",
+  "setlistSongCount": "{count} songs",
+  "@setlistSongCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "setlistNotFound": "No setlist found for this concert.",
+  "setlistShowLess": "Show less",
+  "setlistShowRemaining": "Show remaining {count} songs",
+  "@setlistShowRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "setlistCoverOf": "Cover of {artist}",
+  "@setlistCoverOf": {
+    "placeholders": {
+      "artist": { "type": "String" }
+    }
+  },
+  "setlistWith": "with {artist}",
+  "@setlistWith": {
+    "placeholders": {
+      "artist": { "type": "String" }
+    }
+  },
+
+  "notifMarkAllRead": "Mark all as read",
+  "notifMemoriesToday": "Memories from today",
+  "notifYearsAgoArtist": "{years, plural, =1{1 year} other{{years} years}} ago: {artist}",
+  "@notifYearsAgoArtist": {
+    "placeholders": {
+      "years": { "type": "int" },
+      "artist": { "type": "String" }
+    }
+  },
+  "notifUpcomingSection": "Upcoming concerts",
+  "notifTodaySubtitle": "Today! · {venue}, {city}",
+  "@notifTodaySubtitle": {
+    "placeholders": {
+      "venue": { "type": "String" },
+      "city": { "type": "String" }
+    }
+  },
+  "notifTomorrowSubtitle": "Tomorrow! · {venue}, {city}",
+  "@notifTomorrowSubtitle": {
+    "placeholders": {
+      "venue": { "type": "String" },
+      "city": { "type": "String" }
+    }
+  },
+  "notifDaysSubtitle": "{days} days left · {venue}, {city}",
+  "@notifDaysSubtitle": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "venue": { "type": "String" },
+      "city": { "type": "String" }
+    }
+  },
+  "notifRecommendationsSection": "Recommendations",
+  "notifNoRecsHint": "Mark artists as favorites to get recommendations.",
+  "notifEmpty": "No notifications yet.\nAdd concerts to get started.",
+
+  "buyTickets": "Buy tickets",
+
+  "appTitleLine1": "LIVE",
+  "appTitleLine2": "IN CONCERT",
+
+  "memberNumber": "MEMBER #{number}",
+  "@memberNumber": {
+    "placeholders": {
+      "number": { "type": "String" }
+    }
+  },
+
+  "deleteConcertConfirm": "Are you sure you want to delete \"{name}\"?\nThis action cannot be undone.",
+  "@deleteConcertConfirm": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "concertDeleteError": "Could not delete: {error}",
+  "@concertDeleteError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "artistNotFound": "Artist not found: {error}",
+  "@artistNotFound": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "setlistComingSoon": "The setlist will be available\nafter the concert.",
+  "spotifyFollowers": "{count} followers",
+  "@spotifyFollowers": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "openInSpotify": "Open in Spotify",
+  "participantsAlsoWere": "Also attended",
+  "participantsAlsoGoing": "Also going",
+
+  "artistRequired": "Enter the artist name",
+  "dateRequired": "Select a date",
+  "selectImage": "Select image",
+  "ratingTitle": "Rating",
+  "ratingNone": "Not rated",
+  "ratingStars": "{rating} out of 5 stars",
+  "@ratingStars": {
+    "placeholders": {
+      "rating": { "type": "int" }
+    }
+  },
+  "howWasItTitle": "What did you think?",
+  "likedYes": "I liked it",
+  "likedNo": "Did you like it?",
+  "addedToFavorites": "Added to favorites",
+  "markAsFavorite": "Mark as favorite?",
+  "savingLabel": "Saving...",
+  "saveConcert": "Save concert",
+  "saveChanges": "Save changes",
+
+  "noFriendsYet": "No friends yet. Add them from your profile.",
+  "whoElseWas": "Who else was there?",
+  "whoElseGoing": "Who else is going?",
+
+  "splashLoading1": "🎸 Setting up the stage...",
+  "splashLoading2": "🔊 Testing the sound...",
+  "splashLoading3": "💡 Turning on the lights...",
+  "splashLoading4": "🎫 Loading concerts...",
+  "splashLoading5": "📸 Organizing memories...",
+  "splashLoading6": "🤘 Let the show begin!",
+
+  "tabPast": "Past",
+  "tabUpcoming": "Upcoming",
+  "tabShared": "Shared",
+  "listViewTooltip": "List view",
+  "cardViewTooltip": "Card view",
+  "concertDeleted": "\"{name}\" deleted",
+  "@concertDeleted": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "concertDeleteFailed": "Could not delete the concert",
+  "noPastConcerts": "No past concerts yet.",
+  "noUpcomingConcertsAdd": "No upcoming concerts.\nAdd one!",
+  "noSharedConcerts": "No friends have shared concerts with you yet.",
+
+  "mapVenueLocation": "Venue location",
+  "mapOpenIn": "Open in maps",
+  "mapNotAvailable": "Map not available"
+}

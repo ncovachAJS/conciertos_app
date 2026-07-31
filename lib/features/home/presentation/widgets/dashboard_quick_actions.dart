@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+
 import '../../../import/presentation/pages/import_page.dart';
 
 class DashboardQuickActions extends StatelessWidget {
@@ -8,12 +10,13 @@ class DashboardQuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Row(
       children: [
         Expanded(
           child: _QuickAction(
             icon: Icons.add_rounded,
-            title: 'Añadir',
+            title: l.actionAdd,
             color: const Color(0xFFE53935),
             onTap: () => context.push('/add'),
           ),
@@ -22,7 +25,7 @@ class DashboardQuickActions extends StatelessWidget {
         Expanded(
           child: _QuickAction(
             icon: Icons.confirmation_number_outlined,
-            title: 'Entradas',
+            title: l.actionTickets,
             color: const Color(0xFF42A5F5),
             onTap: () => context.push('/recommendations'),
           ),
@@ -31,7 +34,7 @@ class DashboardQuickActions extends StatelessWidget {
         Expanded(
           child: _QuickAction(
             icon: Icons.bar_chart_rounded,
-            title: 'Stats',
+            title: l.actionStats,
             color: const Color(0xFFFFB300),
             onTap: () => context.push('/statistics'),
           ),
@@ -40,7 +43,7 @@ class DashboardQuickActions extends StatelessWidget {
         Expanded(
           child: _QuickAction(
             icon: Icons.download_rounded,
-            title: 'Importar',
+            title: l.actionImport,
             color: const Color(0xFF66BB6A),
             onTap: () => Navigator.of(
               context,

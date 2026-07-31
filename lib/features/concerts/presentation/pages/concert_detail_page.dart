@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -18,6 +19,7 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../photos/presentation/widgets/memories_section.dart';
+import '../widgets/venue_map_card.dart';
 import '../../../setlist/data/services/setlist_service.dart';
 import '../../../setlist/domain/entities/setlist.dart';
 import '../../../setlist/presentation/widgets/setlist_section.dart';
@@ -61,7 +63,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     if (!should || !mounted) return;
     await TutorialService.markShown(TutorialService.detail);
     if (!mounted) return;
-    await TutorialOverlay.show(context, steps: TutorialContent.concertDetail);
+    await TutorialOverlay.show(context, steps: TutorialContent.concertDetail(AppLocalizations.of(context)));
   }
 
   Future<void> _loadSetlist() async {
@@ -104,7 +106,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se encontró el artista: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context).artistNotFound('$e'))),
         );
       }
     } finally {
@@ -113,28 +115,29 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
   }
 
   Future<void> _showSpotifySearch() async {
+    final l = AppLocalizations.of(context);
     final controller = TextEditingController(text: widget.concert.artist);
     final query = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Buscar artista en Spotify'),
+        title: Text(l.searchArtistSpotify),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Nombre del artista...',
-            prefixIcon: Icon(Icons.search),
+          decoration: InputDecoration(
+            hintText: l.artistNameHint,
+            prefixIcon: const Icon(Icons.search),
           ),
           onSubmitted: (v) => Navigator.pop(ctx, v),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Buscar'),
+            child: Text(l.search),
           ),
         ],
       ),
@@ -150,22 +153,21 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
   }
 
   Future<void> _delete(Concert concert) async {
+    final l = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar concierto'),
-        content: Text(
-          '¿Seguro que quieres eliminar "${concert.name}"?\nEsta acción no se puede deshacer.',
-        ),
+        title: Text(l.deleteConcert),
+        content: Text(l.deleteConcertConfirm(concert.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar'),
+            child: Text(l.delete),
           ),
         ],
       ),
@@ -184,12 +186,13 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
       setState(() => _deleting = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('No se pudo eliminar: $e')));
+      ).showSnackBar(SnackBar(content: Text(l.concertDeleteError('$e'))));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     // Obtenemos el concert desde el provider para que se actualice automáticamente
     final concerts = ref.watch(concertsProvider).asData?.value ?? [];
     final concert = concerts.firstWhere(
@@ -198,14 +201,14 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     );
 
     if (_deleting) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Eliminando...'),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(l.deletingConcert),
             ],
           ),
         ),
@@ -221,12 +224,12 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
       actions: [
         if (isOwner) ...[
           IconButton(
-            tooltip: 'Editar',
+            tooltip: l.edit,
             onPressed: () => _edit(concert),
             icon: const Icon(Icons.edit_outlined),
           ),
           IconButton(
-            tooltip: 'Eliminar',
+            tooltip: l.delete,
             onPressed: () => _delete(concert),
             icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
           ),
@@ -263,32 +266,38 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
-                  title: const Text('Fecha'),
+                  title: Text(l.dateLabel),
                   subtitle: Text(DateFormatter.short(concert.date)),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.stadium),
-                  title: const Text('Recinto'),
+                  title: Text(l.venueLabel),
                   subtitle: Text(concert.venue),
                 ),
                 if (concert.city.isNotEmpty) ...[
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.location_city),
-                    title: const Text('Ciudad'),
+                    title: Text(l.cityLabel),
                     subtitle: Text(concert.city),
                   ),
                 ],
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.music_note),
-                  title: const Text('Concierto'),
+                  title: Text(l.concertLabel),
                   subtitle: Text(concert.name),
                 ),
               ],
             ),
           ),
+
+          // Mapa de ubicación
+          if (concert.venue.isNotEmpty || concert.city.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            VenueMapCard(venue: concert.venue, city: concert.city),
+          ],
 
           // Participantes
           if (concert.participants.isNotEmpty) ...[
@@ -317,12 +326,12 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Row(
-                  children: const [
-                    Icon(Icons.queue_music, color: Colors.white38),
-                    SizedBox(width: 10),
+                  children: [
+                    const Icon(Icons.queue_music, color: Colors.white38),
+                    const SizedBox(width: 10),
                     Text(
-                      'El setlist estará disponible\ntras el concierto.',
-                      style: TextStyle(color: Colors.white54, fontSize: 15),
+                      l.setlistComingSoon,
+                      style: const TextStyle(color: Colors.white54, fontSize: 15),
                     ),
                   ],
                 ),
@@ -392,7 +401,7 @@ class _SpotifyCard extends StatelessWidget {
                   if (artist.followers > 0) ...[
                     const SizedBox(height: 2),
                     Text(
-                      '${_formatFollowers(artist.followers)} seguidores',
+                      AppLocalizations.of(context).spotifyFollowers(_formatFollowers(artist.followers)),
                       style: const TextStyle(
                         color: Colors.white38,
                         fontSize: 12,
@@ -411,7 +420,7 @@ class _SpotifyCard extends StatelessWidget {
                 );
               },
               icon: const Icon(Icons.open_in_new),
-              tooltip: 'Abrir en Spotify',
+              tooltip: AppLocalizations.of(context).openInSpotify,
             ),
           ],
         ),
@@ -453,8 +462,9 @@ class _ParticipantsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final label = concert.isPastConcert ? 'También estuvieron' : 'También irán';
+    final label = concert.isPastConcert ? l.participantsAlsoWere : l.participantsAlsoGoing;
 
     return Card(
       child: Padding(

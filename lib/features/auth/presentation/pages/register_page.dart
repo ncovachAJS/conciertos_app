@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,8 +79,9 @@ class _RegisterPageState extends State<RegisterPage> {
     return ListenableBuilder(
       listenable: _auth,
       builder: (context, _) {
+        final l = AppLocalizations.of(context);
         return Scaffold(
-          appBar: AppBar(title: const Text('Crear cuenta')),
+          appBar: AppBar(title: Text(l.registerTitle)),
           body: Padding(
             padding: const EdgeInsets.all(24),
             child: Form(
@@ -141,7 +143,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Crear cuenta'),
+                          : Text(l.registerTitle),
                     ),
                   ),
                 ],

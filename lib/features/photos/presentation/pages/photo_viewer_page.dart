@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../../friends/data/services/friends_api_service.dart';
@@ -38,8 +39,12 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
   void initState() {
     super.initState();
     _photos = List.from(widget.photos);
-    _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: widget.initialIndex);
+    // Acotamos por si nos llega un índice fuera de rango: un initialPage
+    // inválido deja el PageView en blanco sin error visible.
+    _currentIndex = _photos.isEmpty
+        ? 0
+        : widget.initialIndex.clamp(0, _photos.length - 1);
+    _pageController = PageController(initialPage: _currentIndex);
   }
 
   @override
@@ -51,20 +56,21 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
   ConcertPhotoModel get _current => _photos[_currentIndex];
 
   Future<void> _confirmDelete() async {
+    final l = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar foto'),
-        content: const Text('¿Seguro que quieres eliminar este recuerdo?'),
+        title: Text(l.deletePhotoTitle),
+        content: Text(l.deletePhotoConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar'),
+            child: Text(l.delete),
           ),
         ],
       ),
@@ -96,9 +102,9 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Etiquetar personas',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context).tagPeople,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             TagFriendsSelector(
@@ -140,7 +146,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Listo'),
+                child: Text(AppLocalizations.of(context).done),
               ),
             ),
           ],
@@ -151,6 +157,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final total = _photos.length;
     final cs = Theme.of(context).colorScheme;
 
@@ -177,7 +184,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
           if (widget.onTagFriend != null)
             IconButton(
               icon: const Icon(Icons.person_add_outlined, color: Colors.white),
-              tooltip: 'Etiquetar',
+              tooltip: l.tag,
               onPressed: _showTagSheet,
             ),
           if (widget.onDelete != null)

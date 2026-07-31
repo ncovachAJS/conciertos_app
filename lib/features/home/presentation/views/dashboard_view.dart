@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,7 +40,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     if (!should || !mounted) return;
     await TutorialService.markShown(TutorialService.dashboard);
     if (!mounted) return;
-    await TutorialOverlay.show(context, steps: TutorialContent.dashboard);
+    await TutorialOverlay.show(context, steps: TutorialContent.dashboard(AppLocalizations.of(context)));
   }
 
   @override
@@ -50,13 +51,14 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
         child: Text(
-          'Error al cargar: $e',
+          AppLocalizations.of(context).errorLoadingData(e.toString()),
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
           ),
         ),
       ),
       data: (_) {
+        final l = AppLocalizations.of(context);
         // Lanzamos el tutorial una sola vez cuando los datos ya están disponibles
         if (!_tutorialTriggered) {
           _tutorialTriggered = true;
@@ -120,9 +122,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 
               // ── En tal día como hoy ──────────────────────────────────────
               if (onThisDay.isNotEmpty) ...[
-                const DashboardSectionTitle(
+                DashboardSectionTitle(
                   icon: Icons.cake_rounded,
-                  title: 'EN TAL DÍA COMO HOY',
+                  title: l.onThisDay,
                 ),
                 const SizedBox(height: 14),
                 DashboardOnThisDay(concerts: onThisDay),
@@ -130,9 +132,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               ],
 
               // ── Próximos conciertos ──────────────────────────────────────
-              const DashboardSectionTitle(
+              DashboardSectionTitle(
                 icon: Icons.calendar_month_rounded,
-                title: 'PRÓXIMOS CONCIERTOS',
+                title: l.upcomingConcerts,
               ),
               const SizedBox(height: 24),
               DashboardUpcomingConcerts(
@@ -146,36 +148,36 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               const SizedBox(height: 36),
 
               // ── Estadísticas ─────────────────────────────────────────────
-              const DashboardSectionTitle(
+              DashboardSectionTitle(
                 icon: Icons.bar_chart,
-                title: 'ESTADÍSTICAS',
+                title: l.statisticsSection,
               ),
               const SizedBox(height: 18),
               DashboardStats(stats: stats),
               const SizedBox(height: 36),
 
               // ── Recomendados ─────────────────────────────────────────────
-              const DashboardSectionTitle(
+              DashboardSectionTitle(
                 icon: Icons.local_fire_department,
-                title: 'RECOMENDADOS',
+                title: l.recommendedSection,
               ),
               const SizedBox(height: 18),
               RecommendedConcerts(favoriteArtists: favoriteArtists),
               const SizedBox(height: 36),
 
               // ── Favoritos ────────────────────────────────────────────────
-              const DashboardSectionTitle(
+              DashboardSectionTitle(
                 icon: Icons.favorite,
-                title: 'TUS FAVORITOS',
+                title: l.yourFavorites,
               ),
               const SizedBox(height: 18),
               DashboardFavorites(concerts: favorites),
               const SizedBox(height: 36),
 
               // ── Últimos añadidos ─────────────────────────────────────────
-              const DashboardSectionTitle(
+              DashboardSectionTitle(
                 icon: Icons.history,
-                title: 'ÚLTIMOS AÑADIDOS',
+                title: l.recentlyAdded,
               ),
               const SizedBox(height: 18),
               DashboardRecentConcerts(concerts: recent),

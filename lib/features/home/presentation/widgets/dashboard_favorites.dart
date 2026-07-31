@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+
 import '../../../concerts/domain/entities/concert.dart';
 
 class DashboardFavorites extends StatelessWidget {
@@ -10,12 +12,13 @@ class DashboardFavorites extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     if (concerts.isEmpty) {
       return SizedBox(
         height: 200,
         child: Center(
           child: Text(
-            'Todavía no tienes conciertos favoritos.',
+            l.noFavorites,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
               fontSize: 16,
