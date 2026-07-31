@@ -18,7 +18,6 @@ import '../widgets/dashboard_rate_pending.dart';
 import '../widgets/dashboard_recent_concerts.dart';
 import '../widgets/dashboard_section_title.dart';
 import '../widgets/dashboard_stats.dart';
-import '../widgets/dashboard_concert_map.dart';
 import '../widgets/dashboard_streak.dart';
 import '../widgets/dashboard_upcoming_concerts.dart';
 
@@ -111,10 +110,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               const SizedBox(height: 24),
 
               const DashboardQuickActions(),
-              const SizedBox(height: 16),
-
-              // ── Mapa de conciertos ────────────────────────────────────────
-              const DashboardConcertMap(),
               const SizedBox(height: 20),
 
               // ── Racha ────────────────────────────────────────────────────
