@@ -22,6 +22,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
   final TicketmasterService _service = TicketmasterService();
   List<TicketmasterEvent> events = [];
   bool loading = true;
+  bool hasError = false;
 
   @override
   void initState() {
@@ -29,11 +30,24 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
     _loadEvents();
   }
 
+  @override
+  void didUpdateWidget(RecommendedConcerts oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.favoriteArtists != widget.favoriteArtists) {
+      _loadEvents();
+    }
+  }
+
   Future<void> _loadEvents() async {
+    setState(() {
+      loading = true;
+      hasError = false;
+    });
     try {
       events = await _service.getRecommendedEvents(widget.favoriteArtists);
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('RecommendedConcerts error: $e');
+      if (mounted) setState(() => hasError = true);
     }
     if (mounted) setState(() => loading = false);
   }
@@ -53,6 +67,10 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
         height: 80,
         child: Center(child: CircularProgressIndicator()),
       );
+    }
+
+    if (hasError) {
+      return _buildError(context, l);
     }
 
     if (events.isEmpty) {
@@ -162,28 +180,44 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
     );
   }
 
+  Widget _buildError(BuildContext context, AppLocalizations l) {
+    final cs = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Icon(Icons.wifi_off_rounded,
+            size: 18, color: cs.onSurface.withOpacity(0.4)),
+        const SizedBox(width: 8),
+        Text(
+          l.error,
+          style:
+              TextStyle(color: cs.onSurface.withOpacity(0.54), fontSize: 14),
+        ),
+        const SizedBox(width: 12),
+        TextButton(
+          onPressed: _loadEvents,
+          child: Text(l.retry),
+        ),
+      ],
+    );
+  }
+
   Widget _buildLocalFallback(BuildContext context, AppLocalizations l) {
-    final concerts = ref.read(concertsProvider).asData?.value ?? [];
     final cs = Theme.of(context).colorScheme;
 
-    if (concerts.isEmpty) {
+    if (widget.favoriteArtists.isEmpty) {
       return Text(
         l.noConcertsAddForRec,
         style: TextStyle(color: cs.onSurface.withOpacity(0.54), fontSize: 14),
       );
     }
 
-    // Top 5 artistas más vistos
+    // Cuenta de conciertos por artista para mostrar el ×N
+    final concerts = ref.read(concertsProvider).asData?.value ?? [];
     final countMap = <String, int>{};
     for (final c in concerts) {
-      if (c.artist.trim().isNotEmpty) {
-        countMap[c.artist.trim()] = (countMap[c.artist.trim()] ?? 0) + 1;
-      }
+      final a = c.artist.trim();
+      if (a.isNotEmpty) countMap[a] = (countMap[a] ?? 0) + 1;
     }
-    final topArtists =
-        (countMap.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
-            .take(5)
-            .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,51 +226,51 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
           l.noUpcomingEvents,
           style: TextStyle(color: cs.onSurface.withOpacity(0.54), fontSize: 13),
         ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: topArtists.map((entry) {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: cs.surface,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: const Color(0xFFE53935).withOpacity(0.3),
+        const SizedBox(height: 14),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: widget.favoriteArtists.map((artist) {
+              final count = countMap[artist];
+              return Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: const Color(0xFFE53935).withOpacity(0.3),
+                    ),
+                    boxShadow: [
+                      BoxShadow(color: cs.shadow.withOpacity(0.06), blurRadius: 6),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.music_note, color: Color(0xFFE53935), size: 14),
+                      const SizedBox(width: 6),
+                      Text(
+                        artist,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      ),
+                      if (count != null) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          '×$count',
+                          style: TextStyle(
+                            color: cs.onSurface.withOpacity(0.4),
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                boxShadow: [
-                  BoxShadow(color: cs.shadow.withOpacity(0.06), blurRadius: 6),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.music_note,
-                    color: Color(0xFFE53935),
-                    size: 14,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    entry.key,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '×${entry.value}',
-                    style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.4),
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ],
     );

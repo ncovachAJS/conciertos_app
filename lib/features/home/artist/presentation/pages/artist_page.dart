@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -68,10 +69,10 @@ class ArtistPage extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   if (coverImage.isNotEmpty)
-                    Image.network(
-                      coverImage,
+                    CachedNetworkImage(
+                      imageUrl: coverImage,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      errorWidget: (_, __, ___) =>
                           Container(color: const Color(0xFF1A1A1A)),
                     )
                   else
@@ -388,12 +389,12 @@ class _ConcertRow extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: concert.imageUrl.isNotEmpty
-                  ? Image.network(
-                      concert.imageUrl,
+                  ? CachedNetworkImage(
+                      imageUrl: concert.imageUrl,
                       width: 52,
                       height: 52,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder(),
+                      errorWidget: (_, __, ___) => _placeholder(),
                     )
                   : _placeholder(),
             ),

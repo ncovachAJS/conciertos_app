@@ -135,7 +135,9 @@ final recommendedArtistsProvider = Provider<List<String>>((ref) {
       .toSet()
       .toList();
 
-  if (favArtists.isNotEmpty) return favArtists..sort();
+  if (favArtists.isNotEmpty) {
+    return (favArtists..sort()).take(5).toList();
+  }
 
   final likedArtists = concerts
       .where((c) => c.liked && c.artist.trim().isNotEmpty)
@@ -143,13 +145,19 @@ final recommendedArtistsProvider = Provider<List<String>>((ref) {
       .toSet()
       .toList();
 
-  if (likedArtists.isNotEmpty) return likedArtists..sort();
+  if (likedArtists.isNotEmpty) {
+    return (likedArtists..sort()).take(5).toList();
+  }
 
-  return concerts
-      .map((c) => c.artist.trim())
-      .where((a) => a.isNotEmpty)
-      .toSet()
+  // Sin favoritos ni likes: top 5 por número de conciertos
+  final countMap = <String, int>{};
+  for (final c in concerts) {
+    final a = c.artist.trim();
+    if (a.isNotEmpty) countMap[a] = (countMap[a] ?? 0) + 1;
+  }
+  return (countMap.entries.toList()..sort((a, b) => b.value.compareTo(a.value)))
       .take(5)
+      .map((e) => e.key)
       .toList();
 });
 

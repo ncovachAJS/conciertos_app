@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ui' as ui;
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -516,12 +517,12 @@ class _VenueSheet extends StatelessWidget {
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: c.imageUrl.isNotEmpty
-                        ? Image.network(
-                            c.imageUrl,
+                        ? CachedNetworkImage(
+                            imageUrl: c.imageUrl,
                             width: 48,
                             height: 48,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
+                            errorWidget: (_, __, ___) =>
                                 const _PlaceholderThumb(),
                           )
                         : const _PlaceholderThumb(),

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
@@ -150,7 +151,11 @@ class ConcertCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     concert.imageUrl.isNotEmpty
-                        ? Image.network(concert.imageUrl, fit: BoxFit.cover)
+                        ? CachedNetworkImage(
+                            imageUrl: concert.imageUrl,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) => _placeholder(),
+                          )
                         : _placeholder(),
                     Container(
                       decoration: const BoxDecoration(

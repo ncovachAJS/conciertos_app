@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -27,10 +28,10 @@ class RecommendationCard extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 16 / 9,
-            child: Image.network(
-              event.imageUrl,
+            child: CachedNetworkImage(
+              imageUrl: event.imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              errorWidget: (_, __, ___) => Container(
                 color: const Color(0xFF2B2B2B),
                 child: const Icon(
                   Icons.music_note,

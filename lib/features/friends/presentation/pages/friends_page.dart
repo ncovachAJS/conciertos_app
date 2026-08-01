@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../data/models/friend_model.dart';
 import '../controllers/friends_controller.dart';
@@ -333,6 +334,7 @@ class _FriendsList extends StatelessWidget {
             f.name,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
+          onTap: () => context.push('/friend-profile', extra: f),
           trailing: IconButton(
             icon: Icon(
               Icons.person_remove_outlined,
