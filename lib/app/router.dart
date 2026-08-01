@@ -23,7 +23,9 @@ import '../features/auth/presentation/pages/session_gate_page.dart';
 import '../features/statistics/presentation/pages/statistics_page.dart';
 
 import '../features/home/artist/presentation/pages/artist_page.dart';
+import '../features/friends/domain/entities/friend.dart';
 import '../features/friends/presentation/pages/friends_page.dart';
+import '../features/friends/presentation/pages/friend_profile_page.dart';
 import '../features/notifications/presentation/pages/notifications_page.dart';
 import '../features/concerts/presentation/pages/concert_map_page.dart';
 import 'app_shell.dart';
@@ -104,6 +106,13 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/friends',
           builder: (context, state) => const FriendsPage(),
+        ),
+        GoRoute(
+          path: '/friend-profile',
+          builder: (context, state) {
+            final friend = state.extra as Friend;
+            return FriendProfilePage(friend: friend);
+          },
         ),
         GoRoute(
           path: '/artist',

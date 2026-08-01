@@ -16,7 +16,14 @@ class TicketmasterEventModel extends TicketmasterEvent {
     Map<String, dynamic> json, {
     required String artist,
   }) {
-    final images = json['images'] as List?;
+    final rawImages = json['images'] as List?;
+    // Ordena por anchura descendente y coge la de mayor resolución
+    final images = rawImages != null
+        ? (List<Map<String, dynamic>>.from(rawImages)
+          ..sort((a, b) =>
+              ((b['width'] as num?)?.toInt() ?? 0)
+                  .compareTo((a['width'] as num?)?.toInt() ?? 0)))
+        : null;
     final embedded = json['_embedded'] as Map<String, dynamic>?;
 
     final venues = embedded?['venues'] as List?;

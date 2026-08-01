@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -83,10 +84,10 @@ class DashboardNextConcert extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              concert.imageUrl,
+            CachedNetworkImage(
+              imageUrl: concert.imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) {
+              errorWidget: (_, __, ___) {
                 return Container(
                   color: const Color(0xFF303542),
                   child: const Center(

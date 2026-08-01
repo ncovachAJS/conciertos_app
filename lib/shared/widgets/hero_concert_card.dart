@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/concerts/domain/entities/concert.dart';
@@ -24,7 +25,30 @@ class HeroConcertCard extends StatelessWidget {
               height: 200,
               width: double.infinity,
               child: concert.imageUrl.isNotEmpty
-                  ? Image.network(concert.imageUrl, fit: BoxFit.cover)
+                  ? CachedNetworkImage(
+                      imageUrl: concert.imageUrl,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFFE53935),
+                              Color(0xFF7B1FA2),
+                              Color(0xFF111111),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.music_note_rounded,
+                            size: 100,
+                            color: Colors.white24,
+                          ),
+                        ),
+                      ),
+                    )
                   : Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(

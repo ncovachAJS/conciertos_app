@@ -18,6 +18,7 @@ class RecommendationsPage extends ConsumerStatefulWidget {
 
 class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
   final _api = RecommendationsApiService();
+  final _searchController = TextEditingController();
 
   List<RecommendedEventModel> _events = [];
   String _selectedCountry = '';
@@ -26,22 +27,30 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
   @override
   void initState() {
     super.initState();
-    // Cargamos tras el primer frame para tener acceso al ref
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
-  Future<void> _load() async {
-    // Leemos los artistas que el usuario ha marcado con "me gusta"
-    // directamente del provider — sin llamada extra a la API.
-    final likedArtists =
-        (ref.read(concertsProvider).asData?.value ?? [])
-            .where((c) => c.liked && c.artist.trim().isNotEmpty)
-            .map((c) => c.artist.trim())
-            .toSet()
-            .toList()
-          ..sort();
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
-    if (likedArtists.isEmpty) return;
+  Future<void> _load() async {
+    final artistQuery = _searchController.text.trim();
+
+    List<String> artists;
+    if (artistQuery.isNotEmpty) {
+      artists = [artistQuery];
+    } else {
+      artists = (ref.read(concertsProvider).asData?.value ?? [])
+          .where((c) => c.liked && c.artist.trim().isNotEmpty)
+          .map((c) => c.artist.trim())
+          .toSet()
+          .toList()
+        ..sort();
+      if (artists.isEmpty) return;
+    }
 
     setState(() {
       _loading = true;
@@ -49,14 +58,12 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
     });
 
     try {
-      for (final artist in likedArtists) {
+      for (final artist in artists) {
         final result = await _api.getRecommendations(
           artist: artist,
           countryCode: _selectedCountry,
         );
-
         if (!mounted) return;
-
         setState(() => _events.addAll(result));
       }
     } catch (e) {
@@ -80,18 +87,44 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: DropdownButtonFormField<String>(
-              value: _selectedCountry,
-              decoration: InputDecoration(labelText: l.country),
-              items: localizedCountries(Localizations.localeOf(context).languageCode).entries
-                  .map(
-                    (e) => DropdownMenuItem(value: e.value, child: Text(e.key)),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                _selectedCountry = value ?? '';
-                _load();
-              },
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    labelText: l.artistLabel,
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: ListenableBuilder(
+                      listenable: _searchController,
+                      builder: (_, __) => _searchController.text.isEmpty
+                          ? const SizedBox.shrink()
+                          : IconButton(
+                              icon: const Icon(Icons.clear_rounded),
+                              onPressed: () {
+                                _searchController.clear();
+                                _load();
+                              },
+                            ),
+                    ),
+                  ),
+                  onSubmitted: (_) => _load(),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: _selectedCountry,
+                  decoration: InputDecoration(labelText: l.country),
+                  items: localizedCountries(Localizations.localeOf(context).languageCode).entries
+                      .map(
+                        (e) => DropdownMenuItem(value: e.value, child: Text(e.key)),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    _selectedCountry = value ?? '';
+                    _load();
+                  },
+                ),
+              ],
             ),
           ),
 
