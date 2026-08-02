@@ -85,12 +85,28 @@ class FriendProfilePage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => Center(child: Text(l.error)),
         data: (allConcerts) {
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+
           final shared = allConcerts
               .where((c) => c.participantIds.contains(friend.id))
               .toList()
             ..sort((a, b) => b.date.compareTo(a.date));
 
-          final stats = _Stats(shared);
+          final upcoming = shared
+              .where((c) =>
+                  !DateTime(c.date.year, c.date.month, c.date.day)
+                      .isBefore(today))
+              .toList()
+            ..sort((a, b) => a.date.compareTo(b.date));
+
+          final past = shared
+              .where((c) =>
+                  DateTime(c.date.year, c.date.month, c.date.day)
+                      .isBefore(today))
+              .toList();
+
+          final stats = _Stats(past);
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
@@ -109,25 +125,42 @@ class FriendProfilePage extends ConsumerWidget {
               if (shared.isEmpty) ...[
                 _EmptyShared(cs: cs),
               ] else ...[
-                // Stats grid
-                _StatsGrid(stats: stats, l: l, red: red),
-                const SizedBox(height: 28),
-
-                // Top artistas
-                if (stats.topArtists.isNotEmpty) ...[
-                  _SectionTitle(icon: Icons.person, title: l.topArtists),
+                // ── Próximos ─────────────────────────────────────────────
+                if (upcoming.isNotEmpty) ...[
+                  _SectionTitle(
+                    icon: Icons.event_rounded,
+                    title: 'PRÓXIMOS',
+                    color: Colors.green,
+                  ),
                   const SizedBox(height: 12),
-                  _HorizontalBars(entries: stats.topArtists, color: red),
+                  _ConcertList(concerts: upcoming, cs: cs, accent: Colors.green),
                   const SizedBox(height: 28),
                 ],
 
-                // Historial de conciertos
-                _SectionTitle(
-                  icon: Icons.queue_music_rounded,
-                  title: 'HISTORIAL',
-                ),
-                const SizedBox(height: 12),
-                _ConcertList(concerts: shared, cs: cs),
+                // ── Stats (basadas en pasados) ────────────────────────────
+                if (past.isNotEmpty) ...[
+                  _SectionTitle(
+                    icon: Icons.people_rounded,
+                    title: 'CONCIERTOS JUNTOS',
+                  ),
+                  const SizedBox(height: 16),
+                  _StatsGrid(stats: stats, l: l, red: red),
+                  const SizedBox(height: 28),
+
+                  if (stats.topArtists.isNotEmpty) ...[
+                    _SectionTitle(icon: Icons.person, title: l.topArtists),
+                    const SizedBox(height: 12),
+                    _HorizontalBars(entries: stats.topArtists, color: red),
+                    const SizedBox(height: 28),
+                  ],
+
+                  _SectionTitle(
+                    icon: Icons.queue_music_rounded,
+                    title: 'HISTORIAL',
+                  ),
+                  const SizedBox(height: 12),
+                  _ConcertList(concerts: past, cs: cs),
+                ],
               ],
             ],
           );
@@ -359,25 +392,22 @@ class _StatCard extends StatelessWidget {
 class _SectionTitle extends StatelessWidget {
   final IconData icon;
   final String title;
-  const _SectionTitle({required this.icon, required this.title});
+  final Color? color;
+  const _SectionTitle({required this.icon, required this.title, this.color});
 
   @override
   Widget build(BuildContext context) {
+    final c = color ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.54);
     return Row(
       children: [
-        Icon(
-          icon,
-          color:
-              Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
-          size: 18,
-        ),
+        Icon(icon, color: c, size: 18),
         const SizedBox(width: 8),
         Text(
           title.toUpperCase(),
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+            color: c,
             letterSpacing: 1.1,
           ),
         ),
@@ -480,7 +510,8 @@ class _HorizontalBars extends StatelessWidget {
 class _ConcertList extends StatelessWidget {
   final List<Concert> concerts;
   final ColorScheme cs;
-  const _ConcertList({required this.concerts, required this.cs});
+  final Color? accent;
+  const _ConcertList({required this.concerts, required this.cs, this.accent});
 
   @override
   Widget build(BuildContext context) {
@@ -499,7 +530,7 @@ class _ConcertList extends StatelessWidget {
                 endIndent: 16,
                 color: cs.onSurface.withOpacity(0.08),
               ),
-            _ConcertRow(concert: concerts[i], cs: cs),
+            _ConcertRow(concert: concerts[i], cs: cs, accent: accent),
           ],
         ],
       ),
@@ -510,7 +541,8 @@ class _ConcertList extends StatelessWidget {
 class _ConcertRow extends StatelessWidget {
   final Concert concert;
   final ColorScheme cs;
-  const _ConcertRow({required this.concert, required this.cs});
+  final Color? accent;
+  const _ConcertRow({required this.concert, required this.cs, this.accent});
 
   @override
   Widget build(BuildContext context) {
@@ -603,6 +635,16 @@ class _ConcertRow extends StatelessWidget {
               ],
             ),
             const SizedBox(width: 4),
+            if (accent != null)
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.only(right: 4),
+                decoration: BoxDecoration(
+                  color: accent,
+                  shape: BoxShape.circle,
+                ),
+              ),
             Icon(
               Icons.chevron_right_rounded,
               size: 18,
