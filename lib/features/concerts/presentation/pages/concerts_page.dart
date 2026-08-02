@@ -231,6 +231,15 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                     decoration: InputDecoration(
                       hintText: l.searchConcertsHint,
                       prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear_rounded),
+                              onPressed: () => setState(() {
+                                _searchController.clear();
+                                _searchQuery = '';
+                              }),
+                            )
+                          : null,
                       filled: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(18),
