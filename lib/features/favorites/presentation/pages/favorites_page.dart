@@ -92,6 +92,15 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
               decoration: InputDecoration(
                 hintText: l.searchArtistHint,
                 prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded),
+                        onPressed: () => setState(() {
+                          _searchController.clear();
+                          _searchQuery = '';
+                        }),
+                      )
+                    : null,
                 filled: true,
                 fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                 border: OutlineInputBorder(

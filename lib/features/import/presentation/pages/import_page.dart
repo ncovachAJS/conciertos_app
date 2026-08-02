@@ -265,25 +265,36 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                         children: [
                           SizedBox(
                             width: aw,
-                            child: TextField(
-                              controller: _searchController,
-                              onSubmitted: (_) => _search(),
-                              textInputAction: TextInputAction.search,
-                              style: TextStyle(color: cs.onSurface),
-                              decoration: InputDecoration(
-                                hintText: l.artistHint,
-                                hintStyle: TextStyle(
-                                  color: cs.onSurface.withOpacity(0.4),
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.search,
-                                  color: cs.onSurface.withOpacity(0.6),
-                                ),
-                                filled: true,
-                                fillColor: cs.surfaceContainerHighest,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                  borderSide: BorderSide.none,
+                            child: ListenableBuilder(
+                              listenable: _searchController,
+                              builder: (_, __) => TextField(
+                                controller: _searchController,
+                                onSubmitted: (_) => _search(),
+                                textInputAction: TextInputAction.search,
+                                style: TextStyle(color: cs.onSurface),
+                                decoration: InputDecoration(
+                                  hintText: l.artistHint,
+                                  hintStyle: TextStyle(
+                                    color: cs.onSurface.withOpacity(0.4),
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    color: cs.onSurface.withOpacity(0.6),
+                                  ),
+                                  suffixIcon: _searchController.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.clear_rounded),
+                                          onPressed: () {
+                                            _searchController.clear();
+                                          },
+                                        )
+                                      : null,
+                                  filled: true,
+                                  fillColor: cs.surfaceContainerHighest,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: BorderSide.none,
+                                  ),
                                 ),
                               ),
                             ),
