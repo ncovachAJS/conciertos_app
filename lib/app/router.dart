@@ -28,6 +28,7 @@ import '../features/friends/presentation/pages/friends_page.dart';
 import '../features/friends/presentation/pages/friend_profile_page.dart';
 import '../features/notifications/presentation/pages/notifications_page.dart';
 import '../features/concerts/presentation/pages/concert_map_page.dart';
+import '../features/concerts/presentation/pages/venue_page.dart';
 import 'app_shell.dart';
 
 final appRouter = GoRouter(
@@ -131,6 +132,16 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/concert-map',
           builder: (context, state) => const ConcertMapPage(),
+        ),
+        GoRoute(
+          path: '/venue',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
+            return VenuePage(
+              venue: extra['venue'] as String,
+              city: extra['city'] as String,
+            );
+          },
         ),
       ],
     ),

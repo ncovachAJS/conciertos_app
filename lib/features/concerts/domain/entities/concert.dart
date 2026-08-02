@@ -15,6 +15,7 @@ class Concert {
   final List<String> participantIds;
   final List<ConcertParticipant> participants;
   final String userId;
+  final double price;
 
   const Concert({
     required this.id,
@@ -31,6 +32,7 @@ class Concert {
     this.participantIds = const [],
     this.participants = const [],
     this.userId = '',
+    this.price = 0.0,
   });
 
   bool get isPastConcert {
@@ -55,6 +57,7 @@ class Concert {
     List<String>? participantIds,
     List<ConcertParticipant>? participants,
     String? userId,
+    double? price,
   }) {
     return Concert(
       id: id ?? this.id,
@@ -71,6 +74,7 @@ class Concert {
       participantIds: participantIds ?? this.participantIds,
       participants: participants ?? this.participants,
       userId: userId ?? this.userId,
+      price: price ?? this.price,
     );
   }
 }

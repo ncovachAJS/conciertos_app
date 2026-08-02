@@ -116,6 +116,12 @@ class _Stats {
     return map.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   }
 
+  double get totalSpent =>
+      concerts.fold(0.0, (sum, c) => sum + c.price);
+
+  int get concertsWithPrice =>
+      concerts.where((c) => c.price > 0).length;
+
   List<MapEntry<String, int>> _top(Iterable<String> values, {int take = 5}) {
     final map = <String, int>{};
     for (final v in values) {
@@ -405,6 +411,13 @@ class _SummaryGrid extends StatelessWidget {
         Icons.calendar_today_rounded,
         const Color(0xFFFF7043),
       ),
+      if (stats.concertsWithPrice > 0)
+        _CardData(
+          '${stats.totalSpent.toStringAsFixed(0)} €',
+          'Gasto total',
+          Icons.euro_rounded,
+          const Color(0xFF26A69A),
+        ),
     ];
 
     return LayoutBuilder(

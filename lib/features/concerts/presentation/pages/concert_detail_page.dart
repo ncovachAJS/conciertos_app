@@ -309,7 +309,22 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                   leading: const Icon(Icons.stadium),
                   title: Text(l.venueLabel),
                   subtitle: Text(concert.venue),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push('/venue', extra: {
+                    'venue': concert.venue,
+                    'city': concert.city,
+                  }),
                 ),
+                if (concert.price > 0) ...[
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.euro_rounded),
+                    title: const Text('Precio de la entrada'),
+                    subtitle: Text(
+                      '${concert.price.toStringAsFixed(2)} €',
+                    ),
+                  ),
+                ],
                 if (concert.city.isNotEmpty) ...[
                   const Divider(height: 1),
                   ListTile(

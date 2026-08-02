@@ -36,6 +36,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   final _venueController = TextEditingController();
   final _cityController = TextEditingController();
   final _nameController = TextEditingController();
+  final _priceController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
   final UploadService _uploadService = UploadService();
@@ -80,6 +81,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       _venueController.text = widget.concert!.venue;
       _cityController.text = widget.concert!.city;
       _nameController.text = widget.concert?.name ?? '';
+      if (widget.concert!.price > 0) {
+        _priceController.text = widget.concert!.price.toStringAsFixed(2);
+      }
       _selectedDate = widget.concert!.date;
       _dateController.text =
           '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
@@ -173,6 +177,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         favorite: _favorite,
         venue: _venueController.text.trim(),
         city: _cityController.text.trim(),
+        price: double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0,
         taggedFriendIds: _taggedFriendIds,
         participantIds: widget.concert?.participantIds ?? [],
         participants: widget.concert?.participants ?? [],
@@ -214,6 +219,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     _venueController.dispose();
     _cityController.dispose();
     _nameController.dispose();
+    _priceController.dispose();
     super.dispose();
   }
 
@@ -285,6 +291,20 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                   labelText: l.cityLabel,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.location_city),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: 'Precio de la entrada',
+                  hintText: '0.00',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.euro_rounded),
+                  suffixText: '€',
                 ),
               ),
 

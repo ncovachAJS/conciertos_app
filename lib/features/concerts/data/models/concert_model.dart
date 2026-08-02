@@ -19,6 +19,7 @@ class ConcertModel extends Concert {
     super.participantIds = const [],
     super.participants = const [],
     super.userId = '',
+    super.price = 0.0,
     this.taggedFriendIds = const [],
   });
 
@@ -75,6 +76,7 @@ class ConcertModel extends Concert {
       participantIds: participantIds,
       participants: participants,
       userId: ownerId,
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -94,6 +96,7 @@ class ConcertModel extends Concert {
       participantIds: concert.participantIds,
       participants: concert.participants,
       userId: concert.userId,
+      price: concert.price,
     );
   }
 
@@ -111,6 +114,7 @@ class ConcertModel extends Concert {
     };
     if (city.isNotEmpty) json['city'] = city;
     if (imageUrl.isNotEmpty) json['imageUrl'] = imageUrl;
+    if (price > 0) json['price'] = price;
     return json;
   }
 
