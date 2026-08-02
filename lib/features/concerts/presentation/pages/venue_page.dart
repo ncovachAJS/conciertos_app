@@ -40,9 +40,9 @@ class VenuePage extends ConsumerWidget {
     final firstVisit = past.isEmpty ? null : past.last;
     final lastVisit = past.isEmpty ? null : past.first;
     final coverImage = concerts
-        .firstWhere((c) => c.imageUrl.isNotEmpty,
-            orElse: () => concerts.first)
-        .imageUrl;
+        .where((c) => c.imageUrl.isNotEmpty)
+        .firstOrNull
+        ?.imageUrl ?? '';
 
     return Scaffold(
       body: CustomScrollView(

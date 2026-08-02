@@ -116,11 +116,46 @@ class _Stats {
     return map.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   }
 
-  double get totalSpent =>
-      concerts.fold(0.0, (sum, c) => sum + c.price);
+  double get totalSpent {
+    var total = 0.0;
+    final countedFestivals = <String>{};
+    for (final c in concerts) {
+      final fest = c.festival.trim();
+      if (fest.isNotEmpty) {
+        final key = '${fest}_${c.date.year}';
+        if (!countedFestivals.contains(key)) {
+          final festMax = concerts
+              .where((f) => f.festival.trim() == fest && f.date.year == c.date.year)
+              .fold(0.0, (max, f) => f.price > max ? f.price : max);
+          total += festMax;
+          countedFestivals.add(key);
+        }
+      } else {
+        total += c.price;
+      }
+    }
+    return total;
+  }
 
-  int get concertsWithPrice =>
-      concerts.where((c) => c.price > 0).length;
+  int get concertsWithPrice {
+    final countedFestivals = <String>{};
+    var count = 0;
+    for (final c in concerts) {
+      final fest = c.festival.trim();
+      if (fest.isNotEmpty) {
+        final key = '${fest}_${c.date.year}';
+        if (!countedFestivals.contains(key)) {
+          final hasPrice = concerts.any((f) =>
+              f.festival.trim() == fest && f.date.year == c.date.year && f.price > 0);
+          if (hasPrice) count++;
+          countedFestivals.add(key);
+        }
+      } else if (c.price > 0) {
+        count++;
+      }
+    }
+    return count;
+  }
 
   List<MapEntry<String, int>> _top(Iterable<String> values, {int take = 5}) {
     final map = <String, int>{};

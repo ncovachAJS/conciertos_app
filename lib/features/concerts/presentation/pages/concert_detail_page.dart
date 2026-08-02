@@ -319,7 +319,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.euro_rounded),
-                    title: const Text('Precio de la entrada'),
+                    title: Text(concert.festival.isNotEmpty ? 'Precio del festival' : 'Precio de la entrada'),
                     subtitle: Text(
                       '${concert.price.toStringAsFixed(2)} €',
                     ),

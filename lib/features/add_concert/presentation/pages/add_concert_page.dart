@@ -36,6 +36,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   final _venueController = TextEditingController();
   final _cityController = TextEditingController();
   final _nameController = TextEditingController();
+  bool _hasFestival = false;
   final _priceController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
@@ -66,6 +67,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   @override
   void initState() {
     super.initState();
+    _festivalController.addListener(() {
+      final hasFest = _festivalController.text.trim().isNotEmpty;
+      if (hasFest != _hasFestival) setState(() => _hasFestival = hasFest);
+    });
     if (widget.concert == null) {
       // Solo en modo crear, no al editar
       WidgetsBinding.instance.addPostFrameCallback(
@@ -78,6 +83,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       _favorite = widget.concert!.favorite;
       _artistController.text = widget.concert!.artist;
       _festivalController.text = widget.concert!.festival;
+      _hasFestival = widget.concert!.festival.trim().isNotEmpty;
       _venueController.text = widget.concert!.venue;
       _cityController.text = widget.concert!.city;
       _nameController.text = widget.concert?.name ?? '';
@@ -300,7 +306,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                 controller: _priceController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  labelText: 'Precio de la entrada',
+                  labelText: _hasFestival ? 'Precio del festival' : 'Precio de la entrada',
                   hintText: '0.00',
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.euro_rounded),
