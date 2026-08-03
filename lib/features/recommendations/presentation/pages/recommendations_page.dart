@@ -6,6 +6,8 @@ import '../../../../core/constants/countries.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../data/models/recommended_event_model.dart';
 import '../../data/services/recommendations_api_service.dart';
+import '../../data/services/want_to_attend_api_service.dart';
+import '../../domain/entities/recommended_event.dart';
 import '../widgets/recommendation_card.dart';
 
 class RecommendationsPage extends ConsumerStatefulWidget {
@@ -19,10 +21,12 @@ class RecommendationsPage extends ConsumerStatefulWidget {
 class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
     with SingleTickerProviderStateMixin {
   final _api = RecommendationsApiService();
+  final _wantToAttendApi = WantToAttendApiService();
   final _searchController = TextEditingController();
 
   List<RecommendedEventModel> _events = [];
-  final Set<String> _wantToAttend = {};
+  final Set<String> _wantToAttendIds = {};
+  List<RecommendedEvent> _savedEvents = [];
   String _selectedCountry = '';
   bool _loading = false;
   bool _isCompact = false;
@@ -34,6 +38,21 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() => setState(() {}));
+    _loadSaved();
+  }
+
+  Future<void> _loadSaved() async {
+    try {
+      final saved = await _wantToAttendApi.getAll();
+      if (mounted) {
+        setState(() {
+          _savedEvents = saved;
+          _wantToAttendIds.addAll(saved.map((e) => e.id));
+        });
+      }
+    } catch (e) {
+      debugPrint('Error cargando quiero ir: $e');
+    }
   }
 
   @override
@@ -43,13 +62,31 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
     super.dispose();
   }
 
-  void _toggleWantToAttend(String id) {
+  void _toggleWantToAttend(RecommendedEvent event) {
+    final id = event.id;
+    final wasAdded = !_wantToAttendIds.contains(id);
     setState(() {
-      if (_wantToAttend.contains(id)) {
-        _wantToAttend.remove(id);
+      if (wasAdded) {
+        _wantToAttendIds.add(id);
+        _savedEvents.add(event);
       } else {
-        _wantToAttend.add(id);
+        _wantToAttendIds.remove(id);
+        _savedEvents.removeWhere((e) => e.id == id);
       }
+    });
+    _wantToAttendApi.toggle(event).catchError((e) {
+      if (mounted) {
+        setState(() {
+          if (wasAdded) {
+            _wantToAttendIds.remove(id);
+            _savedEvents.removeWhere((ev) => ev.id == id);
+          } else {
+            _wantToAttendIds.add(id);
+            _savedEvents.add(event);
+          }
+        });
+      }
+      return false;
     });
   }
 
@@ -93,7 +130,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final wantList = _events.where((e) => _wantToAttend.contains(e.id)).toList();
+    final wantList = _savedEvents;
 
     return Scaffold(
       appBar: AppBar(
@@ -185,14 +222,14 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
                     children: [
                       _EventList(
                         events: _events,
-                        wantToAttend: _wantToAttend,
+                        wantToAttendIds: _wantToAttendIds,
                         isCompact: _isCompact,
                         onToggle: _toggleWantToAttend,
                         emptyText: l.noLikesForRecommendations,
                       ),
                       _EventList(
                         events: wantList,
-                        wantToAttend: _wantToAttend,
+                        wantToAttendIds: _wantToAttendIds,
                         isCompact: _isCompact,
                         onToggle: _toggleWantToAttend,
                         emptyText: 'Aún no has marcado ningún concierto.',
@@ -207,15 +244,15 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
 }
 
 class _EventList extends StatelessWidget {
-  final List<RecommendedEventModel> events;
-  final Set<String> wantToAttend;
+  final List<RecommendedEvent> events;
+  final Set<String> wantToAttendIds;
   final bool isCompact;
-  final void Function(String id) onToggle;
+  final void Function(RecommendedEvent event) onToggle;
   final String emptyText;
 
   const _EventList({
     required this.events,
-    required this.wantToAttend,
+    required this.wantToAttendIds,
     required this.isCompact,
     required this.onToggle,
     required this.emptyText,
@@ -250,8 +287,8 @@ class _EventList extends StatelessWidget {
         itemBuilder: (_, i) => RecommendationCard(
           event: events[i],
           isCompact: true,
-          wantToAttend: wantToAttend.contains(events[i].id),
-          onToggleWantToAttend: () => onToggle(events[i].id),
+          wantToAttend: wantToAttendIds.contains(events[i].id),
+          onToggleWantToAttend: () => onToggle(events[i]),
         ),
       );
     }
@@ -261,8 +298,8 @@ class _EventList extends StatelessWidget {
       itemCount: events.length,
       itemBuilder: (_, i) => RecommendationCard(
         event: events[i],
-        wantToAttend: wantToAttend.contains(events[i].id),
-        onToggleWantToAttend: () => onToggle(events[i].id),
+        wantToAttend: wantToAttendIds.contains(events[i].id),
+        onToggleWantToAttend: () => onToggle(events[i]),
       ),
     );
   }
