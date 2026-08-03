@@ -62,32 +62,23 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
     super.dispose();
   }
 
-  void _toggleWantToAttend(RecommendedEvent event) {
+  Future<void> _toggleWantToAttend(RecommendedEvent event) async {
     final id = event.id;
-    final wasAdded = !_wantToAttendIds.contains(id);
-    setState(() {
-      if (wasAdded) {
-        _wantToAttendIds.add(id);
-        _savedEvents.add(event);
-      } else {
-        _wantToAttendIds.remove(id);
-        _savedEvents.removeWhere((e) => e.id == id);
-      }
-    });
-    _wantToAttendApi.toggle(event).catchError((e) {
-      if (mounted) {
-        setState(() {
-          if (wasAdded) {
-            _wantToAttendIds.remove(id);
-            _savedEvents.removeWhere((ev) => ev.id == id);
-          } else {
-            _wantToAttendIds.add(id);
-            _savedEvents.add(event);
-          }
-        });
-      }
-      return false;
-    });
+    try {
+      final added = await _wantToAttendApi.toggle(event);
+      if (!mounted) return;
+      setState(() {
+        if (added) {
+          _wantToAttendIds.add(id);
+          _savedEvents.add(event);
+        } else {
+          _wantToAttendIds.remove(id);
+          _savedEvents.removeWhere((e) => e.id == id);
+        }
+      });
+    } catch (e) {
+      debugPrint('Error toggling quiero ir: $e');
+    }
   }
 
   Future<void> _load() async {
@@ -112,9 +103,10 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
     });
 
     try {
-      for (final artist in artists) {
+      for (int i = 0; i < artists.length; i++) {
+        if (i > 0) await Future.delayed(const Duration(milliseconds: 300));
         final result = await _api.getRecommendations(
-          artist: artist,
+          artist: artists[i],
           countryCode: _selectedCountry,
         );
         if (!mounted) return;
@@ -247,7 +239,7 @@ class _EventList extends StatelessWidget {
   final List<RecommendedEvent> events;
   final Set<String> wantToAttendIds;
   final bool isCompact;
-  final void Function(RecommendedEvent event) onToggle;
+  final Future<void> Function(RecommendedEvent event) onToggle;
   final String emptyText;
 
   const _EventList({
