@@ -25,6 +25,10 @@ class ApiConfig {
   static String friendStatsEndpoint(String friendId) =>
       '$baseUrl/friends/$friendId/stats';
 
+  // Quiero ir
+  static const String wantToAttendEndpoint = '$baseUrl/want-to-attend';
+  static const String wantToAttendToggleEndpoint = '$baseUrl/want-to-attend/toggle';
+
   // Etiquetado en conciertos
   static String concertTagEndpoint(String concertId, String friendId) =>
       '$concertsEndpoint/$concertId/tag/$friendId';
