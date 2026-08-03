@@ -10,7 +10,11 @@ import '../../../concerts/data/services/upload_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../photos/data/services/photo_api_service.dart';
+import '../../data/services/achievements_service.dart';
 import '../../data/services/avatar_api_service.dart';
+import '../../domain/achievement.dart';
+import '../widgets/achievement_toast.dart';
+import '../widgets/achievements_widget.dart';
 import '../widgets/profile_card.dart';
 import 'about_page.dart';
 import 'settings_page.dart';
@@ -58,6 +62,45 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (!mounted) return;
     setState(() => loading = false);
+
+    _checkAchievements();
+  }
+
+  Future<void> _checkAchievements() async {
+    final uniqueArtists = concerts
+        .map((c) => c.artist.trim().toLowerCase())
+        .where((a) => a.isNotEmpty)
+        .toSet()
+        .length;
+    final uniqueFestivals = concerts
+        .map((c) => c.festival.trim().toLowerCase())
+        .where((f) => f.isNotEmpty)
+        .toSet()
+        .length;
+    final uniqueCities = concerts
+        .map((c) => c.city.trim().toLowerCase())
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .length;
+    final totalRated = concerts.where((c) => c.rating > 0).length;
+    final dates = concerts.map((c) => c.date.year).toList();
+    final oldestYear =
+        dates.isNotEmpty ? dates.reduce((a, b) => a < b ? a : b) : 0;
+
+    final stats = UserStats(
+      totalConcerts: concerts.length,
+      uniqueArtists: uniqueArtists,
+      uniqueFestivals: uniqueFestivals,
+      uniqueCities: uniqueCities,
+      totalRated: totalRated,
+      oldestYear: oldestYear,
+    );
+
+    final achievements = AchievementsEngine.compute(stats);
+    final newOnes = await AchievementsService.checkNewUnlocks(achievements);
+
+    if (!mounted || newOnes.isEmpty) return;
+    await showAchievementToasts(context, newOnes);
   }
 
   Future<void> _changeAvatar() async {
@@ -174,6 +217,45 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 avatarUrl: auth.user?.avatarUrl,
                 onAvatarTap: _uploadingAvatar ? null : _changeAvatar,
               ),
+
+              const SizedBox(height: 30),
+
+              // ── Logros ────────────────────────────────────────────────
+              Builder(builder: (context) {
+                final uniqueArtists = concerts
+                    .map((c) => c.artist.trim().toLowerCase())
+                    .where((a) => a.isNotEmpty)
+                    .toSet()
+                    .length;
+                final uniqueFestivals = concerts
+                    .map((c) => c.festival.trim().toLowerCase())
+                    .where((f) => f.isNotEmpty)
+                    .toSet()
+                    .length;
+                final uniqueCities = concerts
+                    .map((c) => c.city.trim().toLowerCase())
+                    .where((c) => c.isNotEmpty)
+                    .toSet()
+                    .length;
+                final totalRated =
+                    concerts.where((c) => c.rating > 0).length;
+                final dates = concerts.map((c) => c.date.year).toList();
+                final oldestYear =
+                    dates.isNotEmpty ? dates.reduce((a, b) => a < b ? a : b) : 0;
+
+                final stats = UserStats(
+                  totalConcerts: concerts.length,
+                  uniqueArtists: uniqueArtists,
+                  uniqueFestivals: uniqueFestivals,
+                  uniqueCities: uniqueCities,
+                  totalRated: totalRated,
+                  oldestYear: oldestYear,
+                );
+
+                return AchievementsWidget(
+                  achievements: AchievementsEngine.compute(stats),
+                );
+              }),
 
               const SizedBox(height: 30),
 

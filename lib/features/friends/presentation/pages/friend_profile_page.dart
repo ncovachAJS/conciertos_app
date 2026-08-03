@@ -7,6 +7,9 @@ import 'package:intl/intl.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
+import '../../../profile/domain/achievement.dart';
+import '../../../profile/presentation/widgets/achievements_widget.dart';
+import '../../data/services/friends_api_service.dart';
 import '../../domain/entities/friend.dart';
 import '../widgets/friend_avatar.dart';
 
@@ -56,12 +59,48 @@ class _Stats {
 // Página
 // ---------------------------------------------------------------------------
 
-class FriendProfilePage extends ConsumerWidget {
+class FriendProfilePage extends ConsumerStatefulWidget {
   final Friend friend;
   const FriendProfilePage({super.key, required this.friend});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FriendProfilePage> createState() => _FriendProfilePageState();
+}
+
+class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
+  final _friendsApi = FriendsApiService();
+  List<Concert> _friendUpcoming = [];
+  bool _loadingFriendConcerts = false;
+  List<Achievement>? _friendAchievements;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFriendData();
+  }
+
+  Future<void> _loadFriendData() async {
+    setState(() => _loadingFriendConcerts = true);
+    try {
+      final results = await Future.wait([
+        _friendsApi.getFriendUpcomingConcerts(widget.friend.id),
+        _friendsApi.getFriendStats(widget.friend.id),
+      ]);
+      if (mounted) {
+        setState(() {
+          _friendUpcoming = results[0] as List<Concert>;
+          _friendAchievements = AchievementsEngine.compute(results[1] as UserStats);
+        });
+      }
+    } catch (e) {
+      debugPrint('Error cargando datos del amigo: $e');
+    } finally {
+      if (mounted) setState(() => _loadingFriendConcerts = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final concertsAsync = ref.watch(concertsProvider);
     final cs = Theme.of(context).colorScheme;
@@ -77,7 +116,7 @@ class FriendProfilePage extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          friend.name,
+          widget.friend.name,
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
@@ -89,7 +128,7 @@ class FriendProfilePage extends ConsumerWidget {
           final today = DateTime(now.year, now.month, now.day);
 
           final shared = allConcerts
-              .where((c) => c.participantIds.contains(friend.id))
+              .where((c) => c.participantIds.contains(widget.friend.id))
               .toList()
             ..sort((a, b) => b.date.compareTo(a.date));
 
@@ -112,24 +151,55 @@ class FriendProfilePage extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
             children: [
               // ── Cabecera de perfil ─────────────────────────────────────
-              _ProfileHeader(friend: friend, cs: cs),
+              _ProfileHeader(friend: widget.friend, cs: cs),
               const SizedBox(height: 24),
 
-              // ── Sección conciertos juntos ──────────────────────────────
-              _SectionTitle(
-                icon: Icons.people_rounded,
-                title: 'CONCIERTOS JUNTOS',
-              ),
-              const SizedBox(height: 16),
+              // ── Logros del amigo ───────────────────────────────────────
+              if (_friendAchievements != null) ...[
+                AchievementsWidget(achievements: _friendAchievements!),
+                const SizedBox(height: 28),
+              ],
 
+              // ── Próximos conciertos propios del amigo ─────────────────
+              _SectionTitle(
+                icon: Icons.calendar_month_rounded,
+                title: 'PRÓXIMOS CONCIERTOS DE ${widget.friend.name.toUpperCase().split(' ').first}',
+                color: Colors.deepPurpleAccent,
+              ),
+              const SizedBox(height: 12),
+              if (_loadingFriendConcerts)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (_friendUpcoming.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'No tiene conciertos próximos',
+                    style: TextStyle(
+                      color: cs.onSurface.withOpacity(0.4),
+                      fontSize: 14,
+                    ),
+                  ),
+                )
+              else
+                _ConcertList(
+                  concerts: _friendUpcoming,
+                  cs: cs,
+                  accent: Colors.deepPurpleAccent,
+                ),
+              const SizedBox(height: 28),
+
+              // ── Sección conciertos juntos ──────────────────────────────
               if (shared.isEmpty) ...[
                 _EmptyShared(cs: cs),
               ] else ...[
                 // ── Próximos ─────────────────────────────────────────────
                 if (upcoming.isNotEmpty) ...[
                   _SectionTitle(
-                    icon: Icons.event_rounded,
-                    title: 'PRÓXIMOS',
+                    icon: Icons.people_rounded,
+                    title: 'PRÓXIMOS CONCIERTOS JUNTOS',
                     color: Colors.green,
                   ),
                   const SizedBox(height: 12),
@@ -140,15 +210,20 @@ class FriendProfilePage extends ConsumerWidget {
                 // ── Stats (basadas en pasados) ────────────────────────────
                 if (past.isNotEmpty) ...[
                   _SectionTitle(
-                    icon: Icons.people_rounded,
-                    title: 'CONCIERTOS JUNTOS',
+                    icon: Icons.history_rounded,
+                    title: 'NÚMEROS JUNTOS',
+                    color: Colors.orange,
                   ),
                   const SizedBox(height: 16),
                   _StatsGrid(stats: stats, l: l, red: red),
                   const SizedBox(height: 28),
 
                   if (stats.topArtists.isNotEmpty) ...[
-                    _SectionTitle(icon: Icons.person, title: l.topArtists),
+                    _SectionTitle(
+                      icon: Icons.person,
+                      title: l.topArtists,
+                      color: Colors.blueAccent,
+                    ),
                     const SizedBox(height: 12),
                     _HorizontalBars(entries: stats.topArtists, color: red),
                     const SizedBox(height: 28),
@@ -157,6 +232,7 @@ class FriendProfilePage extends ConsumerWidget {
                   _SectionTitle(
                     icon: Icons.queue_music_rounded,
                     title: 'HISTORIAL',
+                    color: Colors.tealAccent,
                   ),
                   const SizedBox(height: 12),
                   _ConcertList(concerts: past, cs: cs),
