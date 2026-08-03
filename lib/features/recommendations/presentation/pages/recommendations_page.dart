@@ -16,24 +16,41 @@ class RecommendationsPage extends ConsumerStatefulWidget {
       _RecommendationsPageState();
 }
 
-class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
+class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
+    with SingleTickerProviderStateMixin {
   final _api = RecommendationsApiService();
   final _searchController = TextEditingController();
 
   List<RecommendedEventModel> _events = [];
+  final Set<String> _wantToAttend = {};
   String _selectedCountry = '';
   bool _loading = false;
+  bool _isCompact = false;
+
+  late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _tabController.dispose();
     super.dispose();
+  }
+
+  void _toggleWantToAttend(String id) {
+    setState(() {
+      if (_wantToAttend.contains(id)) {
+        _wantToAttend.remove(id);
+      } else {
+        _wantToAttend.add(id);
+      }
+    });
   }
 
   Future<void> _load() async {
@@ -76,12 +93,21 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final wantList = _events.where((e) => _wantToAttend.contains(e.id)).toList();
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         title: Text(l.recommendedTitle),
+        actions: [
+          IconButton(
+            icon: Icon(_isCompact ? Icons.grid_view_rounded : Icons.view_list_rounded),
+            tooltip: _isCompact ? 'Vista tarjeta' : 'Vista compacta',
+            onPressed: () => setState(() => _isCompact = !_isCompact),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -101,10 +127,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
                           ? const SizedBox.shrink()
                           : IconButton(
                               icon: const Icon(Icons.clear_rounded),
-                              onPressed: () {
-                                _searchController.clear();
-                                _load();
-                              },
+                              onPressed: () => _searchController.clear(),
                             ),
                     ),
                   ),
@@ -114,42 +137,132 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage> {
                 DropdownButtonFormField<String>(
                   value: _selectedCountry,
                   decoration: InputDecoration(labelText: l.country),
-                  items: localizedCountries(Localizations.localeOf(context).languageCode).entries
-                      .map(
-                        (e) => DropdownMenuItem(value: e.value, child: Text(e.key)),
-                      )
+                  items: localizedCountries(
+                          Localizations.localeOf(context).languageCode)
+                      .entries
+                      .map((e) =>
+                          DropdownMenuItem(value: e.value, child: Text(e.key)))
                       .toList(),
                   onChanged: (value) {
-                    _selectedCountry = value ?? '';
-                    _load();
+                    setState(() => _selectedCountry = value ?? '');
                   },
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _loading ? null : _load,
+                    icon: const Icon(Icons.search_rounded),
+                    label: Text(l.search),
+                  ),
                 ),
               ],
             ),
           ),
-
+          const SizedBox(height: 8),
+          TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(text: 'Resultados${_events.isNotEmpty ? ' (${_events.length})' : ''}'),
+              Tab(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check_circle_rounded,
+                        size: 16, color: Colors.greenAccent),
+                    const SizedBox(width: 6),
+                    Text('Quiero ir${wantList.isNotEmpty ? ' (${wantList.length})' : ''}'),
+                  ],
+                ),
+              ),
+            ],
+          ),
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
-                : _events.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Text(
-                        l.noLikesForRecommendations,
-                        style: const TextStyle(color: Colors.white54, fontSize: 15),
-                        textAlign: TextAlign.center,
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _EventList(
+                        events: _events,
+                        wantToAttend: _wantToAttend,
+                        isCompact: _isCompact,
+                        onToggle: _toggleWantToAttend,
+                        emptyText: l.noLikesForRecommendations,
                       ),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.only(top: 8, bottom: 32),
-                    itemCount: _events.length,
-                    itemBuilder: (_, index) =>
-                        RecommendationCard(event: _events[index]),
+                      _EventList(
+                        events: wantList,
+                        wantToAttend: _wantToAttend,
+                        isCompact: _isCompact,
+                        onToggle: _toggleWantToAttend,
+                        emptyText: 'Aún no has marcado ningún concierto.',
+                      ),
+                    ],
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EventList extends StatelessWidget {
+  final List<RecommendedEventModel> events;
+  final Set<String> wantToAttend;
+  final bool isCompact;
+  final void Function(String id) onToggle;
+  final String emptyText;
+
+  const _EventList({
+    required this.events,
+    required this.wantToAttend,
+    required this.isCompact,
+    required this.onToggle,
+    required this.emptyText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (events.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Text(
+            emptyText,
+            style: const TextStyle(color: Colors.white54, fontSize: 15),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    if (isCompact) {
+      final cs = Theme.of(context).colorScheme;
+      return ListView.separated(
+        padding: const EdgeInsets.only(top: 8, bottom: 32),
+        itemCount: events.length,
+        separatorBuilder: (_, __) => Divider(
+          height: 1,
+          indent: 16,
+          endIndent: 16,
+          color: cs.onSurface.withValues(alpha: 0.08),
+        ),
+        itemBuilder: (_, i) => RecommendationCard(
+          event: events[i],
+          isCompact: true,
+          wantToAttend: wantToAttend.contains(events[i].id),
+          onToggleWantToAttend: () => onToggle(events[i].id),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: 8, bottom: 32),
+      itemCount: events.length,
+      itemBuilder: (_, i) => RecommendationCard(
+        event: events[i],
+        wantToAttend: wantToAttend.contains(events[i].id),
+        onToggleWantToAttend: () => onToggle(events[i].id),
       ),
     );
   }

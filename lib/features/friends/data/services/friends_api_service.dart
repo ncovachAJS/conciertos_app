@@ -5,6 +5,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../../config/api_config.dart';
+import '../../../concerts/data/models/concert_model.dart';
+import '../../../concerts/domain/entities/concert.dart';
+import '../../../profile/domain/achievement.dart';
 import '../models/friend_model.dart';
 
 class FriendsApiService {
@@ -96,5 +99,24 @@ class FriendsApiService {
       headers: await _headers(),
     );
     if (response.statusCode != 200) throw Exception(response.body);
+  }
+
+  Future<UserStats> getFriendStats(String friendId) async {
+    final response = await http.get(
+      Uri.parse(ApiConfig.friendStatsEndpoint(friendId)),
+      headers: await _headers(),
+    );
+    if (response.statusCode != 200) throw Exception(response.body);
+    return UserStats.fromJson(jsonDecode(response.body));
+  }
+
+  Future<List<Concert>> getFriendUpcomingConcerts(String friendId) async {
+    final response = await http.get(
+      Uri.parse(ApiConfig.friendUpcomingConcertsEndpoint(friendId)),
+      headers: await _headers(),
+    );
+    if (response.statusCode != 200) throw Exception(response.body);
+    final List list = jsonDecode(response.body);
+    return list.map((e) => ConcertModel.fromJson(e)).toList();
   }
 }

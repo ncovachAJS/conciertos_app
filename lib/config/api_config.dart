@@ -20,6 +20,10 @@ class ApiConfig {
       '$baseUrl/friends/accept/$friendshipId';
   static String friendEndpoint(String friendshipId) =>
       '$baseUrl/friends/$friendshipId';
+  static String friendUpcomingConcertsEndpoint(String friendId) =>
+      '$baseUrl/friends/$friendId/upcoming-concerts';
+  static String friendStatsEndpoint(String friendId) =>
+      '$baseUrl/friends/$friendId/stats';
 
   // Etiquetado en conciertos
   static String concertTagEndpoint(String concertId, String friendId) =>
