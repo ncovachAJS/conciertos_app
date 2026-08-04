@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +9,6 @@ import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../notifications/presentation/controllers/notifications_controller.dart';
-import '../../../notifications/presentation/pages/notifications_page.dart';
 
 class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});
@@ -86,11 +86,7 @@ class DashboardHeader extends ConsumerWidget {
 
                 // Campanita con badge de notificaciones reales
                 GestureDetector(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const NotificationsPage(),
-                    ),
-                  ),
+                  onTap: () => context.push('/notifications'),
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -158,10 +154,12 @@ class DashboardHeader extends ConsumerWidget {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: avatarUrl != null && avatarUrl.isNotEmpty
-                        ? Image.network(
-                            avatarUrl,
+                        ? CachedNetworkImage(
+                            imageUrl: avatarUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Icon(
+                            memCacheWidth: 120,
+                            fadeInDuration: Duration.zero,
+                            errorWidget: (_, __, ___) => const Icon(
                               Icons.person_outline,
                               color: Colors.white,
                               size: 24,

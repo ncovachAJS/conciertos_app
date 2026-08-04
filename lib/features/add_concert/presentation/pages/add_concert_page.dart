@@ -139,7 +139,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   Future<void> _pickImage() async {
     final image = await _picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 85,
+      imageQuality: 95,
     );
     if (image == null) return;
     setState(() => _saving = true);

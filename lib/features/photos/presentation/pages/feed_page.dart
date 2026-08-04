@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../data/models/concert_photo_model.dart';
 import '../../data/services/photo_api_service.dart';
@@ -88,11 +89,9 @@ class _FeedPageState extends State<FeedPage>
     setState(() => _deleting = true);
     final toDelete = List<String>.from(_selected);
 
-    for (final id in toDelete) {
-      try {
-        await _service.deletePhoto(id);
-      } catch (_) {}
-    }
+    await Future.wait(
+      toDelete.map((id) => _service.deletePhoto(id).catchError((_) {})),
+    );
 
     if (!mounted) return;
     setState(() {
@@ -300,7 +299,7 @@ class _FeedPageState extends State<FeedPage>
                                     tag: photo.id,
                                     child: Image(
                                       image: CachedNetworkImageProvider(
-                                        photo.imageUrl,
+                                        cloudinaryThumbnail(photo.imageUrl, width: 400),
                                         maxWidth: 400,
                                       ),
                                       fit: BoxFit.cover,
@@ -595,9 +594,11 @@ class _SinglePhoto extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: CachedNetworkImage(
-            imageUrl: photo.imageUrl,
+            imageUrl: cloudinaryThumbnail(photo.imageUrl, width: 800),
             fit: BoxFit.cover,
             width: double.infinity,
+            memCacheWidth: 800,
+            fadeInDuration: Duration.zero,
             placeholder: (_, __) => Container(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
@@ -632,10 +633,12 @@ class _ThumbPhoto extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: CachedNetworkImage(
-            imageUrl: photo.imageUrl,
+            imageUrl: cloudinaryThumbnail(photo.imageUrl, width: 240),
             fit: BoxFit.cover,
             width: 120,
             height: 140,
+            memCacheWidth: 240,
+            fadeInDuration: Duration.zero,
             placeholder: (_, __) => Container(
               width: 120,
               color: Theme.of(context).colorScheme.surfaceContainerHighest,

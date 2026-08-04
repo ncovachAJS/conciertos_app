@@ -214,6 +214,7 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                         fit: BoxFit.contain,
                         loaderSize: 32,
                         errorIconSize: 80,
+                        memCacheWidth: null, // resolución completa en el viewer
                       ),
                     ),
                   ),
