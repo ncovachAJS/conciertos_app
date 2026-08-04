@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +11,7 @@ import '../../../friends/presentation/widgets/tag_friends_selector.dart';
 import '../../data/models/concert_photo_model.dart';
 import '../../data/services/photo_api_service.dart';
 import '../pages/photo_viewer_page.dart';
+import '../../../../core/utils/cloudinary_utils.dart';
 
 class MemoriesSection extends StatefulWidget {
   final String concertId;
@@ -57,7 +59,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
   }
 
   Future<void> _addPhotos() async {
-    final images = await _picker.pickMultiImage(imageQuality: 85);
+    final images = await _picker.pickMultiImage(imageQuality: 95);
     if (images.isEmpty || !mounted) return;
 
     // Para una sola foto mostramos el diálogo con caption y etiquetas
@@ -98,33 +100,36 @@ class _MemoriesSectionState extends State<MemoriesSection> {
       return;
     }
 
-    // Varias fotos — subimos sin diálogo
+    // Varias fotos — subimos en paralelo
     setState(() {
       _uploading = true;
       _uploadCurrent = 0;
       _uploadTotal = images.length;
     });
 
-    final newPhotos = <ConcertPhotoModel>[];
-    for (final image in images) {
-      if (!mounted) break;
-      setState(() => _uploadCurrent++);
-      try {
-        final imageUrl = await _uploadService.uploadImage(image.path);
-        final photo = await _photoService.addPhoto(
-          concertId: widget.concertId,
-          imageUrl: imageUrl,
-        );
-        newPhotos.add(photo);
-      } catch (e) {
-        if (!mounted) break;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).photoUploadError(e.toString()))));
-      }
-    }
+    final results = await Future.wait(
+      images.map((image) async {
+        try {
+          final imageUrl = await _uploadService.uploadImage(image.path);
+          final photo = await _photoService.addPhoto(
+            concertId: widget.concertId,
+            imageUrl: imageUrl,
+          );
+          if (mounted) setState(() => _uploadCurrent++);
+          return photo;
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(AppLocalizations.of(context).photoUploadError(e.toString()))),
+            );
+          }
+          return null;
+        }
+      }),
+    );
 
     if (!mounted) return;
+    final newPhotos = results.whereType<ConcertPhotoModel>().toList();
     setState(() {
       _photos = [...newPhotos, ..._photos];
       _uploading = false;
@@ -302,9 +307,19 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                           tag: photo.id,
                           child: ClipRect(
                             child: SizedBox.expand(
-                              child: Image.network(
-                                photo.imageUrl,
+                              child: CachedNetworkImage(
+                                imageUrl: cloudinaryThumbnail(photo.imageUrl),
                                 fit: BoxFit.cover,
+                                memCacheWidth: 300,
+                                fadeInDuration: Duration.zero,
+                                fadeOutDuration: Duration.zero,
+                                placeholder: (_, __) => Container(
+                                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                ),
+                                errorWidget: (_, __, ___) => Container(
+                                  color: const Color(0xFF2B2B2B),
+                                  child: const Icon(Icons.broken_image_outlined, color: Colors.white24),
+                                ),
                               ),
                             ),
                           ),

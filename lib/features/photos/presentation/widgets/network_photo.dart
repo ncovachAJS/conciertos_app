@@ -9,12 +9,17 @@ class NetworkPhoto extends StatelessWidget {
   final double loaderSize;
   final double errorIconSize;
 
+  /// Ancho máximo en memoria (px). Pasar null para no limitar.
+  /// En thumbnails pequeños usar ~300; en viewer a pantalla completa usar null.
+  final int? memCacheWidth;
+
   const NetworkPhoto({
     super.key,
     required this.url,
     this.fit = BoxFit.cover,
     this.loaderSize = 22,
     this.errorIconSize = 24,
+    this.memCacheWidth = 600,
   });
 
   @override
@@ -26,22 +31,19 @@ class NetworkPhoto extends StatelessWidget {
       fit: fit,
       width: double.infinity,
       height: double.infinity,
-      // Solo ancho — mantiene proporción sin distorsionar
-      memCacheWidth: 600,
-      // Muestra placeholder mientras carga
+      memCacheWidth: memCacheWidth,
       placeholder: (context, url) => Container(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         alignment: Alignment.center,
         child: SizedBox(
           width: loaderSize,
           height: loaderSize,
-          child: CircularProgressIndicator(
+          child: const CircularProgressIndicator(
             strokeWidth: 2,
-            valueColor: const AlwaysStoppedAnimation(Color(0xFFE53935)),
+            valueColor: AlwaysStoppedAnimation(Color(0xFFE53935)),
           ),
         ),
       ),
-      // Error
       errorWidget: (context, url, error) => _error(),
       // Sin fade para que las imágenes cacheadas aparezcan instantáneamente
       fadeInDuration: Duration.zero,
