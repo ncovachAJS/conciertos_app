@@ -339,6 +339,14 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                   title: Text(l.concertLabel),
                   subtitle: Text(concert.name),
                 ),
+                if (concert.genre.isNotEmpty) ...[
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.library_music_outlined),
+                    title: const Text('Género'),
+                    subtitle: Text(concert.genre),
+                  ),
+                ],
               ],
             ),
           ),

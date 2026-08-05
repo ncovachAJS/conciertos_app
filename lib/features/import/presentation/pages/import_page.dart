@@ -10,6 +10,7 @@ import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../data/models/setlist_concert_model.dart';
 import '../../data/services/artist_image_service.dart';
 import '../../data/services/setlist_import_service.dart';
+import '../../../spotify/domain/entities/data/services/spotify_api_service.dart';
 
 class ImportPage extends ConsumerStatefulWidget {
   const ImportPage({super.key});
@@ -22,6 +23,9 @@ class _ImportPageState extends ConsumerState<ImportPage> {
   final _searchController = TextEditingController();
   final _setlistService = SetlistImportService();
   final _imageService = ArtistImageService();
+  final _spotifyService = SpotifyApiService();
+
+  String _detectedGenre = '';
 
   List<SetlistConcertModel> _concerts = [];
   final Set<String> _selected = {};
@@ -78,8 +82,23 @@ class _ImportPageState extends ConsumerState<ImportPage> {
         _selected.clear();
         _page = 1;
         _total = 0;
+        _detectedGenre = '';
       }
     });
+
+    // Detectar género desde Spotify en paralelo (solo en búsqueda nueva)
+    if (!more) {
+      _spotifyService.searchArtist(q).then((artist) {
+        if (!mounted) return;
+        if (artist != null && artist.genres.isNotEmpty) {
+          final genre = artist.genres.first
+              .split(' ')
+              .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
+              .join(' ');
+          setState(() => _detectedGenre = genre);
+        }
+      }).catchError((_) {});
+    }
 
     try {
       if (_artistYear == 0) {
@@ -165,6 +184,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
             rating: 0,
             liked: false,
             favorite: false,
+            genre: _detectedGenre,
           ),
         );
       }
