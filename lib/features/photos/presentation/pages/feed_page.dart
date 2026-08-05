@@ -103,11 +103,27 @@ class _FeedPageState extends State<FeedPage>
 
   void _openPhoto(List<ConcertPhotoModel> photos, int index) {
     if (_selecting) return; // en selección el tap selecciona, no abre
-    Navigator.of(context).push(
+    Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => PhotoViewerPage(photos: photos, initialIndex: index),
+        builder: (_) => PhotoViewerPage(
+          photos: photos,
+          initialIndex: index,
+          onDelete: (p) async {
+            await _service.deletePhoto(p.id);
+          },
+          onTagFriend: (p, friendId) async {
+            return await _service.tagFriend(p.id, friendId);
+          },
+          onUntagFriend: (p, friendId) async {
+            return await _service.untagFriend(p.id, friendId);
+          },
+        ),
       ),
-    );
+    ).then((deletedId) {
+      if (deletedId != null && mounted) {
+        setState(() => _photos = _photos.where((p) => p.id != deletedId).toList());
+      }
+    });
   }
 
   @override

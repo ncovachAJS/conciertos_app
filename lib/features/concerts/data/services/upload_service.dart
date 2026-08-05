@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import '../../../../config/api_config.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -16,12 +17,17 @@ class UploadService {
       Uri.parse(ApiConfig.uploadsEndpoint),
     );
 
-    // ✅ Fix 1: JWT token en el header
     if (token != null) {
       request.headers['Authorization'] = 'Bearer $token';
     }
 
-    request.files.add(await http.MultipartFile.fromPath('file', imagePath));
+    // Declarar el content-type explícitamente para que el backend
+    // no reciba application/octet-stream por defecto
+    request.files.add(await http.MultipartFile.fromPath(
+      'file',
+      imagePath,
+      contentType: MediaType.parse(_mimeFromPath(imagePath)),
+    ));
 
     final response = await request.send().timeout(_timeout);
 
@@ -33,7 +39,6 @@ class UploadService {
     final body = await response.stream.bytesToString();
     final json = jsonDecode(body) as Map<String, dynamic>;
 
-    // ✅ Fix 2: el back devuelve { url: '...' }, no imageUrl
     final imageUrl = json['url']?.toString() ?? '';
 
     if (imageUrl.isEmpty) {
@@ -43,5 +48,27 @@ class UploadService {
     }
 
     return imageUrl;
+  }
+
+  /// Determina el MIME type por extensión del archivo.
+  /// Flutter/iOS a veces envía application/octet-stream si no se especifica.
+  static String _mimeFromPath(String path) {
+    final ext = path.split('.').last.toLowerCase();
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'heic':
+        return 'image/heic';
+      case 'heif':
+        return 'image/heif';
+      default:
+        // Si la extensión no es reconocida, asumir jpeg (lo más común de la galería)
+        return 'image/jpeg';
+    }
   }
 }

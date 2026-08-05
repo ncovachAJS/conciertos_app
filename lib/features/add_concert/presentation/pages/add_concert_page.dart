@@ -348,10 +348,33 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
               const SizedBox(height: 24),
 
-              FilledButton.icon(
-                onPressed: _pickImage,
-                icon: const Icon(Icons.photo),
-                label: Text(l.selectImage),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _pickImage,
+                      icon: const Icon(Icons.photo),
+                      label: Text(l.selectImage),
+                    ),
+                  ),
+                  if (_selectedImage != null || (_imageUrl != null && _imageUrl!.isNotEmpty)) ...[
+                    const SizedBox(width: 10),
+                    OutlinedButton.icon(
+                      onPressed: () => setState(() {
+                        _selectedImage = null;
+                        _imageUrl = null;
+                      }),
+                      icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                      label: Text(
+                        l.delete,
+                        style: const TextStyle(color: Colors.redAccent),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.redAccent),
+                      ),
+                    ),
+                  ],
+                ],
               ),
 
               const SizedBox(height: 16),
@@ -366,9 +389,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                           width: double.infinity,
                           fit: BoxFit.cover,
                         )
-                      : (widget.concert?.imageUrl.isNotEmpty ?? false)
+                      : (_imageUrl != null && _imageUrl!.isNotEmpty)
                       ? Image.network(
-                          widget.concert!.imageUrl,
+                          _imageUrl!,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => _placeholderImage(),
