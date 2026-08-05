@@ -66,36 +66,80 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _checkAchievements();
   }
 
-  Future<void> _checkAchievements() async {
-    final uniqueArtists = concerts
+  /// Calcula UserStats a partir de la lista de conciertos del usuario.
+  UserStats _buildStats(List<Concert> list) {
+    final uniqueArtists = list
         .map((c) => c.artist.trim().toLowerCase())
         .where((a) => a.isNotEmpty)
         .toSet()
         .length;
-    final uniqueFestivals = concerts
+    final uniqueFestivals = list
         .map((c) => c.festival.trim().toLowerCase())
         .where((f) => f.isNotEmpty)
         .toSet()
         .length;
-    final uniqueCities = concerts
+    final uniqueCities = list
         .map((c) => c.city.trim().toLowerCase())
         .where((c) => c.isNotEmpty)
         .toSet()
         .length;
-    final totalRated = concerts.where((c) => c.rating > 0).length;
-    final dates = concerts.map((c) => c.date.year).toList();
+    final totalRated = list.where((c) => c.rating > 0).length;
+    final dates = list.map((c) => c.date.year).toList();
     final oldestYear =
         dates.isNotEmpty ? dates.reduce((a, b) => a < b ? a : b) : 0;
 
-    final stats = UserStats(
-      totalConcerts: concerts.length,
+    // Géneros — comparación flexible en minúsculas
+    bool hasGenre(Concert c, List<String> keywords) {
+      final g = c.genre.toLowerCase();
+      return keywords.any((k) => g.contains(k));
+    }
+
+    final rockConcerts = list
+        .where((c) => hasGenre(c, ['rock', 'punk', 'grunge', 'indie']))
+        .length;
+    final metalConcerts = list
+        .where((c) => hasGenre(c, ['metal', 'heavy', 'thrash', 'death', 'black metal']))
+        .length;
+    final jazzConcerts = list
+        .where((c) => hasGenre(c, ['jazz', 'blues', 'soul', 'funk']))
+        .length;
+    final urbanConcerts = list
+        .where((c) => hasGenre(c, ['hip', 'rap', 'trap', 'reggaeton', 'urban', 'r&b']))
+        .length;
+
+    final fiveStarConcerts = list.where((c) => c.rating >= 5).length;
+    final totalFavorites = list.where((c) => c.favorite).length;
+    final totalSpent = list.fold<double>(0, (sum, c) => sum + c.price);
+
+    // maxSameArtist: cuántas veces fue al artista más repetido
+    final artistCount = <String, int>{};
+    for (final c in list) {
+      final a = c.artist.trim().toLowerCase();
+      if (a.isNotEmpty) artistCount[a] = (artistCount[a] ?? 0) + 1;
+    }
+    final maxSameArtist =
+        artistCount.values.fold<int>(0, (m, v) => v > m ? v : m);
+
+    return UserStats(
+      totalConcerts: list.length,
       uniqueArtists: uniqueArtists,
       uniqueFestivals: uniqueFestivals,
       uniqueCities: uniqueCities,
       totalRated: totalRated,
       oldestYear: oldestYear,
+      rockConcerts: rockConcerts,
+      metalConcerts: metalConcerts,
+      jazzConcerts: jazzConcerts,
+      urbanConcerts: urbanConcerts,
+      fiveStarConcerts: fiveStarConcerts,
+      maxSameArtist: maxSameArtist,
+      totalSpent: totalSpent,
+      totalFavorites: totalFavorites,
     );
+  }
 
+  Future<void> _checkAchievements() async {
+    final stats = _buildStats(concerts);
     final achievements = AchievementsEngine.compute(stats);
     final newOnes = await AchievementsService.checkNewUnlocks(achievements);
 
@@ -221,41 +265,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               const SizedBox(height: 30),
 
               // ── Logros ────────────────────────────────────────────────
-              Builder(builder: (context) {
-                final uniqueArtists = concerts
-                    .map((c) => c.artist.trim().toLowerCase())
-                    .where((a) => a.isNotEmpty)
-                    .toSet()
-                    .length;
-                final uniqueFestivals = concerts
-                    .map((c) => c.festival.trim().toLowerCase())
-                    .where((f) => f.isNotEmpty)
-                    .toSet()
-                    .length;
-                final uniqueCities = concerts
-                    .map((c) => c.city.trim().toLowerCase())
-                    .where((c) => c.isNotEmpty)
-                    .toSet()
-                    .length;
-                final totalRated =
-                    concerts.where((c) => c.rating > 0).length;
-                final dates = concerts.map((c) => c.date.year).toList();
-                final oldestYear =
-                    dates.isNotEmpty ? dates.reduce((a, b) => a < b ? a : b) : 0;
-
-                final stats = UserStats(
-                  totalConcerts: concerts.length,
-                  uniqueArtists: uniqueArtists,
-                  uniqueFestivals: uniqueFestivals,
-                  uniqueCities: uniqueCities,
-                  totalRated: totalRated,
-                  oldestYear: oldestYear,
-                );
-
-                return AchievementsWidget(
-                  achievements: AchievementsEngine.compute(stats),
-                );
-              }),
+              AchievementsWidget(
+                achievements: AchievementsEngine.compute(_buildStats(concerts)),
+              ),
 
               const SizedBox(height: 30),
 
