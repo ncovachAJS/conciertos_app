@@ -21,6 +21,7 @@ class ConcertsPage extends ConsumerStatefulWidget {
 class _ConcertsPageState extends ConsumerState<ConcertsPage>
     with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   late final TabController _tabController;
 
   String _searchQuery = '';
@@ -31,12 +32,20 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
-    // Pestaña 0: Pasados, 1: Próximos, 2: Compartidos
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
+      ref.read(concertsProvider.notifier).loadMore();
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -252,6 +261,8 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                   // ── Pestañas ──────────────────────────────────────────
                   TabBar(
                     controller: _tabController,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
                     labelColor: const Color(0xFFE53935),
                     unselectedLabelColor: cs.onSurface.withOpacity(0.5),
                     indicatorColor: const Color(0xFFE53935),
@@ -281,6 +292,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                           onRatingChanged: _updateRating,
                           onEdit: _onEdit,
                           onDelete: _deleteConcert,
+                          scrollController: _scrollController,
                         ),
                         // Pestaña 1 — Próximos
                         _TabContent(
@@ -293,6 +305,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                           onRatingChanged: _updateRating,
                           onEdit: _onEdit,
                           onDelete: _deleteConcert,
+                          scrollController: _scrollController,
                         ),
                         // Pestaña 2 — Compartidos
                         _TabContent(
@@ -306,6 +319,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                           onEdit: _onEdit,
                           onDelete: _deleteConcert,
                           readOnly: true,
+                          scrollController: _scrollController,
                         ),
                       ],
                     ),
@@ -352,6 +366,7 @@ class _TabContent extends StatelessWidget {
   final ValueChanged<Concert> onEdit;
   final ValueChanged<Concert> onDelete;
   final bool readOnly;
+  final ScrollController? scrollController;
 
   const _TabContent({
     required this.concerts,
@@ -364,6 +379,7 @@ class _TabContent extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     this.readOnly = false,
+    this.scrollController,
   });
 
   @override
@@ -399,6 +415,7 @@ class _TabContent extends StatelessWidget {
               onEdit: onEdit,
               onDelete: onDelete,
               readOnly: readOnly,
+              scrollController: scrollController,
             )
           : _ListView(
               key: const ValueKey('list'),
@@ -409,6 +426,7 @@ class _TabContent extends StatelessWidget {
               onEdit: onEdit,
               onDelete: onDelete,
               readOnly: readOnly,
+              scrollController: scrollController,
             ),
     );
   }
@@ -418,11 +436,12 @@ class _TabContent extends StatelessWidget {
 // Vista grid
 // ---------------------------------------------------------------------------
 
-class _GridView extends StatelessWidget {
+class _GridView extends ConsumerWidget {
   final List<Concert> concerts;
   final ValueChanged<Concert> onEdit;
   final ValueChanged<Concert> onDelete;
   final bool readOnly;
+  final ScrollController? scrollController;
 
   const _GridView({
     super.key,
@@ -430,13 +449,17 @@ class _GridView extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     this.readOnly = false,
+    this.scrollController,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loadingMore = ref.watch(concertsLoadingMoreProvider);
     return GridView.builder(
+      controller: scrollController,
       padding: EdgeInsets.zero,
-      itemCount: concerts.length,
+      // +1 para el spinner de carga al pie cuando loadingMore
+      itemCount: concerts.length + (loadingMore ? 1 : 0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 18,
@@ -444,6 +467,14 @@ class _GridView extends StatelessWidget {
         mainAxisExtent: 307,
       ),
       itemBuilder: (context, index) {
+        if (index == concerts.length) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
         final concert = concerts[index];
         return ConcertGridCard(
           concert: concert,
@@ -460,7 +491,7 @@ class _GridView extends StatelessWidget {
 // Vista lista
 // ---------------------------------------------------------------------------
 
-class _ListView extends StatelessWidget {
+class _ListView extends ConsumerWidget {
   final List<Concert> concerts;
   final ValueChanged<Concert> onLike;
   final ValueChanged<Concert> onFavorite;
@@ -468,6 +499,7 @@ class _ListView extends StatelessWidget {
   final ValueChanged<Concert> onEdit;
   final ValueChanged<Concert> onDelete;
   final bool readOnly;
+  final ScrollController? scrollController;
 
   const _ListView({
     super.key,
@@ -478,14 +510,24 @@ class _ListView extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     this.readOnly = false,
+    this.scrollController,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loadingMore = ref.watch(concertsLoadingMoreProvider);
     return ListView.separated(
-      itemCount: concerts.length,
+      controller: scrollController,
+      // +1 para el spinner al pie cuando loadingMore
+      itemCount: concerts.length + (loadingMore ? 1 : 0),
       separatorBuilder: (_, __) => const SizedBox(height: 24),
       itemBuilder: (context, index) {
+        if (index == concerts.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final concert = concerts[index];
         return ConcertCard(
           concert: concert,

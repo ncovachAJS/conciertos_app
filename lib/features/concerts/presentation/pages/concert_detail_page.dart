@@ -366,6 +366,36 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
 
           const SizedBox(height: 24),
 
+          // Notas / diario
+          if (concert.notes.isNotEmpty) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.notes_rounded, color: Colors.amber),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Notas',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      concert.notes,
+                      style: const TextStyle(fontSize: 15, height: 1.5),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+
           // Fotos / recuerdos
           MemoriesSection(concertId: widget.concert.id),
 

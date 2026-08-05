@@ -90,22 +90,24 @@ class _VenueMapCardState extends State<VenueMapCard> {
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  l.mapVenueLocation,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    l.mapVenueLocation,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
                 if (_location != null)
-                  TextButton.icon(
+                  IconButton(
                     onPressed: _openInMaps,
-                    icon: const Icon(Icons.open_in_new, size: 15),
-                    label: Text(
-                      l.mapOpenIn,
-                      style: const TextStyle(fontSize: 13),
-                    ),
+                    tooltip: l.mapOpenIn,
+                    icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
               ],
             ),

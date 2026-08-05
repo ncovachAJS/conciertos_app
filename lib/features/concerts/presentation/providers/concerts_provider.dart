@@ -1,29 +1,116 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../data/models/concert_model.dart';
 import '../../data/services/concert_api_service.dart';
+import '../../data/services/concert_cache_service.dart';
 import '../../domain/entities/concert.dart';
 
 // ---------------------------------------------------------------------------
 // Notifier
 // ---------------------------------------------------------------------------
 
+/// Provider separado para el estado de "cargando más páginas".
+/// Lo actualiza el notifier para que los widgets se rebuild automáticamente.
+class _LoadingMoreNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+  // ignore: use_setters_to_change_properties
+  void setValue(bool value) => state = value;
+}
+
+final _loadingMoreState = NotifierProvider<_LoadingMoreNotifier, bool>(
+  _LoadingMoreNotifier.new,
+);
+
 class ConcertsNotifier extends AsyncNotifier<List<Concert>> {
   final _api = ConcertApiService();
+  final _cache = ConcertCacheService();
+
+  static const _pageSize = 5000;
+  int _page = 1;
+  bool _hasMore = true;
+
+  bool get hasMore => _hasMore;
+  bool get loadingMore => ref.read(_loadingMoreState);
 
   @override
-  Future<List<Concert>> build() => _fetchSorted();
-
-  Future<List<Concert>> _fetchSorted() async {
-    final list = await _api.getConcerts();
-    list.sort((a, b) => b.date.compareTo(a.date));
-    return list;
+  Future<List<Concert>> build() async {
+    // 1. Cargamos el caché primero para respuesta instantánea.
+    final cached = await _cache.load();
+    if (cached.isNotEmpty) {
+      // Mostramos el caché de inmediato sin bloquear al usuario.
+      state = AsyncData(_sorted(cached));
+      // Actualizamos desde la API en segundo plano.
+      _refreshFromApi().ignore();
+      return _sorted(cached);
+    }
+    // Sin caché: cargamos normalmente desde la API.
+    return _fetchPage(page: 1, reset: true);
   }
 
-  /// Recarga completa desde la API.
+  /// Actualiza silenciosamente desde la API y guarda en caché.
+  Future<void> _refreshFromApi() async {
+    try {
+      final list = await _api.getConcerts(page: 1, limit: _pageSize);
+      _page = 1;
+      _hasMore = list.length >= _pageSize;
+      final sorted = _sorted(list);
+      state = AsyncData(sorted);
+      await _cache.save(list);
+    } catch (_) {
+      // Error silencioso: ya mostramos el caché, no hace falta nada.
+    }
+  }
+
+  List<Concert> _sorted(List<ConcertModel> list) =>
+      (list..sort((a, b) => b.date.compareTo(a.date))).toList();
+
+  Future<List<Concert>> _fetchPage({
+    required int page,
+    bool reset = false,
+  }) async {
+    final list = await _api.getConcerts(page: page, limit: _pageSize);
+    if (reset) {
+      _page = 1;
+      // Guardamos en caché la primera página completa.
+      _cache.save(list).ignore();
+    }
+    _hasMore = list.length >= _pageSize;
+    final current = reset ? <Concert>[] : (state.asData?.value ?? <Concert>[]);
+    final merged = [...current, ...list]
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return merged;
+  }
+
+  /// Recarga completa desde la API (página 1).
   Future<void> reload() async {
+    _page = 1;
+    _hasMore = true;
     state = const AsyncLoading();
-    state = await AsyncValue.guard(_fetchSorted);
+    state = await AsyncValue.guard(() => _fetchPage(page: 1, reset: true));
+  }
+
+  /// Carga la siguiente página (para infinite scroll).
+  Future<void> loadMore() async {
+    final loading = ref.read(_loadingMoreState);
+    if (loading || !_hasMore) return;
+    ref.read(_loadingMoreState.notifier).setValue(true);
+    try {
+      _page++;
+      final next = await _api.getConcerts(page: _page, limit: _pageSize);
+      _hasMore = next.length >= _pageSize;
+      if (next.isNotEmpty) {
+        final current = state.asData?.value ?? [];
+        final merged = [...current, ...next]
+          ..sort((a, b) => b.date.compareTo(a.date));
+        state = AsyncData(merged);
+      }
+    } catch (_) {
+      _page--; // revertir si falló
+    } finally {
+      ref.read(_loadingMoreState.notifier).setValue(false);
+    }
   }
 
   /// Crea un concierto:
@@ -40,6 +127,9 @@ class ConcertsNotifier extends AsyncNotifier<List<Concert>> {
       final updated = [created, ...current]
         ..sort((a, b) => b.date.compareTo(a.date));
       state = AsyncData(updated);
+      // Actualizar caché con la nueva lista.
+      final models = updated.whereType<ConcertModel>().toList();
+      _cache.save(models).ignore();
     }
 
     // Reload en background para sincronizar estado completo
@@ -67,13 +157,20 @@ class ConcertsNotifier extends AsyncNotifier<List<Concert>> {
   /// Borra un concierto con optimistic update + rollback si falla.
   Future<void> delete(String id) async {
     final prev = state.asData?.value ?? [];
+    final newList = prev.where((c) => c.id != id).toList();
 
-    state = AsyncData(prev.where((c) => c.id != id).toList());
+    state = AsyncData(newList);
+    // Actualizar caché optimistamente
+    final models = newList.whereType<ConcertModel>().toList();
+    _cache.save(models).ignore();
 
     try {
       await _api.deleteConcert(id);
     } catch (e) {
       state = AsyncData(prev);
+      // Revertir caché
+      final prevModels = prev.whereType<ConcertModel>().toList();
+      _cache.save(prevModels).ignore();
       rethrow;
     }
   }
@@ -86,6 +183,11 @@ class ConcertsNotifier extends AsyncNotifier<List<Concert>> {
 final concertsProvider = AsyncNotifierProvider<ConcertsNotifier, List<Concert>>(
   ConcertsNotifier.new,
 );
+
+/// True mientras se carga la siguiente página (para mostrar spinner al pie).
+final concertsLoadingMoreProvider = Provider<bool>((ref) {
+  return ref.watch(_loadingMoreState);
+});
 
 // ---------------------------------------------------------------------------
 // Providers derivados

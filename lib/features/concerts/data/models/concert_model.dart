@@ -20,6 +20,9 @@ class ConcertModel extends Concert {
     super.participants = const [],
     super.userId = '',
     super.price = 0.0,
+    super.notes = '',
+    super.userName = '',
+    super.userAvatarUrl = '',
     this.taggedFriendIds = const [],
   });
 
@@ -77,6 +80,9 @@ class ConcertModel extends Concert {
       participants: participants,
       userId: ownerId,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      notes: json['description']?.toString() ?? '',
+      userName: ownerJson?['name']?.toString() ?? '',
+      userAvatarUrl: ownerJson?['avatarUrl']?.toString() ?? '',
     );
   }
 
@@ -97,8 +103,46 @@ class ConcertModel extends Concert {
       participants: concert.participants,
       userId: concert.userId,
       price: concert.price,
+      notes: concert.notes,
+      userName: concert.userName,
+      userAvatarUrl: concert.userAvatarUrl,
     );
   }
+
+  /// Serialización completa para guardar en caché local.
+  /// Preserva id, userId, participants y todos los campos necesarios
+  /// para que fromJson() pueda reconstruirlo fielmente.
+  Map<String, dynamic> toCacheJson() => {
+    'id': id,
+    'name': name,
+    'artist': artist,
+    'festival': festival,
+    'date': date.toIso8601String(),
+    'imageUrl': imageUrl,
+    'rating': rating,
+    'liked': liked,
+    'favorite': favorite,
+    'venue': venue,
+    'city': city,
+    'userId': userId,
+    'price': price,
+    'description': notes,
+    // El dueño en el formato que espera fromJson
+    'user': {
+      'id': userId,
+      'name': userName,
+      if (userAvatarUrl.isNotEmpty) 'avatarUrl': userAvatarUrl,
+    },
+    // Participantes en el formato que espera fromJson
+    'participants': participants.map((p) => {
+      'id': p.id,
+      'user': {
+        'id': p.id,
+        'name': p.name,
+        if (p.avatarUrl != null) 'avatarUrl': p.avatarUrl,
+      },
+    }).toList(),
+  };
 
   Map<String, dynamic> toCreateJson() {
     final json = <String, dynamic>{
@@ -115,6 +159,8 @@ class ConcertModel extends Concert {
     if (city.isNotEmpty) json['city'] = city;
     if (imageUrl.isNotEmpty) json['imageUrl'] = imageUrl;
     if (price > 0) json['price'] = price;
+    // El backend guarda las notas en el campo `description`
+    if (notes.isNotEmpty) json['description'] = notes;
     return json;
   }
 

@@ -16,6 +16,11 @@ class Concert {
   final List<ConcertParticipant> participants;
   final String userId;
   final double price;
+  final String notes;
+  // Datos del dueño del concierto (útil en el feed de amigos)
+  final String userName;
+  final String userAvatarUrl;
+  final String genre;
 
   const Concert({
     required this.id,
@@ -33,6 +38,10 @@ class Concert {
     this.participants = const [],
     this.userId = '',
     this.price = 0.0,
+    this.notes = '',
+    this.userName = '',
+    this.userAvatarUrl = '',
+    this.genre = '',
   });
 
   bool get isPastConcert {
@@ -58,6 +67,9 @@ class Concert {
     List<ConcertParticipant>? participants,
     String? userId,
     double? price,
+    String? notes,
+    String? userName,
+    String? userAvatarUrl,
   }) {
     return Concert(
       id: id ?? this.id,
@@ -75,6 +87,9 @@ class Concert {
       participants: participants ?? this.participants,
       userId: userId ?? this.userId,
       price: price ?? this.price,
+      notes: notes ?? this.notes,
+      userName: userName ?? this.userName,
+      userAvatarUrl: userAvatarUrl ?? this.userAvatarUrl,
     );
   }
 }

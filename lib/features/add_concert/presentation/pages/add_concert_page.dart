@@ -38,6 +38,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   final _nameController = TextEditingController();
   bool _hasFestival = false;
   final _priceController = TextEditingController();
+  final _notesController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
   final UploadService _uploadService = UploadService();
@@ -89,6 +90,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       _nameController.text = widget.concert?.name ?? '';
       if (widget.concert!.price > 0) {
         _priceController.text = widget.concert!.price.toStringAsFixed(2);
+      }
+      if (widget.concert!.notes.isNotEmpty) {
+        _notesController.text = widget.concert!.notes;
       }
       _selectedDate = widget.concert!.date;
       _dateController.text =
@@ -184,6 +188,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         venue: _venueController.text.trim(),
         city: _cityController.text.trim(),
         price: double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0,
+        notes: _notesController.text.trim(),
         taggedFriendIds: _taggedFriendIds,
         participantIds: widget.concert?.participantIds ?? [],
         participants: widget.concert?.participants ?? [],
@@ -226,6 +231,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     _cityController.dispose();
     _nameController.dispose();
     _priceController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -544,6 +550,19 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                     const SizedBox(height: 32),
                   ],
                 ),
+
+              // ── Notas / diario ────────────────────────────────────
+              const SizedBox(height: 24),
+              TextFormField(
+                controller: _notesController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  labelText: '📝 Notas / diario',
+                  hintText: '¿Qué recordás de este concierto?',
+                  border: const OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
+              ),
 
               // ── Etiquetar amigos ───────────────────────────────────
               const SizedBox(height: 32),
