@@ -23,6 +23,7 @@ class ConcertModel extends Concert {
     super.notes = '',
     super.userName = '',
     super.userAvatarUrl = '',
+    super.genre = '',
     this.taggedFriendIds = const [],
   });
 
@@ -55,7 +56,6 @@ class ConcertModel extends Concert {
         name: ownerJson['name']?.toString() ?? '',
         avatarUrl: ownerJson['avatarUrl']?.toString(),
       );
-      // Solo añadir si no está ya en participants
       if (!participants.any((p) => p.id == ownerId)) {
         participants.insert(0, ownerParticipant);
       }
@@ -83,6 +83,7 @@ class ConcertModel extends Concert {
       notes: json['description']?.toString() ?? '',
       userName: ownerJson?['name']?.toString() ?? '',
       userAvatarUrl: ownerJson?['avatarUrl']?.toString() ?? '',
+      genre: json['genre']?.toString() ?? '',
     );
   }
 
@@ -106,12 +107,11 @@ class ConcertModel extends Concert {
       notes: concert.notes,
       userName: concert.userName,
       userAvatarUrl: concert.userAvatarUrl,
+      genre: concert.genre,
     );
   }
 
-  /// Serialización completa para guardar en caché local.
-  /// Preserva id, userId, participants y todos los campos necesarios
-  /// para que fromJson() pueda reconstruirlo fielmente.
+  /// Serialización completa para caché local — preserva todos los campos.
   Map<String, dynamic> toCacheJson() => {
     'id': id,
     'name': name,
@@ -127,13 +127,12 @@ class ConcertModel extends Concert {
     'userId': userId,
     'price': price,
     'description': notes,
-    // El dueño en el formato que espera fromJson
+    if (genre.isNotEmpty) 'genre': genre,
     'user': {
       'id': userId,
       'name': userName,
       if (userAvatarUrl.isNotEmpty) 'avatarUrl': userAvatarUrl,
     },
-    // Participantes en el formato que espera fromJson
     'participants': participants.map((p) => {
       'id': p.id,
       'user': {
@@ -159,8 +158,8 @@ class ConcertModel extends Concert {
     if (city.isNotEmpty) json['city'] = city;
     if (imageUrl.isNotEmpty) json['imageUrl'] = imageUrl;
     if (price > 0) json['price'] = price;
-    // El backend guarda las notas en el campo `description`
     if (notes.isNotEmpty) json['description'] = notes;
+    if (genre.isNotEmpty) json['genre'] = genre;
     return json;
   }
 

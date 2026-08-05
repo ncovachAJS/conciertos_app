@@ -70,6 +70,7 @@ class Concert {
     String? notes,
     String? userName,
     String? userAvatarUrl,
+    String? genre,
   }) {
     return Concert(
       id: id ?? this.id,
@@ -90,6 +91,7 @@ class Concert {
       notes: notes ?? this.notes,
       userName: userName ?? this.userName,
       userAvatarUrl: userAvatarUrl ?? this.userAvatarUrl,
+      genre: genre ?? this.genre,
     );
   }
 }

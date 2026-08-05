@@ -17,6 +17,7 @@ import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../friends/presentation/widgets/tag_friends_selector.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../spotify/domain/entities/data/services/spotify_api_service.dart';
 
 class AddConcertPage extends ConsumerStatefulWidget {
   final Concert? concert;
@@ -39,6 +40,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   bool _hasFestival = false;
   final _priceController = TextEditingController();
   final _notesController = TextEditingController();
+  final _genreController = TextEditingController();
+
+  final _spotifyService = SpotifyApiService();
+  bool _fetchingGenre = false;
 
   final ImagePicker _picker = ImagePicker();
   final UploadService _uploadService = UploadService();
@@ -94,6 +99,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       if (widget.concert!.notes.isNotEmpty) {
         _notesController.text = widget.concert!.notes;
       }
+      if (widget.concert!.genre.isNotEmpty) {
+        _genreController.text = widget.concert!.genre;
+      }
       _selectedDate = widget.concert!.date;
       _dateController.text =
           '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
@@ -114,6 +122,28 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
           !_taggedFriendIds.contains(ownerId)) {
         _taggedFriendIds.add(ownerId);
       }
+    }
+  }
+
+  /// Busca el género en Spotify cuando el artista pierde el foco.
+  /// Solo rellena si el campo está vacío.
+  Future<void> _suggestGenreFromSpotify() async {
+    final artist = _artistController.text.trim();
+    if (artist.isEmpty || _genreController.text.trim().isNotEmpty) return;
+    setState(() => _fetchingGenre = true);
+    try {
+      final spotifyArtist = await _spotifyService.searchArtist(artist);
+      if (!mounted) return;
+      if (spotifyArtist != null && spotifyArtist.genres.isNotEmpty) {
+        // Capitaliza el primer género
+        final genre = spotifyArtist.genres.first
+            .split(' ')
+            .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
+            .join(' ');
+        setState(() => _genreController.text = genre);
+      }
+    } catch (_) {} finally {
+      if (mounted) setState(() => _fetchingGenre = false);
     }
   }
 
@@ -189,6 +219,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         city: _cityController.text.trim(),
         price: double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0,
         notes: _notesController.text.trim(),
+        genre: _genreController.text.trim(),
         taggedFriendIds: _taggedFriendIds,
         participantIds: widget.concert?.participantIds ?? [],
         participants: widget.concert?.participants ?? [],
@@ -232,6 +263,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     _nameController.dispose();
     _priceController.dispose();
     _notesController.dispose();
+    _genreController.dispose();
     super.dispose();
   }
 
@@ -265,12 +297,35 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.person),
                 ),
+                onEditingComplete: _suggestGenreFromSpotify,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return l.artistRequired;
                   }
                   return null;
                 },
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _genreController,
+                decoration: InputDecoration(
+                  labelText: '🎸 Género musical',
+                  hintText: 'Rock, Pop, Metal, Jazz…',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.library_music_outlined),
+                  suffixIcon: _fetchingGenre
+                      ? const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : null,
+                ),
               ),
 
               const SizedBox(height: 16),
