@@ -16,6 +16,7 @@ import '../features/home/presentation/pages/home_page.dart';
 import '../features/setlist/presentation/pages/setlist_test_page.dart';
 import '../features/import/presentation/pages/import_page.dart';
 import '../features/photos/presentation/pages/feed_page.dart';
+import '../features/friends_activity/presentation/pages/friends_activity_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
@@ -76,6 +77,10 @@ final appRouter = GoRouter(
           },
         ),
         GoRoute(path: '/feed', builder: (context, state) => const FeedPage()),
+        GoRoute(
+          path: '/friends-activity',
+          builder: (context, state) => const FriendsActivityPage(),
+        ),
         GoRoute(
           path: '/favorites',
           builder: (context, state) => const FavoritesPage(),

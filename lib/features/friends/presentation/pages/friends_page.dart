@@ -61,6 +61,11 @@ class _FriendsPageState extends State<FriendsPage>
             : null,
         actions: [
           IconButton(
+            icon: const Icon(Icons.dynamic_feed_rounded),
+            tooltip: 'Actividad de amigos',
+            onPressed: () => context.push('/friends-activity'),
+          ),
+          IconButton(
             icon: const Icon(Icons.person_search_rounded),
             tooltip: AppLocalizations.of(context).friendsSearchPeople,
             onPressed: _openSearch,

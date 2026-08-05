@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
+import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../ticketmaster/presentation/widgets/recommended_concerts.dart';
@@ -49,13 +50,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 
     return concertsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(
-        child: Text(
-          AppLocalizations.of(context).errorLoadingData(e.toString()),
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
-          ),
-        ),
+      error: (e, _) => AppErrorWidget(
+        error: e,
+        onRetry: () => ref.invalidate(concertsProvider),
       ),
       data: (_) {
         final l = AppLocalizations.of(context);

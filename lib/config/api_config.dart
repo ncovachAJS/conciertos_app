@@ -4,6 +4,7 @@ class ApiConfig {
   static const String baseUrl = 'https://conciertos-backend.onrender.com';
 
   static const String concertsEndpoint = '$baseUrl/concerts';
+  static const String friendsActivityEndpoint = '$baseUrl/concerts/friends-activity';
   static const String loginEndpoint = '$baseUrl/auth/login';
   static const String registerEndpoint = '$baseUrl/auth/register';
   static const String uploadsEndpoint = '$baseUrl/uploads/image';
