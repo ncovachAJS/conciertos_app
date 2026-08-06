@@ -97,7 +97,7 @@ class AchievementsEngine {
           '10 conciertos de rock',                          s.rockConcerts >= 10),
       _a('metalero',        '🤘', 'Metalero',
           '3 conciertos de metal o heavy',                  s.metalConcerts >= 3),
-      _a('jazzero',         '🎹', 'Jazzero',
+      _a('jazzero',         '🎹', 'Blusero',
           '3 conciertos de jazz o blues',                   s.jazzConcerts >= 3),
       _a('urbano',          '🎤', 'Urbano',
           '3 conciertos de hip-hop, rap o trap',            s.urbanConcerts >= 3),
