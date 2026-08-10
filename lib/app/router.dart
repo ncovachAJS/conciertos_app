@@ -53,7 +53,10 @@ final appRouter = GoRouter(
         GoRoute(path: '/', builder: (context, state) => const HomePage()),
         GoRoute(
           path: '/concerts',
-          builder: (context, state) => const ConcertsPage(),
+          builder: (context, state) => ConcertsPage(
+            openCalendar:
+                state.uri.queryParameters['view'] == 'calendar',
+          ),
         ),
         GoRoute(
           path: '/concert-detail',
@@ -72,8 +75,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/add',
           builder: (context, state) {
-            final concert = state.extra as Concert?;
-            return AddConcertPage(concert: concert);
+            final extra = state.extra;
+            if (extra is Concert) return AddConcertPage(concert: extra);
+            if (extra is DateTime) return AddConcertPage(initialDate: extra);
+            return const AddConcertPage();
           },
         ),
         GoRoute(path: '/feed', builder: (context, state) => const FeedPage()),

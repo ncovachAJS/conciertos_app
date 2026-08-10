@@ -2,44 +2,105 @@ import 'package:flutter/material.dart';
 
 import '../../domain/achievement.dart';
 
-class AchievementsWidget extends StatelessWidget {
+/// Número de logros visibles cuando el panel está colapsado (2 filas × 4 cols).
+const _kCollapsedCount = 8;
+
+class AchievementsWidget extends StatefulWidget {
   final List<Achievement> achievements;
 
   const AchievementsWidget({super.key, required this.achievements});
 
   @override
+  State<AchievementsWidget> createState() => _AchievementsWidgetState();
+}
+
+class _AchievementsWidgetState extends State<AchievementsWidget>
+    with SingleTickerProviderStateMixin {
+  bool _expanded = false;
+
+  late final AnimationController _ctrl;
+  late final Animation<double> _rotate;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _rotate = Tween<double>(begin: 0, end: 0.5).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() => _expanded = !_expanded);
+    _expanded ? _ctrl.forward() : _ctrl.reverse();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final achievements = widget.achievements;
     final unlocked = achievements.where((a) => a.unlocked).length;
     final total = achievements.length;
     final cs = Theme.of(context).colorScheme;
 
+    final visibleItems =
+        _expanded ? achievements : achievements.take(_kCollapsedCount).toList();
+    final hasMore = achievements.length > _kCollapsedCount;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const Text('🏆', style: TextStyle(fontSize: 18)),
-            const SizedBox(width: 8),
-            Text(
-              'LOGROS',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFFFFC107),
-                letterSpacing: 1.1,
+        // ── Cabecera ──────────────────────────────────────────────────
+        GestureDetector(
+          onTap: hasMore ? _toggle : null,
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            children: [
+              const Text('🏆', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 8),
+              const Text(
+                'LOGROS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFFFC107),
+                  letterSpacing: 1.1,
+                ),
               ),
-            ),
-            const Spacer(),
-            Text(
-              '$unlocked / $total',
-              style: TextStyle(
-                fontSize: 12,
-                color: cs.onSurface.withValues(alpha: 0.5),
+              const Spacer(),
+              Text(
+                '$unlocked / $total',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: cs.onSurface.withValues(alpha: 0.5),
+                ),
               ),
-            ),
-          ],
+              if (hasMore) ...[
+                const SizedBox(width: 6),
+                RotationTransition(
+                  turns: _rotate,
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: cs.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
+
         const SizedBox(height: 4),
+
+        // ── Barra de progreso ─────────────────────────────────────────
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
@@ -49,23 +110,56 @@ class AchievementsWidget extends StatelessWidget {
             valueColor: const AlwaysStoppedAnimation(Color(0xFFFFC107)),
           ),
         ),
+
         const SizedBox(height: 16),
-        GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.82,
+
+        // ── Grid animada ──────────────────────────────────────────────
+        AnimatedSize(
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeInOut,
+          child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.82,
+            ),
+            itemCount: visibleItems.length,
+            itemBuilder: (context, i) =>
+                _TrophyTile(achievement: visibleItems[i]),
           ),
-          itemCount: achievements.length,
-          itemBuilder: (context, i) => _TrophyTile(achievement: achievements[i]),
         ),
+
+        // ── Botón Ver más / Ver menos ─────────────────────────────────
+        if (hasMore) ...[
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _toggle,
+            child: Center(
+              child: AnimatedBuilder(
+                animation: _ctrl,
+                builder: (_, __) => Text(
+                  _expanded
+                      ? 'Ver menos'
+                      : 'Ver todos los logros (${achievements.length - _kCollapsedCount} más)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFFFC107).withValues(alpha: 0.8),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _TrophyTile extends StatelessWidget {
   final Achievement achievement;
@@ -172,7 +266,10 @@ class _TrophyTile extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 20),
@@ -198,7 +295,8 @@ class _TrophyTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: locked ? Colors.white38 : const Color(0xFFFFC107),
+                      color:
+                          locked ? Colors.white38 : const Color(0xFFFFC107),
                     ),
                   ),
                 ],

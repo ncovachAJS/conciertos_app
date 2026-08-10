@@ -10,9 +10,15 @@ import '../../data/models/concert_model.dart';
 import '../../domain/entities/concert.dart';
 import '../providers/concerts_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../widgets/concert_calendar_view.dart';
+
+enum _ViewMode { list, grid, calendar }
 
 class ConcertsPage extends ConsumerStatefulWidget {
-  const ConcertsPage({super.key});
+  /// Si es `true`, la página se abre directamente en modo calendario.
+  final bool openCalendar;
+
+  const ConcertsPage({super.key, this.openCalendar = false});
 
   @override
   ConsumerState<ConcertsPage> createState() => _ConcertsPageState();
@@ -25,12 +31,16 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   late final TabController _tabController;
 
   String _searchQuery = '';
-  bool _gridView = false;
+  late _ViewMode _viewMode;
   bool _deleting = false;
+
+  bool get _gridView => _viewMode == _ViewMode.grid;
 
   @override
   void initState() {
     super.initState();
+    _viewMode =
+        widget.openCalendar ? _ViewMode.calendar : _ViewMode.list;
     _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     _scrollController.addListener(_onScroll);
   }
@@ -161,28 +171,26 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
     return AppPage(
       title: l.concertsTitle,
       actions: [
-        IconButton(
-          tooltip: _gridView ? l.listViewTooltip : l.cardViewTooltip,
-          onPressed: () => setState(() => _gridView = !_gridView),
-          icon: Icon(
-            _gridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-          ),
+        _ViewToggle(
+          current: _viewMode,
+          onChanged: (m) => setState(() => _viewMode = m),
         ),
-        Padding(
-          padding: const EdgeInsets.only(right: 12),
-          child: GestureDetector(
-            onTap: _onAdd,
-            child: Container(
-              width: 46,
-              height: 46,
-              decoration: const BoxDecoration(
-                color: Color(0xFFE53935),
-                shape: BoxShape.circle,
+        if (_viewMode != _ViewMode.calendar)
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: GestureDetector(
+              onTap: _onAdd,
+              child: Container(
+                width: 46,
+                height: 46,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE53935),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.add, color: Colors.white),
               ),
-              child: const Icon(Icons.add, color: Colors.white),
             ),
           ),
-        ),
       ],
       child: Stack(
         children: [
@@ -229,6 +237,53 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                 ..sort((a, b) => a.date.compareTo(b.date));
               final sharedSorted = shared.toList()
                 ..sort((a, b) => b.date.compareTo(a.date));
+
+              // ── Vista Calendario ────────────────────────────────────
+              if (_viewMode == _ViewMode.calendar) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Buscador también disponible en vista calendario
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (v) => setState(() => _searchQuery = v),
+                      decoration: InputDecoration(
+                        hintText: l.searchConcertsHint,
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear_rounded),
+                                onPressed: () => setState(() {
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                }),
+                              )
+                            : null,
+                        filled: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: ConcertCalendarView(
+                        concerts: _filtered(concerts),
+                        onAddConcert: (date) async {
+                          final result =
+                              await context.push('/add', extra: date);
+                          if (result == true && mounted) {
+                            await ref
+                                .read(concertsProvider.notifier)
+                                .reload();
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              }
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,6 +400,63 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Toggle de vista: lista / grid / calendario
+// ---------------------------------------------------------------------------
+
+class _ViewToggle extends StatelessWidget {
+  final _ViewMode current;
+  final ValueChanged<_ViewMode> onChanged;
+
+  const _ViewToggle({required this.current, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    Widget btn(_ViewMode mode, IconData icon, String tooltip) {
+      final selected = current == mode;
+      return Tooltip(
+        message: tooltip,
+        child: GestureDetector(
+          onTap: () => onChanged(mode),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: selected
+                  ? const Color(0xFFE53935).withValues(alpha: 0.15)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: selected
+                  ? const Color(0xFFE53935)
+                  : cs.onSurface.withValues(alpha: 0.45),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          btn(_ViewMode.list,     Icons.view_list_rounded,    'Lista'),
+          const SizedBox(width: 2),
+          btn(_ViewMode.grid,     Icons.grid_view_rounded,    'Cuadrícula'),
+          const SizedBox(width: 2),
+          btn(_ViewMode.calendar, Icons.calendar_month_rounded, 'Calendario'),
         ],
       ),
     );
@@ -520,7 +632,7 @@ class _ListView extends ConsumerWidget {
       controller: scrollController,
       // +1 para el spinner al pie cuando loadingMore
       itemCount: concerts.length + (loadingMore ? 1 : 0),
-      separatorBuilder: (_, __) => const SizedBox(height: 24),
+      separatorBuilder: (_, i) => const SizedBox(height: 24),
       itemBuilder: (context, index) {
         if (index == concerts.length) {
           return const Padding(

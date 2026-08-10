@@ -22,7 +22,10 @@ import '../../../spotify/domain/entities/data/services/spotify_api_service.dart'
 class AddConcertPage extends ConsumerStatefulWidget {
   final Concert? concert;
 
-  const AddConcertPage({super.key, this.concert});
+  /// Fecha inicial pre-seleccionada (solo en modo crear, ignorada al editar).
+  final DateTime? initialDate;
+
+  const AddConcertPage({super.key, this.concert, this.initialDate});
 
   @override
   ConsumerState<AddConcertPage> createState() => _AddConcertPageState();
@@ -122,6 +125,13 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
           !_taggedFriendIds.contains(ownerId)) {
         _taggedFriendIds.add(ownerId);
       }
+    }
+
+    // Pre-rellenar fecha cuando se viene del calendario (solo en modo crear)
+    if (widget.concert == null && widget.initialDate != null) {
+      _selectedDate = widget.initialDate;
+      _dateController.text =
+          '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
     }
   }
 

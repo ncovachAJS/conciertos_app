@@ -1,7 +1,7 @@
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -10,7 +10,6 @@ import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../ticketmaster/presentation/widgets/recommended_concerts.dart';
-import '../../artist/presentation/pages/artist_page.dart';
 import '../widgets/dashboard_favorites.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_on_this_day.dart';
@@ -132,6 +131,8 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               DashboardSectionTitle(
                 icon: Icons.calendar_month_rounded,
                 title: l.upcomingConcerts,
+                action: 'Calendario',
+                onAction: () => context.go('/concerts?view=calendar'),
               ),
               const SizedBox(height: 24),
               DashboardUpcomingConcerts(
