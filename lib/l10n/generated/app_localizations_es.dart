@@ -898,6 +898,168 @@ class AppLocalizationsEs extends AppLocalizations {
       'En la sección Recuerdos puedes añadir todas las fotos que quieras del concierto. Selección múltiple.';
 
   @override
+  String get tutorialConcertsTitle => 'Tu colección de conciertos';
+
+  @override
+  String get tutorialConcertsDesc =>
+      'Aquí tienes todos los conciertos que has registrado. Usa el buscador para filtrar por artista, ciudad o festival.';
+
+  @override
+  String get tutorialConcertsViewTitle => 'Tres formas de verlos';
+
+  @override
+  String get tutorialConcertsViewDesc =>
+      'Cambia entre lista, cuadrícula o calendario con los iconos de arriba a la derecha. Cada vista tiene su momento.';
+
+  @override
+  String get tutorialConcertsCalTitle => 'Vista calendario';
+
+  @override
+  String get tutorialConcertsCalDesc =>
+      'En el calendario puedes ver tus conciertos por fecha y añadir uno nuevo tocando cualquier día.';
+
+  @override
+  String get tutorialStatsOverviewTitle => 'Tu historial musical';
+
+  @override
+  String get tutorialStatsOverviewDesc =>
+      'Un resumen de toda tu actividad: conciertos, artistas únicos, festivales y ciudades que has visitado.';
+
+  @override
+  String get tutorialStatsChartTitle => 'Evolución por año';
+
+  @override
+  String get tutorialStatsChartDesc =>
+      'La gráfica muestra cuántos conciertos has asistido cada año. Descubre tus épocas más activas.';
+
+  @override
+  String get tutorialStatsTopTitle => 'Tus tops personales';
+
+  @override
+  String get tutorialStatsTopDesc =>
+      'Rankings de artistas, ciudades y festivales más visitados. ¿Alguien gana por goleada?';
+
+  @override
+  String get tutorialProfileOverviewTitle => 'Tu perfil';
+
+  @override
+  String get tutorialProfileOverviewDesc =>
+      'Aquí ves tu resumen personal: conciertos, fotos, y acceso a ajustes. Toca tu avatar para cambiarlo.';
+
+  @override
+  String get tutorialProfileAchTitle => 'Logros y trofeos';
+
+  @override
+  String get tutorialProfileAchDesc =>
+      'Gana logros asistiendo a conciertos. La lista se despliega para ver todos. Toca uno para ver qué se necesita.';
+
+  @override
+  String get tutorialFriendsConnectTitle => 'Conecta con amigos';
+
+  @override
+  String get tutorialFriendsConnectDesc =>
+      'Busca a tus amigos por nombre y envíales una solicitud. Así podréis ver los conciertos de los demás.';
+
+  @override
+  String get tutorialFriendsTabsTitle => 'Amigos y solicitudes';
+
+  @override
+  String get tutorialFriendsTabsDesc =>
+      'La primera pestaña muestra tus amigos actuales. La segunda gestiona las solicitudes pendientes que hayas recibido.';
+
+  @override
+  String get tutorialFriendsActivityTitle => 'Actividad de amigos';
+
+  @override
+  String get tutorialFriendsActivityDesc =>
+      'Cuando un amigo añada un concierto recibirás una notificación. También puedes ver su perfil y lista de conciertos.';
+
+  @override
+  String get tutorialFeedPhotosTitle => 'Recuerdos en fotos';
+
+  @override
+  String get tutorialFeedPhotosDesc =>
+      'Aquí aparecen las fotos de tus conciertos y de tus amigos. Un álbum compartido del mundo del directo.';
+
+  @override
+  String get tutorialFeedViewTitle => 'Cuadrícula o línea de tiempo';
+
+  @override
+  String get tutorialFeedViewDesc =>
+      'Alterna entre la cuadrícula y la vista cronológica con el icono de arriba. La vista cronológica agrupa las fotos por concierto.';
+
+  @override
+  String get tutorialRecsDiscoverTitle => 'Descubre nuevos conciertos';
+
+  @override
+  String get tutorialRecsDiscoverDesc =>
+      'Basándonos en los artistas que ya has visto, te sugerimos conciertos próximos. Filtra por país para afinar.';
+
+  @override
+  String get tutorialRecsWantTitle => 'Quiero ir';
+
+  @override
+  String get tutorialRecsWantDesc =>
+      'Toca el 🎟️ en cualquier evento para guardarlo en tu lista «Quiero ir». Lo encontrarás en la segunda pestaña.';
+
+  @override
+  String get tutorialImportSearchTitle => 'Importa desde Setlist.fm';
+
+  @override
+  String get tutorialImportSearchDesc =>
+      'Escribe el nombre de un artista para ver todos sus conciertos pasados disponibles en Setlist.fm.';
+
+  @override
+  String get tutorialImportSelectTitle => 'Selecciona e importa';
+
+  @override
+  String get tutorialImportSelectDesc =>
+      'Marca los conciertos a los que fuiste y pulsa Importar. La app buscará imagen y género automáticamente.';
+
+  @override
+  String get tutorialSettingsSection => 'Ayuda';
+
+  @override
+  String get tutorialSettingsLabel => 'Guías de uso';
+
+  @override
+  String get tutorialSettingsSubtitle =>
+      'Repasa el tutorial de cualquier pantalla';
+
+  @override
+  String get tutorialPickerTitle => '¿Qué quieres repasar?';
+
+  @override
+  String get tutorialPickerDashboard => 'Inicio';
+
+  @override
+  String get tutorialPickerConcerts => 'Conciertos';
+
+  @override
+  String get tutorialPickerAddConcert => 'Añadir concierto';
+
+  @override
+  String get tutorialPickerDetail => 'Detalle de concierto';
+
+  @override
+  String get tutorialPickerStats => 'Estadísticas';
+
+  @override
+  String get tutorialPickerProfile => 'Perfil';
+
+  @override
+  String get tutorialPickerFriends => 'Amigos';
+
+  @override
+  String get tutorialPickerFeed => 'Recuerdos';
+
+  @override
+  String get tutorialPickerRecs => 'Descubrir';
+
+  @override
+  String get tutorialPickerImport => 'Importar';
+
+  @override
   String get splashTagline => 'Cada concierto cuenta una historia.';
 
   @override

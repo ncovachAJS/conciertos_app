@@ -10,6 +10,7 @@ import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../ticketmaster/presentation/widgets/recommended_concerts.dart';
+import '../widgets/dashboard_annual_goal.dart';
 import '../widgets/dashboard_favorites.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_on_this_day.dart';
@@ -111,6 +112,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               // ── Racha ────────────────────────────────────────────────────
               DashboardStreak(concerts: concerts),
               if (concerts.isNotEmpty) const SizedBox(height: 20),
+
+              // ── Meta anual ───────────────────────────────────────────────
+              DashboardAnnualGoal(concerts: concerts),
+              const SizedBox(height: 20),
 
               // ── Valorar pendiente ─────────────────────────────────────────
               const DashboardRatePending(),

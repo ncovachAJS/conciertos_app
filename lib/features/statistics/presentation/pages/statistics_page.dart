@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+import '../../../../core/tutorial/tutorial_content.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -195,11 +198,35 @@ String _monthName(AppLocalizations l, int? index) {
 // Página
 // ---------------------------------------------------------------------------
 
-class StatisticsPage extends ConsumerWidget {
+class StatisticsPage extends ConsumerStatefulWidget {
   const StatisticsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StatisticsPage> createState() => _StatisticsPageState();
+}
+
+class _StatisticsPageState extends ConsumerState<StatisticsPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _showTutorialIfNeeded(),
+    );
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.statistics);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.statistics);
+    if (!mounted) return;
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.statistics(AppLocalizations.of(context)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final concertsAsync = ref.watch(concertsProvider);
 

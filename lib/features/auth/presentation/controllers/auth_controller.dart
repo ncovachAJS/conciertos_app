@@ -84,6 +84,13 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Actualiza el email en memoria.
+  void updateEmail(String email) {
+    if (user == null) return;
+    user = user!.copyWith(email: email);
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     await _storage.delete(key: 'token');
     _token = null;

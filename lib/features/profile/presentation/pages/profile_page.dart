@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../core/tutorial/tutorial_content.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
 import '../../../concerts/data/services/upload_service.dart';
@@ -43,6 +46,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     super.initState();
     auth.addListener(_refresh);
     load();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _showTutorialIfNeeded(),
+    );
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.profile);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.profile);
+    if (!mounted) return;
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.profile(AppLocalizations.of(context)),
+    );
   }
 
   void _refresh() {

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/tutorial/tutorial_content.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/concert_card.dart';
 import '../../../../shared/widgets/concert_grid_card.dart';
@@ -43,6 +46,20 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
         widget.openCalendar ? _ViewMode.calendar : _ViewMode.list;
     _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _showTutorialIfNeeded(),
+    );
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.concerts);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.concerts);
+    if (!mounted) return;
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.concerts(AppLocalizations.of(context)),
+    );
   }
 
   void _onScroll() {

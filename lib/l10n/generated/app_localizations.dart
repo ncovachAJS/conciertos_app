@@ -1616,6 +1616,294 @@ abstract class AppLocalizations {
   /// **'En la sección Recuerdos puedes añadir todas las fotos que quieras del concierto. Selección múltiple.'**
   String get tutorialPhotosDesc;
 
+  /// No description provided for @tutorialConcertsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu colección de conciertos'**
+  String get tutorialConcertsTitle;
+
+  /// No description provided for @tutorialConcertsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí tienes todos los conciertos que has registrado. Usa el buscador para filtrar por artista, ciudad o festival.'**
+  String get tutorialConcertsDesc;
+
+  /// No description provided for @tutorialConcertsViewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tres formas de verlos'**
+  String get tutorialConcertsViewTitle;
+
+  /// No description provided for @tutorialConcertsViewDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambia entre lista, cuadrícula o calendario con los iconos de arriba a la derecha. Cada vista tiene su momento.'**
+  String get tutorialConcertsViewDesc;
+
+  /// No description provided for @tutorialConcertsCalTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Vista calendario'**
+  String get tutorialConcertsCalTitle;
+
+  /// No description provided for @tutorialConcertsCalDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'En el calendario puedes ver tus conciertos por fecha y añadir uno nuevo tocando cualquier día.'**
+  String get tutorialConcertsCalDesc;
+
+  /// No description provided for @tutorialStatsOverviewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu historial musical'**
+  String get tutorialStatsOverviewTitle;
+
+  /// No description provided for @tutorialStatsOverviewDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Un resumen de toda tu actividad: conciertos, artistas únicos, festivales y ciudades que has visitado.'**
+  String get tutorialStatsOverviewDesc;
+
+  /// No description provided for @tutorialStatsChartTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Evolución por año'**
+  String get tutorialStatsChartTitle;
+
+  /// No description provided for @tutorialStatsChartDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'La gráfica muestra cuántos conciertos has asistido cada año. Descubre tus épocas más activas.'**
+  String get tutorialStatsChartDesc;
+
+  /// No description provided for @tutorialStatsTopTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus tops personales'**
+  String get tutorialStatsTopTitle;
+
+  /// No description provided for @tutorialStatsTopDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Rankings de artistas, ciudades y festivales más visitados. ¿Alguien gana por goleada?'**
+  String get tutorialStatsTopDesc;
+
+  /// No description provided for @tutorialProfileOverviewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu perfil'**
+  String get tutorialProfileOverviewTitle;
+
+  /// No description provided for @tutorialProfileOverviewDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí ves tu resumen personal: conciertos, fotos, y acceso a ajustes. Toca tu avatar para cambiarlo.'**
+  String get tutorialProfileOverviewDesc;
+
+  /// No description provided for @tutorialProfileAchTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Logros y trofeos'**
+  String get tutorialProfileAchTitle;
+
+  /// No description provided for @tutorialProfileAchDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Gana logros asistiendo a conciertos. La lista se despliega para ver todos. Toca uno para ver qué se necesita.'**
+  String get tutorialProfileAchDesc;
+
+  /// No description provided for @tutorialFriendsConnectTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Conecta con amigos'**
+  String get tutorialFriendsConnectTitle;
+
+  /// No description provided for @tutorialFriendsConnectDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca a tus amigos por nombre y envíales una solicitud. Así podréis ver los conciertos de los demás.'**
+  String get tutorialFriendsConnectDesc;
+
+  /// No description provided for @tutorialFriendsTabsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigos y solicitudes'**
+  String get tutorialFriendsTabsTitle;
+
+  /// No description provided for @tutorialFriendsTabsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'La primera pestaña muestra tus amigos actuales. La segunda gestiona las solicitudes pendientes que hayas recibido.'**
+  String get tutorialFriendsTabsDesc;
+
+  /// No description provided for @tutorialFriendsActivityTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividad de amigos'**
+  String get tutorialFriendsActivityTitle;
+
+  /// No description provided for @tutorialFriendsActivityDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando un amigo añada un concierto recibirás una notificación. También puedes ver su perfil y lista de conciertos.'**
+  String get tutorialFriendsActivityDesc;
+
+  /// No description provided for @tutorialFeedPhotosTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Recuerdos en fotos'**
+  String get tutorialFeedPhotosTitle;
+
+  /// No description provided for @tutorialFeedPhotosDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí aparecen las fotos de tus conciertos y de tus amigos. Un álbum compartido del mundo del directo.'**
+  String get tutorialFeedPhotosDesc;
+
+  /// No description provided for @tutorialFeedViewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuadrícula o línea de tiempo'**
+  String get tutorialFeedViewTitle;
+
+  /// No description provided for @tutorialFeedViewDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Alterna entre la cuadrícula y la vista cronológica con el icono de arriba. La vista cronológica agrupa las fotos por concierto.'**
+  String get tutorialFeedViewDesc;
+
+  /// No description provided for @tutorialRecsDiscoverTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Descubre nuevos conciertos'**
+  String get tutorialRecsDiscoverTitle;
+
+  /// No description provided for @tutorialRecsDiscoverDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Basándonos en los artistas que ya has visto, te sugerimos conciertos próximos. Filtra por país para afinar.'**
+  String get tutorialRecsDiscoverDesc;
+
+  /// No description provided for @tutorialRecsWantTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Quiero ir'**
+  String get tutorialRecsWantTitle;
+
+  /// No description provided for @tutorialRecsWantDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca el 🎟️ en cualquier evento para guardarlo en tu lista «Quiero ir». Lo encontrarás en la segunda pestaña.'**
+  String get tutorialRecsWantDesc;
+
+  /// No description provided for @tutorialImportSearchTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Importa desde Setlist.fm'**
+  String get tutorialImportSearchTitle;
+
+  /// No description provided for @tutorialImportSearchDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el nombre de un artista para ver todos sus conciertos pasados disponibles en Setlist.fm.'**
+  String get tutorialImportSearchDesc;
+
+  /// No description provided for @tutorialImportSelectTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona e importa'**
+  String get tutorialImportSelectTitle;
+
+  /// No description provided for @tutorialImportSelectDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Marca los conciertos a los que fuiste y pulsa Importar. La app buscará imagen y género automáticamente.'**
+  String get tutorialImportSelectDesc;
+
+  /// No description provided for @tutorialSettingsSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayuda'**
+  String get tutorialSettingsSection;
+
+  /// No description provided for @tutorialSettingsLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Guías de uso'**
+  String get tutorialSettingsLabel;
+
+  /// No description provided for @tutorialSettingsSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Repasa el tutorial de cualquier pantalla'**
+  String get tutorialSettingsSubtitle;
+
+  /// No description provided for @tutorialPickerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué quieres repasar?'**
+  String get tutorialPickerTitle;
+
+  /// No description provided for @tutorialPickerDashboard.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio'**
+  String get tutorialPickerDashboard;
+
+  /// No description provided for @tutorialPickerConcerts.
+  ///
+  /// In es, this message translates to:
+  /// **'Conciertos'**
+  String get tutorialPickerConcerts;
+
+  /// No description provided for @tutorialPickerAddConcert.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir concierto'**
+  String get tutorialPickerAddConcert;
+
+  /// No description provided for @tutorialPickerDetail.
+  ///
+  /// In es, this message translates to:
+  /// **'Detalle de concierto'**
+  String get tutorialPickerDetail;
+
+  /// No description provided for @tutorialPickerStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Estadísticas'**
+  String get tutorialPickerStats;
+
+  /// No description provided for @tutorialPickerProfile.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil'**
+  String get tutorialPickerProfile;
+
+  /// No description provided for @tutorialPickerFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Amigos'**
+  String get tutorialPickerFriends;
+
+  /// No description provided for @tutorialPickerFeed.
+  ///
+  /// In es, this message translates to:
+  /// **'Recuerdos'**
+  String get tutorialPickerFeed;
+
+  /// No description provided for @tutorialPickerRecs.
+  ///
+  /// In es, this message translates to:
+  /// **'Descubrir'**
+  String get tutorialPickerRecs;
+
+  /// No description provided for @tutorialPickerImport.
+  ///
+  /// In es, this message translates to:
+  /// **'Importar'**
+  String get tutorialPickerImport;
+
   /// No description provided for @splashTagline.
   ///
   /// In es, this message translates to:

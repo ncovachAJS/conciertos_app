@@ -894,6 +894,167 @@ class AppLocalizationsEn extends AppLocalizations {
       'In the Memories section you can add as many photos as you want from the concert. Multi-selection supported.';
 
   @override
+  String get tutorialConcertsTitle => 'Your concert collection';
+
+  @override
+  String get tutorialConcertsDesc =>
+      'Here are all the concerts you have logged. Use the search bar to filter by artist, city or festival.';
+
+  @override
+  String get tutorialConcertsViewTitle => 'Three ways to view them';
+
+  @override
+  String get tutorialConcertsViewDesc =>
+      'Switch between list, grid or calendar with the icons at the top right. Each view has its moment.';
+
+  @override
+  String get tutorialConcertsCalTitle => 'Calendar view';
+
+  @override
+  String get tutorialConcertsCalDesc =>
+      'In the calendar you can see your concerts by date and add a new one by tapping any day.';
+
+  @override
+  String get tutorialStatsOverviewTitle => 'Your musical history';
+
+  @override
+  String get tutorialStatsOverviewDesc =>
+      'A summary of all your activity: concerts, unique artists, festivals and cities you have visited.';
+
+  @override
+  String get tutorialStatsChartTitle => 'Evolution by year';
+
+  @override
+  String get tutorialStatsChartDesc =>
+      'The chart shows how many concerts you attended each year. Discover your most active periods.';
+
+  @override
+  String get tutorialStatsTopTitle => 'Your personal tops';
+
+  @override
+  String get tutorialStatsTopDesc =>
+      'Rankings of most visited artists, cities and festivals. Is there a clear winner?';
+
+  @override
+  String get tutorialProfileOverviewTitle => 'Your profile';
+
+  @override
+  String get tutorialProfileOverviewDesc =>
+      'Here you see your personal summary: concerts, photos, and access to settings. Tap your avatar to change it.';
+
+  @override
+  String get tutorialProfileAchTitle => 'Achievements and trophies';
+
+  @override
+  String get tutorialProfileAchDesc =>
+      'Earn achievements by attending concerts. The list expands to show all. Tap one to see what it takes.';
+
+  @override
+  String get tutorialFriendsConnectTitle => 'Connect with friends';
+
+  @override
+  String get tutorialFriendsConnectDesc =>
+      'Search for your friends by name and send them a request. That way you can see each other\'s concerts.';
+
+  @override
+  String get tutorialFriendsTabsTitle => 'Friends and requests';
+
+  @override
+  String get tutorialFriendsTabsDesc =>
+      'The first tab shows your current friends. The second manages pending requests you have received.';
+
+  @override
+  String get tutorialFriendsActivityTitle => 'Friends\' activity';
+
+  @override
+  String get tutorialFriendsActivityDesc =>
+      'When a friend adds a concert you will get a notification. You can also view their profile and concert list.';
+
+  @override
+  String get tutorialFeedPhotosTitle => 'Memories in photos';
+
+  @override
+  String get tutorialFeedPhotosDesc =>
+      'Here are the photos from your concerts and your friends\'. A shared album of the live music world.';
+
+  @override
+  String get tutorialFeedViewTitle => 'Grid or timeline';
+
+  @override
+  String get tutorialFeedViewDesc =>
+      'Toggle between the grid and the chronological view with the icon above. The timeline groups photos by concert.';
+
+  @override
+  String get tutorialRecsDiscoverTitle => 'Discover new concerts';
+
+  @override
+  String get tutorialRecsDiscoverDesc =>
+      'Based on the artists you have already seen, we suggest upcoming concerts. Filter by country to narrow it down.';
+
+  @override
+  String get tutorialRecsWantTitle => 'Want to go';
+
+  @override
+  String get tutorialRecsWantDesc =>
+      'Tap 🎟️ on any event to save it to your «Want to go» list. You will find it in the second tab.';
+
+  @override
+  String get tutorialImportSearchTitle => 'Import from Setlist.fm';
+
+  @override
+  String get tutorialImportSearchDesc =>
+      'Type an artist name to see all their past concerts available on Setlist.fm.';
+
+  @override
+  String get tutorialImportSelectTitle => 'Select and import';
+
+  @override
+  String get tutorialImportSelectDesc =>
+      'Check the concerts you attended and tap Import. The app will automatically find the image and genre.';
+
+  @override
+  String get tutorialSettingsSection => 'Help';
+
+  @override
+  String get tutorialSettingsLabel => 'Usage guides';
+
+  @override
+  String get tutorialSettingsSubtitle => 'Replay the tutorial for any screen';
+
+  @override
+  String get tutorialPickerTitle => 'What do you want to review?';
+
+  @override
+  String get tutorialPickerDashboard => 'Home';
+
+  @override
+  String get tutorialPickerConcerts => 'Concerts';
+
+  @override
+  String get tutorialPickerAddConcert => 'Add concert';
+
+  @override
+  String get tutorialPickerDetail => 'Concert detail';
+
+  @override
+  String get tutorialPickerStats => 'Statistics';
+
+  @override
+  String get tutorialPickerProfile => 'Profile';
+
+  @override
+  String get tutorialPickerFriends => 'Friends';
+
+  @override
+  String get tutorialPickerFeed => 'Memories';
+
+  @override
+  String get tutorialPickerRecs => 'Discover';
+
+  @override
+  String get tutorialPickerImport => 'Import';
+
+  @override
   String get splashTagline => 'Every concert tells a story.';
 
   @override

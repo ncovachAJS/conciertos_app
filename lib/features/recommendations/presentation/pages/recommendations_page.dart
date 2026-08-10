@@ -2,6 +2,10 @@ import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/tutorial/tutorial_content.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
+
 import '../../../../core/constants/countries.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../data/models/recommended_event_model.dart';
@@ -39,6 +43,20 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() => setState(() {}));
     _loadSaved();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _showTutorialIfNeeded(),
+    );
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.recs);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.recs);
+    if (!mounted) return;
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.recommendations(AppLocalizations.of(context)),
+    );
   }
 
   Future<void> _loadSaved() async {

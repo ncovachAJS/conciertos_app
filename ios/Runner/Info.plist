@@ -66,5 +66,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCalendarsUsageDescription</key>
+	<string>La Vida en Directo quiere añadir tus próximos conciertos al calendario del dispositivo.</string>
 </dict>
 </plist>

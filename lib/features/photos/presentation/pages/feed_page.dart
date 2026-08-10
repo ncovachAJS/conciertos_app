@@ -3,6 +3,10 @@ import 'package:collection/collection.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/tutorial/tutorial_content.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
+
 import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../data/models/concert_photo_model.dart';
@@ -35,6 +39,20 @@ class _FeedPageState extends State<FeedPage>
   void initState() {
     super.initState();
     _load();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _showTutorialIfNeeded(),
+    );
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.feed);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.feed);
+    if (!mounted) return;
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.feed(AppLocalizations.of(context)),
+    );
   }
 
   Future<void> _load() async {

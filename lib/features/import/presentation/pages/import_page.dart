@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/tutorial/tutorial_content.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
+
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
@@ -45,6 +49,20 @@ class _ImportPageState extends ConsumerState<ImportPage> {
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchTextChanged);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _showTutorialIfNeeded(),
+    );
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.import_);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.import_);
+    if (!mounted) return;
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.import_(AppLocalizations.of(context)),
+    );
   }
 
   void _onSearchTextChanged() {

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/tutorial/tutorial_content.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
 import '../../data/models/friend_model.dart';
 import '../controllers/friends_controller.dart';
 import '../widgets/friend_avatar.dart';
@@ -24,6 +27,20 @@ class _FriendsPageState extends State<FriendsPage>
     _tabs = TabController(length: 2, vsync: this);
     _ctrl.addListener(_rebuild);
     _ctrl.loadFriends();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _showTutorialIfNeeded(),
+    );
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.friends);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.friends);
+    if (!mounted) return;
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.friends(AppLocalizations.of(context)),
+    );
   }
 
   void _rebuild() {
