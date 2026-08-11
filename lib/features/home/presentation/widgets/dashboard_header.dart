@@ -177,13 +177,28 @@ class DashboardHeader extends ConsumerWidget {
 
             const SizedBox(height: 26),
 
-            Text(
-              '${_greeting(l)}, ${user?.name ?? l.defaultNickname} 🤘',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: cs.onSurface,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    '${_greeting(l)}, ${user?.name ?? l.defaultNickname} 🤘',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => context.push('/dashboard-edit'),
+                  child: Icon(
+                    Icons.tune_rounded,
+                    size: 20,
+                    color: cs.onSurface.withOpacity(0.35),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 6),

@@ -10,6 +10,9 @@ import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../ticketmaster/presentation/widgets/recommended_concerts.dart';
+import '../../data/dashboard_layout_service.dart';
+import '../../domain/dashboard_section.dart';
+import '../providers/dashboard_layout_provider.dart';
 import '../widgets/dashboard_annual_goal.dart';
 import '../widgets/dashboard_favorites.dart';
 import '../widgets/dashboard_header.dart';
@@ -41,7 +44,10 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     if (!should || !mounted) return;
     await TutorialService.markShown(TutorialService.dashboard);
     if (!mounted) return;
-    await TutorialOverlay.show(context, steps: TutorialContent.dashboard(AppLocalizations.of(context)));
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.dashboard(AppLocalizations.of(context)),
+    );
   }
 
   @override
@@ -56,19 +62,21 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
       ),
       data: (_) {
         final l = AppLocalizations.of(context);
-        // Lanzamos el tutorial una sola vez cuando los datos ya están disponibles
+
         if (!_tutorialTriggered) {
           _tutorialTriggered = true;
           Future.delayed(const Duration(milliseconds: 500), () {
             if (mounted) _showTutorialIfNeeded();
           });
         }
+
         final concerts = ref.watch(concertsProvider).asData?.value ?? [];
         final upcoming = ref.watch(upcomingConcertsProvider);
         final favorites = ref.watch(favoriteConcertsProvider);
         final recent = ref.watch(recentConcertsProvider);
         final stats = ref.watch(concertStatsProvider);
         final favoriteArtists = ref.watch(recommendedArtistsProvider);
+        final layout = ref.watch(dashboardLayoutProvider).asData?.value;
 
         // "En tal día como hoy" — día exacto primero, luego esta semana
         final now = DateTime.now();
@@ -77,27 +85,127 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         final onThisDay =
             concerts.where((c) {
               if (c.date.year >= now.year) return false;
-              final concertDay = DateTime(
-                c.date.year,
-                c.date.month,
-                c.date.day,
-              );
-              // Mismo día y mes (aniversario exacto)
-              if (c.date.day == now.day && c.date.month == now.month)
+              if (c.date.day == now.day && c.date.month == now.month) {
                 return true;
-              // Dentro de los últimos 3 días o próximos 3 días del año actual
-              final thisYearDate = DateTime(now.year, c.date.month, c.date.day);
-              final diff = thisYearDate.difference(todayMidnight).inDays.abs();
+              }
+              final thisYearDate =
+                  DateTime(now.year, c.date.month, c.date.day);
+              final diff =
+                  thisYearDate.difference(todayMidnight).inDays.abs();
               return diff <= 3;
             }).toList()..sort((a, b) {
-              // Aniversarios exactos primero, luego por cercanía
-              final aExact = a.date.day == now.day && a.date.month == now.month;
-              final bExact = b.date.day == now.day && b.date.month == now.month;
+              final aExact =
+                  a.date.day == now.day && a.date.month == now.month;
+              final bExact =
+                  b.date.day == now.day && b.date.month == now.month;
               if (aExact && !bExact) return -1;
               if (!aExact && bExact) return 1;
               return b.date.year.compareTo(a.date.year);
             });
 
+        // ── Builder por sección ──────────────────────────────────────────────
+        List<Widget> widgetsFor(DashboardSectionId id) {
+          return switch (id) {
+            DashboardSectionId.streak => concerts.isNotEmpty
+                ? [
+                    DashboardStreak(concerts: concerts),
+                    const SizedBox(height: 20),
+                  ]
+                : [],
+
+            DashboardSectionId.annualGoal => [
+                DashboardAnnualGoal(concerts: concerts),
+                const SizedBox(height: 20),
+              ],
+
+            DashboardSectionId.ratePending => [
+                const DashboardRatePending(),
+                const SizedBox(height: 28),
+              ],
+
+            DashboardSectionId.onThisDay => onThisDay.isNotEmpty
+                ? [
+                    DashboardSectionTitle(
+                      icon: Icons.cake_rounded,
+                      title: l.onThisDay,
+                    ),
+                    const SizedBox(height: 14),
+                    DashboardOnThisDay(concerts: onThisDay),
+                    const SizedBox(height: 36),
+                  ]
+                : [],
+
+            DashboardSectionId.upcoming => [
+                DashboardSectionTitle(
+                  icon: Icons.calendar_month_rounded,
+                  title: l.upcomingConcerts,
+                  action: 'Calendario',
+                  onAction: () =>
+                      context.go('/concerts?view=calendar'),
+                ),
+                const SizedBox(height: 24),
+                DashboardUpcomingConcerts(
+                  concerts: upcoming,
+                  onConcertChanged: (index) {
+                    if (index < upcoming.length) {
+                      _updateBackground(upcoming[index]);
+                    }
+                  },
+                ),
+                const SizedBox(height: 36),
+              ],
+
+            DashboardSectionId.stats => [
+                DashboardSectionTitle(
+                  icon: Icons.bar_chart,
+                  title: l.statisticsSection,
+                ),
+                const SizedBox(height: 18),
+                DashboardStats(stats: stats),
+                const SizedBox(height: 36),
+              ],
+
+            DashboardSectionId.recommended => [
+                DashboardSectionTitle(
+                  icon: Icons.local_fire_department,
+                  title: l.recommendedSection,
+                ),
+                const SizedBox(height: 18),
+                RecommendedConcerts(favoriteArtists: favoriteArtists),
+                const SizedBox(height: 36),
+              ],
+
+            DashboardSectionId.favorites => [
+                DashboardSectionTitle(
+                  icon: Icons.favorite,
+                  title: l.yourFavorites,
+                ),
+                const SizedBox(height: 18),
+                DashboardFavorites(concerts: favorites),
+                const SizedBox(height: 36),
+              ],
+
+            DashboardSectionId.recent => [
+                DashboardSectionTitle(
+                  icon: Icons.history,
+                  title: l.recentlyAdded,
+                ),
+                const SizedBox(height: 18),
+                DashboardRecentConcerts(concerts: recent),
+              ],
+          };
+        }
+
+        // Si el provider todavía no cargó, usamos el orden por defecto.
+        final sections = layout ??
+            DashboardLayoutService.defaults;
+
+        final sectionWidgets = sections
+            .where((s) => s.visible)
+            .expand((s) => widgetsFor(s.id))
+            .toList();
+
+        // ── Layout ───────────────────────────────────────────────────────────
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(4, 4, 4, 100),
           child: Column(
@@ -109,81 +217,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               const DashboardQuickActions(),
               const SizedBox(height: 20),
 
-              // ── Racha ────────────────────────────────────────────────────
-              DashboardStreak(concerts: concerts),
-              if (concerts.isNotEmpty) const SizedBox(height: 20),
-
-              // ── Meta anual ───────────────────────────────────────────────
-              DashboardAnnualGoal(concerts: concerts),
-              const SizedBox(height: 20),
-
-              // ── Valorar pendiente ─────────────────────────────────────────
-              const DashboardRatePending(),
-              const SizedBox(height: 28),
-
-              // ── En tal día como hoy ──────────────────────────────────────
-              if (onThisDay.isNotEmpty) ...[
-                DashboardSectionTitle(
-                  icon: Icons.cake_rounded,
-                  title: l.onThisDay,
-                ),
-                const SizedBox(height: 14),
-                DashboardOnThisDay(concerts: onThisDay),
-                const SizedBox(height: 36),
-              ],
-
-              // ── Próximos conciertos ──────────────────────────────────────
-              DashboardSectionTitle(
-                icon: Icons.calendar_month_rounded,
-                title: l.upcomingConcerts,
-                action: 'Calendario',
-                onAction: () => context.go('/concerts?view=calendar'),
-              ),
-              const SizedBox(height: 24),
-              DashboardUpcomingConcerts(
-                concerts: upcoming,
-                onConcertChanged: (index) {
-                  if (index < upcoming.length) {
-                    _updateBackground(upcoming[index]);
-                  }
-                },
-              ),
-              const SizedBox(height: 36),
-
-              // ── Estadísticas ─────────────────────────────────────────────
-              DashboardSectionTitle(
-                icon: Icons.bar_chart,
-                title: l.statisticsSection,
-              ),
-              const SizedBox(height: 18),
-              DashboardStats(stats: stats),
-              const SizedBox(height: 36),
-
-              // ── Recomendados ─────────────────────────────────────────────
-              DashboardSectionTitle(
-                icon: Icons.local_fire_department,
-                title: l.recommendedSection,
-              ),
-              const SizedBox(height: 18),
-              RecommendedConcerts(favoriteArtists: favoriteArtists),
-              const SizedBox(height: 36),
-
-              // ── Favoritos ────────────────────────────────────────────────
-              DashboardSectionTitle(
-                icon: Icons.favorite,
-                title: l.yourFavorites,
-              ),
-              const SizedBox(height: 18),
-              DashboardFavorites(concerts: favorites),
-              const SizedBox(height: 36),
-
-              // ── Últimos añadidos ─────────────────────────────────────────
-              DashboardSectionTitle(
-                icon: Icons.history,
-                title: l.recentlyAdded,
-              ),
-              const SizedBox(height: 18),
-              DashboardRecentConcerts(concerts: recent),
+              ...sectionWidgets,
             ],
           ),
         );

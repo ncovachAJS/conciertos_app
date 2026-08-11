@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../app/theme_pack_provider.dart';
 import '../../../../app/theme_provider.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -827,6 +828,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: _changeTheme,
           ),
+          const Divider(height: 1, indent: 56),
+          ListTile(
+            leading: const Icon(Icons.palette_outlined),
+            title: const Text('Paleta de color'),
+            subtitle: Text(
+              ref.watch(themePackProvider).name,
+              style: TextStyle(color: ref.watch(themePackProvider).previewPrimary),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (ref.watch(themePackProvider).isPro)
+                  const _ProBadge(),
+                const SizedBox(width: 4),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+            onTap: () => context.push('/color-theme'),
+          ),
 
           // ── Mis datos ─────────────────────────────────────────────────────
           const _SectionHeader(title: 'Mis datos'),
@@ -904,6 +924,29 @@ class _ThemeOption {
   final ThemeMode mode;
   final ThemeMode current;
   const _ThemeOption(this.icon, this.label, this.mode, this.current);
+}
+
+class _ProBadge extends StatelessWidget {
+  const _ProBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0xFF7C3AED).withValues(alpha: .12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: const Text(
+        'Pro',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF7C3AED),
+        ),
+      ),
+    );
+  }
 }
 
 class _SectionHeader extends StatelessWidget {

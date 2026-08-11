@@ -13,6 +13,9 @@ import '../features/add_concert/presentation/pages/add_concert_page.dart';
 import '../features/favorites/presentation/pages/favorites_page.dart';
 import '../features/profile/presentation/pages/settings_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
+import '../features/home/presentation/pages/dashboard_edit_page.dart';
+import '../features/settings/presentation/pages/color_theme_picker_page.dart';
+import '../features/statistics/presentation/pages/stats_edit_page.dart';
 import '../features/setlist/presentation/pages/setlist_test_page.dart';
 import '../features/import/presentation/pages/import_page.dart';
 import '../features/photos/presentation/pages/feed_page.dart';
@@ -138,6 +141,18 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfilePage(),
+        ),
+        GoRoute(
+          path: '/dashboard-edit',
+          builder: (context, state) => const DashboardEditPage(),
+        ),
+        GoRoute(
+          path: '/color-theme',
+          builder: (context, state) => const ColorThemePickerPage(),
+        ),
+        GoRoute(
+          path: '/stats-edit',
+          builder: (context, state) => const StatsEditPage(),
         ),
         GoRoute(
           path: '/concert-map',

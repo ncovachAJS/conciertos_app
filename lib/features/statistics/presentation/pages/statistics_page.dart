@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
@@ -7,7 +8,10 @@ import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
+import '../../data/stats_layout_service.dart';
 import '../../domain/concert_stats.dart';
+import '../../domain/stats_section.dart';
+import '../providers/stats_layout_provider.dart';
 
 // ---------------------------------------------------------------------------
 // Alias privado: _Stats → ConcertStatistics (ver statistics/domain/concert_stats.dart)
@@ -79,6 +83,13 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         title: Text(l.statisticsTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.tune_rounded),
+            tooltip: 'Personalizar',
+            onPressed: () => context.push('/stats-edit'),
+          ),
+        ],
       ),
       body: concertsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -199,161 +210,182 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
           }
 
           final stats = _Stats(past);
+          final layout = ref.watch(statsLayoutProvider).asData?.value ??
+              StatsLayoutService.defaults;
+
+          // Builder por sección — respeta condiciones de datos
+          List<Widget> widgetsFor(StatsSectionId id) {
+            return switch (id) {
+              StatsSectionId.summary => [
+                  _SummaryGrid(stats: stats),
+                  const SizedBox(height: 32),
+                ],
+              StatsSectionId.byYear => stats.byYear.length > 1
+                  ? [
+                      _SectionTitle(
+                        icon: Icons.calendar_month,
+                        title: l.concertsByYear,
+                      ),
+                      const SizedBox(height: 16),
+                      _YearBarChart(byYear: stats.byYear),
+                      const SizedBox(height: 32),
+                    ]
+                  : [],
+              StatsSectionId.byMonth => [
+                  _SectionTitle(
+                    icon: Icons.calendar_view_month_rounded,
+                    title: 'Conciertos por mes',
+                  ),
+                  const SizedBox(height: 16),
+                  _MonthBars(byMonth: stats.byMonth),
+                  const SizedBox(height: 32),
+                ],
+              StatsSectionId.byDayOfWeek => [
+                  _SectionTitle(
+                    icon: Icons.view_week_outlined,
+                    title: 'Día de la semana favorito',
+                  ),
+                  const SizedBox(height: 16),
+                  _WeekdayBars(byDow: stats.byDayOfWeek),
+                  const SizedBox(height: 32),
+                ],
+              StatsSectionId.topArtists => stats.topArtists.isNotEmpty
+                  ? [
+                      _SectionTitle(
+                          icon: Icons.person, title: l.topArtists),
+                      const SizedBox(height: 16),
+                      _HorizontalBars(
+                        entries: stats.topArtists,
+                        color: const Color(0xFFE53935),
+                      ),
+                      const SizedBox(height: 32),
+                    ]
+                  : [],
+              StatsSectionId.topGenres => stats.topGenres.isNotEmpty
+                  ? [
+                      _SectionTitle(
+                        icon: Icons.library_music_outlined,
+                        title: 'Géneros musicales',
+                      ),
+                      const SizedBox(height: 16),
+                      _HorizontalBars(
+                        entries: stats.topGenres,
+                        color: const Color(0xFFAB47BC),
+                      ),
+                      const SizedBox(height: 32),
+                    ]
+                  : [],
+              StatsSectionId.topFestivals => stats.topFestivals.isNotEmpty
+                  ? [
+                      _SectionTitle(
+                          icon: Icons.festival, title: l.topFestivals),
+                      const SizedBox(height: 16),
+                      _HorizontalBars(
+                        entries: stats.topFestivals,
+                        color: const Color(0xFF42A5F5),
+                      ),
+                      const SizedBox(height: 32),
+                    ]
+                  : [],
+              StatsSectionId.topCities => stats.topCities.isNotEmpty
+                  ? [
+                      _SectionTitle(
+                        icon: Icons.location_city,
+                        title: l.favoriteCities,
+                      ),
+                      const SizedBox(height: 16),
+                      _HorizontalBars(
+                        entries: stats.topCities,
+                        color: const Color(0xFF66BB6A),
+                      ),
+                      const SizedBox(height: 32),
+                    ]
+                  : [],
+              StatsSectionId.topVenues => stats.topVenues.isNotEmpty
+                  ? [
+                      _SectionTitle(
+                        icon: Icons.stadium_rounded,
+                        title: 'Recintos más visitados',
+                      ),
+                      const SizedBox(height: 16),
+                      _HorizontalBars(
+                        entries: stats.topVenues,
+                        color: const Color(0xFFFF7043),
+                      ),
+                      const SizedBox(height: 32),
+                    ]
+                  : [],
+              StatsSectionId.festivalSplit => [
+                  _SectionTitle(
+                    icon: Icons.compare_arrows_rounded,
+                    title: 'Festival vs. individual',
+                  ),
+                  const SizedBox(height: 16),
+                  _FestivalSplit(
+                    festival: stats.festivalCount,
+                    solo: stats.soloCount,
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              StatsSectionId.ratingDist => [
+                  _SectionTitle(
+                    icon: Icons.star_rounded,
+                    title: l.ratingDistribution,
+                  ),
+                  const SizedBox(height: 16),
+                  _RatingBars(byRating: stats.byRating),
+                  const SizedBox(height: 32),
+                ],
+              StatsSectionId.avgRatingByYear =>
+                stats.avgRatingByYear.length > 1
+                    ? [
+                        _SectionTitle(
+                          icon: Icons.trending_up_rounded,
+                          title: 'Valoración media por año',
+                        ),
+                        const SizedBox(height: 16),
+                        _AvgRatingByYear(data: stats.avgRatingByYear),
+                        const SizedBox(height: 32),
+                      ]
+                    : [],
+              StatsSectionId.topRatedArtists =>
+                stats.topRatedArtists.isNotEmpty
+                    ? [
+                        _SectionTitle(
+                          icon: Icons.emoji_events_rounded,
+                          title: 'Artistas mejor valorados',
+                        ),
+                        const SizedBox(height: 16),
+                        _TopRatedArtistsBars(
+                            entries: stats.topRatedArtists),
+                        const SizedBox(height: 32),
+                      ]
+                    : [],
+              StatsSectionId.priceStats => stats.concertsWithPrice > 0
+                  ? [
+                      _SectionTitle(
+                        icon: Icons.euro_rounded,
+                        title: 'Precio de las entradas',
+                      ),
+                      const SizedBox(height: 16),
+                      _PriceStats(stats: stats),
+                      const SizedBox(height: 32),
+                    ]
+                  : [],
+            };
+          }
+
+          final sectionWidgets = layout
+              .where((s) => s.visible)
+              .expand((s) => widgetsFor(s.id))
+              .toList();
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-            // Pre-renderizar secciones fuera de pantalla para evitar
-            // el flash gris en iOS al hacer scroll rápido.
             // ignore: deprecated_member_use
             cacheExtent: 5000,
             children: [
-              _SummaryGrid(stats: stats),
-              const SizedBox(height: 32),
-
-              if (stats.byYear.length > 1) ...[
-                _SectionTitle(
-                  icon: Icons.calendar_month,
-                  title: l.concertsByYear,
-                ),
-                const SizedBox(height: 16),
-                _YearBarChart(byYear: stats.byYear),
-                const SizedBox(height: 32),
-              ],
-
-              // ── Conciertos por mes ──────────────────────────────────────
-              _SectionTitle(
-                icon: Icons.calendar_view_month_rounded,
-                title: 'Conciertos por mes',
-              ),
-              const SizedBox(height: 16),
-              _MonthBars(byMonth: stats.byMonth),
-              const SizedBox(height: 32),
-
-              // ── Día de la semana ────────────────────────────────────────
-              _SectionTitle(
-                icon: Icons.view_week_outlined,
-                title: 'Día de la semana favorito',
-              ),
-              const SizedBox(height: 16),
-              _WeekdayBars(byDow: stats.byDayOfWeek),
-              const SizedBox(height: 32),
-
-              if (stats.topArtists.isNotEmpty) ...[
-                _SectionTitle(icon: Icons.person, title: l.topArtists),
-                const SizedBox(height: 16),
-                _HorizontalBars(
-                  entries: stats.topArtists,
-                  color: const Color(0xFFE53935),
-                ),
-                const SizedBox(height: 32),
-              ],
-
-              // ── Géneros ─────────────────────────────────────────────────
-              if (stats.topGenres.isNotEmpty) ...[
-                _SectionTitle(
-                  icon: Icons.library_music_outlined,
-                  title: 'Géneros musicales',
-                ),
-                const SizedBox(height: 16),
-                _HorizontalBars(
-                  entries: stats.topGenres,
-                  color: const Color(0xFFAB47BC),
-                ),
-                const SizedBox(height: 32),
-              ],
-
-              if (stats.topFestivals.isNotEmpty) ...[
-                _SectionTitle(
-                  icon: Icons.festival,
-                  title: l.topFestivals,
-                ),
-                const SizedBox(height: 16),
-                _HorizontalBars(
-                  entries: stats.topFestivals,
-                  color: const Color(0xFF42A5F5),
-                ),
-                const SizedBox(height: 32),
-              ],
-
-              if (stats.topCities.isNotEmpty) ...[
-                _SectionTitle(
-                  icon: Icons.location_city,
-                  title: l.favoriteCities,
-                ),
-                const SizedBox(height: 16),
-                _HorizontalBars(
-                  entries: stats.topCities,
-                  color: const Color(0xFF66BB6A),
-                ),
-                const SizedBox(height: 32),
-              ],
-
-              // ── Recintos más visitados ──────────────────────────────────
-              if (stats.topVenues.isNotEmpty) ...[
-                _SectionTitle(
-                  icon: Icons.stadium_rounded,
-                  title: 'Recintos más visitados',
-                ),
-                const SizedBox(height: 16),
-                _HorizontalBars(
-                  entries: stats.topVenues,
-                  color: const Color(0xFFFF7043),
-                ),
-                const SizedBox(height: 32),
-              ],
-
-              // ── Festival vs. individual ─────────────────────────────────
-              _SectionTitle(
-                icon: Icons.compare_arrows_rounded,
-                title: 'Festival vs. individual',
-              ),
-              const SizedBox(height: 16),
-              _FestivalSplit(
-                  festival: stats.festivalCount, solo: stats.soloCount),
-              const SizedBox(height: 32),
-
-              // ── Valoraciones ─────────────────────────────────────────────
-              _SectionTitle(
-                icon: Icons.star_rounded,
-                title: l.ratingDistribution,
-              ),
-              const SizedBox(height: 16),
-              _RatingBars(byRating: stats.byRating),
-              const SizedBox(height: 32),
-
-              // ── Valoración media por año ────────────────────────────────
-              if (stats.avgRatingByYear.length > 1) ...[
-                _SectionTitle(
-                  icon: Icons.trending_up_rounded,
-                  title: 'Valoración media por año',
-                ),
-                const SizedBox(height: 16),
-                _AvgRatingByYear(data: stats.avgRatingByYear),
-                const SizedBox(height: 32),
-              ],
-
-              // ── Artistas mejor valorados ────────────────────────────────
-              if (stats.topRatedArtists.isNotEmpty) ...[
-                _SectionTitle(
-                  icon: Icons.emoji_events_rounded,
-                  title: 'Artistas mejor valorados',
-                ),
-                const SizedBox(height: 16),
-                _TopRatedArtistsBars(entries: stats.topRatedArtists),
-                const SizedBox(height: 32),
-              ],
-
-              // ── Precio de las entradas ──────────────────────────────────
-              if (stats.concertsWithPrice > 0) ...[
-                _SectionTitle(
-                  icon: Icons.euro_rounded,
-                  title: 'Precio de las entradas',
-                ),
-                const SizedBox(height: 16),
-                _PriceStats(stats: stats),
-                const SizedBox(height: 32),
-              ],
-
+              ...sectionWidgets,
               const SizedBox(height: 8),
             ],
           );

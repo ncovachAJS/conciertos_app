@@ -13,6 +13,15 @@ import '../../core/config/pro_config.dart';
 class ProPaywallSheet {
   ProPaywallSheet._(); // coverage:ignore-line
 
+  /// Muestra el paywall directamente, sin comprobar límite.
+  static Future<void> showPaywall(BuildContext context) =>
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const _ProPaywallSheet(),
+      );
+
   /// Retorna `true` si se puede añadir el concierto, `false` si se mostró el paywall.
   static Future<bool> checkLimit(
     BuildContext context,

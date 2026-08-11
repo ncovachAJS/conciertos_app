@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/concerts/presentation/providers/concerts_provider.dart';
 import 'locale_provider.dart';
 import 'router.dart';
-import 'theme.dart';
+import 'theme_pack_provider.dart';
 import 'theme_provider.dart';
 
 import '../l10n/generated/app_localizations.dart';
@@ -41,13 +41,14 @@ class _ConcertsAppState extends ConsumerState<ConcertsApp>
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
+    final themePack = ref.watch(themePackProvider);
     final locale = ref.watch(localeProvider);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'La Vida en Directo',
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: themePack.light,
+      darkTheme: themePack.dark,
       themeMode: themeMode,
       locale: locale,
       localizationsDelegates: const [
