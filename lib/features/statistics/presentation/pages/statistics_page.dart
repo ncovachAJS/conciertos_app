@@ -169,6 +169,142 @@ class _Stats {
       ..sort((a, b) => b.value.compareTo(a.value));
     return sorted.take(take).toList();
   }
+
+  // ── Nuevas métricas ────────────────────────────────────────────────────────
+
+  /// Conciertos por mes (1-12), todos los años juntos.
+  Map<int, int> get byMonth {
+    final map = <int, int>{for (int i = 1; i <= 12; i++) i: 0};
+    for (final c in concerts) {
+      map[c.date.month] = (map[c.date.month] ?? 0) + 1;
+    }
+    return map;
+  }
+
+  /// Conciertos por día de la semana (1=lunes … 7=domingo).
+  Map<int, int> get byDayOfWeek {
+    final map = <int, int>{for (int i = 1; i <= 7; i++) i: 0};
+    for (final c in concerts) {
+      map[c.date.weekday] = (map[c.date.weekday] ?? 0) + 1;
+    }
+    return map;
+  }
+
+  /// Top géneros musicales.
+  List<MapEntry<String, int>> get topGenres => _top(
+        concerts.map((c) => c.genre.trim()).where((g) => g.isNotEmpty),
+        take: 8,
+      );
+
+  /// Top recintos.
+  List<MapEntry<String, int>> get topVenues => _top(
+        concerts.map((c) => c.venue.trim()).where((v) => v.isNotEmpty),
+      );
+
+  /// Número de conciertos en festival.
+  int get festivalCount =>
+      concerts.where((c) => c.festival.trim().isNotEmpty).length;
+
+  /// Número de conciertos individuales (sin festival).
+  int get soloCount =>
+      concerts.where((c) => c.festival.trim().isEmpty).length;
+
+  /// % de conciertos de artistas que ya se han visto antes.
+  double get repeatArtistPercent {
+    if (concerts.isEmpty) return 0;
+    final counts = <String, int>{};
+    for (final c in concerts) {
+      final a = c.artist.trim();
+      if (a.isNotEmpty) counts[a] = (counts[a] ?? 0) + 1;
+    }
+    final repeated = counts.values
+        .where((v) => v > 1)
+        .fold<int>(0, (s, v) => s + v);
+    return repeated / concerts.length * 100;
+  }
+
+  /// Precio medio de entrada (solo conciertos con precio > 0).
+  double get avgPrice {
+    final w = concerts.where((c) => c.price > 0).toList();
+    if (w.isEmpty) return 0;
+    return w.fold<double>(0, (s, c) => s + c.price) / w.length;
+  }
+
+  Concert? get mostExpensive {
+    final w = concerts.where((c) => c.price > 0).toList();
+    if (w.isEmpty) return null;
+    return w.reduce((a, b) => a.price > b.price ? a : b);
+  }
+
+  Concert? get cheapest {
+    final w = concerts.where((c) => c.price > 0).toList();
+    if (w.isEmpty) return null;
+    return w.reduce((a, b) => a.price < b.price ? a : b);
+  }
+
+  /// Valoración media por año (solo años con al menos 1 valoración).
+  Map<int, double> get avgRatingByYear {
+    final map = <int, List<int>>{};
+    for (final c in concerts.where((c) => c.rating > 0)) {
+      (map[c.date.year] ??= []).add(c.rating);
+    }
+    return map.map((y, r) =>
+        MapEntry(y, r.fold<int>(0, (s, v) => s + v) / r.length));
+  }
+
+  /// Artistas vistos >= 2 veces, ordenados por valoración media.
+  List<MapEntry<String, double>> get topRatedArtists {
+    final map = <String, List<int>>{};
+    for (final c in concerts.where(
+        (c) => c.rating > 0 && c.artist.trim().isNotEmpty)) {
+      (map[c.artist.trim()] ??= []).add(c.rating);
+    }
+    return (map.entries
+            .where((e) => e.value.length >= 2)
+            .map((e) => MapEntry(
+                  e.key,
+                  e.value.fold<int>(0, (s, r) => s + r) / e.value.length,
+                ))
+            .toList()
+          ..sort((a, b) => b.value.compareTo(a.value)))
+        .take(5)
+        .toList();
+  }
+
+  /// Racha más larga de meses consecutivos con al menos 1 concierto.
+  int get longestStreakMonths {
+    if (concerts.isEmpty) return 0;
+    final months = concerts
+        .map((c) => c.date.year * 12 + c.date.month)
+        .toSet()
+        .toList()
+      ..sort();
+    int maxS = 1, cur = 1;
+    for (int i = 1; i < months.length; i++) {
+      if (months[i] == months[i - 1] + 1) {
+        cur++;
+        if (cur > maxS) maxS = cur;
+      } else {
+        cur = 1;
+      }
+    }
+    return maxS;
+  }
+
+  /// Mayor hueco en días entre dos conciertos consecutivos.
+  int get longestGapDays {
+    if (concerts.length < 2) return 0;
+    final sorted = concerts
+        .map((c) => DateTime(c.date.year, c.date.month, c.date.day))
+        .toList()
+      ..sort();
+    int maxG = 0;
+    for (int i = 1; i < sorted.length; i++) {
+      final g = sorted[i].difference(sorted[i - 1]).inDays;
+      if (g > maxG) maxG = g;
+    }
+    return maxG;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -373,12 +509,44 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                 const SizedBox(height: 32),
               ],
 
+              // ── Conciertos por mes ──────────────────────────────────────
+              _SectionTitle(
+                icon: Icons.calendar_view_month_rounded,
+                title: 'Conciertos por mes',
+              ),
+              const SizedBox(height: 16),
+              _MonthBars(byMonth: stats.byMonth),
+              const SizedBox(height: 32),
+
+              // ── Día de la semana ────────────────────────────────────────
+              _SectionTitle(
+                icon: Icons.view_week_outlined,
+                title: 'Día de la semana favorito',
+              ),
+              const SizedBox(height: 16),
+              _WeekdayBars(byDow: stats.byDayOfWeek),
+              const SizedBox(height: 32),
+
               if (stats.topArtists.isNotEmpty) ...[
                 _SectionTitle(icon: Icons.person, title: l.topArtists),
                 const SizedBox(height: 16),
                 _HorizontalBars(
                   entries: stats.topArtists,
                   color: const Color(0xFFE53935),
+                ),
+                const SizedBox(height: 32),
+              ],
+
+              // ── Géneros ─────────────────────────────────────────────────
+              if (stats.topGenres.isNotEmpty) ...[
+                _SectionTitle(
+                  icon: Icons.library_music_outlined,
+                  title: 'Géneros musicales',
+                ),
+                const SizedBox(height: 16),
+                _HorizontalBars(
+                  entries: stats.topGenres,
+                  color: const Color(0xFFAB47BC),
                 ),
                 const SizedBox(height: 32),
               ],
@@ -409,13 +577,73 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                 const SizedBox(height: 32),
               ],
 
+              // ── Recintos más visitados ──────────────────────────────────
+              if (stats.topVenues.isNotEmpty) ...[
+                _SectionTitle(
+                  icon: Icons.stadium_rounded,
+                  title: 'Recintos más visitados',
+                ),
+                const SizedBox(height: 16),
+                _HorizontalBars(
+                  entries: stats.topVenues,
+                  color: const Color(0xFFFF7043),
+                ),
+                const SizedBox(height: 32),
+              ],
+
+              // ── Festival vs. individual ─────────────────────────────────
+              _SectionTitle(
+                icon: Icons.compare_arrows_rounded,
+                title: 'Festival vs. individual',
+              ),
+              const SizedBox(height: 16),
+              _FestivalSplit(
+                  festival: stats.festivalCount, solo: stats.soloCount),
+              const SizedBox(height: 32),
+
+              // ── Valoraciones ─────────────────────────────────────────────
               _SectionTitle(
                 icon: Icons.star_rounded,
                 title: l.ratingDistribution,
               ),
               const SizedBox(height: 16),
               _RatingBars(byRating: stats.byRating),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
+
+              // ── Valoración media por año ────────────────────────────────
+              if (stats.avgRatingByYear.length > 1) ...[
+                _SectionTitle(
+                  icon: Icons.trending_up_rounded,
+                  title: 'Valoración media por año',
+                ),
+                const SizedBox(height: 16),
+                _AvgRatingByYear(data: stats.avgRatingByYear),
+                const SizedBox(height: 32),
+              ],
+
+              // ── Artistas mejor valorados ────────────────────────────────
+              if (stats.topRatedArtists.isNotEmpty) ...[
+                _SectionTitle(
+                  icon: Icons.emoji_events_rounded,
+                  title: 'Artistas mejor valorados',
+                ),
+                const SizedBox(height: 16),
+                _TopRatedArtistsBars(entries: stats.topRatedArtists),
+                const SizedBox(height: 32),
+              ],
+
+              // ── Precio de las entradas ──────────────────────────────────
+              if (stats.concertsWithPrice > 0) ...[
+                _SectionTitle(
+                  icon: Icons.euro_rounded,
+                  title: 'Precio de las entradas',
+                ),
+                const SizedBox(height: 16),
+                _PriceStats(stats: stats),
+                const SizedBox(height: 32),
+              ],
+
+              const SizedBox(height: 8),
             ],
           );
         },
@@ -480,6 +708,26 @@ class _SummaryGrid extends StatelessWidget {
           Icons.euro_rounded,
           const Color(0xFF26A69A),
         ),
+      if (stats.longestStreakMonths > 1)
+        _CardData(
+          '${stats.longestStreakMonths} meses',
+          'Racha más larga',
+          Icons.local_fire_department_rounded,
+          const Color(0xFFFF7043),
+        ),
+      if (stats.longestGapDays > 0)
+        _CardData(
+          '${stats.longestGapDays} días',
+          'Mayor hueco',
+          Icons.hourglass_empty_rounded,
+          const Color(0xFF78909C),
+        ),
+      _CardData(
+        '${stats.repeatArtistPercent.toStringAsFixed(0)} %',
+        'Artistas repetidos',
+        Icons.replay_rounded,
+        const Color(0xFF8D6E63),
+      ),
     ];
 
     return LayoutBuilder(
@@ -596,15 +844,42 @@ class _SectionTitle extends StatelessWidget {
 // Gráfica de barras verticales por año
 // ---------------------------------------------------------------------------
 
-class _YearBarChart extends StatelessWidget {
+class _YearBarChart extends StatefulWidget {
   final Map<int, int> byYear;
 
   const _YearBarChart({required this.byYear});
 
   @override
+  State<_YearBarChart> createState() => _YearBarChartState();
+}
+
+class _YearBarChartState extends State<_YearBarChart> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Después del primer frame, salta al final (años más recientes)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final byYear = widget.byYear;
     final maxVal = byYear.values.reduce((a, b) => a > b ? a : b);
-    final entries = byYear.entries.toList();
+    // Orden cronológico: los más antiguos a la izquierda, los recientes a la derecha
+    final entries = byYear.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
 
     // Ancho fijo por barra para que haya espacio aunque haya muchos años
     const barWidth = 36.0;
@@ -625,6 +900,7 @@ class _YearBarChart extends StatelessWidget {
         ],
       ),
       child: SingleChildScrollView(
+        controller: _scrollController,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SizedBox(
@@ -790,6 +1066,613 @@ class _HorizontalBars extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Barras por mes (enero–diciembre, siempre 12)
+// ---------------------------------------------------------------------------
+
+class _MonthBars extends StatelessWidget {
+  final Map<int, int> byMonth;
+  const _MonthBars({required this.byMonth});
+
+  static const _labels = ['E','F','M','A','M','J','J','A','S','O','N','D'];
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final maxVal = byMonth.values.isEmpty
+        ? 1
+        : byMonth.values.reduce((a, b) => a > b ? a : b).clamp(1, 999);
+    const gap = 6.0;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 110,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for (int m = 1; m <= 12; m++) ...[
+                  if (m > 1) const SizedBox(width: gap),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if ((byMonth[m] ?? 0) > 0)
+                          Text(
+                            '${byMonth[m]}',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFFE53935),
+                            ),
+                          ),
+                        const SizedBox(height: 3),
+                        Container(
+                          height: maxVal > 0
+                              ? ((byMonth[m] ?? 0) / maxVal * 80).clamp(3, 80)
+                              : 3,
+                          decoration: BoxDecoration(
+                            color: (byMonth[m] ?? 0) > 0
+                                ? const Color(0xFFE53935)
+                                : cs.onSurface.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (int m = 1; m <= 12; m++) ...[
+                if (m > 1) const SizedBox(width: gap),
+                Expanded(
+                  child: Text(
+                    _labels[m - 1],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: cs.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Barras por día de la semana
+// ---------------------------------------------------------------------------
+
+class _WeekdayBars extends StatelessWidget {
+  final Map<int, int> byDow;
+  const _WeekdayBars({required this.byDow});
+
+  static const _labels = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  static const _weekend = {6, 7};
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final maxVal =
+        byDow.values.isEmpty ? 1 : byDow.values.reduce((a, b) => a > b ? a : b).clamp(1, 999);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 100,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for (int d = 1; d <= 7; d++) ...[
+                  if (d > 1) const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if ((byDow[d] ?? 0) > 0)
+                          Text(
+                            '${byDow[d]}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF42A5F5),
+                            ),
+                          ),
+                        const SizedBox(height: 3),
+                        Container(
+                          height: maxVal > 0
+                              ? ((byDow[d] ?? 0) / maxVal * 72).clamp(3, 72)
+                              : 3,
+                          decoration: BoxDecoration(
+                            color: _weekend.contains(d)
+                                ? const Color(0xFFE53935)
+                                : (byDow[d] ?? 0) > 0
+                                    ? const Color(0xFF42A5F5)
+                                    : cs.onSurface.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (int d = 1; d <= 7; d++) ...[
+                if (d > 1) const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _labels[d - 1],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: _weekend.contains(d)
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: _weekend.contains(d)
+                          ? const Color(0xFFE53935)
+                          : cs.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Festival vs. individual
+// ---------------------------------------------------------------------------
+
+class _FestivalSplit extends StatelessWidget {
+  final int festival;
+  final int solo;
+  const _FestivalSplit({required this.festival, required this.solo});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final total = festival + solo;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _SplitTile(
+                icon: Icons.festival_rounded,
+                label: 'Festivales',
+                count: festival,
+                color: const Color(0xFF42A5F5),
+              ),
+              const SizedBox(width: 16),
+              _SplitTile(
+                icon: Icons.music_note_rounded,
+                label: 'Individuales',
+                count: solo,
+                color: const Color(0xFFE53935),
+              ),
+            ],
+          ),
+          if (total > 0) ...[
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Row(
+                children: [
+                  Flexible(
+                    flex: festival,
+                    child: Container(height: 8, color: const Color(0xFF42A5F5)),
+                  ),
+                  Flexible(
+                    flex: solo,
+                    child: Container(height: 8, color: const Color(0xFFE53935)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SplitTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final int count;
+  final Color color;
+  const _SplitTile(
+      {required this.icon,
+      required this.label,
+      required this.count,
+      required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 8),
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                color: color,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: cs.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Valoración media por año
+// ---------------------------------------------------------------------------
+
+class _AvgRatingByYear extends StatefulWidget {
+  final Map<int, double> data;
+  const _AvgRatingByYear({required this.data});
+
+  @override
+  State<_AvgRatingByYear> createState() => _AvgRatingByYearState();
+}
+
+class _AvgRatingByYearState extends State<_AvgRatingByYear> {
+  final _sc = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_sc.hasClients) _sc.jumpTo(_sc.position.maxScrollExtent);
+    });
+  }
+
+  @override
+  void dispose() {
+    _sc.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final entries = widget.data.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    const barW = 36.0, gap = 10.0;
+    final totalW = entries.length * (barW + gap);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(0, 20, 0, 16),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: SingleChildScrollView(
+        controller: _sc,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SizedBox(
+          width: totalW,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 120,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    for (int i = 0; i < entries.length; i++) ...[
+                      if (i > 0) const SizedBox(width: gap),
+                      SizedBox(
+                        width: barW,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              entries[i].value.toStringAsFixed(1),
+                              style: const TextStyle(
+                                color: Color(0xFFFFC107),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              height: (entries[i].value / 5 * 80).clamp(4, 80),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFC107),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  for (int i = 0; i < entries.length; i++) ...[
+                    if (i > 0) const SizedBox(width: gap),
+                    SizedBox(
+                      width: barW,
+                      child: Text(
+                        '${entries[i].key}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: cs.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Artistas mejor valorados (vistos >= 2 veces)
+// ---------------------------------------------------------------------------
+
+class _TopRatedArtistsBars extends StatelessWidget {
+  final List<MapEntry<String, double>> entries;
+  const _TopRatedArtistsBars({required this.entries});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        children: [
+          for (int i = 0; i < entries.length; i++) ...[
+            if (i > 0) const SizedBox(height: 14),
+            Row(
+              children: [
+                SizedBox(
+                  width: 110,
+                  child: Text(
+                    entries[i].key,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (_, c) => Stack(children: [
+                      Container(
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: cs.onSurface.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      Container(
+                        height: 8,
+                        width: c.maxWidth * (entries[i].value / 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFC107),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ]),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Row(
+                  children: List.generate(
+                    5,
+                    (s) => Icon(
+                      s < entries[i].value.round()
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      size: 12,
+                      color: s < entries[i].value.round()
+                          ? const Color(0xFFFFC107)
+                          : cs.onSurface.withValues(alpha: 0.2),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Precio de las entradas
+// ---------------------------------------------------------------------------
+
+class _PriceStats extends StatelessWidget {
+  final _Stats stats;
+  const _PriceStats({required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final expensive = stats.mostExpensive;
+    final cheap     = stats.cheapest;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _PriceTile(
+                label: 'Precio medio',
+                value: '${stats.avgPrice.toStringAsFixed(0)} €',
+                icon: Icons.euro_rounded,
+                color: const Color(0xFF26A69A),
+              ),
+              const SizedBox(width: 12),
+              _PriceTile(
+                label: 'Más cara',
+                value: expensive != null
+                    ? '${expensive.price.toStringAsFixed(0)} €'
+                    : '—',
+                sub: expensive?.artist,
+                icon: Icons.arrow_upward_rounded,
+                color: const Color(0xFFEF5350),
+              ),
+              const SizedBox(width: 12),
+              _PriceTile(
+                label: 'Más barata',
+                value: cheap != null
+                    ? '${cheap.price.toStringAsFixed(0)} €'
+                    : '—',
+                sub: cheap?.artist,
+                icon: Icons.arrow_downward_rounded,
+                color: const Color(0xFF66BB6A),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PriceTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final String? sub;
+  final IconData icon;
+  final Color color;
+  const _PriceTile(
+      {required this.label,
+      required this.value,
+      this.sub,
+      required this.icon,
+      required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 10,
+                color: cs.onSurface.withValues(alpha: 0.55),
+              ),
+            ),
+            if (sub != null && sub!.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(
+                sub!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 9,
+                  color: cs.onSurface.withValues(alpha: 0.4),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

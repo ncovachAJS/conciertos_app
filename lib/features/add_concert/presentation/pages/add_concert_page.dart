@@ -37,6 +37,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   final _artistController = TextEditingController();
   final _festivalController = TextEditingController();
   final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
   final _venueController = TextEditingController();
   final _cityController = TextEditingController();
   final _nameController = TextEditingController();
@@ -52,6 +53,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   final UploadService _uploadService = UploadService();
 
   DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
   File? _selectedImage;
   String? _imageUrl;
 
@@ -108,6 +110,14 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       _selectedDate = widget.concert!.date;
       _dateController.text =
           '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
+      if (widget.concert!.date.hour != 0 || widget.concert!.date.minute != 0) {
+        _selectedTime = TimeOfDay(
+          hour: widget.concert!.date.hour,
+          minute: widget.concert!.date.minute,
+        );
+        _timeController.text =
+            '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
+      }
       if (widget.concert!.imageUrl.isNotEmpty) {
         _imageUrl = widget.concert!.imageUrl;
       }
@@ -180,6 +190,23 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     });
   }
 
+  Future<void> _selectTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? const TimeOfDay(hour: 20, minute: 0),
+      builder: (ctx, child) => MediaQuery(
+        data: MediaQuery.of(ctx).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
+    );
+    if (picked == null) return;
+    setState(() {
+      _selectedTime = picked;
+      _timeController.text =
+          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+    });
+  }
+
   Future<void> _pickImage() async {
     final image = await _picker.pickImage(
       source: ImageSource.gallery,
@@ -215,12 +242,19 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     final l = AppLocalizations.of(context);
 
     try {
+      // Combinar fecha + hora (si se eligió una)
+      final baseDate = _selectedDate!;
+      final concertDate = _selectedTime != null
+          ? DateTime(baseDate.year, baseDate.month, baseDate.day,
+              _selectedTime!.hour, _selectedTime!.minute)
+          : DateTime(baseDate.year, baseDate.month, baseDate.day);
+
       final concert = ConcertModel(
         id: widget.concert?.id ?? '',
         artist: _artistController.text.trim(),
         festival: _festivalController.text.trim(),
         name: _nameController.text.trim(),
-        date: _selectedDate!,
+        date: concertDate,
         imageUrl: _imageUrl ?? '',
         rating: _rating,
         liked: _liked,
@@ -268,6 +302,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     _artistController.dispose();
     _festivalController.dispose();
     _dateController.dispose();
+    _timeController.dispose();
     _venueController.dispose();
     _cityController.dispose();
     _nameController.dispose();
@@ -399,22 +434,54 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
               const SizedBox(height: 16),
 
-              TextFormField(
-                controller: _dateController,
-                readOnly: true,
-                onTap: _selectDate,
-                decoration: InputDecoration(
-                  labelText: l.dateLabel,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.calendar_month),
-                  suffixIcon: const Icon(Icons.arrow_drop_down),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return l.dateRequired;
-                  }
-                  return null;
-                },
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: TextFormField(
+                      controller: _dateController,
+                      readOnly: true,
+                      onTap: _selectDate,
+                      decoration: InputDecoration(
+                        labelText: l.dateLabel,
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.calendar_month),
+                        suffixIcon: const Icon(Icons.arrow_drop_down),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return l.dateRequired;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _timeController,
+                      readOnly: true,
+                      onTap: _selectTime,
+                      decoration: InputDecoration(
+                        labelText: 'Hora',
+                        hintText: 'Opcional',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.access_time_rounded),
+                        suffixIcon: _selectedTime != null
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () => setState(() {
+                                  _selectedTime = null;
+                                  _timeController.clear();
+                                }),
+                              )
+                            : const Icon(Icons.arrow_drop_down),
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 24),

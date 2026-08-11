@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../core/utils/date_formatter.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
 class DashboardNextConcert extends StatelessWidget {
@@ -152,6 +153,17 @@ class DashboardNextConcert extends StatelessWidget {
                         fontSize: 11,
                       ),
                     ),
+                    if (DateFormatter.hasTime(concert.date)) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormatter.time(concert.date)!,
+                        style: const TextStyle(
+                          color: Color(0xFFE53935),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

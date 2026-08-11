@@ -302,7 +302,11 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                 ListTile(
                   leading: const Icon(Icons.calendar_today),
                   title: Text(l.dateLabel),
-                  subtitle: Text(DateFormatter.short(concert.date)),
+                  subtitle: Text(
+                    DateFormatter.hasTime(concert.date)
+                        ? '${DateFormatter.short(concert.date)}  ·  ${DateFormatter.time(concert.date)}'
+                        : DateFormatter.short(concert.date),
+                  ),
                 ),
                 const Divider(height: 1),
                 ListTile(

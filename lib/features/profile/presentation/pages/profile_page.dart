@@ -9,6 +9,7 @@ import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
+import '../../data/services/user_api_service.dart';
 import '../../../concerts/data/services/upload_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -34,6 +35,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   final PhotoApiService _photosApi = PhotoApiService();
   final UploadService _uploadService = UploadService();
   final AvatarApiService _avatarService = AvatarApiService();
+  final UserApiService _userService = UserApiService();
   final AuthController auth = AuthController.instance;
 
   List<Concert> concerts = [];
@@ -234,6 +236,73 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return 'Fan desde $oldestYear';
   }
 
+  Future<void> _deleteAccount() async {
+    final passwordCtrl = TextEditingController();
+
+    // Paso 1 — advertencia
+    final step1 = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('⚠️ Eliminar cuenta'),
+        content: const Text(
+          'Esta acción es irreversible. Se borrarán todos tus conciertos, '
+          'fotos, amigos y datos de la cuenta.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Continuar'),
+          ),
+        ],
+      ),
+    );
+    if (step1 != true || !mounted) return;
+
+    // Paso 2 — confirmar con contraseña
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirma tu contraseña'),
+        content: TextField(
+          controller: passwordCtrl,
+          obscureText: true,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Contraseña actual'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Eliminar cuenta'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+
+    try {
+      await _userService.deleteAccount(currentPassword: passwordCtrl.text);
+      if (!mounted) return;
+      await auth.logout();
+      if (!mounted) return;
+      context.go('/login');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
   @override
   void dispose() {
     auth.removeListener(_refresh);
@@ -363,6 +432,24 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   'La Vida en Directo\nVersión 1.0',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey.shade500),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: TextButton.icon(
+                  onPressed: _deleteAccount,
+                  icon: const Icon(
+                    Icons.delete_forever_outlined,
+                    size: 16,
+                    color: Colors.redAccent,
+                  ),
+                  label: const Text(
+                    'Eliminar cuenta',
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
               ),
             ],

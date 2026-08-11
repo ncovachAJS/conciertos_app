@@ -20,7 +20,7 @@ import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../data/services/user_api_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Claves de SharedPreferences para preferencias de notificaciones
+// Claves de SharedPreferences
 // ─────────────────────────────────────────────────────────────────────────────
 const _kNotifFriends = 'notif_friend_activity';
 const _kNotifRecs    = 'notif_recommendations';
@@ -40,10 +40,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _notifFriends = true;
   bool _notifRecs    = true;
 
+  // Meta anual de conciertos
+  int? _annualGoal;
+
+  String get _goalPrefKey {
+    final userId = AuthController.instance.user?.id ?? 'guest';
+    return 'annual_concert_goal_$userId';
+  }
+
   @override
   void initState() {
     super.initState();
     _loadNotifPrefs();
+    _loadAnnualGoal();
   }
 
   Future<void> _loadNotifPrefs() async {
@@ -53,6 +62,88 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       _notifFriends = prefs.getBool(_kNotifFriends) ?? true;
       _notifRecs    = prefs.getBool(_kNotifRecs)    ?? true;
     });
+  }
+
+  Future<void> _loadAnnualGoal() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() => _annualGoal = prefs.getInt(_goalPrefKey));
+  }
+
+  Future<void> _editAnnualGoal() async {
+    final current = _annualGoal;
+    final controller = TextEditingController(
+      text: current != null ? '$current' : '',
+    );
+
+    final result = await showDialog<int?>(
+      context: context,
+      builder: (ctx) {
+        int? parsed = current;
+        return StatefulBuilder(
+          builder: (ctx2, setS) => AlertDialog(
+            title: const Text('Meta anual de conciertos'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '¿Cuántos conciertos quieres ver este año?',
+                  style: TextStyle(fontSize: 13),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Número de conciertos',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.flag_rounded,
+                        color: Color(0xFFE53935)),
+                  ),
+                  onChanged: (v) {
+                    setS(() => parsed = int.tryParse(v));
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              if (current != null)
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, -1), // señal borrar
+                  child: const Text(
+                    'Quitar meta',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, null),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: parsed != null && parsed! > 0
+                    ? () => Navigator.pop(ctx, parsed)
+                    : null,
+                child: const Text('Guardar'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (result == null) return; // cancelado
+
+    final prefs = await SharedPreferences.getInstance();
+    if (result == -1) {
+      // borrar meta
+      await prefs.remove(_goalPrefKey);
+      if (mounted) setState(() => _annualGoal = null);
+    } else {
+      await prefs.setInt(_goalPrefKey, result);
+      if (mounted) setState(() => _annualGoal = result);
+    }
   }
 
   Future<void> _setNotifPref(String key, bool value) async {
@@ -236,8 +327,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _deleteAccount() async {
-    final passwordCtrl    = TextEditingController();
-    final confirmCtrl     = TextEditingController();
+    final passwordCtrl = TextEditingController();
 
     // Paso 1 — advertencia
     final step1 = await showDialog<bool>(
@@ -246,8 +336,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         title: const Text('⚠️ Eliminar cuenta'),
         content: const Text(
           'Esta acción es irreversible. Se borrarán todos tus conciertos, '
-          'fotos, amigos y datos de la cuenta.\n\n'
-          'Escribe ELIMINAR en el siguiente campo para confirmar.',
+          'fotos, amigos y datos de la cuenta.',
         ),
         actions: [
           TextButton(
@@ -265,28 +354,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
     if (step1 != true || !mounted) return;
 
-    // Paso 2 — confirmar con texto + contraseña
+    // Paso 2 — confirmar con contraseña
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirmación final'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Escribe ELIMINAR para confirmar:'),
-            const SizedBox(height: 8),
-            TextField(
-              controller: confirmCtrl,
-              decoration: const InputDecoration(hintText: 'ELIMINAR'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordCtrl,
-              obscureText: true,
-              decoration:
-                  const InputDecoration(labelText: 'Contraseña actual'),
-            ),
-          ],
+        title: const Text('Confirma tu contraseña'),
+        content: TextField(
+          controller: passwordCtrl,
+          obscureText: true,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Contraseña actual'),
         ),
         actions: [
           TextButton(
@@ -296,16 +373,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           FilledButton(
             style: FilledButton.styleFrom(
                 backgroundColor: Colors.red.shade700),
-            onPressed: () {
-              if (confirmCtrl.text.trim() != 'ELIMINAR') {
-                ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(
-                      content: Text('Debes escribir ELIMINAR exactamente')),
-                );
-                return;
-              }
-              Navigator.pop(ctx, true);
-            },
+            onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Eliminar cuenta'),
           ),
         ],
@@ -762,6 +830,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
           // ── Mis datos ─────────────────────────────────────────────────────
           const _SectionHeader(title: 'Mis datos'),
+          ListTile(
+            leading: const Icon(Icons.flag_rounded, color: Color(0xFFE53935)),
+            title: const Text('Meta anual de conciertos'),
+            subtitle: Text(
+              _annualGoal != null
+                  ? 'Este año: $_annualGoal conciertos'
+                  : 'Sin meta configurada',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _editAnnualGoal,
+          ),
+          const Divider(height: 1, indent: 56),
           ListTile(
             leading: const Icon(Icons.download_rounded,
                 color: Color(0xFF43A047)),

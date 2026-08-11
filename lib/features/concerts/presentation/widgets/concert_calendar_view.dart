@@ -23,6 +23,7 @@ class ConcertCalendarView extends StatefulWidget {
 
 class _ConcertCalendarViewState extends State<ConcertCalendarView> {
   late DateTime _focus;
+  bool _goingForward = true; // para la dirección del slide
 
   static const _weekdays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
   static const _months = [
@@ -51,12 +52,19 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
     return _focus.year == now.year && _focus.month == now.month;
   }
 
-  void _prevMonth() =>
-      setState(() => _focus = DateTime(_focus.year, _focus.month - 1));
-  void _nextMonth() =>
-      setState(() => _focus = DateTime(_focus.year, _focus.month + 1));
-  void _goToToday() =>
-      setState(() => _focus = DateTime(DateTime.now().year, DateTime.now().month));
+  void _prevMonth() => setState(() {
+    _goingForward = false;
+    _focus = DateTime(_focus.year, _focus.month - 1);
+  });
+  void _nextMonth() => setState(() {
+    _goingForward = true;
+    _focus = DateTime(_focus.year, _focus.month + 1);
+  });
+  void _goToToday() => setState(() {
+    final now = DateTime.now();
+    _goingForward = _focus.isBefore(now);
+    _focus = DateTime(now.year, now.month);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -154,40 +162,68 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
 
         // ── Grid de días (scrollable, celdas de altura fija) ─────────
         Expanded(
-          child: SingleChildScrollView(
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                mainAxisSpacing: 5,
-                crossAxisSpacing: 5,
-                childAspectRatio: 0.78, // celdas ligeramente más altas que anchas
-              ),
-              itemCount: rows * 7,
-              itemBuilder: (_, index) {
-                final dayNum = index - startOffset + 1;
-                if (dayNum < 1 || dayNum > daysInMonth) {
-                  return const SizedBox.shrink();
-                }
-                final concerts = byDay[dayNum] ?? [];
-                final isToday = _focus.year == today.year &&
-                    _focus.month == today.month &&
-                    today.day == dayNum;
-
-                final date = DateTime(_focus.year, _focus.month, dayNum);
-                return _DayCell(
-                  day: dayNum,
-                  concerts: concerts,
-                  isToday: isToday,
-                  canAdd: widget.onAddConcert != null,
-                  onTap: concerts.isNotEmpty
-                      ? () => _showDaySheet(context, dayNum, concerts, date)
-                      : widget.onAddConcert != null
-                          ? () => widget.onAddConcert!(date)
-                          : null,
+          child: GestureDetector(
+            onHorizontalDragEnd: (details) {
+              final v = details.primaryVelocity ?? 0;
+              if (v < -200) _nextMonth();
+              if (v >  200) _prevMonth();
+            },
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 260),
+              transitionBuilder: (child, animation) {
+                // Slide + fade: entra desde la derecha al avanzar, desde la izquierda al retroceder
+                final begin = _goingForward
+                    ? const Offset(1.0, 0)
+                    : const Offset(-1.0, 0);
+                final slide = Tween<Offset>(
+                  begin: begin,
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                ));
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(position: slide, child: child),
                 );
               },
+              child: SingleChildScrollView(
+                key: ValueKey(_focus),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisSpacing: 5,
+                    crossAxisSpacing: 5,
+                    childAspectRatio: 0.78,
+                  ),
+                  itemCount: rows * 7,
+                  itemBuilder: (_, index) {
+                    final dayNum = index - startOffset + 1;
+                    if (dayNum < 1 || dayNum > daysInMonth) {
+                      return const SizedBox.shrink();
+                    }
+                    final concerts = byDay[dayNum] ?? [];
+                    final isToday = _focus.year == today.year &&
+                        _focus.month == today.month &&
+                        today.day == dayNum;
+
+                    final date = DateTime(_focus.year, _focus.month, dayNum);
+                    return _DayCell(
+                      day: dayNum,
+                      concerts: concerts,
+                      isToday: isToday,
+                      canAdd: widget.onAddConcert != null,
+                      onTap: concerts.isNotEmpty
+                          ? () => _showDaySheet(context, dayNum, concerts, date)
+                          : widget.onAddConcert != null
+                              ? () => widget.onAddConcert!(date)
+                              : null,
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -534,8 +570,27 @@ class _SheetRow extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
+                    if (concert.date.hour != 0 || concert.date.minute != 0) ...[
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          Icon(Icons.access_time_rounded,
+                              size: 11,
+                              color: cs.onSurface.withValues(alpha: 0.45)),
+                          const SizedBox(width: 3),
+                          Text(
+                            '${concert.date.hour.toString().padLeft(2, '0')}:${concert.date.minute.toString().padLeft(2, '0')}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFFE53935).withValues(alpha: 0.85),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     if (concert.venue.isNotEmpty || concert.city.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         [concert.venue, concert.city]
                             .where((s) => s.isNotEmpty)
