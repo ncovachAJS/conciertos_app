@@ -1,5 +1,5 @@
 class DateFormatter {
-  DateFormatter._();
+  DateFormatter._(); // coverage:ignore-line
 
   static String short(DateTime date) {
     final day   = date.day.toString().padLeft(2, '0');
