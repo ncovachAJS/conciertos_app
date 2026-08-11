@@ -20,10 +20,16 @@ class SpotifyImportPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             _SpotifyLogo(size: 22),
             const SizedBox(width: 8),
-            const Text('Importar desde Spotify'),
+            const Flexible(
+              child: Text(
+                'Importar desde Spotify',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         centerTitle: false,
