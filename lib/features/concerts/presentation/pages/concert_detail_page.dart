@@ -25,7 +25,7 @@ import '../widgets/venue_map_card.dart';
 import '../../../setlist/data/services/setlist_service.dart';
 import '../../../setlist/domain/entities/setlist.dart';
 import '../../../setlist/presentation/widgets/setlist_section.dart';
-import '../../../spotify/domain/entities/data/services/spotify_api_service.dart';
+import '../../../spotify/data/services/spotify_search_service.dart';
 import '../../../spotify/domain/entities/spotify_artist.dart';
 import '../../domain/entities/concert.dart';
 
@@ -40,7 +40,7 @@ class ConcertDetailPage extends ConsumerStatefulWidget {
 
 class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
   final SetlistService _setlistService = SetlistService();
-  final SpotifyApiService _spotifyService = SpotifyApiService();
+  final SpotifySearchService _spotifyService = SpotifySearchService();
 
   Setlist? _setlist;
   SpotifyArtist? _spotifyArtist;

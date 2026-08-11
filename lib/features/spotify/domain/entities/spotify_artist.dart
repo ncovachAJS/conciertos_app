@@ -1,3 +1,5 @@
+/// Modelo de artista devuelto por el backend propio (proxy de la API de Spotify).
+/// Se usa para mostrar información de Spotify en la pantalla de detalle de concierto.
 class SpotifyArtist {
   final String id;
   final String name;
@@ -22,8 +24,7 @@ class SpotifyArtist {
       url: json['url']?.toString() ?? '',
       image: json['image']?.toString(),
       followers: json['followers'] as int? ?? 0,
-      genres:
-          (json['genres'] as List<dynamic>?)
+      genres: (json['genres'] as List<dynamic>?)
               ?.map((g) => g.toString())
               .toList() ??
           [],

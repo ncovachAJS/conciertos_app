@@ -25,6 +25,7 @@ import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/register_page.dart';
 import '../features/auth/presentation/pages/session_gate_page.dart';
 import '../features/statistics/presentation/pages/statistics_page.dart';
+import '../features/spotify/presentation/pages/spotify_import_page.dart';
 
 import '../features/home/artist/presentation/pages/artist_page.dart';
 import '../features/friends/domain/entities/friend.dart';
@@ -81,6 +82,7 @@ final appRouter = GoRouter(
             final extra = state.extra;
             if (extra is Concert) return AddConcertPage(concert: extra);
             if (extra is DateTime) return AddConcertPage(initialDate: extra);
+            if (extra is String) return AddConcertPage(initialArtist: extra);
             return const AddConcertPage();
           },
         ),
@@ -153,6 +155,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/stats-edit',
           builder: (context, state) => const StatsEditPage(),
+        ),
+        GoRoute(
+          path: '/spotify-import',
+          builder: (context, state) => const SpotifyImportPage(),
         ),
         GoRoute(
           path: '/concert-map',

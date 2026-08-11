@@ -17,7 +17,7 @@ import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../friends/presentation/widgets/tag_friends_selector.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../spotify/domain/entities/data/services/spotify_api_service.dart';
+import '../../../spotify/data/services/spotify_search_service.dart';
 
 class AddConcertPage extends ConsumerStatefulWidget {
   final Concert? concert;
@@ -25,7 +25,15 @@ class AddConcertPage extends ConsumerStatefulWidget {
   /// Fecha inicial pre-seleccionada (solo en modo crear, ignorada al editar).
   final DateTime? initialDate;
 
-  const AddConcertPage({super.key, this.concert, this.initialDate});
+  /// Nombre de artista pre-rellenado (p. ej. desde importación de Spotify).
+  final String? initialArtist;
+
+  const AddConcertPage({
+    super.key,
+    this.concert,
+    this.initialDate,
+    this.initialArtist,
+  });
 
   @override
   ConsumerState<AddConcertPage> createState() => _AddConcertPageState();
@@ -46,7 +54,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   final _notesController = TextEditingController();
   final _genreController = TextEditingController();
 
-  final _spotifyService = SpotifyApiService();
+  final _spotifyService = SpotifySearchService();
   bool _fetchingGenre = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -142,6 +150,11 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       _selectedDate = widget.initialDate;
       _dateController.text =
           '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}';
+    }
+
+    // Pre-rellenar artista cuando se viene de importación Spotify
+    if (widget.concert == null && widget.initialArtist != null) {
+      _artistController.text = widget.initialArtist!;
     }
   }
 

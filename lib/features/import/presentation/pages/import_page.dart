@@ -14,7 +14,7 @@ import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../data/models/setlist_concert_model.dart';
 import '../../data/services/artist_image_service.dart';
 import '../../data/services/setlist_import_service.dart';
-import '../../../spotify/domain/entities/data/services/spotify_api_service.dart';
+import '../../../spotify/data/services/spotify_search_service.dart';
 
 class ImportPage extends ConsumerStatefulWidget {
   const ImportPage({super.key});
@@ -27,7 +27,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
   final _searchController = TextEditingController();
   final _setlistService = SetlistImportService();
   final _imageService = ArtistImageService();
-  final _spotifyService = SpotifyApiService();
+  final _spotifyService = SpotifySearchService();
 
   String _detectedGenre = '';
 
@@ -287,6 +287,74 @@ class _ImportPageState extends ConsumerState<ImportPage> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+
+              // ── Acceso rápido a importación de Spotify ─────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                  child: InkWell(
+                    onTap: () => context.push('/spotify-import'),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1DB954).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFF1DB954).withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF1DB954),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.music_note_rounded,
+                              color: Colors.black,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Importar desde Spotify',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: cs.onSurface,
+                                  ),
+                                ),
+                                Text(
+                                  'Conecta tu cuenta y ve tus artistas favoritos',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: cs.onSurface.withOpacity(0.6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: cs.onSurface.withOpacity(0.4),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
