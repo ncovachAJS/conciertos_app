@@ -9,6 +9,7 @@ import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/concert_card.dart';
 import '../../../../shared/widgets/concert_grid_card.dart';
+import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../data/models/concert_model.dart';
 import '../../domain/entities/concert.dart';
 import '../providers/concerts_provider.dart';
@@ -173,6 +174,10 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   }
 
   Future<void> _onAdd() async {
+    final count = ref.read(ownConcertsCountProvider);
+    final isPro = AuthController.instance.user?.isPro ?? false;
+    final allowed = await ProPaywallSheet.checkLimit(context, count, isPro);
+    if (!allowed || !mounted) return;
     final result = await context.push('/add');
     if (result == true) {
       await ref.read(concertsProvider.notifier).reload();
@@ -288,6 +293,10 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                       child: ConcertCalendarView(
                         concerts: _filtered(concerts),
                         onAddConcert: (date) async {
+                          final count = ref.read(ownConcertsCountProvider);
+                          final isPro = AuthController.instance.user?.isPro ?? false;
+                          final allowed = await ProPaywallSheet.checkLimit(context, count, isPro);
+                          if (!allowed || !mounted) return;
                           final result =
                               await context.push('/add', extra: date);
                           if (result == true && mounted) {

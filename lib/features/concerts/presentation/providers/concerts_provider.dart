@@ -317,3 +317,13 @@ final concertStatsProvider = Provider<ConcertStats>((ref) {
     avgRating: avgRating,
   );
 });
+
+/// Número de conciertos propios del usuario (excluye compartidos por amigos).
+/// Usado para verificar el límite de la versión gratuita.
+final ownConcertsCountProvider = Provider<int>((ref) {
+  final concerts = ref.watch(concertsProvider).asData?.value ?? [];
+  final userId = AuthController.instance.user?.id ?? '';
+  return concerts
+      .where((c) => c.userId == userId || c.userId.isEmpty)
+      .length;
+});

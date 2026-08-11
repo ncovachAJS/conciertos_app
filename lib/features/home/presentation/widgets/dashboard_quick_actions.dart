@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../shared/widgets/pro_paywall_sheet.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../import/presentation/pages/import_page.dart';
 
-class DashboardQuickActions extends StatelessWidget {
+class DashboardQuickActions extends ConsumerWidget {
   const DashboardQuickActions({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     return Row(
       children: [
@@ -18,7 +22,13 @@ class DashboardQuickActions extends StatelessWidget {
             icon: Icons.add_rounded,
             title: l.actionAdd,
             color: const Color(0xFFE53935),
-            onTap: () => context.push('/add'),
+            onTap: () async {
+              final count = ref.read(ownConcertsCountProvider);
+              final isPro = AuthController.instance.user?.isPro ?? false;
+              final allowed =
+                  await ProPaywallSheet.checkLimit(context, count, isPro);
+              if (allowed && context.mounted) context.push('/add');
+            },
           ),
         ),
         const SizedBox(width: 14),
@@ -45,9 +55,9 @@ class DashboardQuickActions extends StatelessWidget {
             icon: Icons.download_rounded,
             title: l.actionImport,
             color: const Color(0xFF66BB6A),
-            onTap: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const ImportPage())),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ImportPage()),
+            ),
           ),
         ),
       ],
@@ -79,7 +89,7 @@ class _QuickAction extends StatelessWidget {
             width: 68,
             height: 68,
             decoration: BoxDecoration(
-              color: color.withOpacity(.15),
+              color: color.withValues(alpha: .15),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 32),

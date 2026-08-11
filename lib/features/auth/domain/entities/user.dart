@@ -4,6 +4,7 @@ class User {
   final String email;
   final int memberNumber;
   final String? avatarUrl;
+  final bool isPro;
 
   const User({
     required this.id,
@@ -11,6 +12,7 @@ class User {
     required this.email,
     required this.memberNumber,
     this.avatarUrl,
+    this.isPro = false,
   });
 
   User copyWith({
@@ -19,6 +21,7 @@ class User {
     String? email,
     int? memberNumber,
     String? avatarUrl,
+    bool? isPro,
   }) {
     return User(
       id: id ?? this.id,
@@ -26,6 +29,7 @@ class User {
       email: email ?? this.email,
       memberNumber: memberNumber ?? this.memberNumber,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      isPro: isPro ?? this.isPro,
     );
   }
 }
