@@ -63,11 +63,11 @@ void main() {
 
     testWidgets('Display concerts list', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
+        ProviderScope(
           child: MaterialApp(
             home: Scaffold(
               body: ListView(
-                children: [
+                children: const [
                   ListTile(title: Text('Concert 1')),
                   ListTile(title: Text('Concert 2')),
                   ListTile(title: Text('Concert 3')),
@@ -84,14 +84,14 @@ void main() {
 
     testWidgets('Mark concert as favorite', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
+        ProviderScope(
           child: MaterialApp(
             home: Scaffold(
               body: Row(
                 children: [
-                  Text('Concert Name'),
+                  const Text('Concert Name'),
                   IconButton(
-                    icon: Icon(Icons.favorite_border),
+                    icon: const Icon(Icons.favorite_border),
                     onPressed: () {},
                   ),
                 ],
