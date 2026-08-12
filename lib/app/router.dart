@@ -16,6 +16,7 @@ import '../features/home/presentation/pages/home_page.dart';
 import '../features/home/presentation/pages/dashboard_edit_page.dart';
 import '../features/settings/presentation/pages/color_theme_picker_page.dart';
 import '../features/statistics/presentation/pages/stats_edit_page.dart';
+import '../features/statistics/presentation/pages/annual_summary_page.dart';
 import '../features/setlist/presentation/pages/setlist_test_page.dart';
 import '../features/import/presentation/pages/import_page.dart';
 import '../features/photos/presentation/pages/feed_page.dart';
@@ -155,6 +156,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/stats-edit',
           builder: (context, state) => const StatsEditPage(),
+        ),
+        GoRoute(
+          path: '/annual-summary',
+          builder: (context, state) => const AnnualSummaryPage(),
         ),
         GoRoute(
           path: '/spotify-import',

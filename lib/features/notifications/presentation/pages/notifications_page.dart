@@ -1,5 +1,6 @@
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -87,22 +88,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
       body: _ctrl.loading
           ? const Center(child: CircularProgressIndicator())
           : _ctrl.notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.notifications_none_rounded,
-                    size: 64,
-                    color: cs.onSurface.withOpacity(0.15),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l.noNotifications,
-                    style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
-                  ),
-                ],
-              ),
+          ? EmptyState(
+              emoji: '🔔',
+              title: l.noNotifications,
+              subtitle: 'Aquí aparecerán tus avisos y actividad de amigos',
             )
           : ListView.separated(
               itemCount: _ctrl.notifications.length,

@@ -273,21 +273,33 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
             onTap: concert.imageUrl.isNotEmpty
                 ? () => _openImage(context, concert.imageUrl)
                 : null,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: CachedNetworkImage(
-                  imageUrl: concert.imageUrl,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => Container(
-                    color: const Color(0xFF2B2B2B),
-                    child: const Icon(
-                      Icons.music_note,
-                      color: Colors.white24,
-                      size: 80,
-                    ),
-                  ),
+            child: Hero(
+              tag: 'concert-image-${concert.id}',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: concert.imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: concert.imageUrl,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) => Container(
+                            color: const Color(0xFF2B2B2B),
+                            child: const Icon(
+                              Icons.music_note,
+                              color: Colors.white24,
+                              size: 80,
+                            ),
+                          ),
+                        )
+                      : Container(
+                          color: const Color(0xFF2B2B2B),
+                          child: const Icon(
+                            Icons.music_note,
+                            color: Colors.white24,
+                            size: 80,
+                          ),
+                        ),
                 ),
               ),
             ),

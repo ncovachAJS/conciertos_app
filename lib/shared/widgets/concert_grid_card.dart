@@ -59,16 +59,19 @@ class ConcertGridCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    CachedNetworkImage(
-                      imageUrl: concert.imageUrl,
-                      fit: BoxFit.cover,
-                      fadeInDuration: Duration.zero,
-                      errorWidget: (_, __, ___) => Container(
-                        color: cs.surfaceContainerHighest,
-                        child: Icon(
-                          Icons.music_note,
-                          size: 48,
-                          color: cs.onSurface.withOpacity(0.2),
+                    Hero(
+                      tag: 'concert-image-${concert.id}',
+                      child: CachedNetworkImage(
+                        imageUrl: concert.imageUrl,
+                        fit: BoxFit.cover,
+                        fadeInDuration: Duration.zero,
+                        errorWidget: (_, __, ___) => Container(
+                          color: cs.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.music_note,
+                            size: 48,
+                            color: cs.onSurface.withOpacity(0.2),
+                          ),
                         ),
                       ),
                     ),

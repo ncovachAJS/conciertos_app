@@ -1,5 +1,6 @@
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,12 +12,61 @@ import '../../../../shared/widgets/concert_card.dart';
 import '../../../../shared/widgets/concert_grid_card.dart';
 import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../data/models/concert_model.dart';
+import '../../../../shared/widgets/skeletons/concerts_skeleton.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import '../../domain/entities/concert.dart';
 import '../providers/concerts_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../widgets/concert_calendar_view.dart';
 
 enum _ViewMode { list, grid, calendar }
+
+// ── Modelo de filtros activos ────────────────────────────────────────────────
+class _ConcertFilter {
+  final int? year;
+  final String? genre;
+  final String? city;
+  final int? minRating;
+  final bool onlyFavorites;
+  final bool onlyLiked;
+
+  const _ConcertFilter({
+    this.year,
+    this.genre,
+    this.city,
+    this.minRating,
+    this.onlyFavorites = false,
+    this.onlyLiked = false,
+  });
+
+  bool get hasAny =>
+      year != null ||
+      genre != null ||
+      city != null ||
+      minRating != null ||
+      onlyFavorites ||
+      onlyLiked;
+
+  _ConcertFilter copyWith({
+    Object? year = _sentinel,
+    Object? genre = _sentinel,
+    Object? city = _sentinel,
+    Object? minRating = _sentinel,
+    bool? onlyFavorites,
+    bool? onlyLiked,
+  }) {
+    return _ConcertFilter(
+      year: year == _sentinel ? this.year : year as int?,
+      genre: genre == _sentinel ? this.genre : genre as String?,
+      city: city == _sentinel ? this.city : city as String?,
+      minRating: minRating == _sentinel ? this.minRating : minRating as int?,
+      onlyFavorites: onlyFavorites ?? this.onlyFavorites,
+      onlyLiked: onlyLiked ?? this.onlyLiked,
+    );
+  }
+}
+
+const _sentinel = Object();
 
 class ConcertsPage extends ConsumerStatefulWidget {
   /// Si es `true`, la página se abre directamente en modo calendario.
@@ -37,8 +87,20 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   String _searchQuery = '';
   late _ViewMode _viewMode;
   bool _deleting = false;
+  _ConcertFilter _filter = const _ConcertFilter();
 
   bool get _gridView => _viewMode == _ViewMode.grid;
+
+  int get _filterCount {
+    int n = 0;
+    if (_filter.year != null) n++;
+    if (_filter.genre != null) n++;
+    if (_filter.city != null) n++;
+    if (_filter.minRating != null) n++;
+    if (_filter.onlyFavorites) n++;
+    if (_filter.onlyLiked) n++;
+    return n;
+  }
 
   @override
   void initState() {
@@ -79,15 +141,62 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   }
 
   List<Concert> _filtered(List<Concert> all) {
-    if (_searchQuery.trim().isEmpty) return all;
-    final q = _searchQuery.toLowerCase();
-    return all.where((c) {
-      return c.artist.toLowerCase().contains(q) ||
-          c.festival.toLowerCase().contains(q) ||
-          c.name.toLowerCase().contains(q) ||
-          c.city.toLowerCase().contains(q) ||
-          c.venue.toLowerCase().contains(q);
-    }).toList();
+    var result = all;
+
+    // Búsqueda de texto
+    if (_searchQuery.trim().isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      result = result.where((c) {
+        return c.artist.toLowerCase().contains(q) ||
+            c.festival.toLowerCase().contains(q) ||
+            c.name.toLowerCase().contains(q) ||
+            c.city.toLowerCase().contains(q) ||
+            c.venue.toLowerCase().contains(q);
+      }).toList();
+    }
+
+    // Filtros adicionales
+    if (_filter.year != null) {
+      result = result.where((c) => c.date.year == _filter.year).toList();
+    }
+    if (_filter.genre != null && _filter.genre!.isNotEmpty) {
+      result = result
+          .where((c) =>
+              c.genre.toLowerCase().contains(_filter.genre!.toLowerCase()))
+          .toList();
+    }
+    if (_filter.city != null && _filter.city!.isNotEmpty) {
+      result = result
+          .where((c) =>
+              c.city.toLowerCase().contains(_filter.city!.toLowerCase()))
+          .toList();
+    }
+    if (_filter.minRating != null) {
+      result = result
+          .where((c) => c.rating >= _filter.minRating!)
+          .toList();
+    }
+    if (_filter.onlyFavorites) {
+      result = result.where((c) => c.favorite).toList();
+    }
+    if (_filter.onlyLiked) {
+      result = result.where((c) => c.liked).toList();
+    }
+
+    return result;
+  }
+
+  Future<void> _openFilters(List<Concert> allConcerts) async {
+    final result = await showModalBottomSheet<_ConcertFilter>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _FilterSheet(
+        current: _filter,
+        allConcerts: allConcerts,
+      ),
+    );
+    if (result != null) setState(() => _filter = result);
   }
 
   Future<void> _toggleFavorite(Concert concert) async {
@@ -149,6 +258,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
 
     if (confirmar != true) return;
 
+    HapticFeedback.heavyImpact();
     setState(() => _deleting = true);
     try {
       await ref.read(concertsProvider.notifier).delete(concert.id);
@@ -217,7 +327,10 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
       child: Stack(
         children: [
           concertsAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: ConcertsSkeleton(),
+            ),
             error: (e, _) => Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -314,30 +427,144 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Buscador ──────────────────────────────────────────
-                  TextField(
-                    controller: _searchController,
-                    onChanged: (v) => setState(() => _searchQuery = v),
-                    decoration: InputDecoration(
-                      hintText: l.searchConcertsHint,
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear_rounded),
-                              onPressed: () => setState(() {
-                                _searchController.clear();
-                                _searchQuery = '';
-                              }),
-                            )
-                          : null,
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide.none,
+                  // ── Buscador + filtro ─────────────────────────────────
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (v) => setState(() => _searchQuery = v),
+                          decoration: InputDecoration(
+                            hintText: l.searchConcertsHint,
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear_rounded),
+                                    onPressed: () => setState(() {
+                                      _searchController.clear();
+                                      _searchQuery = '';
+                                    }),
+                                  )
+                                : null,
+                            filled: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // Botón de filtro
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Material(
+                            color: _filter.hasAny
+                                ? const Color(0xFFE53935)
+                                : cs.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(16),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () => _openFilters(concerts),
+                              child: Container(
+                                width: 48,
+                                height: 48,
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.tune_rounded,
+                                  color: _filter.hasAny
+                                      ? Colors.white
+                                      : cs.onSurface,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_filter.hasAny)
+                            Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                width: 16,
+                                height: 16,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    _filterCount.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      color: Color(0xFFE53935),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  // ── Chips de filtros activos ───────────────────────────
+                  if (_filter.hasAny) ...[
+                    const SizedBox(height: 10),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          if (_filter.year != null)
+                            _ActiveChip(
+                              label: '${_filter.year}',
+                              onRemove: () => setState(
+                                  () => _filter = _filter.copyWith(year: null)),
+                            ),
+                          if (_filter.genre != null)
+                            _ActiveChip(
+                              label: _filter.genre!,
+                              onRemove: () => setState(() =>
+                                  _filter = _filter.copyWith(genre: null)),
+                            ),
+                          if (_filter.city != null)
+                            _ActiveChip(
+                              label: _filter.city!,
+                              onRemove: () => setState(
+                                  () => _filter = _filter.copyWith(city: null)),
+                            ),
+                          if (_filter.minRating != null)
+                            _ActiveChip(
+                              label: '${'⭐' * _filter.minRating!}+',
+                              onRemove: () => setState(() =>
+                                  _filter = _filter.copyWith(minRating: null)),
+                            ),
+                          if (_filter.onlyFavorites)
+                            _ActiveChip(
+                              label: '⭐ Favoritos',
+                              onRemove: () => setState(() => _filter =
+                                  _filter.copyWith(onlyFavorites: false)),
+                            ),
+                          if (_filter.onlyLiked)
+                            _ActiveChip(
+                              label: '❤️ Me gustan',
+                              onRemove: () => setState(() => _filter =
+                                  _filter.copyWith(onlyLiked: false)),
+                            ),
+                          TextButton(
+                            onPressed: () => setState(
+                                () => _filter = const _ConcertFilter()),
+                            child: const Text(
+                              'Limpiar',
+                              style: TextStyle(color: Color(0xFFE53935)),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                  ],
+                  const SizedBox(height: 12),
 
                   // ── Pestañas ──────────────────────────────────────────
                   TabBar(
@@ -520,27 +747,34 @@ class _TabContent extends StatelessWidget {
     this.scrollController,
   });
 
+  String _emptyEmoji(IconData icon) {
+    if (icon == Icons.history_rounded) return '🎸';
+    if (icon == Icons.calendar_month_rounded) return '📅';
+    if (icon == Icons.group_outlined) return '👥';
+    return '🎵';
+  }
+
+  String? _emptySubtitle(IconData icon) {
+    if (icon == Icons.history_rounded) {
+      return 'Tus conciertos pasados aparecerán aquí';
+    }
+    if (icon == Icons.calendar_month_rounded) {
+      return 'Añade un concierto futuro para no perderte nada';
+    }
+    if (icon == Icons.group_outlined) {
+      return 'Cuando tus amigos compartan conciertos, los verás aquí';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     if (concerts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(emptyIcon, size: 64, color: cs.onSurface.withOpacity(0.15)),
-            const SizedBox(height: 16),
-            Text(
-              emptyText,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: cs.onSurface.withOpacity(0.4),
-                fontSize: 15,
-              ),
-            ),
-          ],
-        ),
+      return EmptyState(
+        emoji: _emptyEmoji(emptyIcon),
+        title: emptyText,
+        subtitle: _emptySubtitle(emptyIcon),
+        accentColor: const Color(0xFFE53935),
       );
     }
 
@@ -677,6 +911,290 @@ class _ListView extends ConsumerWidget {
           onDelete: readOnly ? null : () => onDelete(concert),
         );
       },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Chip de filtro activo
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ActiveChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onRemove;
+
+  const _ActiveChip({required this.label, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Chip(
+        label: Text(label, style: const TextStyle(fontSize: 13)),
+        deleteIcon: const Icon(Icons.close, size: 16),
+        onDeleted: onRemove,
+        backgroundColor: const Color(0xFFE53935).withValues(alpha: .12),
+        side: const BorderSide(color: Color(0xFFE53935), width: 0.8),
+        deleteIconColor: const Color(0xFFE53935),
+        labelStyle: const TextStyle(color: Color(0xFFE53935)),
+        visualDensity: VisualDensity.compact,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Bottom sheet de filtros
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _FilterSheet extends StatefulWidget {
+  final _ConcertFilter current;
+  final List<Concert> allConcerts;
+
+  const _FilterSheet({required this.current, required this.allConcerts});
+
+  @override
+  State<_FilterSheet> createState() => _FilterSheetState();
+}
+
+class _FilterSheetState extends State<_FilterSheet> {
+  late _ConcertFilter _f;
+
+  @override
+  void initState() {
+    super.initState();
+    _f = widget.current;
+  }
+
+  List<int> get _years {
+    final ys = widget.allConcerts.map((c) => c.date.year).toSet().toList()
+      ..sort((a, b) => b.compareTo(a));
+    return ys;
+  }
+
+  List<String> get _genres {
+    final gs = widget.allConcerts
+        .map((c) => c.genre.trim())
+        .where((g) => g.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    return gs;
+  }
+
+  List<String> get _cities {
+    final cities = widget.allConcerts
+        .map((c) => c.city.trim())
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    return cities;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.72,
+      maxChildSize: 0.92,
+      minChildSize: 0.4,
+      builder: (_, controller) => Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 4),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: cs.onSurface.withValues(alpha: .2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+              child: Row(
+                children: [
+                  const Text(
+                    'Filtrar conciertos',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () => setState(() => _f = const _ConcertFilter()),
+                    child: const Text('Limpiar',
+                        style: TextStyle(color: Color(0xFFE53935))),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(),
+            Expanded(
+              child: ListView(
+                controller: controller,
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                children: [
+                  _FilterSection(
+                    title: 'Año',
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _years.map((y) {
+                        final selected = _f.year == y;
+                        return ChoiceChip(
+                          label: Text('$y'),
+                          selected: selected,
+                          onSelected: (_) => setState(
+                              () => _f = _f.copyWith(year: selected ? null : y)),
+                          selectedColor: const Color(0xFFE53935).withValues(alpha: .2),
+                          side: selected
+                              ? const BorderSide(color: Color(0xFFE53935))
+                              : null,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  if (_genres.isNotEmpty)
+                    _FilterSection(
+                      title: 'Género',
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _genres.map((g) {
+                          final selected = _f.genre == g;
+                          return ChoiceChip(
+                            label: Text(g),
+                            selected: selected,
+                            onSelected: (_) => setState(
+                                () => _f = _f.copyWith(genre: selected ? null : g)),
+                            selectedColor: const Color(0xFFE53935).withValues(alpha: .2),
+                            side: selected
+                                ? const BorderSide(color: Color(0xFFE53935))
+                                : null,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  if (_cities.isNotEmpty)
+                    _FilterSection(
+                      title: 'Ciudad',
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _cities.take(20).map((c) {
+                          final selected = _f.city == c;
+                          return ChoiceChip(
+                            label: Text(c),
+                            selected: selected,
+                            onSelected: (_) => setState(
+                                () => _f = _f.copyWith(city: selected ? null : c)),
+                            selectedColor: const Color(0xFFE53935).withValues(alpha: .2),
+                            side: selected
+                                ? const BorderSide(color: Color(0xFFE53935))
+                                : null,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  _FilterSection(
+                    title: 'Valoración mínima',
+                    child: Row(
+                      children: List.generate(5, (i) {
+                        final stars = i + 1;
+                        return GestureDetector(
+                          onTap: () => setState(() => _f = _f.copyWith(
+                              minRating: _f.minRating == stars ? null : stars)),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: Icon(
+                              i < (_f.minRating ?? 0)
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              color: Colors.amber,
+                              size: 32,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  _FilterSection(
+                    title: 'Mostrar solo',
+                    child: Column(
+                      children: [
+                        SwitchListTile.adaptive(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Favoritos'),
+                          value: _f.onlyFavorites,
+                          activeColor: const Color(0xFFE53935),
+                          onChanged: (v) =>
+                              setState(() => _f = _f.copyWith(onlyFavorites: v)),
+                        ),
+                        SwitchListTile.adaptive(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Me gustan'),
+                          value: _f.onlyLiked,
+                          activeColor: const Color(0xFFE53935),
+                          onChanged: (v) =>
+                              setState(() => _f = _f.copyWith(onlyLiked: v)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFFE53935),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                  onPressed: () => Navigator.pop(context, _f),
+                  child: const Text('Aplicar filtros',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterSection extends StatelessWidget {
+  final String title;
+  final Widget child;
+  const _FilterSection({required this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+          const SizedBox(height: 10),
+          child,
+        ],
+      ),
     );
   }
 }

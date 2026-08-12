@@ -383,6 +383,71 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ],
 
+              const SizedBox(height: 24),
+
+              // ── Resumen anual ─────────────────────────────────────────
+              GestureDetector(
+                onTap: () => context.push('/annual-summary'),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1A0A0A), Color(0xFF2D0B0B)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFFE53935).withValues(alpha: .4),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE53935).withValues(alpha: .2),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome_rounded,
+                          color: Color(0xFFE53935),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tu año en conciertos',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Resumen anual · compartible',
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: Colors.white38,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 35),
 
               const Text(

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/app_page.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 
@@ -123,14 +124,11 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
             // Grid de artistas
             Expanded(
               child: filtered.isEmpty
-                  ? Center(
-                      child: Text(
-                        l.noFavoritesMessage,
-                        style: TextStyle(
-                          color: cs.onSurface.withOpacity(0.54),
-                          fontSize: 16,
-                        ),
-                      ),
+                  ? EmptyState(
+                      emoji: '⭐',
+                      title: l.noFavoritesMessage,
+                      subtitle: 'Marca conciertos como favoritos para verlos aquí agrupados por artista',
+                      accentColor: Colors.amber,
                     )
                   : GridView.builder(
                       padding: EdgeInsets.zero,

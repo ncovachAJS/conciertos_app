@@ -12,7 +12,6 @@ enum StatsSectionId {
   ratingDist,
   avgRatingByYear,
   topRatedArtists,
-  priceStats,
 }
 
 class StatsSection {

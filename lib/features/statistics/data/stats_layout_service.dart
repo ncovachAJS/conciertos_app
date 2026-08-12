@@ -21,7 +21,6 @@ class StatsLayoutService {
     StatsSection(id: StatsSectionId.ratingDist, visible: true),
     StatsSection(id: StatsSectionId.avgRatingByYear, visible: true),
     StatsSection(id: StatsSectionId.topRatedArtists, visible: true),
-    StatsSection(id: StatsSectionId.priceStats, visible: true),
   ];
 
   Future<List<StatsSection>> load() async {

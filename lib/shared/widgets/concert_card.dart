@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/concerts/domain/entities/concert.dart';
@@ -150,13 +151,16 @@ class ConcertCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    concert.imageUrl.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: concert.imageUrl,
-                            fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) => _placeholder(),
-                          )
-                        : _placeholder(),
+                    Hero(
+                      tag: 'concert-image-${concert.id}',
+                      child: concert.imageUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: concert.imageUrl,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, __, ___) => _placeholder(),
+                            )
+                          : _placeholder(),
+                    ),
                     Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
@@ -266,9 +270,12 @@ class ConcertCard extends StatelessWidget {
                         Row(
                           children: List.generate(5, (index) {
                             return GestureDetector(
-                              onTap: () => onRatingChanged?.call(
-                                concert.rating == index + 1 ? 0 : index + 1,
-                              ),
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                onRatingChanged?.call(
+                                  concert.rating == index + 1 ? 0 : index + 1,
+                                );
+                              },
                               child: Padding(
                                 padding: const EdgeInsets.only(right: 4),
                                 child: Icon(
@@ -284,7 +291,10 @@ class ConcertCard extends StatelessWidget {
                         ),
                         const Spacer(),
                         IconButton(
-                          onPressed: onLike,
+                          onPressed: onLike == null ? null : () {
+                            HapticFeedback.mediumImpact();
+                            onLike!();
+                          },
                           icon: Icon(
                             concert.liked
                                 ? Icons.favorite
@@ -295,7 +305,10 @@ class ConcertCard extends StatelessWidget {
                           ),
                         ),
                         IconButton(
-                          onPressed: onFavorite,
+                          onPressed: onFavorite == null ? null : () {
+                            HapticFeedback.mediumImpact();
+                            onFavorite!();
+                          },
                           icon: Icon(
                             concert.favorite ? Icons.star : Icons.star_border,
                             color: concert.favorite

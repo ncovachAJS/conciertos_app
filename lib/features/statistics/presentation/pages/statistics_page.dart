@@ -12,6 +12,7 @@ import '../../data/stats_layout_service.dart';
 import '../../domain/concert_stats.dart';
 import '../../domain/stats_section.dart';
 import '../providers/stats_layout_provider.dart';
+import '../../../../shared/widgets/skeletons/stats_skeleton.dart';
 
 // ---------------------------------------------------------------------------
 // Alias privado: _Stats → ConcertStatistics (ver statistics/domain/concert_stats.dart)
@@ -92,7 +93,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
         ],
       ),
       body: concertsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const StatsSkeleton(),
         error: (e, _) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -361,17 +362,6 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                         const SizedBox(height: 32),
                       ]
                     : [],
-              StatsSectionId.priceStats => stats.concertsWithPrice > 0
-                  ? [
-                      _SectionTitle(
-                        icon: Icons.euro_rounded,
-                        title: 'Precio de las entradas',
-                      ),
-                      const SizedBox(height: 16),
-                      _PriceStats(stats: stats),
-                      const SizedBox(height: 32),
-                    ]
-                  : [],
             };
           }
 
@@ -1321,128 +1311,6 @@ class _TopRatedArtistsBars extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Precio de las entradas
-// ---------------------------------------------------------------------------
-
-class _PriceStats extends StatelessWidget {
-  final _Stats stats;
-  const _PriceStats({required this.stats});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final expensive = stats.mostExpensive;
-    final cheap     = stats.cheapest;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _PriceTile(
-                label: 'Precio medio',
-                value: '${stats.avgPrice.toStringAsFixed(0)} €',
-                icon: Icons.euro_rounded,
-                color: const Color(0xFF26A69A),
-              ),
-              const SizedBox(width: 12),
-              _PriceTile(
-                label: 'Más cara',
-                value: expensive != null
-                    ? '${expensive.price.toStringAsFixed(0)} €'
-                    : '—',
-                sub: expensive?.artist,
-                icon: Icons.arrow_upward_rounded,
-                color: const Color(0xFFEF5350),
-              ),
-              const SizedBox(width: 12),
-              _PriceTile(
-                label: 'Más barata',
-                value: cheap != null
-                    ? '${cheap.price.toStringAsFixed(0)} €'
-                    : '—',
-                sub: cheap?.artist,
-                icon: Icons.arrow_downward_rounded,
-                color: const Color(0xFF66BB6A),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PriceTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final String? sub;
-  final IconData icon;
-  final Color color;
-  const _PriceTile(
-      {required this.label,
-      required this.value,
-      this.sub,
-      required this.icon,
-      required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 18),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-                color: color,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 10,
-                color: cs.onSurface.withValues(alpha: 0.55),
-              ),
-            ),
-            if (sub != null && sub!.isNotEmpty) ...[
-              const SizedBox(height: 2),
-              Text(
-                sub!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 9,
-                  color: cs.onSurface.withValues(alpha: 0.4),
-                ),
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }

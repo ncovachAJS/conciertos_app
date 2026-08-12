@@ -21,7 +21,6 @@ class StatsEditPage extends ConsumerWidget {
         StatsSectionId.ratingDist => Icons.star_rounded,
         StatsSectionId.avgRatingByYear => Icons.trending_up_rounded,
         StatsSectionId.topRatedArtists => Icons.emoji_events_rounded,
-        StatsSectionId.priceStats => Icons.euro_rounded,
       };
 
   static String _label(StatsSectionId id) => switch (id) {
@@ -38,7 +37,6 @@ class StatsEditPage extends ConsumerWidget {
         StatsSectionId.ratingDist => 'Distribución de valoraciones',
         StatsSectionId.avgRatingByYear => 'Valoración media por año',
         StatsSectionId.topRatedArtists => 'Artistas mejor valorados',
-        StatsSectionId.priceStats => 'Precio de las entradas',
       };
 
   @override

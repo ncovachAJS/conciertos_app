@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -191,7 +192,10 @@ class _WantToAttendButton extends StatelessWidget {
 
     if (filled) {
       return GestureDetector(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.mediumImpact();
+          onTap();
+        },
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -218,7 +222,10 @@ class _WantToAttendButton extends StatelessWidget {
     }
 
     return IconButton(
-      onPressed: onTap,
+      onPressed: () {
+        HapticFeedback.mediumImpact();
+        onTap();
+      },
       icon: Icon(
         active ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
         color: active ? Colors.greenAccent : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
