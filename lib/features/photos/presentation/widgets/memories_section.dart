@@ -5,6 +5,7 @@ import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../shared/widgets/shimmer_box.dart';
 import '../../../concerts/data/services/upload_service.dart';
 import '../../../friends/presentation/widgets/friend_avatar.dart';
 import '../../../friends/presentation/widgets/tag_friends_selector.dart';
@@ -270,9 +271,17 @@ class _MemoriesSectionState extends State<MemoriesSection> {
             const SizedBox(height: 12),
 
             if (_loading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(child: CircularProgressIndicator()),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 3,
+                crossAxisSpacing: 2,
+                mainAxisSpacing: 2,
+                childAspectRatio: 1,
+                children: List.generate(
+                  6,
+                  (_) => const ShimmerFill(height: double.infinity, borderRadius: 0),
+                ),
               )
             else if (_photos.isEmpty)
               Padding(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/concerts/presentation/providers/concerts_provider.dart';
+import '../shared/widgets/skeletons/generic_page_skeleton.dart';
 
 import '../features/profile/presentation/pages/profile_page.dart';
 import '../features/recommendations/presentation/pages/recommendations_page.dart';
@@ -194,8 +195,9 @@ class _ConcertDetailById extends ConsumerWidget {
     final concertsAsync = ref.watch(concertsProvider);
 
     return concertsAsync.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => const Scaffold(
+        body: GenericPageSkeleton(itemCount: 4, withHeader: true),
+      ),
       error: (_, __) => Scaffold(
         body: Center(
           child: Column(

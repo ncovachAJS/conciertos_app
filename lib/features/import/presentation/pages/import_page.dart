@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
@@ -527,7 +528,7 @@ class _ImportPageState extends ConsumerState<ImportPage> {
               // ── Lista ───────────────────────────────────────────────────
               if (_searching && _concerts.isEmpty)
                 const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                  child: GenericPageSkeleton(itemCount: 5),
                 )
               else if (_concerts.isEmpty)
                 SliverFillRemaining(

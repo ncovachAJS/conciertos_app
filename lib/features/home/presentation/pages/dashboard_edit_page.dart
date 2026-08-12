@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../domain/dashboard_section.dart';
 import '../providers/dashboard_layout_provider.dart';
 
@@ -71,7 +72,7 @@ class DashboardEditPage extends ConsumerWidget {
         ],
       ),
       body: sectionsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const GenericPageSkeleton(itemCount: 8, withHeader: true),
         error: (e, _) =>
             const Center(child: Text('Error cargando la configuración')),
         data: (sections) => Column(

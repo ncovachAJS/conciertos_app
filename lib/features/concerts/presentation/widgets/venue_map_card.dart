@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../shared/widgets/shimmer_box.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
@@ -118,12 +120,7 @@ class _VenueMapCardState extends State<VenueMapCard> {
                 height: 200,
                 width: double.infinity,
                 child: _loading
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: cs.onSurface.withOpacity(0.4),
-                          strokeWidth: 2,
-                        ),
-                      )
+                    ? const ShimmerFill(height: 200, borderRadius: 0)
                     : _location == null
                     ? Center(
                         child: Column(

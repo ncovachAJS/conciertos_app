@@ -6,6 +6,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import '../../data/models/app_notification_model.dart';
 import '../controllers/notifications_controller.dart';
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../../friends/presentation/widgets/friend_avatar.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -86,7 +87,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         ],
       ),
       body: _ctrl.loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const GenericPageSkeleton(itemCount: 5)
           : _ctrl.notifications.isEmpty
           ? EmptyState(
               emoji: '🔔',

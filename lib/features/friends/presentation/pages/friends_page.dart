@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
+
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -104,7 +106,7 @@ class _FriendsPageState extends State<FriendsPage>
         ),
       ),
       body: _ctrl.loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const GenericPageSkeleton(itemCount: 6, withHeader: true)
           : TabBarView(
               controller: _tabs,
               children: [
@@ -174,7 +176,7 @@ class _FriendSearchDelegate extends SearchDelegate<void> {
       listenable: ctrl,
       builder: (_, __) {
         if (ctrl.searching) {
-          return const Center(child: CircularProgressIndicator());
+          return const GenericPageSkeleton(itemCount: 3);
         }
 
         if (query.trim().length < 2) {

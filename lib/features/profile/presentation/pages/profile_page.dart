@@ -17,6 +17,7 @@ import '../../../photos/data/services/photo_api_service.dart';
 import '../../data/services/achievements_service.dart';
 import '../../data/services/avatar_api_service.dart';
 import '../../domain/achievement.dart';
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../widgets/achievement_toast.dart';
 import '../widgets/achievements_widget.dart';
 import '../widgets/profile_card.dart';
@@ -313,7 +314,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     if (loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: GenericPageSkeleton(itemCount: 5, withHeader: true),
+      );
     }
 
     return Scaffold(

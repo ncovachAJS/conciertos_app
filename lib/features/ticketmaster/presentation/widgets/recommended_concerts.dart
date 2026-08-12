@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../shared/widgets/shimmer_box.dart';
+
 import '../../../../l10n/generated/app_localizations.dart';
 
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -63,9 +65,18 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     if (loading) {
-      return const SizedBox(
-        height: 80,
-        child: Center(child: CircularProgressIndicator()),
+      return SizedBox(
+        height: 300,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: 3,
+          separatorBuilder: (_, __) => const SizedBox(width: 16),
+          itemBuilder: (_, __) => const ShimmerBox(
+            width: 220,
+            height: 300,
+            borderRadius: 24,
+          ),
+        ),
       );
     }
 

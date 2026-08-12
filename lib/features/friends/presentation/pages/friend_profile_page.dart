@@ -9,6 +9,7 @@ import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../profile/domain/achievement.dart';
 import '../../../profile/presentation/widgets/achievements_widget.dart';
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../data/services/friends_api_service.dart';
 import '../../domain/entities/friend.dart';
 import '../widgets/friend_avatar.dart';
@@ -121,7 +122,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
         ),
       ),
       body: concertsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const GenericPageSkeleton(itemCount: 5, withHeader: true),
         error: (_, __) => Center(child: Text(l.error)),
         data: (allConcerts) {
           final now = DateTime.now();
@@ -168,10 +169,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
               ),
               const SizedBox(height: 12),
               if (_loadingFriendConcerts)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Center(child: CircularProgressIndicator()),
-                )
+                const InlineSectionSkeleton(lines: 3)
               else if (_friendUpcoming.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),

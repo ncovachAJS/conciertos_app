@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 
 import '../../../../core/constants/countries.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -226,7 +227,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
           ),
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const GenericPageSkeleton(itemCount: 4)
                 : TabBarView(
                     controller: _tabController,
                     children: [

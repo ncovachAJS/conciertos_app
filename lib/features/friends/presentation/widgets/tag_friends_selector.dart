@@ -1,6 +1,8 @@
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/shimmer_box.dart';
+
 import '../../data/models/friend_model.dart';
 import '../../data/services/friends_api_service.dart';
 import '../widgets/friend_avatar.dart';
@@ -47,9 +49,13 @@ class _TagFriendsSelectorState extends State<TagFriendsSelector> {
     const red = Color(0xFFE53935);
 
     if (_loading) {
-      return const SizedBox(
-        height: 60,
-        child: Center(child: CircularProgressIndicator()),
+      return Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: List.generate(
+          3,
+          (i) => ShimmerBox(width: 80.0 + i * 20, height: 36, borderRadius: 20),
+        ),
       );
     }
 

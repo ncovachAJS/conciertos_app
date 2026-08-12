@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/empty_state.dart';
+import '../../../../shared/widgets/skeletons/concerts_skeleton.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 
@@ -60,7 +61,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
     return AppPage(
       title: l.favoritesTitle,
       child: concertsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const SingleChildScrollView(child: ConcertsSkeleton()),
         error: (e, _) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,

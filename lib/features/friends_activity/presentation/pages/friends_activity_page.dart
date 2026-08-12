@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../../shared/widgets/app_page.dart';
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../providers/friends_activity_provider.dart';
 
@@ -53,7 +54,7 @@ class _FriendsActivityPageState extends ConsumerState<FriendsActivityPage> {
         ),
       ],
       child: activityAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const GenericPageSkeleton(itemCount: 7),
         error: (e, _) => AppErrorWidget(
           error: e,
           onRetry: () => ref.invalidate(friendsActivityProvider),

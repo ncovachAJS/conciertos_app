@@ -9,6 +9,7 @@ import '../../../../core/tutorial/tutorial_service.dart';
 
 import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../../shared/widgets/app_page.dart';
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../data/models/concert_photo_model.dart';
 import '../../data/services/photo_api_service.dart';
 import 'photo_viewer_page.dart';
@@ -152,7 +153,7 @@ class _FeedPageState extends State<FeedPage>
     if (_loading) {
       return AppPage(
         title: l.memoriesTitle,
-        child: const Center(child: CircularProgressIndicator()),
+        child: const GenericGridSkeleton(itemCount: 12),
       );
     }
 

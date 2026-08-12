@@ -1,6 +1,8 @@
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
+
 import '../../domain/entities/setlist.dart';
 import '../../domain/entities/setlist_set.dart';
 import '../../domain/entities/song.dart';
@@ -57,12 +59,7 @@ class _SetlistSectionState extends State<SetlistSection> {
             const SizedBox(height: 20),
 
             if (widget.loading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: CircularProgressIndicator(),
-                ),
-              )
+              const InlineSectionSkeleton(lines: 5)
             else if (widget.setlist == null || widget.setlist!.sets.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),

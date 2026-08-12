@@ -512,56 +512,64 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                   // ── Chips de filtros activos ───────────────────────────
                   if (_filter.hasAny) ...[
                     const SizedBox(height: 10),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          if (_filter.year != null)
-                            _ActiveChip(
-                              label: '${_filter.year}',
-                              onRemove: () => setState(
-                                  () => _filter = _filter.copyWith(year: null)),
-                            ),
-                          if (_filter.genre != null)
-                            _ActiveChip(
-                              label: _filter.genre!,
-                              onRemove: () => setState(() =>
-                                  _filter = _filter.copyWith(genre: null)),
-                            ),
-                          if (_filter.city != null)
-                            _ActiveChip(
-                              label: _filter.city!,
-                              onRemove: () => setState(
-                                  () => _filter = _filter.copyWith(city: null)),
-                            ),
-                          if (_filter.minRating != null)
-                            _ActiveChip(
-                              label: '${'⭐' * _filter.minRating!}+',
-                              onRemove: () => setState(() =>
-                                  _filter = _filter.copyWith(minRating: null)),
-                            ),
-                          if (_filter.onlyFavorites)
-                            _ActiveChip(
-                              label: '⭐ Favoritos',
-                              onRemove: () => setState(() => _filter =
-                                  _filter.copyWith(onlyFavorites: false)),
-                            ),
-                          if (_filter.onlyLiked)
-                            _ActiveChip(
-                              label: '❤️ Me gustan',
-                              onRemove: () => setState(() => _filter =
-                                  _filter.copyWith(onlyLiked: false)),
-                            ),
-                          TextButton(
-                            onPressed: () => setState(
-                                () => _filter = const _ConcertFilter()),
-                            child: const Text(
-                              'Limpiar',
-                              style: TextStyle(color: Color(0xFFE53935)),
+                    Row(
+                      children: [
+                        // Solo los chips se desplazan horizontalmente
+                        Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                if (_filter.year != null)
+                                  _ActiveChip(
+                                    label: '${_filter.year}',
+                                    onRemove: () => setState(
+                                        () => _filter = _filter.copyWith(year: null)),
+                                  ),
+                                if (_filter.genre != null)
+                                  _ActiveChip(
+                                    label: _filter.genre!,
+                                    onRemove: () => setState(() =>
+                                        _filter = _filter.copyWith(genre: null)),
+                                  ),
+                                if (_filter.city != null)
+                                  _ActiveChip(
+                                    label: _filter.city!,
+                                    onRemove: () => setState(
+                                        () => _filter = _filter.copyWith(city: null)),
+                                  ),
+                                if (_filter.minRating != null)
+                                  _ActiveChip(
+                                    label: '${'⭐' * _filter.minRating!}+',
+                                    onRemove: () => setState(() =>
+                                        _filter = _filter.copyWith(minRating: null)),
+                                  ),
+                                if (_filter.onlyFavorites)
+                                  _ActiveChip(
+                                    label: '⭐ Favoritos',
+                                    onRemove: () => setState(() => _filter =
+                                        _filter.copyWith(onlyFavorites: false)),
+                                  ),
+                                if (_filter.onlyLiked)
+                                  _ActiveChip(
+                                    label: '❤️ Me gustan',
+                                    onRemove: () => setState(() => _filter =
+                                        _filter.copyWith(onlyLiked: false)),
+                                  ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        // "Limpiar" siempre visible, fuera del scroll
+                        TextButton(
+                          onPressed: () =>
+                              setState(() => _filter = const _ConcertFilter()),
+                          child: const Text(
+                            'Limpiar',
+                            style: TextStyle(color: Color(0xFFE53935)),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                   const SizedBox(height: 12),
