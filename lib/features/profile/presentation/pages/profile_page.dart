@@ -72,7 +72,24 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Future<void> load() async {
     try {
       final result = await _api.getConcerts();
-      concerts = result;
+      // Deduplicar igual que concertStatsProvider: el mismo concierto
+      // compartido aparece con userId=yo y userId=amigo. Priorizamos el
+      // propio recogiendo sus fechas y descartando duplicados de otros.
+      final currentUserId = AuthController.instance.user?.id ?? '';
+      final myDates = result
+          .where((c) => c.userId == currentUserId || c.userId.isEmpty)
+          .map((c) => DateTime(c.date.year, c.date.month, c.date.day))
+          .toSet();
+      concerts = result
+          .where(
+            (c) =>
+                c.userId == currentUserId ||
+                c.userId.isEmpty ||
+                !myDates.contains(
+                  DateTime(c.date.year, c.date.month, c.date.day),
+                ),
+          )
+          .toList();
     } catch (_) {}
 
     try {

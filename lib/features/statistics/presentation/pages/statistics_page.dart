@@ -122,7 +122,25 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
             ],
           ),
         ),
-        data: (concerts) {
+        data: (rawConcerts) {
+          // Deduplicar igual que concertStatsProvider: el mismo concierto
+          // compartido aparece con userId=yo y userId=amigo. Priorizamos el
+          // propio recogiendo sus fechas y descartando duplicados de otros.
+          final currentUserId = AuthController.instance.user?.id ?? '';
+          final myDates = rawConcerts
+              .where((c) => c.userId == currentUserId || c.userId.isEmpty)
+              .map((c) => DateTime(c.date.year, c.date.month, c.date.day))
+              .toSet();
+          final concerts = rawConcerts
+              .where(
+                (c) =>
+                    c.userId == currentUserId ||
+                    c.userId.isEmpty ||
+                    !myDates.contains(
+                      DateTime(c.date.year, c.date.month, c.date.day),
+                    ),
+              )
+              .toList();
           if (concerts.isEmpty) {
             return Center(
               child: Padding(
@@ -156,27 +174,10 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
 
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
-          final currentUserId =
-              AuthController.instance.user?.id ?? '';
 
-          final pastAll = concerts
+          // `concerts` ya está deduplicado arriba.
+          final past = concerts
               .where((c) => !c.date.isAfter(today))
-              .toList();
-
-          final myDates = pastAll
-              .where((c) => c.userId == currentUserId || c.userId.isEmpty)
-              .map((c) => DateTime(c.date.year, c.date.month, c.date.day))
-              .toSet();
-
-          final past = pastAll
-              .where(
-                (c) =>
-                    c.userId == currentUserId ||
-                    c.userId.isEmpty ||
-                    !myDates.contains(
-                      DateTime(c.date.year, c.date.month, c.date.day),
-                    ),
-              )
               .toList();
 
           if (past.isEmpty) {

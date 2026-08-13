@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../photos/data/models/concert_photo_model.dart';
@@ -25,6 +26,7 @@ class _YearSummary {
   final int total;
   final String topArtist;
   final int topArtistCount;
+  final double topArtistRating;
   final String topCity;
   final int topCityCount;
   final String topVenue;
@@ -37,13 +39,13 @@ class _YearSummary {
   final int uniqueArtists;
   final int uniqueCities;
   final Map<int, int> monthCounts;
-  final List<String> concertImageUrls;
 
   const _YearSummary({
     required this.year,
     required this.total,
     required this.topArtist,
     required this.topArtistCount,
+    required this.topArtistRating,
     required this.topCity,
     required this.topCityCount,
     required this.topVenue,
@@ -56,11 +58,31 @@ class _YearSummary {
     required this.uniqueArtists,
     required this.uniqueCities,
     required this.monthCounts,
-    required this.concertImageUrls,
   });
 
-  static _YearSummary from(List<Concert> concerts, int year) {
-    final c = concerts.where((c) => c.date.year == year).toList();
+  static _YearSummary from(
+    List<Concert> concerts,
+    int year,
+    String currentUserId,
+  ) {
+    // Deduplicar igual que concertStatsProvider:
+    // Un concierto compartido por un amigo aparece dos veces en el provider
+    // (una vez con userId=yo y otra con userId=amigo). Prioritizamos el
+    // propio: recogemos las fechas de nuestros conciertos y descartamos
+    // entradas de otros usuarios cuya fecha ya está cubierta.
+    final allYear = concerts.where((x) => x.date.year == year).toList();
+    final myDates = allYear
+        .where((x) => x.userId == currentUserId || x.userId.isEmpty)
+        .map((x) => DateTime(x.date.year, x.date.month, x.date.day))
+        .toSet();
+    final c = allYear
+        .where(
+          (x) =>
+              x.userId == currentUserId ||
+              x.userId.isEmpty ||
+              !myDates.contains(DateTime(x.date.year, x.date.month, x.date.day)),
+        )
+        .toList();
 
     Map<String, int> countMap(Iterable<String> vals) {
       final m = <String, int>{};
@@ -80,6 +102,41 @@ class _YearSummary {
       if (m.isEmpty) return 0;
       return m.values.fold(0, math.max);
     }
+
+    // Artista del año: el de mayor valoración media.
+    // Agrupa las valoraciones por artista y calcula la media.
+    // Si no hay ninguno valorado, cae de vuelta al más visto.
+    final artistRatingSum = <String, int>{};
+    final artistRatingCount = <String, int>{};
+    final artistVisitCount = <String, int>{};
+    for (final x in c) {
+      final a = x.artist.trim();
+      if (a.isEmpty) continue;
+      artistVisitCount[a] = (artistVisitCount[a] ?? 0) + 1;
+      if (x.rating > 0) {
+        artistRatingSum[a] = (artistRatingSum[a] ?? 0) + x.rating;
+        artistRatingCount[a] = (artistRatingCount[a] ?? 0) + 1;
+      }
+    }
+    // Media por artista (solo los que tienen al menos una valoración)
+    final artistAvg = {
+      for (final a in artistRatingSum.keys)
+        a: artistRatingSum[a]! / artistRatingCount[a]!,
+    };
+    final String bestArtist;
+    final double bestArtistRating;
+    if (artistAvg.isNotEmpty) {
+      final best = artistAvg.entries.reduce((a, b) => a.value >= b.value ? a : b);
+      bestArtist = best.key;
+      bestArtistRating = best.value;
+    } else {
+      // Sin valoraciones: artista más visto
+      bestArtist = artistVisitCount.isEmpty
+          ? '—'
+          : artistVisitCount.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+      bestArtistRating = 0.0;
+    }
+    final int bestArtistCount = artistVisitCount[bestArtist] ?? 0;
 
     final artistMap = countMap(c.map((x) => x.artist.trim()));
     final cityMap = countMap(c.map((x) => x.city.trim()));
@@ -111,8 +168,9 @@ class _YearSummary {
     return _YearSummary(
       year: year,
       total: c.length,
-      topArtist: topKey(artistMap),
-      topArtistCount: topVal(artistMap),
+      topArtist: bestArtist,
+      topArtistCount: bestArtistCount,
+      topArtistRating: bestArtistRating,
       topCity: topKey(cityMap),
       topCityCount: topVal(cityMap),
       topVenue: topKey(venueMap),
@@ -125,11 +183,6 @@ class _YearSummary {
       uniqueArtists: artistMap.length,
       uniqueCities: cityMap.length,
       monthCounts: monthCounts,
-      concertImageUrls: c
-          .where((x) => x.imageUrl.isNotEmpty)
-          .map((x) => x.imageUrl)
-          .take(12)
-          .toList(),
     );
   }
 }
@@ -225,7 +278,7 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
     return [
       _IntroSlide(key: ValueKey('intro_$_selectedYear'), summary: s, years: years, selectedYear: _selectedYear, onYearChanged: _changeYear, onNext: next),
       _TotalSlide(key: ValueKey('total_$_selectedYear'), summary: s, onNext: next, onPrev: prev),
-      if (s.topArtist != '—' && s.topArtistCount > 0)
+      if (s.topArtist != '—')
         _ArtistSlide(key: ValueKey('artist_$_selectedYear'), summary: s, onNext: next, onPrev: prev),
       _VarietySlide(key: ValueKey('variety_$_selectedYear'), summary: s, onNext: next, onPrev: prev),
       if (s.topCity != '—')
@@ -250,13 +303,10 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
         error: (err, _) => const Center(child: Text('Error cargando conciertos', style: TextStyle(color: Colors.white54))),
         data: (concerts) {
           final years = _availableYears(concerts);
-          final summary = _YearSummary.from(concerts, _selectedYear);
-          final photoUrls = _photosForYear(_selectedYear);
-          // Combine uploaded photos + concert imageUrls, deduplicated
-          final seen = <String>{};
-          final allImgs = [...photoUrls, ...summary.concertImageUrls]
-              .where((u) => seen.add(u))
-              .toList();
+          final currentUserId = AuthController.instance.user?.id ?? '';
+          final summary = _YearSummary.from(concerts, _selectedYear, currentUserId);
+          // Solo fotos de recuerdos subidas por el usuario, no portadas de concierto.
+          final allImgs = _photosForYear(_selectedYear);
           final slides = _buildSlides(summary, years, allImgs);
 
           return Stack(
@@ -554,7 +604,12 @@ class _ArtistSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rating = summary.topArtistRating;
     final times = summary.topArtistCount;
+    // Construye la fila de estrellas (valoración media sobre 5)
+    final fullStars = rating.floor();
+    final hasHalf = (rating - fullStars) >= 0.4;
+
     return _SlideBase(
       colors: const [Color(0xFF00050F), Color(0xFF001A4A), Color(0xFF001030)],
       onNext: onNext, onPrev: onPrev,
@@ -568,22 +623,51 @@ class _ArtistSlide extends StatelessWidget {
               Text('Tu artista del año', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18, fontWeight: FontWeight.w400))
                   .animate().fadeIn(),
               const SizedBox(height: 16),
-              // Artist name — big, wrapping
               Text(
                 summary.topArtist.toUpperCase(),
                 style: const TextStyle(color: Colors.white, fontSize: 52, fontWeight: FontWeight.w900, height: 1.05, letterSpacing: -1),
               ).animate(delay: 150.ms).fadeIn().slideY(begin: 0.4, curve: Curves.easeOutCubic),
               const SizedBox(height: 24),
-              if (times > 1)
-                Text('Lo viste $times veces', style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 20, fontWeight: FontWeight.w600))
-                    .animate(delay: 350.ms).fadeIn()
-              else
-                Text('Fue especial', style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 20, fontWeight: FontWeight.w600))
-                    .animate(delay: 350.ms).fadeIn(),
+              // Valoración media con estrellas
+              if (rating > 0) ...[
+                Row(
+                  children: [
+                    ...List.generate(5, (i) {
+                      IconData icon;
+                      if (i < fullStars) {
+                        icon = Icons.star_rounded;
+                      } else if (i == fullStars && hasHalf) {
+                        icon = Icons.star_half_rounded;
+                      } else {
+                        icon = Icons.star_outline_rounded;
+                      }
+                      return Icon(icon, color: const Color(0xFF64B5F6), size: 28)
+                          .animate(delay: (350 + i * 80).ms).fadeIn().scale(begin: const Offset(0.4, 0.4));
+                    }),
+                    const SizedBox(width: 10),
+                    Text(
+                      rating.toStringAsFixed(1),
+                      style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 22, fontWeight: FontWeight.w700),
+                    ).animate(delay: 750.ms).fadeIn(),
+                  ],
+                ),
+                if (times > 1)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Lo viste $times veces',
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 15),
+                    ).animate(delay: 850.ms).fadeIn(),
+                  ),
+              ] else ...[
+                Text(
+                  times > 1 ? 'Lo viste $times veces' : 'Fue especial',
+                  style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 20, fontWeight: FontWeight.w600),
+                ).animate(delay: 350.ms).fadeIn(),
+              ],
               const SizedBox(height: 32),
-              // Decorative music notes
               Text('♩ ♪ ♫ ♬', style: TextStyle(color: Colors.white.withValues(alpha: 0.15), fontSize: 32))
-                  .animate(delay: 600.ms).fadeIn(),
+                  .animate(delay: 900.ms).fadeIn(),
               const Spacer(),
             ],
           ),
@@ -765,7 +849,7 @@ class _MonthSlide extends StatelessWidget {
               const SizedBox(height: 40),
               // Mini bar chart
               SizedBox(
-                height: 80,
+                height: 96,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: List.generate(12, (i) {
