@@ -405,7 +405,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
               const SizedBox(height: 24),
 
-              // ── Resumen anual ─────────────────────────────────────────
+              // ── Wrapped ───────────────────────────────────────────────
               GestureDetector(
                 onTap: () => context.push('/annual-summary'),
                 child: Container(
@@ -467,6 +467,62 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
               ),
+
+              // ── Wrapped de años anteriores ────────────────────────────
+              Builder(builder: (context) {
+                final now = DateTime.now();
+                // Años en los que hay conciertos, excluyendo el actual
+                final pastYears = concerts
+                    .map((c) => c.date.year)
+                    .where((y) => y < now.year)
+                    .toSet()
+                    .toList()
+                  ..sort((a, b) => b.compareTo(a));
+
+                if (pastYears.isEmpty) return const SizedBox.shrink();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Años anteriores',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white54),
+                    ),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: pastYears.map((year) {
+                          return GestureDetector(
+                            onTap: () => context.push('/annual-summary?year=$year'),
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 10),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1A0A0A),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: const Color(0xFFE53935).withValues(alpha: 0.25)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.auto_awesome_rounded, color: Color(0xFFE53935), size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '$year',
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
+                );
+              }),
 
               const SizedBox(height: 35),
 

@@ -27,6 +27,7 @@ class _YearSummary {
   final String topArtist;
   final int topArtistCount;
   final double topArtistRating;
+  final String topArtistImageUrl;
   final String topCity;
   final int topCityCount;
   final String topVenue;
@@ -46,6 +47,7 @@ class _YearSummary {
     required this.topArtist,
     required this.topArtistCount,
     required this.topArtistRating,
+    required this.topArtistImageUrl,
     required this.topCity,
     required this.topCityCount,
     required this.topVenue,
@@ -171,6 +173,10 @@ class _YearSummary {
       topArtist: bestArtist,
       topArtistCount: bestArtistCount,
       topArtistRating: bestArtistRating,
+      topArtistImageUrl: bestArtist == '—' ? '' : c
+          .where((x) => x.artist.trim().toLowerCase() == bestArtist.toLowerCase() && x.imageUrl.isNotEmpty)
+          .map((x) => x.imageUrl)
+          .firstOrNull ?? '',
       topCity: topKey(cityMap),
       topCityCount: topVal(cityMap),
       topVenue: topKey(venueMap),
@@ -192,7 +198,8 @@ class _YearSummary {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class AnnualSummaryPage extends ConsumerStatefulWidget {
-  const AnnualSummaryPage({super.key});
+  final int? initialYear;
+  const AnnualSummaryPage({super.key, this.initialYear});
 
   @override
   ConsumerState<AnnualSummaryPage> createState() => _AnnualSummaryPageState();
@@ -205,11 +212,13 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
   final _shareKey = GlobalKey();
   bool _sharing = false;
   List<ConcertPhotoModel> _allPhotos = [];
+  // Orden barajado de fotos para el año seleccionado — se fija al cargar/cambiar año.
+  List<String> _shuffledBgs = [];
 
   @override
   void initState() {
     super.initState();
-    _selectedYear = DateTime.now().year;
+    _selectedYear = widget.initialYear ?? DateTime.now().year;
     _loadPhotos();
   }
 
@@ -219,10 +228,15 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
     super.dispose();
   }
 
+  void _reshuffleBgs() {
+    final urls = _photosForYear(_selectedYear);
+    _shuffledBgs = List<String>.from(urls)..shuffle();
+  }
+
   Future<void> _loadPhotos() async {
     try {
       final photos = await PhotoApiService().getFeed();
-      if (mounted) setState(() { _allPhotos = photos; });
+      if (mounted) setState(() { _allPhotos = photos; _reshuffleBgs(); });
     } catch (_) {
     }
   }
@@ -265,7 +279,7 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
   }
 
   void _changeYear(int y) {
-    setState(() { _selectedYear = y; _currentSlide = 0; });
+    setState(() { _selectedYear = y; _currentSlide = 0; _reshuffleBgs(); });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_pageController.hasClients) _pageController.jumpToPage(0);
     });
@@ -275,18 +289,24 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
     void next() => _pageController.nextPage(duration: 350.ms, curve: Curves.easeInOut);
     void prev() => _pageController.previousPage(duration: 350.ms, curve: Curves.easeInOut);
 
+    // Usa el orden barajado fijo (calculado al cargar/cambiar año) para que
+    // no cambie en cada rebuild. Cada slide toma la siguiente foto sin repetir.
+    int bgIdx = 0;
+    String? bg() => bgIdx < _shuffledBgs.length ? _shuffledBgs[bgIdx++] : null;
+
     return [
-      _IntroSlide(key: ValueKey('intro_$_selectedYear'), summary: s, years: years, selectedYear: _selectedYear, onYearChanged: _changeYear, onNext: next),
-      _TotalSlide(key: ValueKey('total_$_selectedYear'), summary: s, onNext: next, onPrev: prev),
+      _IntroSlide(key: ValueKey('intro_$_selectedYear'), summary: s, years: years, selectedYear: _selectedYear, onYearChanged: _changeYear, onNext: next, bgImageUrl: bg()),
+      _TotalSlide(key: ValueKey('total_$_selectedYear'), summary: s, onNext: next, onPrev: prev, bgImageUrl: bg()),
       if (s.topArtist != '—')
+        // El artista usa su propia portada de concierto; si no la tiene, cae a recuerdos.
         _ArtistSlide(key: ValueKey('artist_$_selectedYear'), summary: s, onNext: next, onPrev: prev),
-      _VarietySlide(key: ValueKey('variety_$_selectedYear'), summary: s, onNext: next, onPrev: prev),
+      _VarietySlide(key: ValueKey('variety_$_selectedYear'), summary: s, onNext: next, onPrev: prev, bgImageUrl: bg()),
       if (s.topCity != '—')
-        _CitySlide(key: ValueKey('city_$_selectedYear'), summary: s, onNext: next, onPrev: prev),
+        _CitySlide(key: ValueKey('city_$_selectedYear'), summary: s, onNext: next, onPrev: prev, bgImageUrl: bg()),
       if (s.topMonth != '—' && s.monthCounts.isNotEmpty)
-        _MonthSlide(key: ValueKey('month_$_selectedYear'), summary: s, onNext: next, onPrev: prev),
+        _MonthSlide(key: ValueKey('month_$_selectedYear'), summary: s, onNext: next, onPrev: prev, bgImageUrl: bg()),
       if (s.avgRating > 0)
-        _RatingSlide(key: ValueKey('rating_$_selectedYear'), summary: s, onNext: next, onPrev: prev),
+        _RatingSlide(key: ValueKey('rating_$_selectedYear'), summary: s, onNext: next, onPrev: prev, bgImageUrl: bg()),
       if (imgs.isNotEmpty)
         _PhotosSlide(key: ValueKey('photos_$_selectedYear'), imageUrls: imgs, year: _selectedYear, onNext: next, onPrev: prev),
       _ClosingSlide(key: ValueKey('closing_$_selectedYear'), summary: s, shareKey: _shareKey, sharing: _sharing, onShare: _share, onPrev: prev),
@@ -295,6 +315,12 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Si el año seleccionado es el año actual y aún no es diciembre → teaser.
+    final now = DateTime.now();
+    if (_selectedYear == now.year && now.month < 12) {
+      return _WrapTeaser(year: _selectedYear, onClose: () => context.pop());
+    }
+
     final concertsAsync = ref.watch(concertsProvider);
     return Scaffold(
       backgroundColor: Colors.black,
@@ -387,17 +413,21 @@ class _SlideBase extends StatelessWidget {
   final Widget child;
   final VoidCallback? onNext;
   final VoidCallback? onPrev;
+  /// URL de imagen opcional para mostrar difuminada sobre el gradiente.
+  final String? imageUrl;
 
   const _SlideBase({
     required this.colors,
     required this.child,
     this.onNext,
     this.onPrev,
+    this.imageUrl,
   });
 
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
+    final hasImg = imageUrl != null && imageUrl!.isNotEmpty;
     return Stack(
       children: [
         // Gradient background — also tap zone
@@ -409,12 +439,44 @@ class _SlideBase extends StatelessWidget {
               onNext?.call();
             }
           },
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: colors),
-            ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Base gradient (siempre presente como fallback de color)
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: colors,
+                  ),
+                ),
+              ),
+              // Foto difuminada encima del gradiente
+              if (hasImg) ...[
+                ImageFiltered(
+                  imageFilter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2, tileMode: TileMode.clamp),
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    placeholder: (ctx, url) => const SizedBox.shrink(),
+                    errorWidget: (ctx, url, err) => const SizedBox.shrink(),
+                  ),
+                ),
+                // Overlay oscuro para que el texto siga legible
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xCC000000), Color(0xB3000000)],
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         // Slide content (buttons here absorb their own taps first)
@@ -434,6 +496,7 @@ class _IntroSlide extends StatelessWidget {
   final int selectedYear;
   final ValueChanged<int> onYearChanged;
   final VoidCallback onNext;
+  final String? bgImageUrl;
 
   const _IntroSlide({
     super.key,
@@ -442,12 +505,14 @@ class _IntroSlide extends StatelessWidget {
     required this.selectedYear,
     required this.onYearChanged,
     required this.onNext,
+    this.bgImageUrl,
   });
 
   @override
   Widget build(BuildContext context) {
     return _SlideBase(
       colors: const [Color(0xFF0D0005), Color(0xFF3A0010), Color(0xFF1A000A)],
+      imageUrl: bgImageUrl,
       onNext: onNext,
       child: SafeArea(
         child: Padding(
@@ -543,13 +608,15 @@ class _TotalSlide extends StatelessWidget {
   final _YearSummary summary;
   final VoidCallback onNext;
   final VoidCallback onPrev;
+  final String? bgImageUrl;
 
-  const _TotalSlide({super.key, required this.summary, required this.onNext, required this.onPrev});
+  const _TotalSlide({super.key, required this.summary, required this.onNext, required this.onPrev, this.bgImageUrl});
 
   @override
   Widget build(BuildContext context) {
     return _SlideBase(
       colors: const [Color(0xFF08001F), Color(0xFF1A0050), Color(0xFF0D0030)],
+      imageUrl: bgImageUrl,
       onNext: onNext, onPrev: onPrev,
       child: SafeArea(
         child: Padding(
@@ -599,8 +666,9 @@ class _ArtistSlide extends StatelessWidget {
   final _YearSummary summary;
   final VoidCallback onNext;
   final VoidCallback onPrev;
+  final String? bgImageUrl;
 
-  const _ArtistSlide({super.key, required this.summary, required this.onNext, required this.onPrev});
+  const _ArtistSlide({super.key, required this.summary, required this.onNext, required this.onPrev, this.bgImageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -612,6 +680,7 @@ class _ArtistSlide extends StatelessWidget {
 
     return _SlideBase(
       colors: const [Color(0xFF00050F), Color(0xFF001A4A), Color(0xFF001030)],
+      imageUrl: bgImageUrl ?? summary.topArtistImageUrl,
       onNext: onNext, onPrev: onPrev,
       child: SafeArea(
         child: Padding(
@@ -685,13 +754,15 @@ class _VarietySlide extends StatelessWidget {
   final _YearSummary summary;
   final VoidCallback onNext;
   final VoidCallback onPrev;
+  final String? bgImageUrl;
 
-  const _VarietySlide({super.key, required this.summary, required this.onNext, required this.onPrev});
+  const _VarietySlide({super.key, required this.summary, required this.onNext, required this.onPrev, this.bgImageUrl});
 
   @override
   Widget build(BuildContext context) {
     return _SlideBase(
       colors: const [Color(0xFF000F0F), Color(0xFF00352A), Color(0xFF001A15)],
+      imageUrl: bgImageUrl,
       onNext: onNext, onPrev: onPrev,
       child: SafeArea(
         child: Padding(
@@ -768,13 +839,15 @@ class _CitySlide extends StatelessWidget {
   final _YearSummary summary;
   final VoidCallback onNext;
   final VoidCallback onPrev;
+  final String? bgImageUrl;
 
-  const _CitySlide({super.key, required this.summary, required this.onNext, required this.onPrev});
+  const _CitySlide({super.key, required this.summary, required this.onNext, required this.onPrev, this.bgImageUrl});
 
   @override
   Widget build(BuildContext context) {
     return _SlideBase(
       colors: const [Color(0xFF100500), Color(0xFF3D1200), Color(0xFF1A0800)],
+      imageUrl: bgImageUrl,
       onNext: onNext, onPrev: onPrev,
       child: SafeArea(
         child: Padding(
@@ -815,8 +888,9 @@ class _MonthSlide extends StatelessWidget {
   final _YearSummary summary;
   final VoidCallback onNext;
   final VoidCallback onPrev;
+  final String? bgImageUrl;
 
-  const _MonthSlide({super.key, required this.summary, required this.onNext, required this.onPrev});
+  const _MonthSlide({super.key, required this.summary, required this.onNext, required this.onPrev, this.bgImageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -827,6 +901,7 @@ class _MonthSlide extends StatelessWidget {
 
     return _SlideBase(
       colors: const [Color(0xFF100800), Color(0xFF3D2200), Color(0xFF1E1000)],
+      imageUrl: bgImageUrl,
       onNext: onNext, onPrev: onPrev,
       child: SafeArea(
         child: Padding(
@@ -905,14 +980,16 @@ class _RatingSlide extends StatelessWidget {
   final _YearSummary summary;
   final VoidCallback onNext;
   final VoidCallback onPrev;
+  final String? bgImageUrl;
 
-  const _RatingSlide({super.key, required this.summary, required this.onNext, required this.onPrev});
+  const _RatingSlide({super.key, required this.summary, required this.onNext, required this.onPrev, this.bgImageUrl});
 
   @override
   Widget build(BuildContext context) {
     final rating = summary.avgRating;
     return _SlideBase(
       colors: const [Color(0xFF0F0C00), Color(0xFF3D3000), Color(0xFF1F1800)],
+      imageUrl: bgImageUrl,
       onNext: onNext, onPrev: onPrev,
       child: SafeArea(
         child: Padding(
@@ -1240,6 +1317,247 @@ class _MiniBox extends StatelessWidget {
             Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, height: 1.2), textAlign: TextAlign.center),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pantalla teaser — aparece cuando el Wrapped del año actual aún no está listo
+// (antes de diciembre)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _WrapTeaser extends StatelessWidget {
+  final int year;
+  final VoidCallback onClose;
+
+  const _WrapTeaser({required this.year, required this.onClose});
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final monthsLeft = 12 - now.month; // meses que faltan hasta diciembre
+    const monthLabels = ['E','F','M','A','M','J','J','A','S','O','N','D'];
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF07070F),
+      body: Stack(
+        children: [
+          // Watermark año
+          Positioned.fill(
+            child: Center(
+              child: Text(
+                '$year',
+                style: const TextStyle(
+                  fontSize: 148,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -6,
+                  color: Color(0x09FFFFFF),
+                  height: 1,
+                ),
+              ).animate(onPlay: (c) => c.repeat(reverse: true))
+                  .custom(duration: 5.seconds, builder: (_, v, child) =>
+                      Opacity(opacity: 0.5 + v * 0.5, child: child)),
+            ),
+          ),
+
+          // Contenido principal
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(32, 64, 32, 48),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Spacer(),
+
+                  // Emoji animado
+                  const Text('🎟️', style: TextStyle(fontSize: 52))
+                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                      .slideY(begin: 0, end: -0.12, duration: 2.seconds, curve: Curves.easeInOut),
+
+                  const SizedBox(height: 24),
+
+                  // Label
+                  Text(
+                    'Tu año en conciertos',
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 14, fontWeight: FontWeight.w500),
+                  ).animate().fadeIn(),
+
+                  const SizedBox(height: 10),
+
+                  // Headline
+                  RichText(
+                    text: TextSpan(
+                      style: const TextStyle(fontSize: 46, fontWeight: FontWeight.w900, height: 0.95, letterSpacing: -2),
+                      children: [
+                        const TextSpan(text: 'Tu ', style: TextStyle(color: Colors.white)),
+                        const TextSpan(text: 'Wrapped\n', style: TextStyle(color: Color(0xFFE53935))),
+                        TextSpan(text: 'del $year', style: const TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ).animate(delay: 100.ms).fadeIn().slideY(begin: 0.3, curve: Curves.easeOutCubic),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'llega en diciembre',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.35), letterSpacing: -0.5),
+                  ).animate(delay: 200.ms).fadeIn(),
+
+                  const SizedBox(height: 36),
+
+                  // Dots de meses
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'PROGRESO DEL AÑO',
+                        style: TextStyle(fontSize: 10, letterSpacing: 1.8, color: Colors.white.withValues(alpha: 0.22), fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        monthsLeft == 1 ? '1 mes para diciembre' : '$monthsLeft meses para diciembre',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFFFFB300)),
+                      ),
+                    ],
+                  ).animate(delay: 300.ms).fadeIn(),
+
+                  const SizedBox(height: 12),
+
+                  Row(
+                    children: List.generate(12, (i) {
+                      final month = i + 1;
+                      final isDone = month < now.month;
+                      final isCurrent = month == now.month;
+
+                      Color bg;
+                      Color fg;
+                      if (isCurrent) {
+                        bg = const Color(0xFFE53935);
+                        fg = Colors.white;
+                      } else if (isDone) {
+                        bg = const Color(0xFFE53935).withValues(alpha: 0.22);
+                        fg = const Color(0xFFE53935).withValues(alpha: 0.8);
+                      } else {
+                        bg = Colors.white.withValues(alpha: 0.07);
+                        fg = Colors.white.withValues(alpha: 0.22);
+                      }
+
+                      return Expanded(
+                        child: AnimatedContainer(
+                          duration: 300.ms,
+                          margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color: bg,
+                            shape: BoxShape.circle,
+                            boxShadow: isCurrent ? [
+                              BoxShadow(color: const Color(0xFFE53935).withValues(alpha: 0.5), blurRadius: 10, spreadRadius: 1),
+                            ] : null,
+                          ),
+                          child: Center(
+                            child: Text(
+                              monthLabels[i],
+                              style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: fg),
+                            ),
+                          ),
+                        ).animate(delay: (320 + i * 40).ms).fadeIn().scale(begin: const Offset(0.5, 0.5)),
+                      );
+                    }),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Teaser card con stats difuminados
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.055),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.09)),
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'TU HISTORIA ESTE AÑO',
+                          style: TextStyle(fontSize: 9, letterSpacing: 2, color: Colors.white.withValues(alpha: 0.22), fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 16),
+                        ImageFiltered(
+                          imageFilter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: Row(
+                            children: [
+                              _TeaserStat(num: '—', label: 'conciertos'),
+                              Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.08), margin: const EdgeInsets.symmetric(horizontal: 18)),
+                              _TeaserStat(num: '—', label: 'artistas'),
+                              Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.08), margin: const EdgeInsets.symmetric(horizontal: 18)),
+                              _TeaserStat(num: '—', label: 'ciudades'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ).animate(delay: 600.ms).fadeIn().slideY(begin: 0.2),
+
+                  const Spacer(),
+                ],
+              ),
+            ),
+          ),
+
+          // Barra de progreso y botón cerrar (arriba)
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: List.generate(9, (_) =>
+                        Expanded(child: Container(
+                          height: 3,
+                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.22), borderRadius: BorderRadius.circular(2)),
+                        )),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: onClose,
+                    child: Container(
+                      width: 32, height: 32,
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+                      child: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TeaserStat extends StatelessWidget {
+  final String num;
+  final String label;
+  const _TeaserStat({required this.num, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(num, style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: Colors.white, height: 1, letterSpacing: -1)),
+          const SizedBox(height: 5),
+          Text(label, style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.4), fontWeight: FontWeight.w500)),
+        ],
       ),
     );
   }

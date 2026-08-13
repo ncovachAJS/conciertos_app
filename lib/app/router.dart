@@ -160,7 +160,11 @@ final appRouter = GoRouter(
         ),
         GoRoute(
           path: '/annual-summary',
-          builder: (context, state) => const AnnualSummaryPage(),
+          builder: (context, state) {
+            final yearStr = state.uri.queryParameters['year'];
+            final year = yearStr != null ? int.tryParse(yearStr) : null;
+            return AnnualSummaryPage(initialYear: year);
+          },
         ),
         GoRoute(
           path: '/spotify-import',
