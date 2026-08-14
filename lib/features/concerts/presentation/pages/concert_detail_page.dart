@@ -27,6 +27,8 @@ import '../../../setlist/domain/entities/setlist.dart';
 import '../../../setlist/presentation/widgets/setlist_section.dart';
 import '../../../spotify/data/services/spotify_search_service.dart';
 import '../../../spotify/domain/entities/spotify_artist.dart';
+import '../../../spotify/presentation/widgets/spotify_top_tracks_section.dart';
+import '../../../../shared/widgets/shimmer_box.dart';
 import '../../domain/entities/concert.dart';
 
 class ConcertDetailPage extends ConsumerStatefulWidget {
@@ -104,11 +106,19 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     setState(() => _loadingSpotify = true);
     try {
       final artist = await _spotifyService.searchArtist(query.trim());
-      if (mounted) setState(() => _spotifyArtist = artist);
+      if (!mounted) return;
+      if (artist != null) {
+        setState(() => _spotifyArtist = artist);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Artista no encontrado en Spotify: "${query.trim()}"')),
+        );
+      }
     } catch (e) {
+      debugPrint('Spotify search error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).artistNotFound('$e'))),
+          SnackBar(content: Text('Error al buscar en Spotify: $e')),
         );
       }
     } finally {
@@ -380,13 +390,73 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
           ],
 
           // Card de Spotify
-          if (!_loadingSpotify && _spotifyArtist != null) ...[
-            const SizedBox(height: 20),
+          const SizedBox(height: 20),
+          if (_loadingSpotify)
+            // Skeleton mientras busca el artista
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const ShimmerBox(width: 56, height: 56, borderRadius: 28),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          ShimmerFill(height: 14, borderRadius: 7),
+                          SizedBox(height: 8),
+                          ShimmerBox(width: 120, height: 11, borderRadius: 6),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else if (_spotifyArtist != null) ...[
             _SpotifyCard(
               artist: _spotifyArtist!,
               onSearchTap: _showSpotifySearch,
             ),
-          ],
+            const SizedBox(height: 12),
+            SpotifyTopTracksSection(artist: _spotifyArtist!),
+          ] else
+            // Artista no encontrado automáticamente → búsqueda manual
+            GestureDetector(
+              onTap: _showSpotifySearch,
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40, height: 40,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF1DB954),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.music_note_rounded, color: Colors.black, size: 22),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Vincular artista de Spotify',
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                            SizedBox(height: 2),
+                            Text('Ver canciones populares y perfil',
+                                style: TextStyle(color: Colors.white54, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.search_rounded, color: Colors.white38, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
           const SizedBox(height: 24),
 
