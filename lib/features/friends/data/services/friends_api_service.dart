@@ -119,4 +119,14 @@ class FriendsApiService {
     final List list = jsonDecode(response.body);
     return list.map((e) => ConcertModel.fromJson(e)).toList();
   }
+
+  Future<List<Concert>> getFriendAllConcerts(String friendId) async {
+    final response = await http.get(
+      Uri.parse(ApiConfig.friendAllConcertsEndpoint(friendId)),
+      headers: await _headers(),
+    );
+    if (response.statusCode != 200) throw Exception(response.body);
+    final List list = jsonDecode(response.body);
+    return list.map((e) => ConcertModel.fromJson(e)).toList();
+  }
 }

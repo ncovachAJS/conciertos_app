@@ -105,22 +105,21 @@ class _YearSummary {
       return m.values.fold(0, math.max);
     }
 
-    // Artista del año: el de mayor valoración media.
-    // Agrupa las valoraciones por artista y calcula la media.
+    // Artista del año: el de mayor valoración media (sub-valoraciones).
     // Si no hay ninguno valorado, cae de vuelta al más visto.
-    final artistRatingSum = <String, int>{};
+    final artistRatingSum = <String, double>{};
     final artistRatingCount = <String, int>{};
     final artistVisitCount = <String, int>{};
     for (final x in c) {
       final a = x.artist.trim();
       if (a.isEmpty) continue;
       artistVisitCount[a] = (artistVisitCount[a] ?? 0) + 1;
-      if (x.rating > 0) {
-        artistRatingSum[a] = (artistRatingSum[a] ?? 0) + x.rating;
+      if (x.hasDetailedRating) {
+        artistRatingSum[a] = (artistRatingSum[a] ?? 0) + x.detailedAvg;
         artistRatingCount[a] = (artistRatingCount[a] ?? 0) + 1;
       }
     }
-    // Media por artista (solo los que tienen al menos una valoración)
+    // Media por artista (solo los que tienen al menos una valoración detallada)
     final artistAvg = {
       for (final a in artistRatingSum.keys)
         a: artistRatingSum[a]! / artistRatingCount[a]!,
@@ -157,10 +156,10 @@ class _YearSummary {
       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
     ];
 
-    final rated = c.where((x) => x.rating > 0).toList();
+    final rated = c.where((x) => x.hasDetailedRating).toList();
     final avg = rated.isEmpty
         ? 0.0
-        : rated.fold<int>(0, (s, x) => s + x.rating) / rated.length;
+        : rated.fold<double>(0, (s, x) => s + x.detailedAvg) / rated.length;
 
     final festivalSet = <String>{};
     for (final x in c) {

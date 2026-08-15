@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -65,6 +66,8 @@ class ConcertApiService {
         .timeout(_kTimeout);
 
     if (response.statusCode != 201) {
+      debugPrint('❌ addConcert ${response.statusCode}: ${response.body}');
+      debugPrint('❌ body enviado: ${jsonEncode(body)}');
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
 
@@ -90,6 +93,7 @@ class ConcertApiService {
         .timeout(_kTimeout);
 
     if (response.statusCode != 200) {
+      debugPrint('❌ updateConcert ${response.statusCode}: ${response.body}');
       throw Exception('Error ${response.statusCode}: ${response.body}');
     }
   }

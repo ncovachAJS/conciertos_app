@@ -219,18 +219,31 @@ class ConcertGridCard extends StatelessWidget {
                     ],
                   ),
                   if (concert.isPastConcert) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: List.generate(5, (i) {
-                        return Icon(
-                          i < concert.rating
-                              ? Icons.star_rounded
-                              : Icons.star_outline_rounded,
-                          color: Colors.amber,
-                          size: 16,
-                        );
-                      }),
-                    ),
+                    const SizedBox(height: 6),
+                    if (concert.hasDetailedRating)
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded,
+                              color: Colors.amber, size: 14),
+                          const SizedBox(width: 3),
+                          Text(
+                            concert.detailedAvg.toStringAsFixed(1),
+                            style: const TextStyle(
+                              color: Colors.amber,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Text(
+                        'Sin valorar',
+                        style: TextStyle(
+                          color: Colors.amber.withOpacity(0.45),
+                          fontSize: 11,
+                        ),
+                      ),
                   ],
                 ],
               ),

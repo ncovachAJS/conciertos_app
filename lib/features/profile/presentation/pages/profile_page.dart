@@ -21,6 +21,7 @@ import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../widgets/achievement_toast.dart';
 import '../widgets/achievements_widget.dart';
 import '../widgets/profile_card.dart';
+import '../widgets/top_artists_widget.dart';
 import 'about_page.dart';
 import 'settings_page.dart';
 
@@ -376,6 +377,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
 
               const SizedBox(height: 30),
+
+              // ── Mis artistas ─────────────────────────────────────────
+              if (concerts.isNotEmpty)
+                TopArtistsWidget(concerts: concerts),
+
+              if (concerts.isNotEmpty)
+                const SizedBox(height: 30),
 
               if (auth.user == null) ...[
                 FilledButton.icon(

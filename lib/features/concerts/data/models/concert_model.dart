@@ -16,6 +16,11 @@ class ConcertModel extends Concert {
     required super.favorite,
     required super.venue,
     super.city = '',
+    super.soundRating = 0,
+    super.atmosphereRating = 0,
+    super.setlistRating = 0,
+    super.valueRating = 0,
+    super.artistRating = 0,
     super.participantIds = const [],
     super.participants = const [],
     super.userId = '',
@@ -75,6 +80,11 @@ class ConcertModel extends Concert {
       city: json['city']?.toString() ?? '',
       date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
       rating: json['rating'] ?? 0,
+      soundRating: json['soundRating'] as int? ?? 0,
+      atmosphereRating: json['atmosphereRating'] as int? ?? 0,
+      setlistRating: json['setlistRating'] as int? ?? 0,
+      valueRating: json['valueRating'] as int? ?? 0,
+      artistRating: json['artistRating'] as int? ?? 0,
       liked: json['liked'] ?? false,
       participantIds: participantIds,
       participants: participants,
@@ -96,6 +106,11 @@ class ConcertModel extends Concert {
       date: concert.date,
       imageUrl: concert.imageUrl,
       rating: concert.rating,
+      soundRating: concert.soundRating,
+      atmosphereRating: concert.atmosphereRating,
+      setlistRating: concert.setlistRating,
+      valueRating: concert.valueRating,
+      artistRating: concert.artistRating,
       liked: concert.liked,
       favorite: concert.favorite,
       venue: concert.venue,
@@ -120,6 +135,11 @@ class ConcertModel extends Concert {
     'date': date.toIso8601String(),
     'imageUrl': imageUrl,
     'rating': rating,
+    'soundRating': soundRating,
+    'atmosphereRating': atmosphereRating,
+    'setlistRating': setlistRating,
+    'valueRating': valueRating,
+    'artistRating': artistRating,
     'liked': liked,
     'favorite': favorite,
     'venue': venue,
@@ -160,6 +180,11 @@ class ConcertModel extends Concert {
     if (price > 0) json['price'] = price;
     if (notes.isNotEmpty) json['description'] = notes;
     if (genre.isNotEmpty) json['genre'] = genre;
+    if (soundRating > 0) json['soundRating'] = soundRating;
+    if (atmosphereRating > 0) json['atmosphereRating'] = atmosphereRating;
+    if (setlistRating > 0) json['setlistRating'] = setlistRating;
+    if (valueRating > 0) json['valueRating'] = valueRating;
+    if (artistRating > 0) json['artistRating'] = artistRating;
     return json;
   }
 

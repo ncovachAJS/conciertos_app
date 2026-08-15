@@ -71,6 +71,7 @@ class FriendProfilePage extends ConsumerStatefulWidget {
 class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
   final _friendsApi = FriendsApiService();
   List<Concert> _friendUpcoming = [];
+  List<Concert> _friendAllConcerts = [];
   bool _loadingFriendConcerts = false;
   List<Achievement>? _friendAchievements;
 
@@ -86,11 +87,13 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
       final results = await Future.wait([
         _friendsApi.getFriendUpcomingConcerts(widget.friend.id),
         _friendsApi.getFriendStats(widget.friend.id),
+        _friendsApi.getFriendAllConcerts(widget.friend.id),
       ]);
       if (mounted) {
         setState(() {
           _friendUpcoming = results[0] as List<Concert>;
           _friendAchievements = AchievementsEngine.compute(results[1] as UserStats);
+          _friendAllConcerts = results[2] as List<Concert>;
         });
       }
     } catch (e) {
@@ -153,6 +156,23 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
             children: [
               // ── Cabecera de perfil ─────────────────────────────────────
               _ProfileHeader(friend: widget.friend, cs: cs),
+              const SizedBox(height: 12),
+
+              // ── Botón Comparar estadísticas ────────────────────────────
+              OutlinedButton.icon(
+                onPressed: () => context.push(
+                  '/compare-stats',
+                  extra: {
+                    'friend': widget.friend,
+                    'friendConcerts': _friendAllConcerts,
+                  },
+                ),
+                icon: const Icon(Icons.compare_arrows_rounded),
+                label: const Text('Comparar estadísticas'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(44),
+                ),
+              ),
               const SizedBox(height: 24),
 
               // ── Logros del amigo ───────────────────────────────────────

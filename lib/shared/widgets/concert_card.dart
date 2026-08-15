@@ -267,28 +267,37 @@ class ConcertCard extends StatelessWidget {
                     const SizedBox(height: 18),
                     Row(
                       children: [
-                        Row(
-                          children: List.generate(5, (index) {
-                            return GestureDetector(
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                onRatingChanged?.call(
-                                  concert.rating == index + 1 ? 0 : index + 1,
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 4),
-                                child: Icon(
-                                  index < concert.rating
-                                      ? Icons.star_rounded
-                                      : Icons.star_outline_rounded,
-                                  color: Colors.amber,
-                                  size: 24,
-                                ),
+                        if (concert.hasDetailedRating) ...[
+                          // Estrellas basadas en la media de sub-valoraciones
+                          Row(
+                            children: List.generate(5, (i) => Padding(
+                              padding: const EdgeInsets.only(right: 3),
+                              child: Icon(
+                                i < concert.detailedAvg.round()
+                                    ? Icons.star_rounded
+                                    : Icons.star_outline_rounded,
+                                color: Colors.amber,
+                                size: 22,
                               ),
-                            );
-                          }),
-                        ),
+                            )),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            concert.detailedAvg.toStringAsFixed(1),
+                            style: const TextStyle(
+                              color: Colors.amber,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ] else
+                          Text(
+                            'Sin valorar',
+                            style: TextStyle(
+                              color: cs.onSurface.withOpacity(0.4),
+                              fontSize: 13,
+                            ),
+                          ),
                         const Spacer(),
                         IconButton(
                           onPressed: onLike == null ? null : () {

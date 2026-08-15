@@ -66,7 +66,20 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   String? _imageUrl;
 
   bool _saving = false;
-  int _rating = 0;
+  int _soundRating = 0;
+  int _atmosphereRating = 0;
+  int _setlistRating = 0;
+  int _valueRating = 0;
+  int _artistRating = 0;
+
+  /// Media redondeada de las 5 sub-valoraciones (solo las > 0 cuentan).
+  int get _computedRating {
+    final vals = [_soundRating, _atmosphereRating, _setlistRating, _valueRating, _artistRating]
+        .where((v) => v > 0)
+        .toList();
+    if (vals.isEmpty) return 0;
+    return (vals.fold<int>(0, (s, v) => s + v) / vals.length).round();
+  }
   bool _liked = false;
   bool _favorite = false;
   List<String> _taggedFriendIds = [];
@@ -97,7 +110,11 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       );
     }
     if (widget.concert != null) {
-      _rating = widget.concert!.rating;
+      _soundRating = widget.concert!.soundRating;
+      _atmosphereRating = widget.concert!.atmosphereRating;
+      _setlistRating = widget.concert!.setlistRating;
+      _valueRating = widget.concert!.valueRating;
+      _artistRating = widget.concert!.artistRating;
       _liked = widget.concert!.liked;
       _favorite = widget.concert!.favorite;
       _artistController.text = widget.concert!.artist;
@@ -269,7 +286,12 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         name: _nameController.text.trim(),
         date: concertDate,
         imageUrl: _imageUrl ?? '',
-        rating: _rating,
+        rating: _computedRating,
+        soundRating: _soundRating,
+        atmosphereRating: _atmosphereRating,
+        setlistRating: _setlistRating,
+        valueRating: _valueRating,
+        artistRating: _artistRating,
         liked: _liked,
         favorite: _favorite,
         venue: _venueController.text.trim(),
@@ -295,8 +317,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         // Navegamos al detalle usando el concierto recién creado
         context.pushReplacement('/concert-detail', extra: created);
       } else {
-        // Edición — actualizamos y volvemos
+        // Edición — actualizamos, recargamos el provider y volvemos
         await ConcertApiService().updateConcert(concert);
+        ref.read(concertsProvider.notifier).reload().ignore();
         if (!mounted) return;
         context.pop(true);
       }
@@ -557,49 +580,105 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ── Valoración ────────────────────────────────────
+                    Row(
+                      children: [
+                        const Text(
+                          'Valoración',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        // Vista previa de la media calculada
+                        if (_computedRating > 0) ...[
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(5, (i) => Icon(
+                              i < _computedRating
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              color: Colors.amber,
+                              size: 20,
+                            )),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _computedRating.toString(),
+                            style: const TextStyle(
+                              color: Colors.amber,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ] else
+                          Text(
+                            'Sin valorar',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                              fontSize: 13,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
                     Text(
-                      l.ratingTitle,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      'La valoración general se calcula como la media de los criterios.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(5, (index) {
-                          final active = index < _rating;
-                          return GestureDetector(
-                            onTap: () => setState(
-                              () => _rating = (_rating == index + 1)
-                                  ? 0
-                                  : index + 1,
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: Column(
+                          children: [
+                            _SubRatingRow(
+                              icon: Icons.mic_external_on_rounded,
+                              label: 'Artista',
+                              value: _artistRating,
+                              onChanged: (v) =>
+                                  setState(() => _artistRating = v),
                             ),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              margin: const EdgeInsets.symmetric(horizontal: 2),
-                              child: Icon(
-                                active
-                                    ? Icons.star_rounded
-                                    : Icons.star_outline_rounded,
-                                color: Colors.amber,
-                                size: active ? 44 : 40,
-                              ),
+                            const Divider(height: 1),
+                            _SubRatingRow(
+                              icon: Icons.volume_up_rounded,
+                              label: 'Sonido',
+                              value: _soundRating,
+                              onChanged: (v) =>
+                                  setState(() => _soundRating = v),
                             ),
-                          );
-                        }),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Center(
-                      child: Text(
-                        _rating == 0
-                            ? l.ratingNone
-                            : l.ratingStars(_rating),
-                        style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 15,
+                            const Divider(height: 1),
+                            _SubRatingRow(
+                              icon: Icons.people_rounded,
+                              label: 'Ambiente',
+                              value: _atmosphereRating,
+                              onChanged: (v) =>
+                                  setState(() => _atmosphereRating = v),
+                            ),
+                            const Divider(height: 1),
+                            _SubRatingRow(
+                              icon: Icons.queue_music_rounded,
+                              label: 'Setlist',
+                              value: _setlistRating,
+                              onChanged: (v) =>
+                                  setState(() => _setlistRating = v),
+                            ),
+                            const Divider(height: 1),
+                            _SubRatingRow(
+                              icon: Icons.attach_money_rounded,
+                              label: 'Precio / valor',
+                              value: _valueRating,
+                              onChanged: (v) =>
+                                  setState(() => _valueRating = v),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -765,6 +844,61 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       ),
       child: const Center(
         child: Icon(Icons.photo_camera, color: Colors.white30, size: 80),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Fila de sub-rating: icono + label + 5 estrellas pequeñas
+// ---------------------------------------------------------------------------
+
+class _SubRatingRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  const _SubRatingRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: cs.onSurface.withOpacity(0.6)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(5, (i) {
+              final active = i < value;
+              return GestureDetector(
+                onTap: () => onChanged(value == i + 1 ? 0 : i + 1),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: Icon(
+                    active ? Icons.star_rounded : Icons.star_outline_rounded,
+                    color: active ? Colors.amber : cs.onSurface.withOpacity(0.25),
+                    size: 26,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }

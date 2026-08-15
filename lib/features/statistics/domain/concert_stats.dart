@@ -26,9 +26,9 @@ class ConcertStatistics {
   int get activeYears => concerts.map((c) => c.date.year).toSet().length;
 
   double get avgRating {
-    final rated = concerts.where((c) => c.rating > 0).toList();
+    final rated = concerts.where((c) => c.hasDetailedRating).toList();
     if (rated.isEmpty) return 0;
-    return rated.fold<int>(0, (s, c) => s + c.rating) / rated.length;
+    return rated.fold<double>(0, (s, c) => s + c.detailedAvg) / rated.length;
   }
 
   Map<int, int> get byYear {
@@ -80,8 +80,9 @@ class ConcertStatistics {
 
   Map<int, int> get byRating {
     final map = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
-    for (final c in concerts.where((c) => c.rating > 0)) {
-      map[c.rating] = (map[c.rating] ?? 0) + 1;
+    for (final c in concerts.where((c) => c.hasDetailedRating)) {
+      final r = c.detailedAvg.round().clamp(1, 5);
+      map[r] = (map[r] ?? 0) + 1;
     }
     return map;
   }
@@ -213,25 +214,24 @@ class ConcertStatistics {
   }
 
   Map<int, double> get avgRatingByYear {
-    final map = <int, List<int>>{};
-    for (final c in concerts.where((c) => c.rating > 0)) {
-      (map[c.date.year] ??= []).add(c.rating);
+    final map = <int, List<double>>{};
+    for (final c in concerts.where((c) => c.hasDetailedRating)) {
+      (map[c.date.year] ??= []).add(c.detailedAvg);
     }
     return map.map(
-        (y, r) => MapEntry(y, r.fold<int>(0, (s, v) => s + v) / r.length));
+        (y, r) => MapEntry(y, r.fold<double>(0, (s, v) => s + v) / r.length));
   }
 
   List<MapEntry<String, double>> get topRatedArtists {
-    final map = <String, List<int>>{};
-    for (final c
-        in concerts.where((c) => c.rating > 0 && c.artist.trim().isNotEmpty)) {
-      (map[c.artist.trim()] ??= []).add(c.rating);
+    final map = <String, List<double>>{};
+    for (final c in concerts.where((c) => c.hasDetailedRating && c.artist.trim().isNotEmpty)) {
+      (map[c.artist.trim()] ??= []).add(c.detailedAvg);
     }
     return (map.entries
             .where((e) => e.value.length >= 2)
             .map((e) => MapEntry(
                   e.key,
-                  e.value.fold<int>(0, (s, r) => s + r) / e.value.length,
+                  e.value.fold<double>(0, (s, r) => s + r) / e.value.length,
                 ))
             .toList()
           ..sort((a, b) => b.value.compareTo(a.value)))

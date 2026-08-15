@@ -491,6 +491,12 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
           // Fotos / recuerdos
           MemoriesSection(concertId: widget.concert.id),
 
+          // Sub-valoraciones detalladas
+          if (concert.hasDetailedRating) ...[
+            const SizedBox(height: 24),
+            _SubRatingsCard(concert: concert),
+          ],
+
           const SizedBox(height: 24),
 
           // Setlist
@@ -933,6 +939,132 @@ class _ParticipantsCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tarjeta de sub-valoraciones detalladas
+// ---------------------------------------------------------------------------
+
+class _SubRatingsCard extends StatelessWidget {
+  final Concert concert;
+  const _SubRatingsCard({required this.concert});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    final items = [
+      if (concert.artistRating > 0)
+        _SubRatingItem(
+          icon: Icons.mic_external_on_rounded,
+          label: 'Artista',
+          value: concert.artistRating,
+        ),
+      if (concert.soundRating > 0)
+        _SubRatingItem(
+          icon: Icons.volume_up_rounded,
+          label: 'Sonido',
+          value: concert.soundRating,
+        ),
+      if (concert.atmosphereRating > 0)
+        _SubRatingItem(
+          icon: Icons.people_rounded,
+          label: 'Ambiente',
+          value: concert.atmosphereRating,
+        ),
+      if (concert.setlistRating > 0)
+        _SubRatingItem(
+          icon: Icons.queue_music_rounded,
+          label: 'Setlist',
+          value: concert.setlistRating,
+        ),
+      if (concert.valueRating > 0)
+        _SubRatingItem(
+          icon: Icons.attach_money_rounded,
+          label: 'Precio / valor',
+          value: concert.valueRating,
+        ),
+    ];
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.tune_rounded, color: Colors.amber),
+                SizedBox(width: 10),
+                Text(
+                  'Valoración detallada',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            for (int i = 0; i < items.length; i++) ...[
+              if (i > 0) const SizedBox(height: 12),
+              _SubRatingDetailRow(item: items[i], cs: cs),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SubRatingItem {
+  final IconData icon;
+  final String label;
+  final int value;
+  const _SubRatingItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+}
+
+class _SubRatingDetailRow extends StatelessWidget {
+  final _SubRatingItem item;
+  final ColorScheme cs;
+
+  const _SubRatingDetailRow({required this.item, required this.cs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(item.icon, size: 18, color: cs.onSurface.withOpacity(0.6)),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 100,
+          child: Text(
+            item.label,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ),
+        Expanded(
+          child: LinearProgressIndicator(
+            value: item.value / 5.0,
+            backgroundColor: cs.onSurface.withOpacity(0.1),
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+            borderRadius: BorderRadius.circular(4),
+            minHeight: 8,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          '${item.value}/5',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+        ),
+      ],
     );
   }
 }

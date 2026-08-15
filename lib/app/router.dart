@@ -33,6 +33,7 @@ import '../features/home/artist/presentation/pages/artist_page.dart';
 import '../features/friends/domain/entities/friend.dart';
 import '../features/friends/presentation/pages/friends_page.dart';
 import '../features/friends/presentation/pages/friend_profile_page.dart';
+import '../features/friends/presentation/pages/compare_stats_page.dart';
 import '../features/notifications/presentation/pages/notifications_page.dart';
 import '../features/concerts/presentation/pages/concert_map_page.dart';
 import '../features/concerts/presentation/pages/venue_page.dart';
@@ -130,6 +131,16 @@ final appRouter = GoRouter(
           builder: (context, state) {
             final friend = state.extra as Friend;
             return FriendProfilePage(friend: friend);
+          },
+        ),
+        GoRoute(
+          path: '/compare-stats',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>;
+            return CompareStatsPage(
+              friend: extra['friend'] as Friend,
+              friendConcerts: extra['friendConcerts'] as List<Concert>,
+            );
           },
         ),
         GoRoute(
