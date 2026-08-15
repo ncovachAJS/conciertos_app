@@ -130,7 +130,6 @@ class SpotifyClientService {
       // La forma más sencilla: search by artist name, type=track, ordenar por popularidad.
       final q = artistName.isNotEmpty ? artistName : artistId;
 
-      // Nota: no pasamos 'limit' explícitamente (default Spotify = 20)
       final uri = Uri.https('api.spotify.com', '/v1/search', {
         'q': q,
         'type': 'track',

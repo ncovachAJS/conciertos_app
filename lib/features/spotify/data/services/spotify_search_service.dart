@@ -18,22 +18,20 @@ class SpotifySearchService {
   Future<SpotifyArtist?> searchArtist(String artist) async {
     if (artist.trim().isEmpty) return null;
 
-    // ── 1. Intentar vía backend ──────────────────────────────────────────────
+    // ── 1. Directo a Spotify (datos completos: seguidores, géneros, imagen) ──
+    final direct = await _directClient.searchArtist(artist);
+    if (direct != null) return direct;
+
+    // ── 2. Fallback: backend propio ──────────────────────────────────────────
     try {
       final token = AuthController.instance.token;
       final uri = Uri.parse(
         '${ApiConfig.baseUrl}/spotify/artist?name=${Uri.encodeComponent(artist.trim())}',
       );
-
       final response = await http.get(
         uri,
         headers: {if (token != null) 'Authorization': 'Bearer $token'},
       );
-
-      debugPrint(
-        '[SpotifySearch] backend "${artist.trim()}" → ${response.statusCode} | ${response.body.length > 200 ? response.body.substring(0, 200) : response.body}',
-      );
-
       if (response.statusCode == 200 && response.body != 'null') {
         final decoded = jsonDecode(response.body);
         if (decoded is Map<String, dynamic>) {
@@ -44,8 +42,6 @@ class SpotifySearchService {
       debugPrint('[SpotifySearch] backend error: $e');
     }
 
-    // ── 2. Fallback: llamada directa a Spotify API ───────────────────────────
-    debugPrint('[SpotifySearch] Intentando búsqueda directa a Spotify...');
-    return _directClient.searchArtist(artist);
+    return null;
   }
 }

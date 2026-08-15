@@ -389,40 +389,34 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
             _ParticipantsCard(concert: concert),
           ],
 
-          // Card de Spotify
+          // Sección Spotify
           const SizedBox(height: 20),
           if (_loadingSpotify)
-            // Skeleton mientras busca el artista
             Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    const ShimmerBox(width: 56, height: 56, borderRadius: 28),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          ShimmerFill(height: 14, borderRadius: 7),
-                          SizedBox(height: 8),
-                          ShimmerBox(width: 120, height: 11, borderRadius: 6),
-                        ],
-                      ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  const ShimmerBox(width: double.infinity, height: 110, borderRadius: 0),
+                  Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        ShimmerFill(height: 13, borderRadius: 6),
+                        SizedBox(height: 8),
+                        ShimmerBox(width: 160, height: 11, borderRadius: 5),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             )
-          else if (_spotifyArtist != null) ...[
-            _SpotifyCard(
+          else if (_spotifyArtist != null)
+            SpotifyTopTracksSection(
               artist: _spotifyArtist!,
-              onSearchTap: _showSpotifySearch,
-            ),
-            const SizedBox(height: 12),
-            SpotifyTopTracksSection(artist: _spotifyArtist!),
-          ] else
-            // Artista no encontrado automáticamente → búsqueda manual
+              onChangeTap: _showSpotifySearch,
+            )
+          else
             GestureDetector(
               onTap: _showSpotifySearch,
               child: Card(
@@ -436,7 +430,8 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                           color: Color(0xFF1DB954),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.music_note_rounded, color: Colors.black, size: 22),
+                        child: const Icon(Icons.music_note_rounded,
+                            color: Colors.black, size: 22),
                       ),
                       const SizedBox(width: 14),
                       const Expanded(
@@ -444,14 +439,17 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Vincular artista de Spotify',
-                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 14)),
                             SizedBox(height: 2),
                             Text('Ver canciones populares y perfil',
-                                style: TextStyle(color: Colors.white54, fontSize: 12)),
+                                style: TextStyle(
+                                    color: Colors.white54, fontSize: 12)),
                           ],
                         ),
                       ),
-                      const Icon(Icons.search_rounded, color: Colors.white38, size: 20),
+                      const Icon(Icons.search_rounded,
+                          color: Colors.white38, size: 20),
                     ],
                   ),
                 ),
@@ -519,102 +517,6 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
         ],
       ),
     );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Card de Spotify
-// ---------------------------------------------------------------------------
-
-class _SpotifyCard extends StatelessWidget {
-  final SpotifyArtist artist;
-  final VoidCallback? onSearchTap;
-
-  const _SpotifyCard({required this.artist, this.onSearchTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            if (artist.image != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: CachedNetworkImage(
-                  imageUrl: artist.image!,
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => const _SpotifyPlaceholder(),
-                ),
-              )
-            else
-              const _SpotifyPlaceholder(),
-
-            const SizedBox(width: 16),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    artist.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  if (artist.genres.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      artist.genres.take(2).join(' · '),
-                      style: const TextStyle(
-                        color: Colors.white54,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                  if (artist.followers > 0) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      AppLocalizations.of(context).spotifyFollowers(_formatFollowers(artist.followers)),
-                      style: const TextStyle(
-                        color: Colors.white38,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            IconButton(
-              onPressed: onSearchTap,
-              icon: const Icon(Icons.edit_outlined),
-              tooltip: AppLocalizations.of(context).searchArtistSpotify,
-            ),
-            IconButton(
-              onPressed: () async {
-                await launchUrl(
-                  Uri.parse(artist.url),
-                  mode: LaunchMode.externalApplication,
-                );
-              },
-              icon: const Icon(Icons.open_in_new),
-              tooltip: AppLocalizations.of(context).openInSpotify,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatFollowers(int n) {
-    if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(1)}M';
-    if (n >= 1000) return '${(n / 1000).toStringAsFixed(0)}K';
-    return '$n';
   }
 }
 
@@ -962,23 +864,6 @@ class _ShareCardPlaceholder extends StatelessWidget {
       child: const Center(
         child: Icon(Icons.music_note_rounded, color: Colors.white12, size: 80),
       ),
-    );
-  }
-}
-
-class _SpotifyPlaceholder extends StatelessWidget {
-  const _SpotifyPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1DB954).withOpacity(.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Icon(Icons.music_note, color: Color(0xFF1DB954), size: 32),
     );
   }
 }

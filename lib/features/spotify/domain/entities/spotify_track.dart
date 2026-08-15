@@ -8,6 +8,7 @@ class SpotifyTrack {
   final String? albumImageUrl;
   final String spotifyUrl;
   final int popularity;
+  final bool isExplicit;
 
   const SpotifyTrack({
     required this.id,
@@ -18,6 +19,7 @@ class SpotifyTrack {
     required this.popularity,
     this.previewUrl,
     this.albumImageUrl,
+    this.isExplicit = false,
   });
 
   String get durationFormatted {
@@ -43,6 +45,7 @@ class SpotifyTrack {
           : null,
       spotifyUrl: externalUrls['spotify']?.toString() ?? '',
       popularity: json['popularity'] as int? ?? 0,
+      isExplicit: json['explicit'] as bool? ?? false,
     );
   }
 }
