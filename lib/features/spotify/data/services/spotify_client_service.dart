@@ -86,8 +86,11 @@ class SpotifyClientService {
     }
 
     try {
+      final params = <String, String>{'market': market};
+      if (artistName.isNotEmpty) params['name'] = artistName;
+
       final uri = Uri.parse(ApiConfig.spotifyTopTracksEndpoint(artistId))
-          .replace(queryParameters: {'market': market});
+          .replace(queryParameters: params);
       final response = await http
           .get(uri, headers: await _authHeaders())
           .timeout(_timeout);
