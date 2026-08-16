@@ -12,7 +12,7 @@ class User {
     required this.email,
     required this.memberNumber,
     this.avatarUrl,
-    this.isPro = true, // TODO: remove when RevenueCat is integrated
+    this.isPro = false,
   });
 
   User copyWith({

@@ -17,7 +17,7 @@ class UserModel extends User {
       email: json['email']?.toString() ?? '',
       memberNumber: (json['memberNumber'] as num?)?.toInt() ?? 0,
       avatarUrl: json['avatarUrl']?.toString(),
-      isPro: json['isPro'] as bool? ?? true, // TODO: revert to false when RevenueCat is integrated
+      isPro: json['isPro'] as bool? ?? false,
     );
   }
 }
