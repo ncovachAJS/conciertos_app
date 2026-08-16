@@ -115,6 +115,7 @@ class _ProPaywallSheet extends StatelessWidget {
           _Benefit(icon: Icons.photo_library_rounded, label: 'Fotos ilimitadas por concierto'),
           _Benefit(icon: Icons.picture_as_pdf_rounded, label: 'Exportar estadísticas a PDF'),
           _Benefit(icon: Icons.dashboard_customize_rounded, label: 'Dashboard personalizable'),
+          _Benefit(icon: Icons.palette_rounded, label: 'Temas de color exclusivos'),
           const SizedBox(height: 28),
 
           // CTA
