@@ -75,6 +75,10 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
   bool _loadingFriendConcerts = false;
   List<Achievement>? _friendAchievements;
 
+  /// Número de próximos conciertos visibles antes de expandir
+  static const _upcomingCollapsedCount = 3;
+  bool _upcomingExpanded = false;
+
   @override
   void initState() {
     super.initState();
@@ -201,12 +205,47 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                     ),
                   ),
                 )
-              else
+              else ...[
                 _ConcertList(
-                  concerts: _friendUpcoming,
+                  concerts: _upcomingExpanded
+                      ? _friendUpcoming
+                      : _friendUpcoming.take(_upcomingCollapsedCount).toList(),
                   cs: cs,
                   accent: Colors.deepPurpleAccent,
                 ),
+                if (_friendUpcoming.length > _upcomingCollapsedCount) ...[
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => setState(() => _upcomingExpanded = !_upcomingExpanded),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _upcomingExpanded
+                                ? 'Ver menos'
+                                : 'Ver ${_friendUpcoming.length - _upcomingCollapsedCount} más',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.deepPurpleAccent,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            _upcomingExpanded
+                                ? Icons.keyboard_arrow_up_rounded
+                                : Icons.keyboard_arrow_down_rounded,
+                            color: Colors.deepPurpleAccent,
+                            size: 18,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
               const SizedBox(height: 28),
 
               // ── Sección conciertos juntos ──────────────────────────────

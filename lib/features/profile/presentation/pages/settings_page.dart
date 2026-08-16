@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../app/theme_pack_provider.dart';
 import '../../../../app/theme_provider.dart';
+import '../../../../core/notifiers/annual_goal_notifier.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -140,9 +141,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (result == -1) {
       // borrar meta
       await prefs.remove(_goalPrefKey);
+      AnnualGoalNotifier.instance.value = null;
       if (mounted) setState(() => _annualGoal = null);
     } else {
       await prefs.setInt(_goalPrefKey, result);
+      AnnualGoalNotifier.instance.value = result;
       if (mounted) setState(() => _annualGoal = result);
     }
   }

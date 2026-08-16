@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../../core/notifiers/annual_goal_notifier.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
@@ -30,11 +31,27 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
   void initState() {
     super.initState();
     _loadGoal();
+    // Escucha cambios en tiempo real desde ajustes
+    AnnualGoalNotifier.instance.addListener(_onGoalChanged);
+  }
+
+  @override
+  void dispose() {
+    AnnualGoalNotifier.instance.removeListener(_onGoalChanged);
+    super.dispose();
+  }
+
+  void _onGoalChanged() {
+    if (mounted) setState(() => _goal = AnnualGoalNotifier.instance.value);
   }
 
   Future<void> _loadGoal() async {
     final prefs = await SharedPreferences.getInstance();
-    if (mounted) setState(() => _goal = prefs.getInt(_prefKey));
+    if (!mounted) return;
+    final value = prefs.getInt(_prefKey);
+    // Sincroniza con el notifier singleton al cargar
+    AnnualGoalNotifier.instance.value = value;
+    setState(() => _goal = value);
   }
 
   /// Llamado también desde settings_page para recargar tras editar.

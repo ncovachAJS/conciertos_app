@@ -86,6 +86,11 @@ class _YearSummary {
         )
         .toList();
 
+    // Para el artista del año, se priorizan los conciertos propios.
+    // Solo si no hay ninguno propio en ese año se usan también los compartidos.
+    final ownC = c.where((x) => x.userId == currentUserId || x.userId.isEmpty).toList();
+    final artistSource = ownC.isNotEmpty ? ownC : c;
+
     Map<String, int> countMap(Iterable<String> vals) {
       final m = <String, int>{};
       for (final v in vals) {
@@ -107,10 +112,11 @@ class _YearSummary {
 
     // Artista del año: el de mayor valoración media (sub-valoraciones).
     // Si no hay ninguno valorado, cae de vuelta al más visto.
+    // Se calculan SOLO desde los conciertos propios (artistSource).
     final artistRatingSum = <String, double>{};
     final artistRatingCount = <String, int>{};
     final artistVisitCount = <String, int>{};
-    for (final x in c) {
+    for (final x in artistSource) {
       final a = x.artist.trim();
       if (a.isEmpty) continue;
       artistVisitCount[a] = (artistVisitCount[a] ?? 0) + 1;
@@ -172,7 +178,7 @@ class _YearSummary {
       topArtist: bestArtist,
       topArtistCount: bestArtistCount,
       topArtistRating: bestArtistRating,
-      topArtistImageUrl: bestArtist == '—' ? '' : c
+      topArtistImageUrl: bestArtist == '—' ? '' : artistSource
           .where((x) => x.artist.trim().toLowerCase() == bestArtist.toLowerCase() && x.imageUrl.isNotEmpty)
           .map((x) => x.imageUrl)
           .firstOrNull ?? '',
