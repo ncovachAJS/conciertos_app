@@ -40,6 +40,9 @@ class _YearSummary {
   final int uniqueArtists;
   final int uniqueCities;
   final Map<int, int> monthCounts;
+  /// true cuando el artista del año proviene de conciertos compartidos
+  /// (no hay conciertos propios ese año).
+  final bool topArtistIsShared;
 
   const _YearSummary({
     required this.year,
@@ -60,6 +63,7 @@ class _YearSummary {
     required this.uniqueArtists,
     required this.uniqueCities,
     required this.monthCounts,
+    this.topArtistIsShared = false,
   });
 
   static _YearSummary from(
@@ -89,7 +93,8 @@ class _YearSummary {
     // Para el artista del año, se priorizan los conciertos propios.
     // Solo si no hay ninguno propio en ese año se usan también los compartidos.
     final ownC = c.where((x) => x.userId == currentUserId || x.userId.isEmpty).toList();
-    final artistSource = ownC.isNotEmpty ? ownC : c;
+    final artistFromShared = ownC.isEmpty && c.isNotEmpty;
+    final artistSource = artistFromShared ? c : ownC;
 
     Map<String, int> countMap(Iterable<String> vals) {
       final m = <String, int>{};
@@ -194,6 +199,7 @@ class _YearSummary {
       uniqueArtists: artistMap.length,
       uniqueCities: cityMap.length,
       monthCounts: monthCounts,
+      topArtistIsShared: artistFromShared,
     );
   }
 }
@@ -677,7 +683,10 @@ class _ArtistSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rating = summary.topArtistRating;
+    // Si el artista proviene de conciertos compartidos no mostramos la
+    // valoración (sería la del amigo, no la nuestra).
+    final isShared = summary.topArtistIsShared;
+    final rating = isShared ? 0.0 : summary.topArtistRating;
     final times = summary.topArtistCount;
     // Construye la fila de estrellas (valoración media sobre 5)
     final fullStars = rating.floor();
@@ -701,44 +710,75 @@ class _ArtistSlide extends StatelessWidget {
                 summary.topArtist.toUpperCase(),
                 style: const TextStyle(color: Colors.white, fontSize: 52, fontWeight: FontWeight.w900, height: 1.05, letterSpacing: -1),
               ).animate(delay: 150.ms).fadeIn().slideY(begin: 0.4, curve: Curves.easeOutCubic),
-              const SizedBox(height: 24),
-              // Valoración media con estrellas
-              if (rating > 0) ...[
-                Row(
-                  children: [
-                    ...List.generate(5, (i) {
-                      IconData icon;
-                      if (i < fullStars) {
-                        icon = Icons.star_rounded;
-                      } else if (i == fullStars && hasHalf) {
-                        icon = Icons.star_half_rounded;
-                      } else {
-                        icon = Icons.star_outline_rounded;
-                      }
-                      return Icon(icon, color: const Color(0xFF64B5F6), size: 28)
-                          .animate(delay: (350 + i * 80).ms).fadeIn().scale(begin: const Offset(0.4, 0.4));
-                    }),
-                    const SizedBox(width: 10),
-                    Text(
-                      rating.toStringAsFixed(1),
-                      style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 22, fontWeight: FontWeight.w700),
-                    ).animate(delay: 750.ms).fadeIn(),
-                  ],
-                ),
-                if (times > 1)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      'Lo viste $times veces',
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 15),
-                    ).animate(delay: 850.ms).fadeIn(),
+              const SizedBox(height: 16),
+
+              // Badge "concierto compartido" cuando es de un amigo
+              if (isShared) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                   ),
-              ] else ...[
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.people_rounded, color: Colors.white.withValues(alpha: 0.6), size: 14),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Concierto compartido',
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ).animate(delay: 300.ms).fadeIn(),
+                const SizedBox(height: 16),
                 Text(
-                  times > 1 ? 'Lo viste $times veces' : 'Fue especial',
+                  times > 1 ? 'Lo viste $times veces' : 'Estuviste allí',
                   style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 20, fontWeight: FontWeight.w600),
-                ).animate(delay: 350.ms).fadeIn(),
+                ).animate(delay: 400.ms).fadeIn(),
+              ] else ...[
+                // Valoración media con estrellas (solo conciertos propios)
+                if (rating > 0) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      ...List.generate(5, (i) {
+                        IconData icon;
+                        if (i < fullStars) {
+                          icon = Icons.star_rounded;
+                        } else if (i == fullStars && hasHalf) {
+                          icon = Icons.star_half_rounded;
+                        } else {
+                          icon = Icons.star_outline_rounded;
+                        }
+                        return Icon(icon, color: const Color(0xFF64B5F6), size: 28)
+                            .animate(delay: (350 + i * 80).ms).fadeIn().scale(begin: const Offset(0.4, 0.4));
+                      }),
+                      const SizedBox(width: 10),
+                      Text(
+                        rating.toStringAsFixed(1),
+                        style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 22, fontWeight: FontWeight.w700),
+                      ).animate(delay: 750.ms).fadeIn(),
+                    ],
+                  ),
+                  if (times > 1)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        'Lo viste $times veces',
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 15),
+                      ).animate(delay: 850.ms).fadeIn(),
+                    ),
+                ] else ...[
+                  Text(
+                    times > 1 ? 'Lo viste $times veces' : 'Fue especial',
+                    style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 20, fontWeight: FontWeight.w600),
+                  ).animate(delay: 350.ms).fadeIn(),
+                ],
               ],
+
               const SizedBox(height: 32),
               Text('♩ ♪ ♫ ♬', style: TextStyle(color: Colors.white.withValues(alpha: 0.15), fontSize: 32))
                   .animate(delay: 900.ms).fadeIn(),
