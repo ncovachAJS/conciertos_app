@@ -39,6 +39,11 @@ class ApiConfig {
   // Recomendaciones (proxy Ticketmaster en backend)
   static const String recommendationsEndpoint = '$baseUrl/recommendations';
 
+  // Spotify (proxy en backend — el secret vive solo en el servidor)
+  static const String spotifyArtistEndpoint = '$baseUrl/spotify/artist';
+  static String spotifyTopTracksEndpoint(String artistId) =>
+      '$baseUrl/spotify/artist/$artistId/top-tracks';
+
   // Fotos
   static String concertPhotosEndpoint(String concertId) =>
       '$concertsEndpoint/$concertId/photos';
