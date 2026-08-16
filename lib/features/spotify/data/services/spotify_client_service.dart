@@ -104,8 +104,10 @@ class SpotifyClientService {
           .map(SpotifyTrack.fromJson)
           .toList();
 
-      _tracksCache[cacheKey] = _CachedTracks(tracks, DateTime.now());
       debugPrint('[SpotifyClient] tracks obtenidas: ${tracks.length}');
+      if (tracks.isNotEmpty) {
+        _tracksCache[cacheKey] = _CachedTracks(tracks, DateTime.now());
+      }
       return tracks.take(limit).toList();
     } catch (e) {
       debugPrint('[SpotifyClient] getTopTracks error: $e');
