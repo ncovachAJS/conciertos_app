@@ -251,14 +251,27 @@ class _SpotifyTopTracksSectionState extends State<SpotifyTopTracksSection> {
           // ── Label canciones ───────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 4),
-            child: Text(
-              'CANCIONES POPULARES',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface.withValues(alpha: 0.35),
-                letterSpacing: 0.8,
-              ),
+            child: Row(
+              children: [
+                Text(
+                  'CANCIONES POPULARES',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface.withValues(alpha: 0.35),
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const Spacer(),
+                // Atribución requerida por las ToS de Spotify
+                Text(
+                  'Datos de Spotify',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: cs.onSurface.withValues(alpha: 0.3),
+                  ),
+                ),
+              ],
             ),
           ),
 

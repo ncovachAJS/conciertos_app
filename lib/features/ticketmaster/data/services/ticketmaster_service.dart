@@ -1,108 +1,95 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../config/api_config.dart';
 import '../models/ticketmaster_event_model.dart';
 
+/// Servicio de recomendaciones de conciertos.
+///
+/// Las llamadas van al backend propio en lugar de a Ticketmaster directamente,
+/// para no exponer la API key en el APK/IPA.
 class TicketmasterService {
-  static const String _baseUrl =
-      'https://app.ticketmaster.com/discovery/v2/events.json';
-  static const Duration _timeout = Duration(seconds: 10);
+  static const Duration _timeout = Duration(seconds: 15);
   static const Duration _cacheDuration = Duration(minutes: 15);
-  static const int _batchSize = 4;
 
   static final Map<String, _CachedEvents> _cache = {};
 
-  String get apiKey => dotenv.env['TICKETMASTER_API_KEY']!;
+  final _storage = const FlutterSecureStorage();
 
   Future<List<TicketmasterEventModel>> getRecommendedEvents(
     List<String> artists,
   ) async {
-    final List<TicketmasterEventModel> events = [];
     final uniqueArtists = artists
-        .map((artist) => artist.trim())
-        .where((artist) => artist.isNotEmpty)
+        .map((a) => a.trim())
+        .where((a) => a.isNotEmpty)
         .toSet()
         .toList();
 
-    for (var index = 0; index < uniqueArtists.length; index += _batchSize) {
-      final batch = uniqueArtists.skip(index).take(_batchSize);
-      final batchEvents = await Future.wait(
-        batch.map(_getEventsForArtist),
-        eagerError: false,
-      );
+    if (uniqueArtists.isEmpty) return const [];
 
-      for (final artistEvents in batchEvents) {
-        events.addAll(artistEvents);
-      }
-    }
-
-    // Eliminar duplicados
-    final unique = <String, TicketmasterEventModel>{};
-
-    for (final event in events) {
-      unique[event.id] = event;
-    }
-
-    final result = unique.values.toList();
-
-    // Solo conciertos futuros
-    final now = DateTime.now();
-
-    result.removeWhere(
-      (event) => event.date.isBefore(DateTime(now.year, now.month, now.day)),
-    );
-
-    // Ordenar por fecha
-    result.sort((a, b) => a.date.compareTo(b.date));
-
-    return result;
-  }
-
-  Future<List<TicketmasterEventModel>> _getEventsForArtist(
-    String artist,
-  ) async {
-    final cacheKey = artist.toLowerCase();
+    // Clave de caché: artistas ordenados
+    final cacheKey = (List<String>.from(uniqueArtists)..sort()).join('|');
     final cached = _cache[cacheKey];
-
     if (cached != null &&
         DateTime.now().difference(cached.createdAt) < _cacheDuration) {
       return cached.events;
     }
 
-    final uri = Uri.parse(_baseUrl).replace(
-      queryParameters: {
-        'apikey': apiKey,
-        'keyword': artist,
-        'countryCode': 'ES',
-        'classificationName': 'music',
-        'size': '5',
-        'sort': 'date,asc',
-      },
-    );
+    final token = await _storage.read(key: 'token');
+    if (token == null) return const [];
 
     try {
-      final response = await http.get(uri).timeout(_timeout);
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.recommendationsEndpoint),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({'artists': uniqueArtists}),
+          )
+          .timeout(_timeout);
 
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         return const [];
       }
 
-      final json = jsonDecode(response.body);
+      final List data = jsonDecode(response.body) as List;
 
-      if (json['_embedded'] == null) {
-        return const [];
+      // El backend devuelve una lista plana con { id, artist, venue, city,
+      // country, date, imageUrl, ticketUrl, recommendedBecause? }.
+      final events = data.map((item) {
+        final map = item as Map<String, dynamic>;
+        // 'recommendedBecause' puede venir del backend; si no, usamos el campo
+        // que sea más descriptivo del artista buscado.
+        final recommendedBecause =
+            map['recommendedBecause']?.toString() ??
+            map['artist']?.toString() ??
+            '';
+        return TicketmasterEventModel.fromBackendJson(
+          map,
+          artist: recommendedBecause,
+        );
+      }).toList();
+
+      // Solo conciertos futuros
+      final now = DateTime.now();
+      events.removeWhere(
+        (e) => e.date.isBefore(DateTime(now.year, now.month, now.day)),
+      );
+
+      // Eliminar duplicados por id
+      final unique = <String, TicketmasterEventModel>{};
+      for (final e in events) {
+        unique[e.id] = e;
       }
+      final result = unique.values.toList()
+        ..sort((a, b) => a.date.compareTo(b.date));
 
-      final List list = json['_embedded']['events'];
-      final events = list
-          .map((e) => TicketmasterEventModel.fromJson(e, artist: artist))
-          .toList();
-
-      _cache[cacheKey] = _CachedEvents(events, DateTime.now());
-
-      return events;
+      _cache[cacheKey] = _CachedEvents(result, DateTime.now());
+      return result;
     } catch (_) {
       return const [];
     }

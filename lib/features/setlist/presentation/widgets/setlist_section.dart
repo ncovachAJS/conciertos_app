@@ -56,7 +56,19 @@ class _SetlistSectionState extends State<SetlistSection> {
               ],
             ),
 
-            const SizedBox(height: 20),
+            // Atribución requerida por la API de setlist.fm
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'Datos de setlist.fm',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
 
             if (widget.loading)
               const InlineSectionSkeleton(lines: 5)

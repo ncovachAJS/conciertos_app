@@ -90,13 +90,16 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
 
     final cs = Theme.of(context).colorScheme;
 
-    return SizedBox(
-      height: 320,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: events.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
-        itemBuilder: (_, index) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 320,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: events.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            itemBuilder: (_, index) {
           final event = events[index];
           return Container(
             width: 250,
@@ -187,7 +190,21 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
             ),
           );
         },
-      ),
+          ),
+        ),
+        // Atribución requerida por las ToS de Ticketmaster
+        const SizedBox(height: 6),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            'Powered by Ticketmaster',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey.withOpacity(0.55),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

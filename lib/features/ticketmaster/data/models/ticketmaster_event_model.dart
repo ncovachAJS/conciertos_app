@@ -44,4 +44,22 @@ class TicketmasterEventModel extends TicketmasterEvent {
       recommendedBecause: artist,
     );
   }
+
+  /// Constructor para el formato devuelto por el backend proxy (/recommendations).
+  factory TicketmasterEventModel.fromBackendJson(
+    Map<String, dynamic> json, {
+    required String artist,
+  }) {
+    return TicketmasterEventModel(
+      id: json['id']?.toString() ?? '',
+      // El backend mapea el título del evento en el campo 'artist'
+      name: json['artist']?.toString() ?? '',
+      image: json['imageUrl']?.toString() ?? '',
+      venue: json['venue']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+      url: json['ticketUrl']?.toString() ?? '',
+      recommendedBecause: artist,
+    );
+  }
 }

@@ -36,6 +36,9 @@ class ApiConfig {
   static String concertTagEndpoint(String concertId, String friendId) =>
       '$concertsEndpoint/$concertId/tag/$friendId';
 
+  // Recomendaciones (proxy Ticketmaster en backend)
+  static const String recommendationsEndpoint = '$baseUrl/recommendations';
+
   // Fotos
   static String concertPhotosEndpoint(String concertId) =>
       '$concertsEndpoint/$concertId/photos';
