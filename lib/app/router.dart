@@ -76,7 +76,9 @@ final appRouter = GoRouter(
           path: '/concert-detail-by-id/:id',
           builder: (context, state) {
             final id = state.pathParameters['id']!;
-            return _ConcertDetailById(concertId: id);
+            final extra = state.extra as Map<String, dynamic>?;
+            final scrollToComments = extra?['scrollToComments'] == true;
+            return _ConcertDetailById(concertId: id, scrollToComments: scrollToComments);
           },
         ),
         GoRoute(
@@ -203,7 +205,8 @@ final appRouter = GoRouter(
 // Widget que busca el concierto por ID y abre el detalle
 class _ConcertDetailById extends ConsumerWidget {
   final String concertId;
-  const _ConcertDetailById({required this.concertId});
+  final bool scrollToComments;
+  const _ConcertDetailById({required this.concertId, this.scrollToComments = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -256,7 +259,7 @@ class _ConcertDetailById extends ConsumerWidget {
             ),
           );
         }
-        return ConcertDetailPage(concert: matches.first);
+        return ConcertDetailPage(concert: matches.first, scrollToComments: scrollToComments);
       },
     );
   }

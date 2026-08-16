@@ -132,6 +132,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
         final concertId = data['concertId']?.toString();
         if (concertId != null) context.push('/concert-detail-by-id/$concertId');
         break;
+      case 'CONCERT_COMMENT':
+        final concertId = data['concertId']?.toString();
+        if (concertId != null) {
+          context.push(
+            '/concert-detail-by-id/$concertId',
+            extra: {'scrollToComments': true},
+          );
+        }
+        break;
       case 'FRIEND_REQUEST':
       case 'FRIEND_ACCEPTED':
         context.push('/friends');
@@ -158,6 +167,8 @@ class _NotificationTile extends StatelessWidget {
         return Icons.check_circle_rounded;
       case 'FRIEND_CONCERT':
         return Icons.queue_music_rounded;
+      case 'CONCERT_COMMENT':
+        return Icons.chat_bubble_outline_rounded;
       default:
         return Icons.notifications_rounded;
     }

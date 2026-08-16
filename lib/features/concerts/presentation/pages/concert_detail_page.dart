@@ -30,11 +30,18 @@ import '../../../spotify/domain/entities/spotify_artist.dart';
 import '../../../spotify/presentation/widgets/spotify_top_tracks_section.dart';
 import '../../../../shared/widgets/shimmer_box.dart';
 import '../../domain/entities/concert.dart';
+import '../../../friends_activity/data/concert_comments_service.dart';
+import '../../../friends_activity/domain/concert_comment.dart';
 
 class ConcertDetailPage extends ConsumerStatefulWidget {
   final Concert concert;
+  final bool scrollToComments;
 
-  const ConcertDetailPage({super.key, required this.concert});
+  const ConcertDetailPage({
+    super.key,
+    required this.concert,
+    this.scrollToComments = false,
+  });
 
   @override
   ConsumerState<ConcertDetailPage> createState() => _ConcertDetailPageState();
@@ -51,6 +58,8 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
   bool _loadingSpotify = true;
   bool _deleting = false;
 
+  final _commentsKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -59,7 +68,19 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 600));
       if (mounted) _showTutorialIfNeeded();
+      if (widget.scrollToComments && mounted) _scrollToComments();
     });
+  }
+
+  void _scrollToComments() {
+    final ctx = _commentsKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+      alignment: 0.0,
+    );
   }
 
   Future<void> _showTutorialIfNeeded() async {
@@ -520,9 +541,234 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
             ),
 
           const SizedBox(height: 24),
+
+          // Comentarios de amigos
+          _CommentsSection(key: _commentsKey, concertId: widget.concert.id),
+
+          const SizedBox(height: 32),
         ],
       ),
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sección de comentarios
+// ---------------------------------------------------------------------------
+
+class _CommentsSection extends StatefulWidget {
+  final String concertId;
+  const _CommentsSection({super.key, required this.concertId});
+
+  @override
+  State<_CommentsSection> createState() => _CommentsSectionState();
+}
+
+class _CommentsSectionState extends State<_CommentsSection> {
+  final _service = ConcertCommentsService();
+  final _controller = TextEditingController();
+  List<ConcertComment> _comments = [];
+  bool _loading = true;
+  bool _sending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final data = await _service.getComments(widget.concertId);
+    if (mounted) setState(() { _comments = data; _loading = false; });
+  }
+
+  Future<void> _send() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty || _sending) return;
+    setState(() => _sending = true);
+    _controller.clear();
+    final comment = await _service.addComment(widget.concertId, text);
+    if (!mounted) return;
+    setState(() {
+      if (comment != null) _comments = [..._comments, comment];
+      _sending = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Cabecera
+            Row(
+              children: [
+                const Icon(Icons.chat_bubble_outline_rounded, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Comentarios',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                if (_comments.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: cs.onSurface.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${_comments.length}',
+                      style: TextStyle(fontSize: 12, color: cs.onSurface.withOpacity(0.7)),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Lista
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              )
+            else if (_comments.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: Text(
+                    'Sé el primero en comentar',
+                    style: TextStyle(color: cs.onSurface.withOpacity(0.4), fontSize: 14),
+                  ),
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _comments.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (_, i) => _CommentTile(comment: _comments[i], cs: cs),
+              ),
+
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+
+            // Campo de texto
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: 'Escribe un comentario…',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      isDense: true,
+                    ),
+                    minLines: 1,
+                    maxLines: 4,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _send(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _sending
+                    ? const SizedBox(
+                        width: 38, height: 38,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : IconButton.filled(
+                        onPressed: _send,
+                        icon: const Icon(Icons.send_rounded),
+                        style: IconButton.styleFrom(
+                          backgroundColor: const Color(0xFFE53935),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.all(8),
+                        ),
+                      ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CommentTile extends StatelessWidget {
+  final ConcertComment comment;
+  final ColorScheme cs;
+  const _CommentTile({required this.comment, required this.cs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CircleAvatar(
+          radius: 16,
+          backgroundColor: cs.onSurface.withOpacity(0.1),
+          backgroundImage: comment.userAvatarUrl.isNotEmpty
+              ? NetworkImage(comment.userAvatarUrl)
+              : null,
+          child: comment.userAvatarUrl.isEmpty
+              ? Text(
+                  comment.userName.isNotEmpty ? comment.userName[0].toUpperCase() : '?',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                )
+              : null,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    comment.userName,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _timeAgo(comment.createdAt),
+                    style: TextStyle(fontSize: 11, color: cs.onSurface.withOpacity(0.45)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(comment.text, style: const TextStyle(fontSize: 14, height: 1.4)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _timeAgo(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1) return 'ahora';
+    if (diff.inMinutes < 60) return 'hace ${diff.inMinutes} min';
+    if (diff.inHours < 24) return 'hace ${diff.inHours} h';
+    if (diff.inDays < 7) return 'hace ${diff.inDays} d';
+    return '${dt.day}/${dt.month}/${dt.year}';
   }
 }
 

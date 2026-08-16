@@ -367,7 +367,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
       final comment = await _service.addComment(widget.concertId, text);
       if (!mounted) return;
       if (comment != null) {
-        setState(() => _optimisticComments = [...existing, ..._optimisticComments, comment]);
+        setState(() => _optimisticComments = [..._optimisticComments, comment]);
       }
     } finally {
       if (mounted) setState(() => _sending = false);

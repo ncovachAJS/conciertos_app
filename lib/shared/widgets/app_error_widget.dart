@@ -23,13 +23,13 @@ class AppErrorWidget extends StatelessWidget {
     if (err.contains('TimeoutException')) {
       return 'El servidor tardó demasiado en responder';
     }
-    if (err.contains('401')) return 'Sesión expirada. Volvé a iniciar sesión';
-    if (err.contains('403')) return 'No tenés permiso para ver esto';
+    if (err.contains('401')) return 'Sesión expirada. Vuelve a iniciar sesión';
+    if (err.contains('403')) return 'No tienes permiso para ver esto';
     if (err.contains('404')) return 'No se encontró el contenido';
     if (err.contains('500') || err.contains('503')) {
-      return 'Error en el servidor. Intentá más tarde';
+      return 'Error en el servidor. Inténtalo más tarde';
     }
-    return 'Algo salió mal. Intentá de nuevo';
+    return 'Algo salió mal. Inténtalo de nuevo';
   }
 
   @override

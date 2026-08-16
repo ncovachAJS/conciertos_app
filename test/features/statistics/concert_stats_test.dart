@@ -4,6 +4,8 @@ import 'package:conciertos_app/features/concerts/domain/entities/concert.dart';
 import 'package:conciertos_app/features/statistics/domain/concert_stats.dart';
 
 /// Factoría de Concert mínima para tests de estadísticas.
+/// Cuando [rating] > 0 se replica en todos los sub-ratings para que
+/// [detailedAvg] devuelva exactamente ese valor (comportamiento post-migración).
 Concert _c({
   String id = 'c',
   String artist = 'Artist',
@@ -26,6 +28,12 @@ Concert _c({
     city: city,
     imageUrl: '',
     rating: rating,
+    // Sub-ratings: se igualan a rating para que detailedAvg == rating
+    soundRating: rating,
+    atmosphereRating: rating,
+    setlistRating: rating,
+    valueRating: rating,
+    artistRating: rating,
     liked: false,
     favorite: false,
     price: price,
