@@ -8,6 +8,7 @@ import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
+import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../data/stats_layout_service.dart';
 import '../../domain/concert_stats.dart';
 import '../../domain/stats_section.dart';
@@ -88,7 +89,14 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
           IconButton(
             icon: const Icon(Icons.tune_rounded),
             tooltip: 'Personalizar',
-            onPressed: () => context.push('/stats-edit'),
+            onPressed: () async {
+              final isPro = AuthController.instance.user?.isPro ?? false;
+              if (!isPro) {
+                await ProPaywallSheet.showPaywall(context);
+                return;
+              }
+              if (context.mounted) context.push('/stats-edit');
+            },
           ),
         ],
       ),

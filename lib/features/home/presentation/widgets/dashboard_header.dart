@@ -9,6 +9,7 @@ import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../notifications/presentation/controllers/notifications_controller.dart';
+import '../../../../shared/widgets/pro_paywall_sheet.dart';
 
 class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});
@@ -191,7 +192,15 @@ class DashboardHeader extends ConsumerWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => context.push('/dashboard-edit'),
+                  onTap: () async {
+                    final isPro =
+                        AuthController.instance.user?.isPro ?? false;
+                    if (!isPro) {
+                      await ProPaywallSheet.showPaywall(context);
+                      return;
+                    }
+                    if (context.mounted) context.push('/dashboard-edit');
+                  },
                   child: Icon(
                     Icons.tune_rounded,
                     size: 20,
