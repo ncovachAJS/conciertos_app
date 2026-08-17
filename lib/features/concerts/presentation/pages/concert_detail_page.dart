@@ -103,8 +103,8 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
         city: widget.concert.city,
         venue: widget.concert.venue,
       );
-    } catch (e) {
-      debugPrint('Setlist error: $e');
+    } catch (e, st) {
+      debugPrint('Setlist error: $e\n$st');
     } finally {
       if (mounted) setState(() => _loadingSetlist = false);
     }

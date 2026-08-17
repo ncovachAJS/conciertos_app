@@ -19,7 +19,7 @@ class RecommendationsApiService {
         'Content-Type': 'application/json',
         if (token != null) 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode({'artist': artist, 'countryCode': countryCode}),
+      body: jsonEncode({'artists': [artist], 'countryCode': countryCode}),
     );
 
     if (response.statusCode != 200) {
