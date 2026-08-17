@@ -44,6 +44,9 @@ class ApiConfig {
   static String spotifyTopTracksEndpoint(String artistId) =>
       '$baseUrl/spotify/artist/$artistId/top-tracks';
 
+  // Setlist (proxy en backend — la API key vive solo en el servidor)
+  static const String setlistSearchEndpoint = '$baseUrl/setlist/search';
+
   // Fotos
   static String concertPhotosEndpoint(String concertId) =>
       '$concertsEndpoint/$concertId/photos';
