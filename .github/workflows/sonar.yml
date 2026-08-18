@@ -36,7 +36,6 @@ jobs:
 
       - name: Crear .env desde secrets (nunca se sube al repo)
         run: |
-          echo "SETLIST_API_KEY=${{ secrets.SETLIST_API_KEY }}" >> .env
           echo "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" >> .env
 
       - name: Ejecutar tests con cobertura
