@@ -28,6 +28,7 @@ import '../features/auth/presentation/pages/register_page.dart';
 import '../features/auth/presentation/pages/session_gate_page.dart';
 import '../features/statistics/presentation/pages/statistics_page.dart';
 import '../features/spotify/presentation/pages/spotify_import_page.dart';
+import '../features/spotify/presentation/pages/spotify_embed_page.dart';
 
 import '../features/home/artist/presentation/pages/artist_page.dart';
 import '../features/friends/domain/entities/friend.dart';
@@ -182,6 +183,16 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/spotify-import',
           builder: (context, state) => const SpotifyImportPage(),
+        ),
+        GoRoute(
+          path: '/spotify-embed',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return SpotifyEmbedPage(
+              playlistId: extra?['playlistId'] as String? ?? '4kqsEp7um2ySvyzW7L0sNI',
+              title: extra?['title'] as String? ?? 'Tus canciones favoritas',
+            );
+          },
         ),
         GoRoute(
           path: '/concert-map',

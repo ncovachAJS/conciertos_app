@@ -6,6 +6,9 @@ import 'package:go_router/go_router.dart';
 import '../../domain/spotify_artist.dart';
 import '../providers/spotify_provider.dart';
 
+// ID de la playlist "Top canciones" embebida de Spotify
+const _topSongsPlaylistId = '4kqsEp7um2ySvyzW7L0sNI';
+
 /// Página de importación desde Spotify.
 /// El usuario conecta su cuenta y ve sus artistas más escuchados;
 /// al pulsar uno se abre AddConcertPage con el nombre pre-rellenado.
@@ -47,21 +50,77 @@ class SpotifyImportPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: artistsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => _ErrorState(
-          message: e.toString(),
-          onRetry: () => ref.invalidate(spotifyTopArtistsProvider),
-        ),
-        data: (artists) {
-          if (artists.isEmpty) {
-            return _ConnectPrompt(
-              onConnect: () =>
-                  ref.read(spotifyTopArtistsProvider.notifier).login(),
-            );
-          }
-          return _ArtistGrid(artists: artists, cs: cs);
-        },
+      body: Column(
+        children: [
+          // Banner "Tus canciones más escuchadas"
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: InkWell(
+              onTap: () => context.push('/spotify-embed', extra: {
+                'playlistId': _topSongsPlaylistId,
+                'title': 'Tus canciones favoritas',
+              }),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1DB954).withValues(alpha: .12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFF1DB954).withValues(alpha: .3)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF1DB954),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.headphones_rounded, color: Colors.black, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Tus canciones más escuchadas',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                          Text(
+                            'Escucha tu playlist directamente en la app',
+                            style: TextStyle(fontSize: 12, color: Colors.white54),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right_rounded, color: Colors.white38),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const Divider(height: 1, indent: 16, endIndent: 16),
+          Expanded(
+            child: artistsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => _ErrorState(
+                message: e.toString(),
+                onRetry: () => ref.invalidate(spotifyTopArtistsProvider),
+              ),
+              data: (artists) {
+                if (artists.isEmpty) {
+                  return _ConnectPrompt(
+                    onConnect: () =>
+                        ref.read(spotifyTopArtistsProvider.notifier).login(),
+                  );
+                }
+                return _ArtistGrid(artists: artists, cs: cs);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
