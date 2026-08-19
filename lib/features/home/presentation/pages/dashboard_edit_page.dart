@@ -19,6 +19,7 @@ class DashboardEditPage extends ConsumerWidget {
         DashboardSectionId.recommended => Icons.local_fire_department_outlined,
         DashboardSectionId.favorites => Icons.favorite_rounded,
         DashboardSectionId.recent => Icons.history_rounded,
+        DashboardSectionId.spotifyEmbed => Icons.headphones_rounded,
       };
 
   static String _label(DashboardSectionId id) => switch (id) {
@@ -31,6 +32,7 @@ class DashboardEditPage extends ConsumerWidget {
         DashboardSectionId.recommended => 'Recomendaciones',
         DashboardSectionId.favorites => 'Favoritos',
         DashboardSectionId.recent => 'Últimos añadidos',
+        DashboardSectionId.spotifyEmbed => 'Canciones favoritas (Spotify)',
       };
 
   @override

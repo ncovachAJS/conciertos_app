@@ -24,6 +24,7 @@ import '../widgets/dashboard_recent_concerts.dart';
 import '../widgets/dashboard_section_title.dart';
 import '../widgets/dashboard_stats.dart';
 import '../widgets/dashboard_streak.dart';
+import '../widgets/dashboard_spotify_embed.dart';
 import '../widgets/dashboard_upcoming_concerts.dart';
 
 class DashboardView extends ConsumerStatefulWidget {
@@ -193,6 +194,20 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 ),
                 const SizedBox(height: 18),
                 DashboardRecentConcerts(concerts: recent),
+                const SizedBox(height: 36),
+              ],
+
+            DashboardSectionId.spotifyEmbed => [
+                DashboardSectionTitle(
+                  icon: Icons.headphones_rounded,
+                  title: 'Tus canciones favoritas',
+                ),
+                const SizedBox(height: 14),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  child: DashboardSpotifyEmbed(),
+                ),
+                const SizedBox(height: 36),
               ],
           };
         }

@@ -20,6 +20,7 @@ class DashboardLayoutService {
     DashboardSection(id: DashboardSectionId.recommended, visible: true),
     DashboardSection(id: DashboardSectionId.favorites, visible: true),
     DashboardSection(id: DashboardSectionId.recent, visible: true),
+    DashboardSection(id: DashboardSectionId.spotifyEmbed, visible: true),
   ];
 
   Future<List<DashboardSection>> load() async {

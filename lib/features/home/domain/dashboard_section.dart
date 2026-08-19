@@ -9,6 +9,7 @@ enum DashboardSectionId {
   recommended,
   favorites,
   recent,
+  spotifyEmbed,
 }
 
 /// Estado de una sección: posición (implícita por el orden en la lista)
