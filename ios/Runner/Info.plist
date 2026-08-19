@@ -79,5 +79,9 @@
 	</array>
 	<key>NSCalendarsUsageDescription</key>
 	<string>La Vida en Directo quiere añadir tus próximos conciertos al calendario del dispositivo.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>La Vida en Directo usa tu ubicación para mostrarte conciertos cerca de ti.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>La Vida en Directo usa tu ubicación para mostrarte conciertos cerca de ti.</string>
 </dict>
 </plist>
