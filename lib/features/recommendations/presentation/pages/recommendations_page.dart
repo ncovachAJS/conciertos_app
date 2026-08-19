@@ -14,7 +14,6 @@ import '../../data/services/recommendations_api_service.dart';
 import '../../data/services/want_to_attend_api_service.dart';
 import '../../domain/entities/recommended_event.dart';
 import '../widgets/recommendation_card.dart';
-import 'nearby_concerts_tab.dart';
 
 class RecommendationsPage extends ConsumerStatefulWidget {
   const RecommendationsPage({super.key});
@@ -42,7 +41,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() => setState(() {}));
     _loadSaved();
     WidgetsBinding.instance.addPostFrameCallback(
@@ -212,17 +211,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
           TabBar(
             controller: _tabController,
             tabs: [
-              Tab(text: 'Para ti${_events.isNotEmpty ? ' (${_events.length})' : ''}'),
-              const Tab(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.location_on_rounded, size: 14),
-                    SizedBox(width: 4),
-                    Text('Cerca de ti'),
-                  ],
-                ),
-              ),
+              Tab(text: 'Resultados${_events.isNotEmpty ? ' (${_events.length})' : ''}'),
               Tab(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -249,7 +238,6 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
                         onToggle: _toggleWantToAttend,
                         emptyText: l.noLikesForRecommendations,
                       ),
-                      const NearbyConsertsTab(),
                       _EventList(
                         events: wantList,
                         wantToAttendIds: _wantToAttendIds,
