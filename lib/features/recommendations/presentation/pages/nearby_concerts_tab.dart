@@ -24,7 +24,9 @@ class _NearbyConsertsTabState extends ConsumerState<NearbyConsertsTab>
 
   List<RecommendedEventModel> _events = [];
   final Set<String> _wantToAttendIds = {};
-  bool _loading = false;
+
+  // Empieza en true para mostrar skeleton desde el primer frame
+  bool _loading = true;
   bool _loaded = false;
   String? _error;
   double _radiusKm = 50;
@@ -39,53 +41,63 @@ class _NearbyConsertsTabState extends ConsumerState<NearbyConsertsTab>
   }
 
   Future<void> _load() async {
-    final artists = ref.read(spotifyTopArtistsProvider).asData?.value ?? [];
-    if (artists.isEmpty) return;
-
     setState(() {
       _loading = true;
       _error = null;
     });
 
+    // Esperar a que el provider de Spotify tenga datos (máx 5 s)
+    final artists = await _waitForSpotifyArtists();
+
+    if (artists.isEmpty) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+
     try {
       final position = await _getLocation();
       if (position == null) {
-        setState(() {
-          _loading = false;
-          _error = 'No se pudo obtener tu ubicación. Comprueba los permisos.';
-        });
+        if (mounted) {
+          setState(() {
+            _loading = false;
+            _error = 'No se pudo obtener tu ubicación.\nComprueba los permisos de localización.';
+          });
+        }
         return;
       }
 
-      final artistNames = artists.map((a) => a.name).take(10).toList();
+      // Solo los 5 artistas más escuchados para no saturar la API
+      final artistNames = artists.map((a) => a.name).take(5).toList();
 
-      final results = <RecommendedEventModel>[];
-      for (int i = 0; i < artistNames.length; i++) {
-        if (i > 0) await Future.delayed(const Duration(milliseconds: 200));
-        final r = await _api.getNearbyRecommendations(
-          artist: artistNames[i],
-          lat: position.latitude,
-          lng: position.longitude,
-          radiusKm: _radiusKm.round(),
-        );
-        results.addAll(r);
-      }
+      // Llamadas en paralelo (más rápido que secuencial)
+      final futures = artistNames.map((name) => _api
+          .getNearbyRecommendations(
+            artist: name,
+            lat: position.latitude,
+            lng: position.longitude,
+            radiusKm: _radiusKm.round(),
+          )
+          .catchError((_) => <RecommendedEventModel>[]));
+
+      final allResults = await Future.wait(futures);
 
       // Deduplicar por id y ordenar por fecha
       final seen = <String>{};
-      final unique = results.where((e) => seen.add(e.id)).toList()
+      final unique = allResults
+          .expand((list) => list)
+          .where((e) => seen.add(e.id))
+          .toList()
         ..sort((a, b) => a.date.compareTo(b.date));
 
       // Cargar quiero-ir
       final saved = await _wantToAttendApi.getAll();
-      final savedIds = saved.map((e) => e.id).toSet();
 
       if (mounted) {
         setState(() {
           _events = unique;
           _wantToAttendIds
             ..clear()
-            ..addAll(savedIds);
+            ..addAll(saved.map((e) => e.id));
           _loaded = true;
           _loading = false;
         });
@@ -100,21 +112,31 @@ class _NearbyConsertsTabState extends ConsumerState<NearbyConsertsTab>
     }
   }
 
-  Future<Position?> _getLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return null;
+  /// Espera hasta 5 s a que el provider de Spotify cargue.
+  Future<List<dynamic>> _waitForSpotifyArtists() async {
+    for (int i = 0; i < 10; i++) {
+      final state = ref.read(spotifyTopArtistsProvider);
+      if (state is AsyncData) return state.value ?? [];
+      if (state is AsyncError) return [];
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+    return ref.read(spotifyTopArtistsProvider).asData?.value ?? [];
+  }
 
-    LocationPermission permission = await Geolocator.checkPermission();
+  Future<Position?> _getLocation() async {
+    if (!await Geolocator.isLocationServiceEnabled()) return null;
+
+    var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return null;
     }
-    if (permission == LocationPermission.deniedForever) return null;
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) return null;
 
     return Geolocator.getCurrentPosition(
       locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.low, // suficiente para buscar conciertos
-        timeLimit: Duration(seconds: 10),
+        accuracy: LocationAccuracy.low,
+        timeLimit: Duration(seconds: 8),
       ),
     );
   }
@@ -137,13 +159,16 @@ class _NearbyConsertsTabState extends ConsumerState<NearbyConsertsTab>
   Widget build(BuildContext context) {
     super.build(context);
     final cs = Theme.of(context).colorScheme;
-    final artistsAsync = ref.watch(spotifyTopArtistsProvider);
 
-    // Sin Spotify conectado
-    final artists = artistsAsync.asData?.value ?? [];
-    if (!artistsAsync.isLoading && artists.isEmpty) {
+    // Sin Spotify conectado (y ya terminó de cargar)
+    final artistsState = ref.watch(spotifyTopArtistsProvider);
+    final hasArtists = (artistsState.asData?.value ?? []).isNotEmpty;
+    if (!artistsState.isLoading && !_loading && !hasArtists) {
       return _SpotifyPrompt(
-        onConnect: () => ref.read(spotifyTopArtistsProvider.notifier).login(),
+        onConnect: () async {
+          await ref.read(spotifyTopArtistsProvider.notifier).login();
+          _load();
+        },
       );
     }
 
@@ -158,7 +183,8 @@ class _NearbyConsertsTabState extends ConsumerState<NearbyConsertsTab>
               const SizedBox(width: 8),
               Text(
                 'Radio: ${_radiusKm.round()} km',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.w500),
               ),
               Expanded(
                 child: Slider(
@@ -174,20 +200,22 @@ class _NearbyConsertsTabState extends ConsumerState<NearbyConsertsTab>
           ),
         ),
 
-        // Lista
+        // Contenido
         Expanded(
           child: _loading
               ? const GenericPageSkeleton(itemCount: 4)
               : _error != null
                   ? _ErrorState(message: _error!, onRetry: _load)
-                  : _loaded && _events.isEmpty
+                  : _events.isEmpty
                       ? _EmptyState(radiusKm: _radiusKm.round())
                       : ListView.builder(
-                          padding: const EdgeInsets.only(top: 8, bottom: 100),
+                          padding:
+                              const EdgeInsets.only(top: 8, bottom: 100),
                           itemCount: _events.length,
                           itemBuilder: (_, i) => RecommendationCard(
                             event: _events[i],
-                            wantToAttend: _wantToAttendIds.contains(_events[i].id),
+                            wantToAttend:
+                                _wantToAttendIds.contains(_events[i].id),
                             onToggleWantToAttend: () =>
                                 _toggleWantToAttend(_events[i]),
                           ),
@@ -257,13 +285,15 @@ class _SpotifyPromptState extends State<_SpotifyPrompt> {
                   : () async {
                       setState(() => _loading = true);
                       widget.onConnect();
-                      await Future.delayed(const Duration(milliseconds: 300));
+                      await Future.delayed(
+                          const Duration(milliseconds: 300));
                       if (mounted) setState(() => _loading = false);
                     },
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF1DB954),
                 foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 28, vertical: 16),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50)),
               ),
@@ -318,7 +348,8 @@ class _EmptyState extends StatelessWidget {
             Text(
               'Prueba a ampliar el radio de búsqueda.',
               style: TextStyle(
-                  fontSize: 14, color: cs.onSurface.withValues(alpha: .45)),
+                  fontSize: 14,
+                  color: cs.onSurface.withValues(alpha: .45)),
               textAlign: TextAlign.center,
             ),
           ],
@@ -349,7 +380,8 @@ class _ErrorState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 14, color: cs.onSurface.withValues(alpha: .6)),
+                  fontSize: 14,
+                  color: cs.onSurface.withValues(alpha: .6)),
             ),
             const SizedBox(height: 20),
             OutlinedButton.icon(
