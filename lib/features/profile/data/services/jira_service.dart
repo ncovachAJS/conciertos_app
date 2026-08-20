@@ -44,6 +44,7 @@ class JiraService {
   /// Devuelve la clave del issue creado (p.ej. "APP-42").
   static Future<String> createIssue({
     required IssueType type,
+    required String title,
     required String description,
     required String reporterEmail,
   }) async {
@@ -59,7 +60,7 @@ class JiraService {
     final body = {
       'fields': {
         'project': {'key': _projectKey},
-        'summary': '[${type.label}] Incidencia desde la app',
+        'summary': '[${type.label}] $title',
         'issuetype': {'name': type.jiraType},
         'description': {
           'type': 'doc',

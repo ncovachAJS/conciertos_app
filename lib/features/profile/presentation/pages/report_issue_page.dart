@@ -12,6 +12,7 @@ class ReportIssuePage extends StatefulWidget {
 
 class _ReportIssuePageState extends State<ReportIssuePage> {
   final _formKey     = GlobalKey<FormState>();
+  final _titleCtrl   = TextEditingController();
   final _descCtrl    = TextEditingController();
   IssueType _type    = IssueType.bug;
   bool _sending      = false;
@@ -20,6 +21,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
 
   @override
   void dispose() {
+    _titleCtrl.dispose();
     _descCtrl.dispose();
     super.dispose();
   }
@@ -37,6 +39,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
       final email = AuthController.instance.user?.email ?? 'desconocido';
       final key = await JiraService.createIssue(
         type:          _type,
+        title:         _titleCtrl.text.trim(),
         description:   _descCtrl.text.trim(),
         reporterEmail: email,
       );
@@ -45,6 +48,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
         _successKey = key;
         _sending    = false;
       });
+      _titleCtrl.clear();
       _descCtrl.clear();
     } catch (e) {
       if (!mounted) return;
@@ -112,6 +116,40 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
                 ),
               ),
               const SizedBox(height: 24),
+
+              // ── Título ────────────────────────────────────────────────────
+              const Text(
+                'Título',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _titleCtrl,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  hintText: 'Resumen breve del problema…',
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(
+                        color: Color(0xFFE53935), width: 1.5),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 14),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Escribe un título para el ticket';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
 
               // ── Descripción ────────────────────────────────────────────────
               const Text(
