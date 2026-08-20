@@ -1138,41 +1138,10 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
               if (_ownConcerts.isNotEmpty || _sharedConcerts.isNotEmpty) ...[
                 const SizedBox(height: 24),
 
-                // Banner de compartidos (solo si hay)
-                if (_sharedConcerts.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withValues(alpha: .08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                          color: Colors.amber.withValues(alpha: .3)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.group_off_outlined,
-                            color: Colors.amber, size: 18),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            '${_sharedConcerts.length} concierto${_sharedConcerts.length == 1 ? '' : 's'} compartido${_sharedConcerts.length == 1 ? '' : 's'} de amigos no se pueden restaurar — solo puedes recuperar tus propios conciertos.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: cs.onSurface.withValues(alpha: .75),
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
               ],
 
               if (_parsed.isNotEmpty) ...[
-                if (_sharedConcerts.isEmpty) const SizedBox(height: 24),
+                const SizedBox(height: 24),
                 // Cabecera con contador y toggle seleccionar todo
                 Row(
                   children: [
