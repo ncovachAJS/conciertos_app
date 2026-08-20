@@ -11,10 +11,13 @@ import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
+import '../../../../core/config/pro_config.dart';
+import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../data/models/setlist_concert_model.dart';
 import '../../data/services/artist_image_service.dart';
 import '../../data/services/backup_import_service.dart';
@@ -750,10 +753,14 @@ class _BackupTab extends ConsumerStatefulWidget {
 }
 
 class _BackupTabState extends ConsumerState<_BackupTab> {
-  List<ConcertModel> _parsed    = [];
-  final Set<int> _selectedIdx   = {};   // índices de _parsed seleccionados
+  /// Conciertos propios del usuario (userId vacío o coincide con el actual)
+  List<ConcertModel> _ownConcerts    = [];
+  /// Conciertos de amigos/compartidos — no se pueden restaurar
+  List<ConcertModel> _sharedConcerts = [];
+
+  final Set<int> _selectedIdx   = {};   // índices de _ownConcerts seleccionados
   List<ConcertModel> _failed    = [];   // los que fallaron en el último intento
-  int  _restoredCount           = 0;   // cuántos se restauraron en el último intento
+  int  _restoredCount           = 0;
   bool _importing               = false;
   int  _importedCount           = 0;
   int  _importTotal             = 0;
@@ -761,9 +768,13 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
   String? _errorMsg;
   String? _fileName;
 
+  // Retrocompat: para que el resto del código siga funcionando
+  List<ConcertModel> get _parsed => _ownConcerts;
+
   Future<void> _pickFile() async {
     setState(() {
-      _parsed        = [];
+      _ownConcerts    = [];
+      _sharedConcerts = [];
       _failed        = [];
       _restoredCount = 0;
       _errorMsg      = null;
@@ -783,16 +794,27 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
     if (path == null) return;
 
     try {
-      final content = await File(path).readAsString();
+      final content  = await File(path).readAsString();
       final concerts = BackupImportService.parse(content);
+      final currentUserId = AuthController.instance.user?.id ?? '';
+
+      // Separamos propios (se pueden restaurar) de compartidos (no se pueden)
+      final own    = concerts
+          .where((c) => c.userId.isEmpty || c.userId == currentUserId)
+          .toList();
+      final shared = concerts
+          .where((c) => c.userId.isNotEmpty && c.userId != currentUserId)
+          .toList();
+
       setState(() {
-        _parsed   = concerts;
+        _ownConcerts    = own;
+        _sharedConcerts = shared;
         _fileName = result.files.single.name;
         _errorMsg = null;
-        // Todos seleccionados por defecto
+        // Solo los propios se preseleccionan
         _selectedIdx
           ..clear()
-          ..addAll(List.generate(concerts.length, (i) => i));
+          ..addAll(List.generate(own.length, (i) => i));
       });
     } catch (e) {
       setState(() => _errorMsg = e.toString());
@@ -832,22 +854,157 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
 
   Future<void> _restore() async {
     if (_parsed.isEmpty || _selectedIdx.isEmpty) return;
-    // Solo restauramos los seleccionados
-    final toImport = [
+
+    // ── Comprobación límite gratuito ────────────────────────────────────────
+    final isPro        = AuthController.instance.user?.isPro ?? false;
+    final currentCount = ref.read(ownConcertsCountProvider);
+    final limit        = ProConfig.freeConcertLimit;
+    final hueco        = limit - currentCount; // cuántos caben hasta el límite
+
+    List<ConcertModel> toImport = [
       for (int i = 0; i < _parsed.length; i++)
         if (_selectedIdx.contains(i)) _parsed[i],
     ];
+
+    if (!isPro && toImport.length > hueco) {
+      // Mostrar diálogo de aviso
+      if (!mounted) return;
+      final action = await _showLimitDialog(
+        selected:  toImport.length,
+        hueco:     hueco.clamp(0, limit),
+        currentCount: currentCount,
+      );
+
+      switch (action) {
+        case _LimitAction.importFirst:
+          // Reducir selección a los primeros que caben
+          if (hueco <= 0) return;
+          final indices = _selectedIdx.toList()..sort();
+          final kept = indices.take(hueco).toSet();
+          setState(() => _selectedIdx
+            ..clear()
+            ..addAll(kept));
+          toImport = [
+            for (int i = 0; i < _parsed.length; i++)
+              if (_selectedIdx.contains(i)) _parsed[i],
+          ];
+        case _LimitAction.selectManually:
+          // Volvemos sin importar, el usuario elige
+          return;
+        case _LimitAction.goPro:
+          if (mounted) ProPaywallSheet.showPaywall(context);
+          return;
+        case null:
+          return; // cancelado
+      }
+    }
+    // ───────────────────────────────────────────────────────────────────────
 
     final failed = await _runImport(toImport);
     if (!mounted) return;
 
     final restored = toImport.length - failed.length;
     setState(() {
-      _failed        = failed;
-      _restoredCount = restored;
-      _parsed        = [];
+      _failed         = failed;
+      _restoredCount  = restored;
+      _ownConcerts    = [];
+      _sharedConcerts = [];
       _selectedIdx.clear();
     });
+  }
+
+  /// Devuelve la acción que el usuario elige ante el límite gratuito.
+  Future<_LimitAction?> _showLimitDialog({
+    required int selected,
+    required int hueco,
+    required int currentCount,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return showModalBottomSheet<_LimitAction>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: cs.onSurface.withValues(alpha: .2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Container(
+                  width: 40, height: 40,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFF8F00),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.warning_amber_rounded,
+                      color: Colors.white, size: 22),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Límite de conciertos gratuito',
+                    style: TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Tienes $currentCount conciertos de un máximo de ${ProConfig.freeConcertLimit} '
+              'en la versión gratuita. Has seleccionado $selected conciertos para importar'
+              '${hueco > 0 ? ', pero solo caben $hueco más.' : ' y ya has alcanzado el límite.'}',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: cs.onSurface.withValues(alpha: .7),
+                  height: 1.5),
+            ),
+            const SizedBox(height: 20),
+            if (hueco > 0) ...[
+              _LimitOption(
+                icon: Icons.filter_list_rounded,
+                color: const Color(0xFF1E88E5),
+                title: 'Importar los primeros $hueco',
+                subtitle: 'Se importarán los primeros $hueco conciertos seleccionados',
+                onTap: () => Navigator.pop(context, _LimitAction.importFirst),
+              ),
+              const SizedBox(height: 10),
+            ],
+            _LimitOption(
+              icon: Icons.checklist_rounded,
+              color: const Color(0xFF43A047),
+              title: 'Elegir manualmente',
+              subtitle: 'Vuelve a la lista y selecciona solo los que quieras',
+              onTap: () => Navigator.pop(context, _LimitAction.selectManually),
+            ),
+            const SizedBox(height: 10),
+            _LimitOption(
+              icon: Icons.workspace_premium_rounded,
+              color: const Color(0xFF7C3AED),
+              title: 'Hazte Pro',
+              subtitle: 'Sin límite de conciertos y más funciones',
+              onTap: () => Navigator.pop(context, _LimitAction.goPro),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _retryFailed() async {
@@ -978,14 +1135,50 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
               ],
 
               // ── Lista previa: conciertos a restaurar ─────────────────────
-              if (_parsed.isNotEmpty) ...[
+              if (_ownConcerts.isNotEmpty || _sharedConcerts.isNotEmpty) ...[
                 const SizedBox(height: 24),
+
+                // Banner de compartidos (solo si hay)
+                if (_sharedConcerts.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withValues(alpha: .08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Colors.amber.withValues(alpha: .3)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.group_off_outlined,
+                            color: Colors.amber, size: 18),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            '${_sharedConcerts.length} concierto${_sharedConcerts.length == 1 ? '' : 's'} compartido${_sharedConcerts.length == 1 ? '' : 's'} de amigos no se pueden restaurar — solo puedes recuperar tus propios conciertos.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: cs.onSurface.withValues(alpha: .75),
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ],
+
+              if (_parsed.isNotEmpty) ...[
+                if (_sharedConcerts.isEmpty) const SizedBox(height: 24),
                 // Cabecera con contador y toggle seleccionar todo
                 Row(
                   children: [
                     Expanded(
                       child: Text(
-                        '${_parsed.length} conciertos encontrados',
+                        '${_parsed.length} conciertos propios',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -1050,6 +1243,21 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                   _parsed.length,
                   (i) => _concertTile(_parsed[i], cs, index: i),
                 ),
+
+                // ── Compartidos (solo visual, no seleccionables) ───────────
+                if (_sharedConcerts.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  Text(
+                    '${_sharedConcerts.length} compartido${_sharedConcerts.length == 1 ? '' : 's'} (no restaurables)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface.withValues(alpha: .45),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ..._sharedConcerts.map((c) => _sharedTile(c, cs)),
+                ],
               ],
 
               // ── Resultado: fallidos con reintento ────────────────────────
@@ -1308,7 +1516,73 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
     return tile;
   }
 
+  /// Tile de solo lectura para conciertos compartidos (no restaurables)
+  Widget _sharedTile(ConcertModel c, ColorScheme cs) {
+    final dt = c.date;
+    final dateStr =
+        '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+    return Opacity(
+      opacity: 0.45,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest.withValues(alpha: .3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: cs.outline.withValues(alpha: .08)),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: c.imageUrl.isNotEmpty
+                  ? Image.network(c.imageUrl,
+                      width: 44, height: 44,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _placeholder(c.artist, cs))
+                  : _placeholder(c.artist, cs),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(c.artist,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$dateStr${c.venue.isNotEmpty ? '  ·  ${c.venue}' : ''}',
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: cs.onSurface.withValues(alpha: .55)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (c.userName.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      'De: ${c.userName}',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: cs.onSurface.withValues(alpha: .4)),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.group_rounded, size: 16, color: Colors.amber),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _placeholder(String artist, ColorScheme cs) {
+
     final hue = artist.isNotEmpty
         ? (artist.codeUnitAt(0) * 137.5) % 360
         : 0.0;
@@ -1321,6 +1595,75 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
           artist.isNotEmpty ? artist[0].toUpperCase() : '?',
           style: const TextStyle(
             fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white70),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enum y widget auxiliar para el diálogo de límite Pro
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum _LimitAction { importFirst, selectManually, goPro }
+
+class _LimitOption extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _LimitOption({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: .07),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withValues(alpha: .2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36, height: 36,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: .15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 14)),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: cs.onSurface.withValues(alpha: .55))),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                color: cs.onSurface.withValues(alpha: .3)),
+          ],
         ),
       ),
     );
