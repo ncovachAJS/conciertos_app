@@ -962,33 +962,30 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
               // ── Vista previa de conciertos ────────────────────────────────
               if (_parsed.isNotEmpty) ...[
                 const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${_parsed.length} conciertos encontrados',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: cs.onSurface,
-                        ),
+                Text(
+                  '${_parsed.length} conciertos encontrados',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _importing ? null : _restore,
+                    icon: const Icon(Icons.restore_rounded, size: 18),
+                    label: const Text('Restaurar todo'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFFE53935),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    FilledButton.icon(
-                      onPressed: _importing ? null : _restore,
-                      icon: const Icon(Icons.restore_rounded, size: 18),
-                      label: const Text('Restaurar todo'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFFE53935),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 14),
                 // Lista de conciertos del backup
