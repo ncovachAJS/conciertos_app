@@ -19,6 +19,7 @@ import '../../../../core/notifiers/annual_goal_notifier.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../data/services/user_api_service.dart';
 
@@ -438,21 +439,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       filename = 'conciertos_${DateTime.now().year}.csv';
       mime     = 'text/csv';
     } else {
-      final list = concerts.map((c) => {
-        'artista':   c.artist,
-        'nombre':    c.name,
-        'fecha':     c.date.toIso8601String(),
-        'recinto':   c.venue,
-        'ciudad':    c.city,
-        'festival':  c.festival,
-        'genero':    c.genre,
-        'valoracion': c.rating,
-        'favorito':  c.favorite,
-        'precio':    c.price,
-        'notas':     c.notes,
+      // Exportamos en formato completo (todos los campos + imageUrl)
+      // compatible con la restauración desde la pestaña "Copia de seguridad"
+      final now = DateTime.now();
+      String pad(int n) => n.toString().padLeft(2, '0');
+      final dateStr = '${now.year}${pad(now.month)}${pad(now.day)}';
+      final concertList = concerts.map((c) {
+        final model = c is ConcertModel ? c : ConcertModel.fromEntity(c);
+        return model.toCacheJson();
       }).toList();
-      content  = const JsonEncoder.withIndent('  ').convert(list);
-      filename = 'conciertos_${DateTime.now().year}.json';
+      content = const JsonEncoder.withIndent('  ').convert({
+        'version': 1,
+        'exportedAt': now.toIso8601String(),
+        'app': 'lavd',
+        'concerts': concertList,
+      });
+      filename = 'lavd_backup_$dateStr.json';
       mime     = 'application/json';
     }
 

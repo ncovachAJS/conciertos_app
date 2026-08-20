@@ -44,6 +44,7 @@ dependencies:
   crypto: ^3.0.6                # SHA-256 para PKCE
   geolocator: ^13.0.2           # GPS para "conciertos cerca de ti"
   webview_flutter: ^4.10.0      # Embed de Spotify (top canciones)
+  file_picker: ^8.1.6            # Seleccionar JSON de copia de seguridad
 
 dev_dependencies:
   flutter_test:
