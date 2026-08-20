@@ -22,6 +22,7 @@ import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
+import '../../../photos/data/services/photo_api_service.dart';
 import '../../data/services/user_api_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -440,17 +441,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       filename = 'conciertos_${DateTime.now().year}.csv';
       mime     = 'text/csv';
     } else {
-      // Exportamos en formato completo (todos los campos + imageUrl)
+      // Exportamos en formato completo (todos los campos + imageUrl + fotos de recuerdos)
       // compatible con la restauración desde la pestaña "Copia de seguridad"
       final now = DateTime.now();
       String pad(int n) => n.toString().padLeft(2, '0');
       final dateStr = '${now.year}${pad(now.month)}${pad(now.day)}';
-      final concertList = concerts.map((c) {
+
+      // Incluir fotos de recuerdos de cada concierto
+      final photoService = PhotoApiService();
+      final concertList = <Map<String, dynamic>>[];
+      for (final c in concerts) {
         final model = c is ConcertModel ? c : ConcertModel.fromEntity(c);
-        return model.toCacheJson();
-      }).toList();
+        final concertJson = model.toCacheJson();
+        if (c.id.isNotEmpty) {
+          try {
+            final photos = await photoService.getConcertPhotos(c.id);
+            if (photos.isNotEmpty) {
+              concertJson['photos'] = photos.map((p) {
+                final m = <String, dynamic>{'imageUrl': p.imageUrl};
+                if (p.caption.isNotEmpty) m['caption'] = p.caption;
+                return m;
+              }).toList();
+            }
+          } catch (_) {
+            // Si falla la carga de fotos, el concierto se exporta igualmente sin ellas
+          }
+        }
+        concertList.add(concertJson);
+      }
+
       content = const JsonEncoder.withIndent('  ').convert({
-        'version': 1,
+        'version': 2,
         'exportedAt': now.toIso8601String(),
         'app': 'lavd',
         'concerts': concertList,

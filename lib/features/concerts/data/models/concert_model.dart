@@ -4,6 +4,10 @@ import '../../domain/entities/concert_participant.dart';
 class ConcertModel extends Concert {
   final List<String> taggedFriendIds;
 
+  /// Solo se rellena al parsear un JSON de copia de seguridad.
+  /// No se envía a la API — solo se usa durante la restauración.
+  final List<Map<String, String>> backupPhotos;
+
   const ConcertModel({
     required super.id,
     required super.name,
@@ -30,6 +34,7 @@ class ConcertModel extends Concert {
     super.userAvatarUrl = '',
     super.genre = '',
     this.taggedFriendIds = const [],
+    this.backupPhotos = const [],
   });
 
   factory ConcertModel.fromJson(Map<String, dynamic> json) {
@@ -69,6 +74,20 @@ class ConcertModel extends Concert {
       }
     }
 
+    // Fotos de recuerdos (solo presentes en JSONs de copia de seguridad v2+)
+    final photosRaw = json['photos'] as List<dynamic>? ?? [];
+    final backupPhotos = photosRaw
+        .whereType<Map>()
+        .expand<Map<String, String>>((p) {
+          final url = p['imageUrl']?.toString() ?? '';
+          if (url.isEmpty) return [];
+          final map = <String, String>{'imageUrl': url};
+          final caption = p['caption']?.toString() ?? '';
+          if (caption.isNotEmpty) map['caption'] = caption;
+          return [map];
+        })
+        .toList();
+
     return ConcertModel(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -94,6 +113,7 @@ class ConcertModel extends Concert {
       userName: ownerJson?['name']?.toString() ?? '',
       userAvatarUrl: ownerJson?['avatarUrl']?.toString() ?? '',
       genre: json['genre']?.toString() ?? '',
+      backupPhotos: backupPhotos,
     );
   }
 

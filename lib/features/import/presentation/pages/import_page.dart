@@ -14,6 +14,7 @@ import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
+import '../../../photos/data/services/photo_api_service.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../../core/config/pro_config.dart';
@@ -841,7 +842,25 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
       });
 
       try {
-        await ConcertApiService().addConcert(concert);
+        final created = await ConcertApiService().addConcert(concert);
+        // Restaurar fotos de recuerdos si el backup las incluía
+        if (concert.backupPhotos.isNotEmpty) {
+          final photoService = PhotoApiService();
+          for (final p in concert.backupPhotos) {
+            final url = p['imageUrl'] ?? '';
+            if (url.isNotEmpty) {
+              try {
+                await photoService.addPhoto(
+                  concertId: created.id,
+                  imageUrl: url,
+                  caption: p['caption'] ?? '',
+                );
+              } catch (_) {
+                // Si falla una foto, continuamos con las demás
+              }
+            }
+          }
+        }
       } catch (_) {
         failed.add(concert);
       }
