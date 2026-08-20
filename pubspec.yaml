@@ -45,6 +45,7 @@ dependencies:
   geolocator: ^13.0.2           # GPS para "conciertos cerca de ti"
   webview_flutter: ^4.10.0      # Embed de Spotify (top canciones)
   file_picker: ^8.1.6            # Seleccionar JSON de copia de seguridad
+  package_info_plus: ^8.3.0      # Versión de la app para reportes Jira
 
 dev_dependencies:
   flutter_test:

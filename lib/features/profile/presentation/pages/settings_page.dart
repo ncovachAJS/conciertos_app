@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../data/services/jira_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -909,6 +910,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             subtitle: Text(l.tutorialSettingsSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: _showTutorialPicker,
+          ),
+
+          // ── Soporte ───────────────────────────────────────────────────────
+          const _SectionHeader(title: 'Soporte'),
+          ListTile(
+            leading: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0052CC).withValues(alpha: .12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.bug_report_outlined,
+                color: Color(0xFF0052CC),
+                size: 20,
+              ),
+            ),
+            title: const Text('Reportar incidencia'),
+            subtitle: Text(
+              JiraService.isConfigured
+                  ? 'Envía un bug, sugerencia o comentario'
+                  : 'Integración Jira no configurada — rellena el .env',
+              style: JiraService.isConfigured
+                  ? null
+                  : const TextStyle(color: Colors.orange, fontSize: 12),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/report-issue'),
           ),
         ],
       ),
