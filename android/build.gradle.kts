@@ -14,6 +14,14 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
+
+    // Registrar ANTES de evaluationDependsOn para que el hook esté listo
+    // cuando los plugins se evalúen. Sube compileSdk a 36 en todos los plugins
+    // que lo necesiten (p.ej. file_picker, flutter_plugin_android_lifecycle).
+    afterEvaluate {
+        extensions.findByType<com.android.build.api.dsl.LibraryExtension>()
+            ?.let { lib -> if ((lib.compileSdk ?: 0) < 36) lib.compileSdk = 36 }
+    }
 }
 subprojects {
     project.evaluationDependsOn(":app")
