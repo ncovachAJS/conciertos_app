@@ -750,19 +750,24 @@ class _BackupTab extends ConsumerStatefulWidget {
 }
 
 class _BackupTabState extends ConsumerState<_BackupTab> {
-  List<ConcertModel> _parsed   = [];
-  bool _importing              = false;
-  int  _importedCount          = 0;
-  int  _importTotal            = 0;
-  String _importingCurrent     = '';
+  List<ConcertModel> _parsed    = [];
+  final Set<int> _selectedIdx   = {};   // índices de _parsed seleccionados
+  List<ConcertModel> _failed    = [];   // los que fallaron en el último intento
+  int  _restoredCount           = 0;   // cuántos se restauraron en el último intento
+  bool _importing               = false;
+  int  _importedCount           = 0;
+  int  _importTotal             = 0;
+  String _importingCurrent      = '';
   String? _errorMsg;
   String? _fileName;
 
   Future<void> _pickFile() async {
     setState(() {
-      _parsed   = [];
-      _errorMsg = null;
-      _fileName = null;
+      _parsed        = [];
+      _failed        = [];
+      _restoredCount = 0;
+      _errorMsg      = null;
+      _fileName      = null;
     });
 
     final result = await FilePicker.platform.pickFiles(
@@ -784,66 +789,79 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
         _parsed   = concerts;
         _fileName = result.files.single.name;
         _errorMsg = null;
+        // Todos seleccionados por defecto
+        _selectedIdx
+          ..clear()
+          ..addAll(List.generate(concerts.length, (i) => i));
       });
     } catch (e) {
       setState(() => _errorMsg = e.toString());
     }
   }
 
-  Future<void> _restore() async {
-    if (_parsed.isEmpty) return;
-
+  /// Intenta subir [toImport]. Devuelve la lista de los que fallaron.
+  Future<List<ConcertModel>> _runImport(List<ConcertModel> toImport) async {
     setState(() {
-      _importing      = true;
-      _importTotal    = _parsed.length;
-      _importedCount  = 0;
+      _importing     = true;
+      _importTotal   = toImport.length;
+      _importedCount = 0;
       _importingCurrent = '';
     });
 
-    int restored = 0;
-    final errors = <String>[];
+    final failed = <ConcertModel>[];
 
-    for (final concert in _parsed) {
-      if (!mounted) return;
+    for (final concert in toImport) {
+      if (!mounted) return failed;
       setState(() {
         _importingCurrent =
-            '${concert.artist} · ${concert.venue.isNotEmpty ? concert.venue : concert.city}';
+            '${concert.artist}${concert.venue.isNotEmpty ? ' · ${concert.venue}' : ''}';
         _importedCount++;
       });
 
       try {
         await ConcertApiService().addConcert(concert);
-        restored++;
-      } catch (e) {
-        errors.add('${concert.artist}: $e');
+      } catch (_) {
+        failed.add(concert);
       }
     }
 
     ref.read(concertsProvider.notifier).reload().ignore();
+    if (mounted) setState(() => _importing = false);
+    return failed;
+  }
+
+  Future<void> _restore() async {
+    if (_parsed.isEmpty || _selectedIdx.isEmpty) return;
+    // Solo restauramos los seleccionados
+    final toImport = [
+      for (int i = 0; i < _parsed.length; i++)
+        if (_selectedIdx.contains(i)) _parsed[i],
+    ];
+
+    final failed = await _runImport(toImport);
     if (!mounted) return;
 
+    final restored = toImport.length - failed.length;
     setState(() {
-      _importing = false;
-      _parsed    = [];
-      _fileName  = null;
+      _failed        = failed;
+      _restoredCount = restored;
+      _parsed        = [];
+      _selectedIdx.clear();
     });
+  }
 
-    if (errors.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('✅  $restored conciertos restaurados correctamente'),
-          backgroundColor: Colors.green.shade700,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              '$restored restaurados · ${errors.length} errores'),
-          backgroundColor: Colors.orange.shade700,
-        ),
-      );
-    }
+  Future<void> _retryFailed() async {
+    if (_failed.isEmpty) return;
+    final toRetry = List<ConcertModel>.from(_failed);
+
+    final stillFailed = await _runImport(toRetry);
+    if (!mounted) return;
+
+    final restored = toRetry.length - stillFailed.length;
+    setState(() {
+      _failed        = stillFailed;
+      _restoredCount = restored;
+    });
   }
 
   @override
@@ -959,24 +977,64 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                 ),
               ],
 
-              // ── Vista previa de conciertos ────────────────────────────────
+              // ── Lista previa: conciertos a restaurar ─────────────────────
               if (_parsed.isNotEmpty) ...[
                 const SizedBox(height: 24),
-                Text(
-                  '${_parsed.length} conciertos encontrados',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
+                // Cabecera con contador y toggle seleccionar todo
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${_parsed.length} conciertos encontrados',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => setState(() {
+                        if (_selectedIdx.length == _parsed.length) {
+                          _selectedIdx.clear();
+                        } else {
+                          _selectedIdx.addAll(
+                              List.generate(_parsed.length, (i) => i));
+                        }
+                      }),
+                      child: Text(
+                        _selectedIdx.length == _parsed.length
+                            ? 'Deseleccionar todo'
+                            : 'Seleccionar todo',
+                        style: const TextStyle(
+                            color: Color(0xFFE53935), fontSize: 13),
+                      ),
+                    ),
+                  ],
                 ),
+                if (_selectedIdx.isNotEmpty) ...[
+                  Text(
+                    '${_selectedIdx.length} seleccionado${_selectedIdx.length == 1 ? '' : 's'}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: const Color(0xFFE53935).withValues(alpha: .8),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: _importing ? null : _restore,
+                    onPressed: (_importing || _selectedIdx.isEmpty)
+                        ? null
+                        : _restore,
                     icon: const Icon(Icons.restore_rounded, size: 18),
-                    label: const Text('Restaurar todo'),
+                    label: Text(
+                      _selectedIdx.length == _parsed.length
+                          ? 'Restaurar todo'
+                          : 'Restaurar ${_selectedIdx.length} seleccionado${_selectedIdx.length == 1 ? '' : 's'}',
+                    ),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFFE53935),
                       foregroundColor: Colors.white,
@@ -988,83 +1046,87 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                // Lista de conciertos del backup
-                ...List.generate(_parsed.length, (i) {
-                  final c  = _parsed[i];
-                  final dt = c.date;
-                  final dateStr =
-                      '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest.withValues(alpha: .5),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                          color: cs.outline.withValues(alpha: .1)),
+                ...List.generate(
+                  _parsed.length,
+                  (i) => _concertTile(_parsed[i], cs, index: i),
+                ),
+              ],
+
+              // ── Resultado: fallidos con reintento ────────────────────────
+              if (_failed.isNotEmpty || (_restoredCount > 0 && _parsed.isEmpty)) ...[
+                const SizedBox(height: 24),
+
+                // Resumen
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: _failed.isEmpty
+                        ? Colors.green.withValues(alpha: .1)
+                        : Colors.orange.withValues(alpha: .1),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: _failed.isEmpty
+                          ? Colors.green.withValues(alpha: .3)
+                          : Colors.orange.withValues(alpha: .3),
                     ),
-                    child: Row(
-                      children: [
-                        // Imagen o placeholder
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: c.imageUrl.isNotEmpty
-                              ? Image.network(
-                                  c.imageUrl,
-                                  width: 44,
-                                  height: 44,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      _placeholder(c.artist, cs),
-                                )
-                              : _placeholder(c.artist, cs),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                c.artist,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '$dateStr${c.venue.isNotEmpty ? '  ·  ${c.venue}' : ''}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: cs.onSurface.withValues(alpha: .55),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _failed.isEmpty
+                            ? Icons.check_circle_rounded
+                            : Icons.warning_amber_rounded,
+                        color: _failed.isEmpty ? Colors.green : Colors.orange,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _failed.isEmpty
+                              ? '$_restoredCount conciertos restaurados correctamente ✅'
+                              : '$_restoredCount restaurados · ${_failed.length} fallaron',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
                           ),
                         ),
-                        if (c.rating > 0)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.star_rounded,
-                                  size: 14, color: Colors.amber),
-                              const SizedBox(width: 2),
-                              Text(
-                                '${c.rating}',
-                                style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Lista de fallidos + botón reintentar
+                if (_failed.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Conciertos que fallaron:',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface.withValues(alpha: .7),
                     ),
-                  );
-                }),
+                  ),
+                  const SizedBox(height: 8),
+                  ..._failed.map((c) => _concertTile(c, cs, isError: true)),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _importing ? null : _retryFailed,
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text('Reintentar ${_failed.length} fallidos'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.orange,
+                        side: const BorderSide(color: Colors.orange),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ],
           ),
@@ -1120,23 +1182,145 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
     );
   }
 
+  Widget _concertTile(
+    ConcertModel c,
+    ColorScheme cs, {
+    bool isError = false,
+    int? index,
+  }) {
+    final dt = c.date;
+    final dateStr =
+        '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+
+    // Si tenemos índice, es un tile seleccionable (lista previa)
+    final isSelectable = index != null;
+    final isSelected = isSelectable && _selectedIdx.contains(index);
+
+    Widget tile = Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isError
+            ? Colors.orange.withValues(alpha: .07)
+            : isSelected
+                ? const Color(0xFFE53935).withValues(alpha: .07)
+                : cs.surfaceContainerHighest.withValues(alpha: .5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isError
+              ? Colors.orange.withValues(alpha: .3)
+              : isSelected
+                  ? const Color(0xFFE53935).withValues(alpha: .4)
+                  : cs.outline.withValues(alpha: .1),
+        ),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: c.imageUrl.isNotEmpty
+                ? Image.network(
+                    c.imageUrl,
+                    width: 44, height: 44,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _placeholder(c.artist, cs),
+                  )
+                : _placeholder(c.artist, cs),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  c.artist,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$dateStr${c.venue.isNotEmpty ? '  ·  ${c.venue}' : ''}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: cs.onSurface.withValues(alpha: .55),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Trailing: checkbox (seleccionable), error icon, o rating
+          if (isSelectable)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 24, height: 24,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? const Color(0xFFE53935)
+                    : Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFFE53935)
+                      : cs.onSurface.withValues(alpha: .3),
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check_rounded,
+                      color: Colors.white, size: 14)
+                  : null,
+            )
+          else if (isError)
+            const Icon(Icons.error_outline_rounded,
+                size: 18, color: Colors.orange)
+          else if (c.rating > 0)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
+                const SizedBox(width: 2),
+                Text('${c.rating}',
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.bold)),
+              ],
+            ),
+        ],
+      ),
+    );
+
+    if (isSelectable) {
+      return GestureDetector(
+        onTap: () => setState(() {
+          if (_selectedIdx.contains(index)) {
+            _selectedIdx.remove(index);
+          } else {
+            _selectedIdx.add(index);
+          }
+        }),
+        child: tile,
+      );
+    }
+    return tile;
+  }
+
   Widget _placeholder(String artist, ColorScheme cs) {
     final hue = artist.isNotEmpty
         ? (artist.codeUnitAt(0) * 137.5) % 360
         : 0.0;
     final bg = HSLColor.fromAHSL(1, hue, 0.4, 0.25).toColor();
     return Container(
-      width: 44,
-      height: 44,
+      width: 44, height: 44,
       color: bg,
       child: Center(
         child: Text(
           artist.isNotEmpty ? artist[0].toUpperCase() : '?',
           style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white70,
-          ),
+            fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white70),
         ),
       ),
     );

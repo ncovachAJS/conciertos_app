@@ -89,6 +89,10 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   bool _deleting = false;
   _ConcertFilter _filter = const _ConcertFilter();
 
+  // ── Selección múltiple ───────────────────────────────────────────────────
+  bool _selectionMode = false;
+  final Set<String> _selectedIds = {};
+
   bool get _gridView => _viewMode == _ViewMode.grid;
 
   int get _filterCount {
@@ -184,6 +188,81 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
     }
 
     return result;
+  }
+
+  void _enterSelection(String id) {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _selectionMode = true;
+      _selectedIds.add(id);
+    });
+  }
+
+  void _exitSelection() => setState(() {
+        _selectionMode = false;
+        _selectedIds.clear();
+      });
+
+  void _toggleSelect(String id) => setState(() {
+        if (_selectedIds.contains(id)) {
+          _selectedIds.remove(id);
+          if (_selectedIds.isEmpty) _selectionMode = false;
+        } else {
+          _selectedIds.add(id);
+        }
+      });
+
+  void _selectAll(List<Concert> concerts) =>
+      setState(() => _selectedIds.addAll(concerts.map((c) => c.id)));
+
+  Future<void> _deleteSelected() async {
+    final ids = Set<String>.from(_selectedIds);
+    final count = ids.length;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar conciertos'),
+        content: Text(
+          '¿Eliminar $count concierto${count == 1 ? '' : 's'}?\nEsta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFE53935),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    HapticFeedback.heavyImpact();
+    setState(() => _deleting = true);
+
+    int deleted = 0;
+    for (final id in ids) {
+      try {
+        await ref.read(concertsProvider.notifier).delete(id);
+        deleted++;
+      } catch (_) {}
+    }
+
+    if (!mounted) return;
+    _exitSelection();
+    setState(() => _deleting = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '$deleted concierto${deleted == 1 ? '' : 's'} eliminado${deleted == 1 ? '' : 's'}',
+        ),
+      ),
+    );
   }
 
   Future<void> _openFilters(List<Concert> allConcerts) async {
@@ -301,29 +380,70 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
     final cs = Theme.of(context).colorScheme;
 
     return AppPage(
-      title: l.concertsTitle,
-      actions: [
-        _ViewToggle(
-          current: _viewMode,
-          onChanged: (m) => setState(() => _viewMode = m),
-        ),
-        if (_viewMode != _ViewMode.calendar)
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: GestureDetector(
-              onTap: _onAdd,
-              child: Container(
-                width: 46,
-                height: 46,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE53935),
-                  shape: BoxShape.circle,
+      title: _selectionMode && _selectedIds.isNotEmpty
+          ? '${_selectedIds.length} seleccionado${_selectedIds.length == 1 ? '' : 's'}'
+          : l.concertsTitle,
+      actions: _selectionMode
+          ? [
+              // Seleccionar todo (se calcula más abajo con allVisible)
+              TextButton(
+                onPressed: () {
+                  final allVisible = concertsAsync.asData?.value ?? [];
+                  final currentUserId = AuthController.instance.user?.id ?? '';
+                  final mine = _filtered(allVisible)
+                      .where((c) =>
+                          c.userId == currentUserId || c.userId.isEmpty)
+                      .toList();
+                  _selectAll(mine);
+                },
+                child: const Text(
+                  'Todo',
+                  style: TextStyle(color: Color(0xFFE53935)),
                 ),
-                child: const Icon(Icons.add, color: Colors.white),
               ),
-            ),
-          ),
-      ],
+              // Eliminar seleccionados
+              IconButton(
+                icon: const Icon(Icons.delete_rounded),
+                color: const Color(0xFFE53935),
+                tooltip: 'Eliminar seleccionados',
+                onPressed: _selectedIds.isEmpty ? null : _deleteSelected,
+              ),
+              // Salir de selección
+              IconButton(
+                icon: const Icon(Icons.close_rounded),
+                tooltip: 'Cancelar selección',
+                onPressed: _exitSelection,
+              ),
+            ]
+          : [
+              // Entrar en modo selección
+              if (_viewMode != _ViewMode.calendar)
+                IconButton(
+                  icon: const Icon(Icons.checklist_rounded),
+                  tooltip: 'Seleccionar',
+                  onPressed: () => setState(() => _selectionMode = true),
+                ),
+              _ViewToggle(
+                current: _viewMode,
+                onChanged: (m) => setState(() => _viewMode = m),
+              ),
+              if (_viewMode != _ViewMode.calendar)
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: GestureDetector(
+                    onTap: _onAdd,
+                    child: Container(
+                      width: 46,
+                      height: 46,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE53935),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.add, color: Colors.white),
+                    ),
+                  ),
+                ),
+            ],
       child: Stack(
         children: [
           concertsAsync.when(
@@ -609,6 +729,10 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                           onEdit: _onEdit,
                           onDelete: _deleteConcert,
                           scrollController: _scrollController,
+                          selectionMode: _selectionMode,
+                          selectedIds: _selectedIds,
+                          onToggleSelect: _toggleSelect,
+                          onEnterSelection: _enterSelection,
                         ),
                         // Pestaña 1 — Próximos
                         _TabContent(
@@ -622,8 +746,12 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                           onEdit: _onEdit,
                           onDelete: _deleteConcert,
                           scrollController: _scrollController,
+                          selectionMode: _selectionMode,
+                          selectedIds: _selectedIds,
+                          onToggleSelect: _toggleSelect,
+                          onEnterSelection: _enterSelection,
                         ),
-                        // Pestaña 2 — Compartidos
+                        // Pestaña 2 — Compartidos (sin selección: no son propios)
                         _TabContent(
                           concerts: sharedSorted,
                           gridView: _gridView,
@@ -740,6 +868,11 @@ class _TabContent extends StatelessWidget {
   final ValueChanged<Concert> onDelete;
   final bool readOnly;
   final ScrollController? scrollController;
+  // Selección múltiple
+  final bool selectionMode;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggleSelect;
+  final ValueChanged<String> onEnterSelection;
 
   const _TabContent({
     required this.concerts,
@@ -753,7 +886,13 @@ class _TabContent extends StatelessWidget {
     required this.onDelete,
     this.readOnly = false,
     this.scrollController,
+    this.selectionMode = false,
+    this.selectedIds = const {},
+    this.onToggleSelect = _noop,
+    this.onEnterSelection = _noop,
   });
+
+  static void _noop(dynamic _) {}
 
   String _emptyEmoji(IconData icon) {
     if (icon == Icons.history_rounded) return '🎸';
@@ -796,6 +935,10 @@ class _TabContent extends StatelessWidget {
               onDelete: onDelete,
               readOnly: readOnly,
               scrollController: scrollController,
+              selectionMode: selectionMode,
+              selectedIds: selectedIds,
+              onToggleSelect: onToggleSelect,
+              onEnterSelection: onEnterSelection,
             )
           : _ListView(
               key: const ValueKey('list'),
@@ -807,6 +950,10 @@ class _TabContent extends StatelessWidget {
               onDelete: onDelete,
               readOnly: readOnly,
               scrollController: scrollController,
+              selectionMode: selectionMode,
+              selectedIds: selectedIds,
+              onToggleSelect: onToggleSelect,
+              onEnterSelection: onEnterSelection,
             ),
     );
   }
@@ -822,6 +969,10 @@ class _GridView extends ConsumerWidget {
   final ValueChanged<Concert> onDelete;
   final bool readOnly;
   final ScrollController? scrollController;
+  final bool selectionMode;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggleSelect;
+  final ValueChanged<String> onEnterSelection;
 
   const _GridView({
     super.key,
@@ -830,7 +981,13 @@ class _GridView extends ConsumerWidget {
     required this.onDelete,
     this.readOnly = false,
     this.scrollController,
+    this.selectionMode = false,
+    this.selectedIds = const {},
+    this.onToggleSelect = _noop,
+    this.onEnterSelection = _noop,
   });
+
+  static void _noop(dynamic _) {}
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -856,11 +1013,47 @@ class _GridView extends ConsumerWidget {
           );
         }
         final concert = concerts[index];
-        return ConcertGridCard(
-          concert: concert,
-          onTap: () => context.push('/concert-detail', extra: concert),
-          onEdit: readOnly ? null : () => onEdit(concert),
-          onDelete: readOnly ? null : () => onDelete(concert),
+        final isSelected = selectedIds.contains(concert.id);
+        return GestureDetector(
+          onLongPress: selectionMode ? null : () => onEnterSelection(concert.id),
+          onTap: selectionMode ? () => onToggleSelect(concert.id) : null,
+          child: Stack(
+            children: [
+              // La tarjeta original — ignoramos sus toques cuando estamos en selección
+              IgnorePointer(
+                ignoring: selectionMode,
+                child: ConcertGridCard(
+                  concert: concert,
+                  onTap: () => context.push('/concert-detail', extra: concert),
+                  onEdit: readOnly ? null : () => onEdit(concert),
+                  onDelete: readOnly ? null : () => onDelete(concert),
+                ),
+              ),
+              // Overlay de selección
+              if (selectionMode)
+                Positioned.fill(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFFE53935).withValues(alpha: .18)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                      border: isSelected
+                          ? Border.all(color: const Color(0xFFE53935), width: 2)
+                          : null,
+                    ),
+                  ),
+                ),
+              // Checkbox en la esquina superior izquierda
+              if (selectionMode)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: _SelectionDot(selected: isSelected),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -880,6 +1073,10 @@ class _ListView extends ConsumerWidget {
   final ValueChanged<Concert> onDelete;
   final bool readOnly;
   final ScrollController? scrollController;
+  final bool selectionMode;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggleSelect;
+  final ValueChanged<String> onEnterSelection;
 
   const _ListView({
     super.key,
@@ -891,7 +1088,13 @@ class _ListView extends ConsumerWidget {
     required this.onDelete,
     this.readOnly = false,
     this.scrollController,
+    this.selectionMode = false,
+    this.selectedIds = const {},
+    this.onToggleSelect = _noop,
+    this.onEnterSelection = _noop,
   });
+
+  static void _noop(dynamic _) {}
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -909,16 +1112,81 @@ class _ListView extends ConsumerWidget {
           );
         }
         final concert = concerts[index];
-        return ConcertCard(
-          concert: concert,
-          onImageTap: () => context.push('/concert-detail', extra: concert),
-          onLike: () => onLike(concert),
-          onFavorite: () => onFavorite(concert),
-          onRatingChanged: (r) => onRatingChanged(concert, r),
-          onEdit: readOnly ? null : () => onEdit(concert),
-          onDelete: readOnly ? null : () => onDelete(concert),
+        final isSelected = selectedIds.contains(concert.id);
+        return GestureDetector(
+          onLongPress: selectionMode ? null : () => onEnterSelection(concert.id),
+          onTap: selectionMode ? () => onToggleSelect(concert.id) : null,
+          child: Stack(
+            children: [
+              // Tarjeta original — desactivamos sus gestos al estar en selección
+              IgnorePointer(
+                ignoring: selectionMode,
+                child: ConcertCard(
+                  concert: concert,
+                  onImageTap: () => context.push('/concert-detail', extra: concert),
+                  onLike: () => onLike(concert),
+                  onFavorite: () => onFavorite(concert),
+                  onRatingChanged: (r) => onRatingChanged(concert, r),
+                  onEdit: readOnly ? null : () => onEdit(concert),
+                  onDelete: readOnly ? null : () => onDelete(concert),
+                ),
+              ),
+              // Overlay de selección
+              if (selectionMode)
+                Positioned.fill(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFFE53935).withValues(alpha: .15)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                      border: isSelected
+                          ? Border.all(color: const Color(0xFFE53935), width: 2)
+                          : Border.all(color: Colors.transparent, width: 2),
+                    ),
+                  ),
+                ),
+              // Checkbox arriba a la derecha
+              if (selectionMode)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: _SelectionDot(selected: isSelected),
+                ),
+            ],
+          ),
         );
       },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Indicador visual de selección (círculo con check)
+// ---------------------------------------------------------------------------
+
+class _SelectionDot extends StatelessWidget {
+  final bool selected;
+  const _SelectionDot({required this.selected});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 26,
+      height: 26,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: selected ? const Color(0xFFE53935) : Colors.black45,
+        border: Border.all(
+          color: selected ? const Color(0xFFE53935) : Colors.white54,
+          width: 2,
+        ),
+      ),
+      child: selected
+          ? const Icon(Icons.check_rounded, color: Colors.white, size: 16)
+          : null,
     );
   }
 }
