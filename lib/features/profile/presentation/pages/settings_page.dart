@@ -496,8 +496,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       final file = File('${dir.path}/$filename');
       await file.writeAsString(content, encoding: utf8);
 
-      // Cerramos el diálogo de progreso antes de abrir el share sheet
-      if (format == 'json' && mounted) Navigator.of(context).pop();
+      // Cerramos el diálogo de progreso antes de abrir el share sheet.
+      // Usamos rootNavigator:true porque showDialog lo abre en el navigator raíz.
+      if (format == 'json' && mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
 
       await SharePlus.instance.share(
         ShareParams(
@@ -506,7 +509,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ),
       );
     } catch (e) {
-      if (format == 'json' && mounted) Navigator.of(context).pop();
+      if (format == 'json' && mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al exportar: $e')),
