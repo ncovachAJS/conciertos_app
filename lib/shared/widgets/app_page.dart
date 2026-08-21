@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/responsive/responsive.dart';
+
 class AppPage extends StatelessWidget {
   final String? title;
   final Widget child;
@@ -20,6 +22,25 @@ class AppPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final showAppBar = title != null;
+    final tablet = Responsive.isTablet(context);
+
+    // En tablet centramos el contenido y lo limitamos a maxContentWidth para
+    // que no quede excesivamente estirado en la pantalla grande del iPad.
+    Widget body = SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        child: tablet
+            ? Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: Responsive.maxContentWidth,
+                  ),
+                  child: child,
+                ),
+              )
+            : child,
+      ),
+    );
 
     return GestureDetector(
       // Oculta el teclado al tocar fuera de un input.
@@ -43,12 +64,7 @@ class AppPage extends StatelessWidget {
               )
             : null,
 
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: child,
-          ),
-        ),
+        body: body,
 
         floatingActionButton: floatingActionButton,
       ),

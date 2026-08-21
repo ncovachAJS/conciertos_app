@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -997,8 +998,8 @@ class _GridView extends ConsumerWidget {
       padding: EdgeInsets.zero,
       // +1 para el spinner de carga al pie cuando loadingMore
       itemCount: concerts.length + (loadingMore ? 1 : 0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: Responsive.gridColumns(context, phone: 2, tablet: 3),
         crossAxisSpacing: 18,
         mainAxisSpacing: 18,
         mainAxisExtent: 307,

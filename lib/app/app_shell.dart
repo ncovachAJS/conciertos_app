@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/responsive/responsive.dart';
 import '../features/notifications/presentation/controllers/notifications_controller.dart';
 import '../l10n/generated/app_localizations.dart';
 
@@ -50,29 +51,80 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
+  void _navigate(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        context.go('/');
+      case 1:
+        context.go('/concerts');
+      case 2:
+        context.go('/feed');
+      case 3:
+        context.go('/favorites');
+      case 4:
+        context.go('/statistics');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final unread = _notif.unreadCount;
     final l = AppLocalizations.of(context);
+    final selectedIndex = _currentIndex(context);
 
+    // ── iPad / tablet: NavigationRail lateral ───────────────────────────────
+    if (Responsive.isTablet(context)) {
+      return Scaffold(
+        body: Row(
+          children: [
+            NavigationRail(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (index) => _navigate(context, index),
+              labelType: NavigationRailLabelType.all,
+              // Un poco más compacto que el ancho por defecto
+              minWidth: 72,
+              destinations: [
+                NavigationRailDestination(
+                  icon: _BadgeIcon(icon: Icons.home_outlined, count: unread),
+                  selectedIcon:
+                      _BadgeIcon(icon: Icons.home, count: unread, selected: true),
+                  label: Text(l.navHome),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.library_music_outlined),
+                  selectedIcon: const Icon(Icons.library_music),
+                  label: Text(l.navConcerts),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.photo_library_outlined),
+                  selectedIcon: const Icon(Icons.photo_library),
+                  label: Text(l.navMemories),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.favorite_border),
+                  selectedIcon: const Icon(Icons.favorite),
+                  label: Text(l.navFavorites),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.bar_chart_outlined),
+                  selectedIcon: const Icon(Icons.bar_chart),
+                  label: Text(l.navStats),
+                ),
+              ],
+            ),
+            const VerticalDivider(thickness: 1, width: 1),
+            Expanded(child: widget.child),
+          ],
+        ),
+      );
+    }
+
+    // ── iPhone / móvil: NavigationBar inferior (sin cambios) ────────────────
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex(context),
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0:
-              context.go('/');
-            case 1:
-              context.go('/concerts');
-            case 2:
-              context.go('/feed');
-            case 3:
-              context.go('/favorites');
-            case 4:
-              context.go('/statistics');
-          }
-        },
+        selectedIndex: selectedIndex,
+        onDestinationSelected: (index) => _navigate(context, index),
         destinations: [
           NavigationDestination(
             icon: _BadgeIcon(icon: Icons.home_outlined, count: unread),
