@@ -24,23 +24,10 @@ class AppPage extends StatelessWidget {
     final showAppBar = title != null;
     final tablet = Responsive.isTablet(context);
 
-    // En tablet centramos el contenido y lo limitamos a maxContentWidth para
-    // que no quede excesivamente estirado en la pantalla grande del iPad.
-    Widget body = SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-        child: tablet
-            ? Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: Responsive.maxContentWidth,
-                  ),
-                  child: child,
-                ),
-              )
-            : child,
-      ),
-    );
+    // En tablet añadimos más respiro horizontal; el contenido NO está limitado
+    // en ancho — cada página usa el espacio con su propio layout (2 columnas, etc.)
+    final horizontalPadding = tablet ? 24.0 : 8.0;
+    final verticalPadding = tablet ? 20.0 : 16.0;
 
     return GestureDetector(
       // Oculta el teclado al tocar fuera de un input.
@@ -64,7 +51,15 @@ class AppPage extends StatelessWidget {
               )
             : null,
 
-        body: body,
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
+            ),
+            child: child,
+          ),
+        ),
 
         floatingActionButton: floatingActionButton,
       ),

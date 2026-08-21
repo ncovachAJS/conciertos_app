@@ -71,55 +71,69 @@ class _AppShellState extends State<AppShell> {
     final unread = _notif.unreadCount;
     final l = AppLocalizations.of(context);
     final selectedIndex = _currentIndex(context);
+    final cs = Theme.of(context).colorScheme;
 
-    // ── iPad / tablet: NavigationRail lateral ───────────────────────────────
+    // ── iPad / tablet: barra lateral extendida (icono + etiqueta en fila) ──
     if (Responsive.isTablet(context)) {
       return Scaffold(
         body: Row(
           children: [
+            // Sidebar: NavigationRail en modo extendido (estilo Slack / Notion)
             NavigationRail(
+              extended: true,
+              minExtendedWidth: 190,
               selectedIndex: selectedIndex,
               onDestinationSelected: (index) => _navigate(context, index),
-              labelType: NavigationRailLabelType.all,
-              // Un poco más compacto que el ancho por defecto
-              minWidth: 72,
+              // Separador visual entre el rail y el contenido
+              trailing: const Expanded(child: SizedBox.shrink()),
+              // Indicador de selección más suave
+              indicatorColor: cs.primaryContainer,
               destinations: [
                 NavigationRailDestination(
                   icon: _BadgeIcon(icon: Icons.home_outlined, count: unread),
-                  selectedIcon:
-                      _BadgeIcon(icon: Icons.home, count: unread, selected: true),
+                  selectedIcon: _BadgeIcon(
+                    icon: Icons.home_rounded,
+                    count: unread,
+                    selected: true,
+                  ),
                   label: Text(l.navHome),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.library_music_outlined),
-                  selectedIcon: const Icon(Icons.library_music),
+                  selectedIcon: const Icon(Icons.library_music_rounded),
                   label: Text(l.navConcerts),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.photo_library_outlined),
-                  selectedIcon: const Icon(Icons.photo_library),
+                  selectedIcon: const Icon(Icons.photo_library_rounded),
                   label: Text(l.navMemories),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.favorite_border),
-                  selectedIcon: const Icon(Icons.favorite),
+                  icon: const Icon(Icons.favorite_border_rounded),
+                  selectedIcon: const Icon(Icons.favorite_rounded),
                   label: Text(l.navFavorites),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.bar_chart_outlined),
-                  selectedIcon: const Icon(Icons.bar_chart),
+                  selectedIcon: const Icon(Icons.bar_chart_rounded),
                   label: Text(l.navStats),
                 ),
               ],
             ),
-            const VerticalDivider(thickness: 1, width: 1),
+            // Línea divisoria sutil
+            VerticalDivider(
+              thickness: 1,
+              width: 1,
+              color: cs.outlineVariant.withValues(alpha: 0.5),
+            ),
+            // Contenido principal
             Expanded(child: widget.child),
           ],
         ),
       );
     }
 
-    // ── iPhone / móvil: NavigationBar inferior (sin cambios) ────────────────
+    // ── iPhone / móvil: barra inferior (sin ningún cambio) ──────────────────
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: NavigationBar(

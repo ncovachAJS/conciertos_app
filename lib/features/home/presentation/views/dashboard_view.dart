@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -212,32 +213,116 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           };
         }
 
-        // Si el provider todavía no cargó, usamos el orden por defecto.
-        final sections = layout ??
-            DashboardLayoutService.defaults;
+        final sections = layout ?? DashboardLayoutService.defaults;
+        final visibleSections = sections.where((s) => s.visible).toList();
 
-        final sectionWidgets = sections
-            .where((s) => s.visible)
-            .expand((s) => widgetsFor(s.id))
-            .toList();
+        final isTablet = Responsive.isTablet(context);
 
         // ── Layout ───────────────────────────────────────────────────────────
         return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(4, 4, 4, 100),
+          padding: EdgeInsets.fromLTRB(4, 4, 4, isTablet ? 32 : 100),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const DashboardHeader(),
               const SizedBox(height: 24),
-
               const DashboardQuickActions(),
               const SizedBox(height: 20),
 
-              ...sectionWidgets,
+              // En iPad usamos un layout de 2 columnas para las secciones
+              // que encajan bien en media pantalla (cards, stats, etc.).
+              // Las secciones con carruseles horizontales siempre van a ancho completo.
+              if (isTablet)
+                _TabletDashboardLayout(
+                  sections: visibleSections,
+                  widgetsFor: widgetsFor,
+                )
+              else
+                ...visibleSections.expand((s) => widgetsFor(s.id)),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Layout de 2 columnas para el dashboard en iPad
+// ---------------------------------------------------------------------------
+
+/// Secciones que ocupan ancho completo (carruseles, mapas, embeds).
+const _fullWidthSections = {
+  DashboardSectionId.upcoming,
+  DashboardSectionId.favorites,
+  DashboardSectionId.recommended,
+  DashboardSectionId.spotifyEmbed,
+};
+
+class _TabletDashboardLayout extends StatelessWidget {
+  final List<DashboardSection> sections;
+  final List<Widget> Function(DashboardSectionId) widgetsFor;
+
+  const _TabletDashboardLayout({
+    required this.sections,
+    required this.widgetsFor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const gap = 20.0;
+    final result = <Widget>[];
+    // Cola de secciones que caben en media columna
+    final halfQueue = <DashboardSection>[];
+
+    void flushQueue() {
+      if (halfQueue.isEmpty) return;
+      if (halfQueue.length == 1) {
+        // Sola: ocupa ancho completo igualmente
+        result.addAll(widgetsFor(halfQueue[0].id));
+      } else {
+        // Par: lado a lado
+        result.add(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widgetsFor(halfQueue[0].id),
+                ),
+              ),
+              const SizedBox(width: gap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widgetsFor(halfQueue[1].id),
+                ),
+              ),
+            ],
+          ),
+        );
+        result.add(const SizedBox(height: gap));
+      }
+      halfQueue.clear();
+    }
+
+    for (final section in sections) {
+      if (_fullWidthSections.contains(section.id)) {
+        // Antes de colocar la sección ancho-completo, vaciamos la cola
+        flushQueue();
+        result.addAll(widgetsFor(section.id));
+      } else {
+        halfQueue.add(section);
+        if (halfQueue.length == 2) flushQueue();
+      }
+    }
+    // Vaciamos lo que quede al final
+    flushQueue();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: result,
     );
   }
 }

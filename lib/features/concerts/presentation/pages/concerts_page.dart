@@ -1097,14 +1097,94 @@ class _ListView extends ConsumerWidget {
 
   static void _noop(dynamic _) {}
 
+  Widget _buildItem(BuildContext context, Concert concert) {
+    final isSelected = selectedIds.contains(concert.id);
+    return GestureDetector(
+      onLongPress: selectionMode ? null : () => onEnterSelection(concert.id),
+      onTap: selectionMode ? () => onToggleSelect(concert.id) : null,
+      child: Stack(
+        children: [
+          IgnorePointer(
+            ignoring: selectionMode,
+            child: ConcertCard(
+              concert: concert,
+              onImageTap: () => context.push('/concert-detail', extra: concert),
+              onLike: () => onLike(concert),
+              onFavorite: () => onFavorite(concert),
+              onRatingChanged: (r) => onRatingChanged(concert, r),
+              onEdit: readOnly ? null : () => onEdit(concert),
+              onDelete: readOnly ? null : () => onDelete(concert),
+            ),
+          ),
+          if (selectionMode)
+            Positioned.fill(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFFE53935).withValues(alpha: .15)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  border: isSelected
+                      ? Border.all(color: const Color(0xFFE53935), width: 2)
+                      : Border.all(color: Colors.transparent, width: 2),
+                ),
+              ),
+            ),
+          if (selectionMode)
+            Positioned(
+              top: 12,
+              right: 12,
+              child: _SelectionDot(selected: isSelected),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loadingMore = ref.watch(concertsLoadingMoreProvider);
+    final isTablet = Responsive.isTablet(context);
+
+    // ── iPad: 2 tarjetas por fila ─────────────────────────────────────────
+    if (isTablet) {
+      // Agrupamos los conciertos de 2 en 2
+      final rowCount = (concerts.length / 2).ceil();
+      return ListView.separated(
+        controller: scrollController,
+        itemCount: rowCount + (loadingMore ? 1 : 0),
+        separatorBuilder: (_, __) => const SizedBox(height: 0),
+        itemBuilder: (context, rowIndex) {
+          if (rowIndex == rowCount) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final i = rowIndex * 2;
+          final concert1 = concerts[i];
+          final concert2 = i + 1 < concerts.length ? concerts[i + 1] : null;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _buildItem(context, concert1)),
+              Expanded(
+                child: concert2 != null
+                    ? _buildItem(context, concert2)
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    // ── iPhone: lista simple (sin cambios) ────────────────────────────────
     return ListView.separated(
       controller: scrollController,
-      // +1 para el spinner al pie cuando loadingMore
       itemCount: concerts.length + (loadingMore ? 1 : 0),
-      separatorBuilder: (_, i) => const SizedBox(height: 24),
+      separatorBuilder: (_, __) => const SizedBox(height: 24),
       itemBuilder: (context, index) {
         if (index == concerts.length) {
           return const Padding(
@@ -1112,52 +1192,7 @@ class _ListView extends ConsumerWidget {
             child: Center(child: CircularProgressIndicator()),
           );
         }
-        final concert = concerts[index];
-        final isSelected = selectedIds.contains(concert.id);
-        return GestureDetector(
-          onLongPress: selectionMode ? null : () => onEnterSelection(concert.id),
-          onTap: selectionMode ? () => onToggleSelect(concert.id) : null,
-          child: Stack(
-            children: [
-              // Tarjeta original — desactivamos sus gestos al estar en selección
-              IgnorePointer(
-                ignoring: selectionMode,
-                child: ConcertCard(
-                  concert: concert,
-                  onImageTap: () => context.push('/concert-detail', extra: concert),
-                  onLike: () => onLike(concert),
-                  onFavorite: () => onFavorite(concert),
-                  onRatingChanged: (r) => onRatingChanged(concert, r),
-                  onEdit: readOnly ? null : () => onEdit(concert),
-                  onDelete: readOnly ? null : () => onDelete(concert),
-                ),
-              ),
-              // Overlay de selección
-              if (selectionMode)
-                Positioned.fill(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFFE53935).withValues(alpha: .15)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(16),
-                      border: isSelected
-                          ? Border.all(color: const Color(0xFFE53935), width: 2)
-                          : Border.all(color: Colors.transparent, width: 2),
-                    ),
-                  ),
-                ),
-              // Checkbox arriba a la derecha
-              if (selectionMode)
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: _SelectionDot(selected: isSelected),
-                ),
-            ],
-          ),
-        );
+        return _buildItem(context, concerts[index]);
       },
     );
   }
