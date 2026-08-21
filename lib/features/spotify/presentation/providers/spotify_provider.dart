@@ -7,10 +7,25 @@ import '../../domain/spotify_artist.dart';
 
 // ─────────────────────────────────────────── Auth (para invalidar al cambiar usuario)
 
-/// Expone AuthController como ChangeNotifierProvider para que los providers
-/// de Spotify puedan reaccionar cuando el usuario de la app cambia.
-final authControllerProvider = ChangeNotifierProvider<AuthController>(
-  (_) => AuthController.instance,
+/// Notifier que observa AuthController (ChangeNotifier) y expone el userId
+/// actual como estado Riverpod. Cuando el usuario de la app cambia
+/// (login / logout), todos los providers que lo observen se reconstruyen.
+class _AuthUserIdNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    final controller = AuthController.instance;
+
+    void _onAuthChanged() => state = controller.user?.id;
+
+    controller.addListener(_onAuthChanged);
+    ref.onDispose(() => controller.removeListener(_onAuthChanged));
+
+    return controller.user?.id;
+  }
+}
+
+final authUserIdProvider = NotifierProvider<_AuthUserIdNotifier, String?>(
+  _AuthUserIdNotifier.new,
 );
 
 // ─────────────────────────────────────────── Servicios singleton
@@ -27,7 +42,7 @@ final spotifyApiServiceProvider = Provider<SpotifyApiService>((ref) {
 
 final spotifyLoggedInProvider = FutureProvider<bool>((ref) async {
   // Se invalida cuando cambia el usuario de la app.
-  ref.watch(authControllerProvider.select((c) => c.user?.id));
+  ref.watch(authUserIdProvider);
   return ref.watch(spotifyAuthServiceProvider).isLoggedIn;
 });
 
@@ -39,7 +54,8 @@ class SpotifyTopArtistsNotifier extends AsyncNotifier<List<SpotifyArtist>> {
     // Observar el userId hace que este notifier se reconstruya cuando el
     // usuario de la app cambia (login/logout), evitando que un usuario
     // vea los artistas de Spotify del usuario anterior.
-    ref.watch(authControllerProvider.select((c) => c.user?.id));
+    // Reconstruye cuando cambia el usuario de la app.
+    ref.watch(authUserIdProvider);
 
     final loggedIn = await ref.watch(spotifyAuthServiceProvider).isLoggedIn;
     if (!loggedIn) return [];
