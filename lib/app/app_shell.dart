@@ -82,7 +82,7 @@ class _AppShellState extends State<AppShell> {
       );
     }
 
-    // ── iPhone / Android: pill tabs en la barra inferior ────────────────────
+    // ── iPhone / Android: pill flotante al fondo ────────────────────────────
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: _BottomPillNavBar(
@@ -221,10 +221,25 @@ class _PillTabBar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Android: pill tabs en la barra inferior
+// iPhone / Android: pill flotante con iconos — sin fondo sólido
 // ---------------------------------------------------------------------------
 
 class _BottomPillNavBar extends StatelessWidget {
+  static const _filledIcons = [
+    Icons.home_rounded,
+    Icons.music_note_rounded,
+    Icons.photo_library_rounded,
+    Icons.favorite_rounded,
+    Icons.bar_chart_rounded,
+  ];
+  static const _outlinedIcons = [
+    Icons.home_outlined,
+    Icons.music_note_outlined,
+    Icons.photo_library_outlined,
+    Icons.favorite_outline_rounded,
+    Icons.bar_chart_outlined,
+  ];
+
   final int selectedIndex;
   final List<String> labels;
   final int unreadCount;
@@ -240,18 +255,94 @@ class _BottomPillNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      color: cs.surface,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Center(
-            child: _PillTabBar(
-              selectedIndex: selectedIndex,
-              labels: labels,
-              unreadCount: unreadCount,
-              onTap: onTap,
+
+    // SafeArea + Padding determinan la altura real — no hay Center que expanda.
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.22),
+                blurRadius: 24,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            child: Row(
+              children: List.generate(labels.length, (i) {
+                final selected = i == selectedIndex;
+                final hasUnread = i == 0 && unreadCount > 0;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => onTap(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeInOut,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? cs.surface.withValues(alpha: 0.85)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Icon(
+                                selected
+                                    ? _filledIcons[i]
+                                    : _outlinedIcons[i],
+                                size: 24,
+                                color: selected
+                                    ? cs.onSurface
+                                    : cs.onSurface.withValues(alpha: 0.45),
+                              ),
+                              if (hasUnread)
+                                Positioned(
+                                  top: -2,
+                                  right: -4,
+                                  child: Container(
+                                    width: 7,
+                                    height: 7,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFE53935),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            labels[i],
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: selected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: selected
+                                  ? cs.onSurface
+                                  : cs.onSurface.withValues(alpha: 0.45),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
             ),
           ),
         ),

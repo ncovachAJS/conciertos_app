@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -246,6 +247,208 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     }
   }
 
+  // ── Helpers de secciones ────────────────────────────────────────────────────
+
+  Widget _buildImage(Concert concert) {
+    return GestureDetector(
+      onTap: concert.imageUrl.isNotEmpty
+          ? () => _openImage(context, concert.imageUrl)
+          : null,
+      child: Hero(
+        tag: 'concert-image-${concert.id}',
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: concert.imageUrl.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: concert.imageUrl,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => Container(
+                      color: const Color(0xFF2B2B2B),
+                      child: const Icon(Icons.music_note, color: Colors.white24, size: 80),
+                    ),
+                  )
+                : Container(
+                    color: const Color(0xFF2B2B2B),
+                    child: const Icon(Icons.music_note, color: Colors.white24, size: 80),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(Concert concert, AppLocalizations l) {
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.calendar_today),
+            title: Text(l.dateLabel),
+            subtitle: Text(
+              DateFormatter.hasTime(concert.date)
+                  ? '${DateFormatter.short(concert.date)}  ·  ${DateFormatter.time(concert.date)}'
+                  : DateFormatter.short(concert.date),
+            ),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.stadium),
+            title: Text(l.venueLabel),
+            subtitle: Text(concert.venue),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/venue', extra: {
+              'venue': concert.venue,
+              'city': concert.city,
+            }),
+          ),
+          if (concert.price > 0) ...[
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.euro_rounded),
+              title: Text(concert.festival.isNotEmpty
+                  ? 'Precio del festival'
+                  : 'Precio de la entrada'),
+              subtitle: Text('${concert.price.toStringAsFixed(2)} €'),
+            ),
+          ],
+          if (concert.city.isNotEmpty) ...[
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.location_city),
+              title: Text(l.cityLabel),
+              subtitle: Text(concert.city),
+            ),
+          ],
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.music_note),
+            title: Text(l.concertLabel),
+            subtitle: Text(concert.name),
+          ),
+          if (concert.genre.isNotEmpty) ...[
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.library_music_outlined),
+              title: const Text('Género'),
+              subtitle: Text(concert.genre),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpotifyWidget() {
+    if (_loadingSpotify) {
+      return Card(
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            const ShimmerBox(width: double.infinity, height: 110, borderRadius: 0),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  ShimmerFill(height: 13, borderRadius: 6),
+                  SizedBox(height: 8),
+                  ShimmerBox(width: 160, height: 11, borderRadius: 5),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    if (_spotifyArtist != null) {
+      return SpotifyTopTracksSection(
+        artist: _spotifyArtist!,
+        onChangeTap: _showSpotifySearch,
+      );
+    }
+    return GestureDetector(
+      onTap: _showSpotifySearch,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF1DB954),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.music_note_rounded, color: Colors.black, size: 22),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Vincular artista de Spotify',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    SizedBox(height: 2),
+                    Text('Ver canciones populares y perfil',
+                        style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  ],
+                ),
+              ),
+              const Icon(Icons.search_rounded, color: Colors.white38, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotesCard(Concert concert) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.notes_rounded, color: Colors.amber),
+                SizedBox(width: 10),
+                Text('Notas',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(concert.notes, style: const TextStyle(fontSize: 15, height: 1.5)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSetlistWidget(Concert concert, AppLocalizations l) {
+    if (concert.isPastConcert) {
+      return SetlistSection(loading: _loadingSetlist, setlist: _setlist);
+    }
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            const Icon(Icons.queue_music, color: Colors.white38),
+            const SizedBox(width: 10),
+            Text(l.setlistComingSoon,
+                style: const TextStyle(color: Colors.white54, fontSize: 15)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── build ────────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -273,278 +476,152 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
 
     final currentUserId = AuthController.instance.user?.id ?? '';
     final isOwner = concert.userId == currentUserId;
+    final isTablet = Responsive.isTablet(context);
 
+    // ── Secciones reutilizables ──────────────────────────────────────────────
+    final imageWidget      = _buildImage(concert);
+    final infoCard         = _buildInfoCard(concert, l);
+    final spotifyWidget    = _buildSpotifyWidget();
+    final memoriesSection  = MemoriesSection(concertId: widget.concert.id);
+    final setlistWidget    = _buildSetlistWidget(concert, l);
+    final commentsSection  = _CommentsSection(key: _commentsKey, concertId: widget.concert.id);
+
+    final hasMap          = concert.venue.isNotEmpty || concert.city.isNotEmpty;
+    final hasParticipants = concert.participants.isNotEmpty;
+    final hasNotes        = concert.notes.isNotEmpty;
+    final hasSubRatings   = concert.hasDetailedRating;
+
+    final appPageActions = [
+      IconButton(
+        tooltip: 'Compartir',
+        onPressed: () => _shareCard(concert),
+        icon: const Icon(Icons.ios_share_rounded),
+      ),
+      if (isOwner) ...[
+        IconButton(
+          tooltip: l.edit,
+          onPressed: () => _edit(concert),
+          icon: const Icon(Icons.edit_outlined),
+        ),
+        IconButton(
+          tooltip: l.delete,
+          onPressed: () => _delete(concert),
+          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+        ),
+      ],
+    ];
+
+    // ── iPad: foto a todo ancho + 2 columnas ─────────────────────────────────
+    if (isTablet) {
+      return AppPage(
+        title: '🎸 ${concert.artist}',
+        showBackButton: true,
+        actions: appPageActions,
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            // Foto (ancho completo)
+            imageWidget,
+            const SizedBox(height: 24),
+
+            // 2 columnas
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Columna izquierda: info, mapa, participantes, notas ──────
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      infoCard,
+                      if (hasMap) ...[
+                        const SizedBox(height: 20),
+                        VenueMapCard(venue: concert.venue, city: concert.city),
+                      ],
+                      if (hasParticipants) ...[
+                        const SizedBox(height: 20),
+                        _ParticipantsCard(concert: concert),
+                      ],
+                      if (hasNotes) ...[
+                        const SizedBox(height: 20),
+                        _buildNotesCard(concert),
+                      ],
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 20),
+
+                // ── Columna derecha: spotify, recuerdos, valoración, setlist, comentarios
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      spotifyWidget,
+                      const SizedBox(height: 20),
+                      memoriesSection,
+                      if (hasSubRatings) ...[
+                        const SizedBox(height: 20),
+                        _SubRatingsCard(concert: concert),
+                      ],
+                      const SizedBox(height: 20),
+                      setlistWidget,
+                      const SizedBox(height: 20),
+                      commentsSection,
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 32),
+          ],
+        ),
+      );
+    }
+
+    // ── iPhone / Android: layout lineal (sin cambios) ────────────────────────
     return AppPage(
       title: '🎸 ${concert.artist}',
       showBackButton: true,
-      actions: [
-        IconButton(
-          tooltip: 'Compartir',
-          onPressed: () => _shareCard(concert),
-          icon: const Icon(Icons.ios_share_rounded),
-        ),
-        if (isOwner) ...[
-          IconButton(
-            tooltip: l.edit,
-            onPressed: () => _edit(concert),
-            icon: const Icon(Icons.edit_outlined),
-          ),
-          IconButton(
-            tooltip: l.delete,
-            onPressed: () => _delete(concert),
-            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-          ),
-        ],
-      ],
+      actions: appPageActions,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Imagen del concierto
-          GestureDetector(
-            onTap: concert.imageUrl.isNotEmpty
-                ? () => _openImage(context, concert.imageUrl)
-                : null,
-            child: Hero(
-              tag: 'concert-image-${concert.id}',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: concert.imageUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: concert.imageUrl,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => Container(
-                            color: const Color(0xFF2B2B2B),
-                            child: const Icon(
-                              Icons.music_note,
-                              color: Colors.white24,
-                              size: 80,
-                            ),
-                          ),
-                        )
-                      : Container(
-                          color: const Color(0xFF2B2B2B),
-                          child: const Icon(
-                            Icons.music_note,
-                            color: Colors.white24,
-                            size: 80,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-          ),
-
+          imageWidget,
           const SizedBox(height: 30),
+          infoCard,
 
-          // Info del concierto
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.calendar_today),
-                  title: Text(l.dateLabel),
-                  subtitle: Text(
-                    DateFormatter.hasTime(concert.date)
-                        ? '${DateFormatter.short(concert.date)}  ·  ${DateFormatter.time(concert.date)}'
-                        : DateFormatter.short(concert.date),
-                  ),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.stadium),
-                  title: Text(l.venueLabel),
-                  subtitle: Text(concert.venue),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.push('/venue', extra: {
-                    'venue': concert.venue,
-                    'city': concert.city,
-                  }),
-                ),
-                if (concert.price > 0) ...[
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.euro_rounded),
-                    title: Text(concert.festival.isNotEmpty ? 'Precio del festival' : 'Precio de la entrada'),
-                    subtitle: Text(
-                      '${concert.price.toStringAsFixed(2)} €',
-                    ),
-                  ),
-                ],
-                if (concert.city.isNotEmpty) ...[
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.location_city),
-                    title: Text(l.cityLabel),
-                    subtitle: Text(concert.city),
-                  ),
-                ],
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.music_note),
-                  title: Text(l.concertLabel),
-                  subtitle: Text(concert.name),
-                ),
-                if (concert.genre.isNotEmpty) ...[
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.library_music_outlined),
-                    title: const Text('Género'),
-                    subtitle: Text(concert.genre),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          // Mapa de ubicación
-          if (concert.venue.isNotEmpty || concert.city.isNotEmpty) ...[
+          if (hasMap) ...[
             const SizedBox(height: 20),
             VenueMapCard(venue: concert.venue, city: concert.city),
           ],
 
-          // Participantes
-          if (concert.participants.isNotEmpty) ...[
+          if (hasParticipants) ...[
             const SizedBox(height: 20),
             _ParticipantsCard(concert: concert),
           ],
 
-          // Sección Spotify
           const SizedBox(height: 20),
-          if (_loadingSpotify)
-            Card(
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: [
-                  const ShimmerBox(width: double.infinity, height: 110, borderRadius: 0),
-                  Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        ShimmerFill(height: 13, borderRadius: 6),
-                        SizedBox(height: 8),
-                        ShimmerBox(width: 160, height: 11, borderRadius: 5),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else if (_spotifyArtist != null)
-            SpotifyTopTracksSection(
-              artist: _spotifyArtist!,
-              onChangeTap: _showSpotifySearch,
-            )
-          else
-            GestureDetector(
-              onTap: _showSpotifySearch,
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40, height: 40,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF1DB954),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.music_note_rounded,
-                            color: Colors.black, size: 22),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Vincular artista de Spotify',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 14)),
-                            SizedBox(height: 2),
-                            Text('Ver canciones populares y perfil',
-                                style: TextStyle(
-                                    color: Colors.white54, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.search_rounded,
-                          color: Colors.white38, size: 20),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
+          spotifyWidget,
           const SizedBox(height: 24),
 
-          // Notas / diario
-          if (concert.notes.isNotEmpty) ...[
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.notes_rounded, color: Colors.amber),
-                        const SizedBox(width: 10),
-                        const Text(
-                          'Notas',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      concert.notes,
-                      style: const TextStyle(fontSize: 15, height: 1.5),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          if (hasNotes) ...[
+            _buildNotesCard(concert),
             const SizedBox(height: 24),
           ],
 
-          // Fotos / recuerdos
-          MemoriesSection(concertId: widget.concert.id),
+          memoriesSection,
 
-          // Sub-valoraciones detalladas
-          if (concert.hasDetailedRating) ...[
+          if (hasSubRatings) ...[
             const SizedBox(height: 24),
             _SubRatingsCard(concert: concert),
           ],
 
           const SizedBox(height: 24),
-
-          // Setlist
-          if (concert.isPastConcert)
-            SetlistSection(loading: _loadingSetlist, setlist: _setlist)
-          else
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    const Icon(Icons.queue_music, color: Colors.white38),
-                    const SizedBox(width: 10),
-                    Text(
-                      l.setlistComingSoon,
-                      style: const TextStyle(color: Colors.white54, fontSize: 15),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
+          setlistWidget,
           const SizedBox(height: 24),
-
-          // Comentarios de amigos
-          _CommentsSection(key: _commentsKey, concertId: widget.concert.id),
-
+          commentsSection,
           const SizedBox(height: 32),
         ],
       ),
