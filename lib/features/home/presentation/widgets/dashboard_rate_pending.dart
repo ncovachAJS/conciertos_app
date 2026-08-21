@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../../core/responsive/responsive.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -39,47 +38,7 @@ class _DashboardRatePendingState extends ConsumerState<DashboardRatePending> {
     }).toList()
       ..sort((a, b) => b.date.compareTo(a.date));
 
-    if (pending.isEmpty) {
-      // En iPad mostramos un estado "todo valorado" para no dejar el hueco vacío
-      if (!Responsive.isTablet(context)) return const SizedBox.shrink();
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        decoration: BoxDecoration(
-          color: const Color(0xFF4CAF50).withOpacity(0.08),
-          borderRadius: const BorderRadius.all(Radius.circular(18)),
-          border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.25)),
-        ),
-        child: Row(
-          children: [
-            const Text('✅', style: TextStyle(fontSize: 24)),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Todo valorado',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Color(0xFF4CAF50),
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    'No tienes conciertos pendientes de valorar',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    if (pending.isEmpty) return const SizedBox.shrink();
 
     // Si el índice actual quedó fuera de rango (ej. valoraron uno), lo ajustamos.
     final page = _currentPage.clamp(0, pending.length - 1);

@@ -1004,7 +1004,9 @@ class _GridView extends ConsumerWidget {
       // Ancho disponible: pantalla - padding AppPage (24*2) - gaps (18 * (cols-1))
       final screenW = MediaQuery.sizeOf(context).width;
       final cardW = (screenW - 48 - 18 * (columns - 1)) / columns;
-      mainExtent = cardW + 92; // imagen cuadrada + ~92pt para artista/ciudad/fecha
+      // imagen AspectRatio(1) + texto: pad(22) + artista(18) + ciudad(15)
+      // + fecha(15) + rating(21) ≈ 98pt → usamos 115 para margen holgado
+      mainExtent = cardW + 115;
     } else {
       mainExtent = 307;
     }

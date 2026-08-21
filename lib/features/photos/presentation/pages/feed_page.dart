@@ -7,6 +7,7 @@ import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 
+import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
@@ -378,8 +379,9 @@ class _FeedPageState extends State<FeedPage>
                           );
                         }, childCount: byYear[year]!.length),
                         gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount:
+                                  Responsive.isTablet(context) ? 6 : 3,
                               crossAxisSpacing: 2,
                               mainAxisSpacing: 2,
                               childAspectRatio: 1,
