@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -414,82 +415,104 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       return;
     }
 
+    // Para JSON mostramos un diálogo de progreso porque implica N peticiones HTTP
+    // (una por concierto para cargar sus fotos) y puede tardar varios segundos.
+    if (format == 'json') {
+      unawaited(showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const _ExportingDialog(),
+      ));
+    }
+
     String content;
     String filename;
     String mime;
 
-    if (format == 'csv') {
-      final sb = StringBuffer();
-      sb.writeln('artista,nombre,fecha,recinto,ciudad,festival,género,valoracion,favorito,precio,notas');
-      for (final c in concerts) {
-        String esc(String s) => '"${s.replaceAll('"', '""')}"';
-        sb.writeln([
-          esc(c.artist),
-          esc(c.name),
-          '${c.date.year}-${c.date.month.toString().padLeft(2,'0')}-${c.date.day.toString().padLeft(2,'0')}',
-          esc(c.venue),
-          esc(c.city),
-          esc(c.festival),
-          esc(c.genre),
-          c.rating,
-          c.favorite ? 'sí' : 'no',
-          c.price.toStringAsFixed(2),
-          esc(c.notes),
-        ].join(','));
-      }
-      content  = sb.toString();
-      filename = 'conciertos_${DateTime.now().year}.csv';
-      mime     = 'text/csv';
-    } else {
-      // Exportamos en formato completo (todos los campos + imageUrl + fotos de recuerdos)
-      // compatible con la restauración desde la pestaña "Copia de seguridad"
-      final now = DateTime.now();
-      String pad(int n) => n.toString().padLeft(2, '0');
-      final dateStr = '${now.year}${pad(now.month)}${pad(now.day)}';
-
-      // Incluir fotos de recuerdos de cada concierto
-      final photoService = PhotoApiService();
-      final concertList = <Map<String, dynamic>>[];
-      for (final c in concerts) {
-        final model = c is ConcertModel ? c : ConcertModel.fromEntity(c);
-        final concertJson = model.toCacheJson();
-        if (c.id.isNotEmpty) {
-          try {
-            final photos = await photoService.getConcertPhotos(c.id);
-            if (photos.isNotEmpty) {
-              concertJson['photos'] = photos.map((p) {
-                final m = <String, dynamic>{'imageUrl': p.imageUrl};
-                if (p.caption.isNotEmpty) m['caption'] = p.caption;
-                return m;
-              }).toList();
-            }
-          } catch (_) {
-            // Si falla la carga de fotos, el concierto se exporta igualmente sin ellas
-          }
+    try {
+      if (format == 'csv') {
+        final sb = StringBuffer();
+        sb.writeln('artista,nombre,fecha,recinto,ciudad,festival,género,valoracion,favorito,precio,notas');
+        for (final c in concerts) {
+          String esc(String s) => '"${s.replaceAll('"', '""')}"';
+          sb.writeln([
+            esc(c.artist),
+            esc(c.name),
+            '${c.date.year}-${c.date.month.toString().padLeft(2,'0')}-${c.date.day.toString().padLeft(2,'0')}',
+            esc(c.venue),
+            esc(c.city),
+            esc(c.festival),
+            esc(c.genre),
+            c.rating,
+            c.favorite ? 'sí' : 'no',
+            c.price.toStringAsFixed(2),
+            esc(c.notes),
+          ].join(','));
         }
-        concertList.add(concertJson);
+        content  = sb.toString();
+        filename = 'conciertos_${DateTime.now().year}.csv';
+        mime     = 'text/csv';
+      } else {
+        // Exportamos en formato completo (todos los campos + imageUrl + fotos de recuerdos)
+        // compatible con la restauración desde la pestaña "Copia de seguridad"
+        final now = DateTime.now();
+        String pad(int n) => n.toString().padLeft(2, '0');
+        final dateStr = '${now.year}${pad(now.month)}${pad(now.day)}';
+
+        // Incluir fotos de recuerdos de cada concierto
+        final photoService = PhotoApiService();
+        final concertList = <Map<String, dynamic>>[];
+        for (final c in concerts) {
+          final model = c is ConcertModel ? c : ConcertModel.fromEntity(c);
+          final concertJson = model.toCacheJson();
+          if (c.id.isNotEmpty) {
+            try {
+              final photos = await photoService.getConcertPhotos(c.id);
+              if (photos.isNotEmpty) {
+                concertJson['photos'] = photos.map((p) {
+                  final m = <String, dynamic>{'imageUrl': p.imageUrl};
+                  if (p.caption.isNotEmpty) m['caption'] = p.caption;
+                  return m;
+                }).toList();
+              }
+            } catch (_) {
+              // Si falla la carga de fotos, el concierto se exporta igualmente sin ellas
+            }
+          }
+          concertList.add(concertJson);
+        }
+
+        content = const JsonEncoder.withIndent('  ').convert({
+          'version': 2,
+          'exportedAt': now.toIso8601String(),
+          'app': 'lavd',
+          'concerts': concertList,
+        });
+        filename = 'lavd_backup_$dateStr.json';
+        mime     = 'application/json';
       }
 
-      content = const JsonEncoder.withIndent('  ').convert({
-        'version': 2,
-        'exportedAt': now.toIso8601String(),
-        'app': 'lavd',
-        'concerts': concertList,
-      });
-      filename = 'lavd_backup_$dateStr.json';
-      mime     = 'application/json';
+      final dir  = await getTemporaryDirectory();
+      final file = File('${dir.path}/$filename');
+      await file.writeAsString(content, encoding: utf8);
+
+      // Cerramos el diálogo de progreso antes de abrir el share sheet
+      if (format == 'json' && mounted) Navigator.of(context).pop();
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: mime)],
+          subject: 'Mis conciertos — La Vida en Directo',
+        ),
+      );
+    } catch (e) {
+      if (format == 'json' && mounted) Navigator.of(context).pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al exportar: $e')),
+        );
+      }
     }
-
-    final dir  = await getTemporaryDirectory();
-    final file = File('${dir.path}/$filename');
-    await file.writeAsString(content, encoding: utf8);
-
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path, mimeType: mime)],
-        subject: 'Mis conciertos — La Vida en Directo',
-      ),
-    );
   }
 
   void _showExportPicker() {
@@ -962,6 +985,57 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             onTap: () => context.push('/report-issue'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Diálogo de progreso durante la exportación JSON
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ExportingDialog extends StatelessWidget {
+  const _ExportingDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      content: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: cs.primary,
+              ),
+            ),
+            const SizedBox(width: 20),
+            const Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Preparando exportación…',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Cargando fotos de cada concierto',
+                    style: TextStyle(fontSize: 12, color: Colors.white54),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

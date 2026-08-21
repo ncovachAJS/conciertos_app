@@ -7,6 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../auth/presentation/controllers/auth_controller.dart';
+
 /// Credenciales obtenidas tras el flujo PKCE de Spotify.
 class SpotifyTokens {
   final String accessToken;
@@ -29,9 +31,17 @@ class SpotifyAuthService {
   static const _scopes = 'user-top-read user-read-recently-played';
 
   static const _storage = FlutterSecureStorage();
-  static const _keyAccessToken = 'spotify_access_token';
-  static const _keyRefreshToken = 'spotify_refresh_token';
-  static const _keyExpiresAt = 'spotify_expires_at';
+
+  /// Prefijo con el userId para que cada usuario de la app tenga
+  /// sus propios tokens de Spotify en el secure storage.
+  static String get _userPrefix {
+    final uid = AuthController.instance.user?.id ?? 'anonymous';
+    return 'spotify_${uid}_';
+  }
+
+  String get _keyAccessToken  => '${_userPrefix}access_token';
+  String get _keyRefreshToken => '${_userPrefix}refresh_token';
+  String get _keyExpiresAt    => '${_userPrefix}expires_at';
 
   // ---------------------------------------------------------------- PKCE utils
 
