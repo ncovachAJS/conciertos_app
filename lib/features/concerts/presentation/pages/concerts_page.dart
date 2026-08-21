@@ -993,16 +993,32 @@ class _GridView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loadingMore = ref.watch(concertsLoadingMoreProvider);
+    final isTablet = Responsive.isTablet(context);
+    final columns = Responsive.gridColumns(context, phone: 2, tablet: 3);
+
+    // mainAxisExtent = ancho de la tarjeta (imagen cuadrada) + sección de texto.
+    // En iPhone con 2 cols el valor fijo de 307 ya funcionaba bien.
+    // En iPad las tarjetas son más anchas y la imagen AspectRatio(1) las desbordaba.
+    final double mainExtent;
+    if (isTablet) {
+      // Ancho disponible: pantalla - padding AppPage (24*2) - gaps (18 * (cols-1))
+      final screenW = MediaQuery.sizeOf(context).width;
+      final cardW = (screenW - 48 - 18 * (columns - 1)) / columns;
+      mainExtent = cardW + 92; // imagen cuadrada + ~92pt para artista/ciudad/fecha
+    } else {
+      mainExtent = 307;
+    }
+
     return GridView.builder(
       controller: scrollController,
       padding: EdgeInsets.zero,
       // +1 para el spinner de carga al pie cuando loadingMore
       itemCount: concerts.length + (loadingMore ? 1 : 0),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: Responsive.gridColumns(context, phone: 2, tablet: 3),
+        crossAxisCount: columns,
         crossAxisSpacing: 18,
         mainAxisSpacing: 18,
-        mainAxisExtent: 307,
+        mainAxisExtent: mainExtent,
       ),
       itemBuilder: (context, index) {
         if (index == concerts.length) {
@@ -1147,7 +1163,7 @@ class _ListView extends ConsumerWidget {
     final loadingMore = ref.watch(concertsLoadingMoreProvider);
     final isTablet = Responsive.isTablet(context);
 
-    // ── iPad: 2 tarjetas por fila ─────────────────────────────────────────
+    // ── iPad: 2 tarjetas por fila ────────────────────────────────────────
     if (isTablet) {
       // Agrupamos los conciertos de 2 en 2
       final rowCount = (concerts.length / 2).ceil();

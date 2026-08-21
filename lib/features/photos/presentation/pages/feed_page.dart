@@ -526,14 +526,16 @@ class _FeedPageState extends State<FeedPage>
                                           const SizedBox(height: 10),
                                         ],
                                         SizedBox(
-                                          height: concertPhotos.length == 1
-                                              ? 180
-                                              : 140,
+                                          height: 140,
                                           child: concertPhotos.length == 1
-                                              ? _SinglePhoto(
-                                                  photo: concertPhotos.first,
-                                                  onTap: () =>
-                                                      _openPhoto(concertPhotos, 0),
+                                              ? Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: _ThumbPhoto(
+                                                    photo: concertPhotos.first,
+                                                    onTap: () => _openPhoto(
+                                                        concertPhotos, 0),
+                                                  ),
                                                 )
                                               : ListView.separated(
                                                   scrollDirection:
@@ -609,45 +611,6 @@ class _FeedPageState extends State<FeedPage>
       'dic',
     ];
     return '${d.day} ${months[d.month - 1]} ${d.year}';
-  }
-}
-
-// ── Foto única (más grande) ────────────────────────────────────────────────
-
-class _SinglePhoto extends StatelessWidget {
-  final ConcertPhotoModel photo;
-  final VoidCallback onTap;
-
-  const _SinglePhoto({required this.photo, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Hero(
-        tag: photo.id,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: CachedNetworkImage(
-            imageUrl: cloudinaryThumbnail(photo.imageUrl, width: 800),
-            fit: BoxFit.cover,
-            width: double.infinity,
-            memCacheWidth: 800,
-            fadeInDuration: Duration.zero,
-            placeholder: (_, __) => Container(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            ),
-            errorWidget: (_, __, ___) => Container(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child: Icon(
-                Icons.broken_image_outlined,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 

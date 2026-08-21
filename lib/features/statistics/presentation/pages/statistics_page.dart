@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -374,19 +375,31 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
             };
           }
 
-          final sectionWidgets = layout
-              .where((s) => s.visible)
-              .expand((s) => widgetsFor(s.id))
-              .toList();
+          final visibleSections = layout.where((s) => s.visible).toList();
+          final isTablet = Responsive.isTablet(context);
+
+          // ── iPad: summary en fila horizontal + gráficos en 2 columnas ──────
+          final Widget content;
+          if (isTablet) {
+            content = _TabletStatsLayout(
+              sections: visibleSections,
+              widgetsFor: widgetsFor,
+            );
+          } else {
+            final sectionWidgets = visibleSections
+                .expand((s) => widgetsFor(s.id))
+                .toList();
+            content = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: sectionWidgets,
+            );
+          }
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
             // ignore: deprecated_member_use
             cacheExtent: 5000,
-            children: [
-              ...sectionWidgets,
-              const SizedBox(height: 8),
-            ],
+            children: [content, const SizedBox(height: 8)],
           );
         },
       ),
@@ -472,6 +485,25 @@ class _SummaryGrid extends StatelessWidget {
       ),
     ];
 
+    final isTablet = Responsive.isTablet(context);
+
+    // ── iPad: fila horizontal con scroll ────────────────────────────────────
+    if (isTablet) {
+      return SizedBox(
+        height: 120,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: items.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (_, i) => SizedBox(
+            width: 155,
+            child: _SummaryCard(data: items[i]),
+          ),
+        ),
+      );
+    }
+
+    // ── iPhone: wrap de 2 columnas (sin cambios) ─────────────────────────────
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = (constraints.maxWidth - 14) / 2;
@@ -1418,6 +1450,95 @@ class _RatingBars extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Layout de 2 columnas para los gráficos en iPad
+// ---------------------------------------------------------------------------
+
+class _TabletStatsLayout extends StatelessWidget {
+  final List<StatsSection> sections;
+  final List<Widget> Function(StatsSectionId) widgetsFor;
+
+  const _TabletStatsLayout({
+    required this.sections,
+    required this.widgetsFor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const gap = 24.0;
+    final result = <Widget>[];
+    final halfQueue = <StatsSection>[];
+
+    void flushQueue() {
+      if (halfQueue.isEmpty) return;
+
+      // Filtramos secciones vacías (widgetsFor devuelve [] si no hay datos)
+      final filled = halfQueue
+          .where((s) => widgetsFor(s.id).isNotEmpty)
+          .toList();
+      halfQueue.clear();
+      if (filled.isEmpty) return;
+
+      if (filled.length == 1) {
+        // Sección sola: ocupa la mitad izquierda
+        result.add(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widgetsFor(filled[0].id),
+                ),
+              ),
+              const SizedBox(width: gap),
+              const Expanded(child: SizedBox.shrink()),
+            ],
+          ),
+        );
+      } else {
+        result.add(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widgetsFor(filled[0].id),
+                ),
+              ),
+              const SizedBox(width: gap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widgetsFor(filled[1].id),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    for (final section in sections) {
+      if (section.id == StatsSectionId.summary) {
+        // Summary siempre a ancho completo (fila horizontal de cards)
+        flushQueue();
+        result.addAll(widgetsFor(section.id));
+      } else {
+        halfQueue.add(section);
+        if (halfQueue.length == 2) flushQueue();
+      }
+    }
+    flushQueue();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: result,
     );
   }
 }

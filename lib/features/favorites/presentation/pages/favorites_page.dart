@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/responsive/responsive.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/skeletons/concerts_skeleton.dart';
@@ -134,13 +135,16 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                   : GridView.builder(
                       padding: EdgeInsets.zero,
                       itemCount: filtered.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 0.75,
-                          ),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: Responsive.gridColumns(
+                          context,
+                          phone: 2,
+                          tablet: 4,
+                        ),
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.75,
+                      ),
                       itemBuilder: (_, index) {
                         final entry = filtered[index];
                         final artist = entry.key;

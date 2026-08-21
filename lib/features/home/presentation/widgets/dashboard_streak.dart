@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+import '../../../../../core/responsive/responsive.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
 /// Widget de racha — muestra cuántos conciertos este mes o tiempo sin ir.
@@ -56,7 +57,15 @@ class DashboardStreak extends StatelessWidget {
       subtitle = l.longTimeDesc(daysSinceLast);
       color = const Color(0xFFFFC107);
     } else {
-      return const SizedBox.shrink();
+      // En iPad: mostramos "tu último concierto fue hace X días" para no dejar el hueco
+      if (Responsive.isTablet(context)) {
+        emoji = '🎵';
+        title = 'Tu último concierto';
+        subtitle = l.lastConcertDaysAgo(daysSinceLast);
+        color = cs.onSurface.withOpacity(0.4);
+      } else {
+        return const SizedBox.shrink();
+      }
     }
 
     return Container(

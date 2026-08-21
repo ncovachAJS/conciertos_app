@@ -2,6 +2,7 @@ import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -284,8 +285,61 @@ class _EventList extends StatelessWidget {
       );
     }
 
+    final isTablet = Responsive.isTablet(context);
+
+    // ── Modo compacto ────────────────────────────────────────────────────────
     if (isCompact) {
       final cs = Theme.of(context).colorScheme;
+      if (isTablet) {
+        // En iPad: dos listas compactas lado a lado
+        final left = [for (int i = 0; i < events.length; i += 2) events[i]];
+        final right = [for (int i = 1; i < events.length; i += 2) events[i]];
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.only(top: 8, bottom: 32),
+                itemCount: left.length,
+                separatorBuilder: (_, __) => Divider(
+                  height: 1,
+                  indent: 16,
+                  endIndent: 16,
+                  color: cs.onSurface.withValues(alpha: 0.08),
+                ),
+                itemBuilder: (_, i) => RecommendationCard(
+                  event: left[i],
+                  isCompact: true,
+                  wantToAttend: wantToAttendIds.contains(left[i].id),
+                  onToggleWantToAttend: () => onToggle(left[i]),
+                ),
+              ),
+            ),
+            VerticalDivider(
+              width: 1,
+              color: cs.onSurface.withValues(alpha: 0.08),
+            ),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.only(top: 8, bottom: 32),
+                itemCount: right.length,
+                separatorBuilder: (_, __) => Divider(
+                  height: 1,
+                  indent: 16,
+                  endIndent: 16,
+                  color: cs.onSurface.withValues(alpha: 0.08),
+                ),
+                itemBuilder: (_, i) => RecommendationCard(
+                  event: right[i],
+                  isCompact: true,
+                  wantToAttend: wantToAttendIds.contains(right[i].id),
+                  onToggleWantToAttend: () => onToggle(right[i]),
+                ),
+              ),
+            ),
+          ],
+        );
+      }
       return ListView.separated(
         padding: const EdgeInsets.only(top: 8, bottom: 32),
         itemCount: events.length,
@@ -298,6 +352,26 @@ class _EventList extends StatelessWidget {
         itemBuilder: (_, i) => RecommendationCard(
           event: events[i],
           isCompact: true,
+          wantToAttend: wantToAttendIds.contains(events[i].id),
+          onToggleWantToAttend: () => onToggle(events[i]),
+        ),
+      );
+    }
+
+    // ── Modo tarjeta ─────────────────────────────────────────────────────────
+    if (isTablet) {
+      // En iPad: grid de 2 columnas
+      return GridView.builder(
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 32),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 0,
+          mainAxisSpacing: 0,
+          childAspectRatio: 1.05,
+        ),
+        itemCount: events.length,
+        itemBuilder: (_, i) => RecommendationCard(
+          event: events[i],
           wantToAttend: wantToAttendIds.contains(events[i].id),
           onToggleWantToAttend: () => onToggle(events[i]),
         ),

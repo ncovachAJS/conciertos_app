@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/responsive/responsive.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
@@ -348,9 +349,207 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     super.dispose();
   }
 
+  // ── Columna izquierda (campos de texto) ─────────────────────────────────────
+  List<Widget> _buildFields(AppLocalizations l) => [
+        TextFormField(
+          controller: _artistController,
+          decoration: InputDecoration(
+            labelText: l.artistLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.person),
+          ),
+          onEditingComplete: _suggestGenreFromSpotify,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return l.artistRequired;
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _genreController,
+          decoration: InputDecoration(
+            labelText: '🎸 Género musical',
+            hintText: 'Rock, Pop, Metal, Jazz…',
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.library_music_outlined),
+            suffixIcon: _fetchingGenre
+                ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : null,
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _festivalController,
+          decoration: InputDecoration(
+            labelText: l.festivalLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.festival),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _venueController,
+          decoration: InputDecoration(
+            labelText: l.venueLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.stadium),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _cityController,
+          decoration: InputDecoration(
+            labelText: l.cityLabel,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.location_city),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _priceController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: _hasFestival
+                ? 'Precio del festival'
+                : 'Precio de la entrada',
+            hintText: '0.00',
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.euro_rounded),
+            suffixText: '€',
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _nameController,
+          decoration: InputDecoration(
+            labelText: l.concertNameLabel,
+            hintText: l.concertNameHint,
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.music_note),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: TextFormField(
+                controller: _dateController,
+                readOnly: true,
+                onTap: _selectDate,
+                decoration: InputDecoration(
+                  labelText: l.dateLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.calendar_month),
+                  suffixIcon: const Icon(Icons.arrow_drop_down),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l.dateRequired;
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: TextFormField(
+                controller: _timeController,
+                readOnly: true,
+                onTap: _selectTime,
+                decoration: InputDecoration(
+                  labelText: 'Hora',
+                  hintText: 'Opcional',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.access_time_rounded),
+                  suffixIcon: _selectedTime != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          onPressed: () => setState(() {
+                            _selectedTime = null;
+                            _timeController.clear();
+                          }),
+                        )
+                      : const Icon(Icons.arrow_drop_down),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ];
+
+  // ── Columna derecha (imagen) ─────────────────────────────────────────────────
+  List<Widget> _buildImageSection(AppLocalizations l,
+      {double imageHeight = 220}) =>
+      [
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.photo),
+                label: Text(l.selectImage),
+              ),
+            ),
+            if (_selectedImage != null ||
+                (_imageUrl != null && _imageUrl!.isNotEmpty)) ...[
+              const SizedBox(width: 10),
+              OutlinedButton.icon(
+                onPressed: () => setState(() {
+                  _selectedImage = null;
+                  _imageUrl = null;
+                }),
+                icon: const Icon(Icons.delete_outline,
+                    color: Colors.redAccent),
+                label: Text(
+                  l.delete,
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.redAccent),
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 16),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: SizedBox(
+            height: imageHeight,
+            child: _selectedImage != null
+                ? Image.file(
+                    _selectedImage!,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  )
+                : (_imageUrl != null && _imageUrl!.isNotEmpty)
+                    ? Image.network(
+                        _imageUrl!,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _placeholderImage(),
+                      )
+                    : _placeholderImage(),
+          ),
+        ),
+      ];
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final isTablet = Responsive.isTablet(context);
     return AppPage(
       title: widget.concert == null
           ? '➕ ${l.addConcertTitle}'
@@ -362,7 +561,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                widget.concert == null ? l.addConcertTitle : l.editConcertTitle,
+                widget.concert == null
+                    ? l.addConcertTitle
+                    : l.editConcertTitle,
                 style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -371,208 +572,35 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
               const SizedBox(height: 24),
 
-              TextFormField(
-                controller: _artistController,
-                decoration: InputDecoration(
-                  labelText: l.artistLabel,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.person),
-                ),
-                onEditingComplete: _suggestGenreFromSpotify,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return l.artistRequired;
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _genreController,
-                decoration: InputDecoration(
-                  labelText: '🎸 Género musical',
-                  hintText: 'Rock, Pop, Metal, Jazz…',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.library_music_outlined),
-                  suffixIcon: _fetchingGenre
-                      ? const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        )
-                      : null,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _festivalController,
-                decoration: InputDecoration(
-                  labelText: l.festivalLabel,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.festival),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _venueController,
-                decoration: InputDecoration(
-                  labelText: l.venueLabel,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.stadium),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _cityController,
-                decoration: InputDecoration(
-                  labelText: l.cityLabel,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.location_city),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _priceController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: _hasFestival ? 'Precio del festival' : 'Precio de la entrada',
-                  hintText: '0.00',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.euro_rounded),
-                  suffixText: '€',
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: l.concertNameLabel,
-                  hintText: l.concertNameHint,
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.music_note),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextFormField(
-                      controller: _dateController,
-                      readOnly: true,
-                      onTap: _selectDate,
-                      decoration: InputDecoration(
-                        labelText: l.dateLabel,
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.calendar_month),
-                        suffixIcon: const Icon(Icons.arrow_drop_down),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return l.dateRequired;
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                      controller: _timeController,
-                      readOnly: true,
-                      onTap: _selectTime,
-                      decoration: InputDecoration(
-                        labelText: 'Hora',
-                        hintText: 'Opcional',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.access_time_rounded),
-                        suffixIcon: _selectedTime != null
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, size: 18),
-                                onPressed: () => setState(() {
-                                  _selectedTime = null;
-                                  _timeController.clear();
-                                }),
-                              )
-                            : const Icon(Icons.arrow_drop_down),
+              // ── iPad: 2 columnas | iPhone: columna única ──────────────────
+              if (isTablet) ...[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Columna izquierda: campos de texto
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: _buildFields(l),
                       ),
                     ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: _pickImage,
-                      icon: const Icon(Icons.photo),
-                      label: Text(l.selectImage),
-                    ),
-                  ),
-                  if (_selectedImage != null || (_imageUrl != null && _imageUrl!.isNotEmpty)) ...[
-                    const SizedBox(width: 10),
-                    OutlinedButton.icon(
-                      onPressed: () => setState(() {
-                        _selectedImage = null;
-                        _imageUrl = null;
-                      }),
-                      icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                      label: Text(
-                        l.delete,
-                        style: const TextStyle(color: Colors.redAccent),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.redAccent),
+                    const SizedBox(width: 24),
+                    // Columna derecha: imagen
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: _buildImageSection(l, imageHeight: 340),
                       ),
                     ),
                   ],
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: SizedBox(
-                  height: 220,
-                  child: _selectedImage != null
-                      ? Image.file(
-                          _selectedImage!,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        )
-                      : (_imageUrl != null && _imageUrl!.isNotEmpty)
-                      ? Image.network(
-                          _imageUrl!,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _placeholderImage(),
-                        )
-                      : _placeholderImage(),
                 ),
-              ),
+              ] else ...[
+                ..._buildFields(l),
+                const SizedBox(height: 24),
+                ..._buildImageSection(l),
+              ],
 
               const SizedBox(height: 32),
 

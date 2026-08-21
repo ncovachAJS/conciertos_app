@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../core/responsive/responsive.dart';
+
 class ProfileCard extends StatelessWidget {
   const ProfileCard({
     super.key,
@@ -28,29 +30,162 @@ class ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final isTablet = Responsive.isTablet(context);
+
+    final decoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(24),
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFFE53935), Color(0xFF8E1B1B)],
+      ),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x55E53935),
+          blurRadius: 20,
+          offset: Offset(0, 8),
+        ),
+      ],
+    );
+
+    return isTablet
+        ? _buildTablet(context, l, decoration)
+        : _buildPhone(context, l, decoration);
+  }
+
+  // ── iPad: layout horizontal compacto ─────────────────────────────────────
+  Widget _buildTablet(
+      BuildContext context, AppLocalizations l, BoxDecoration decoration) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: decoration,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Avatar
+          GestureDetector(
+            onTap: onAvatarTap,
+            child: Stack(
+              children: [
+                Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white38, width: 2),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: avatarUrl != null && avatarUrl!.isNotEmpty
+                      ? Image.network(
+                          avatarUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.person_outline,
+                            color: Colors.white,
+                            size: 36,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.person_outline,
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: const Color(0xFFE53935), width: 2),
+                    ),
+                    child: const Icon(Icons.camera_alt,
+                        size: 11, color: Color(0xFFE53935)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 18),
+          // Nombre + subtítulo + número de miembro
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l.memberNumber(memberNumber.toString().padLeft(6, '0')),
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    letterSpacing: 1.5,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Separador
+          Container(
+            width: 1,
+            height: 60,
+            color: Colors.white24,
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+          ),
+          // Stats en fila
+          _Stat(
+              icon: Icons.music_note,
+              value: totalConcerts.toString(),
+              label: l.concertsStatLabel),
+          const SizedBox(width: 28),
+          _Stat(
+              icon: Icons.star,
+              value: totalFavorites.toString(),
+              label: l.favoritesStatLabel),
+          const SizedBox(width: 28),
+          _Stat(
+              icon: Icons.photo_camera,
+              value: totalPhotos.toString(),
+              label: l.memoriesStatLabel),
+        ],
+      ),
+    );
+  }
+
+  // ── iPhone: layout vertical original ─────────────────────────────────────
+  Widget _buildPhone(
+      BuildContext context, AppLocalizations l, BoxDecoration decoration) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFE53935), Color(0xFF8E1B1B)],
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x55E53935),
-            blurRadius: 20,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
+      decoration: decoration,
       child: Column(
         children: [
           const SizedBox(height: 12),
-
-          // Avatar — tappable para cambiar foto
           GestureDetector(
             onTap: onAvatarTap,
             child: Stack(
@@ -80,8 +215,6 @@ class ProfileCard extends StatelessWidget {
                           size: 48,
                         ),
                 ),
-
-                // Icono de cámara
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -92,23 +225,16 @@ class ProfileCard extends StatelessWidget {
                       color: Colors.white,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFFE53935),
-                        width: 2,
-                      ),
+                          color: const Color(0xFFE53935), width: 2),
                     ),
-                    child: const Icon(
-                      Icons.camera_alt,
-                      size: 14,
-                      color: Color(0xFFE53935),
-                    ),
+                    child: const Icon(Icons.camera_alt,
+                        size: 14, color: Color(0xFFE53935)),
                   ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 20),
-
           Text(
             name,
             style: const TextStyle(
@@ -117,9 +243,7 @@ class ProfileCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 10),
-
           Text(
             subtitle,
             textAlign: TextAlign.center,
@@ -128,13 +252,9 @@ class ProfileCard extends StatelessWidget {
               fontStyle: FontStyle.italic,
             ),
           ),
-
           const SizedBox(height: 24),
-
           const Divider(color: Colors.white24),
-
           const SizedBox(height: 8),
-
           Text(
             l.memberNumber(memberNumber.toString().padLeft(6, '0')),
             style: TextStyle(
@@ -144,9 +264,7 @@ class ProfileCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 20),
-
           Row(
             children: [
               Expanded(

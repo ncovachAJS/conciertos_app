@@ -1,3 +1,6 @@
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -36,12 +39,12 @@ class _AppShellState extends State<AppShell> {
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
     switch (location) {
-      case '/':        return 0;
-      case '/concerts': return 1;
-      case '/feed':    return 2;
+      case '/':          return 0;
+      case '/concerts':  return 1;
+      case '/feed':      return 2;
       case '/favorites': return 3;
-      case '/statistics': return 4;
-      default:         return 0;
+      case '/statistics':return 4;
+      default:           return 0;
     }
   }
 
@@ -57,22 +60,21 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final unread  = _notif.unreadCount;
-    final l       = AppLocalizations.of(context);
-    final idx     = _currentIndex(context);
+    final unread = _notif.unreadCount;
+    final l      = AppLocalizations.of(context);
+    final idx    = _currentIndex(context);
 
-    // ── iPad: barra superior estilo Apple Music ──────────────────────────────
+    final labels = [
+      l.navHome,
+      l.navConcerts,
+      l.navMemories,
+      l.navFavorites,
+      l.navStats,
+    ];
+
+    // ── iPad: pill tabs en la barra superior (Apple Music style) ─────────────
     if (Responsive.isTablet(context)) {
-      final labels = [
-        l.navHome,
-        l.navConcerts,
-        l.navMemories,
-        l.navFavorites,
-        l.navStats,
-      ];
-
       return Scaffold(
-        // AppBar transparente con las pestañas centradas
         appBar: _TopTabAppBar(
           selectedIndex: idx,
           labels: labels,
@@ -83,47 +85,35 @@ class _AppShellState extends State<AppShell> {
       );
     }
 
-    // ── iPhone: barra inferior (sin cambios) ─────────────────────────────────
+    // ── iPhone: Liquid Glass bottom nav (iOS 26 style) ───────────────────────
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return Scaffold(
+        extendBody: true,
+        body: widget.child,
+        bottomNavigationBar: _LiquidGlassNavBar(
+          selectedIndex: idx,
+          labels: labels,
+          unreadCount: unread,
+          onTap: (i) => _navigate(context, i),
+        ),
+      );
+    }
+
+    // ── Android: pill tabs en la barra inferior ──────────────────────────────
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: _BottomPillNavBar(
         selectedIndex: idx,
-        onDestinationSelected: (i) => _navigate(context, i),
-        destinations: [
-          NavigationDestination(
-            icon: _BadgeIcon(icon: Icons.home_outlined, count: unread),
-            selectedIcon:
-                _BadgeIcon(icon: Icons.home, count: unread, selected: true),
-            label: l.navHome,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.library_music_outlined),
-            selectedIcon: const Icon(Icons.library_music),
-            label: l.navConcerts,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.photo_library_outlined),
-            selectedIcon: const Icon(Icons.photo_library),
-            label: l.navMemories,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.favorite_border),
-            selectedIcon: const Icon(Icons.favorite),
-            label: l.navFavorites,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.bar_chart_outlined),
-            selectedIcon: const Icon(Icons.bar_chart),
-            label: l.navStats,
-          ),
-        ],
+        labels: labels,
+        unreadCount: unread,
+        onTap: (i) => _navigate(context, i),
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// AppBar con las pestañas pill centradas — estilo Apple Music / iPadOS
+// AppBar con pill tabs centradas — iPad (Apple Music / iPadOS)
 // ---------------------------------------------------------------------------
 
 class _TopTabAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -145,13 +135,11 @@ class _TopTabAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return AppBar(
       elevation: 0,
       scrolledUnderElevation: 1,
       backgroundColor: cs.surface,
       surfaceTintColor: cs.surfaceTint,
-      // Las pestañas en el centro — ocupan el espacio del título
       title: _PillTabBar(
         selectedIndex: selectedIndex,
         labels: labels,
@@ -164,7 +152,7 @@ class _TopTabAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Pill tab bar — igual que la barra de navegación de Apple Music en iPad
+// Pill tab bar (compartido entre iPad top y Android bottom)
 // ---------------------------------------------------------------------------
 
 class _PillTabBar extends StatelessWidget {
@@ -183,7 +171,6 @@ class _PillTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
@@ -195,13 +182,13 @@ class _PillTabBar extends StatelessWidget {
         children: List.generate(labels.length, (i) {
           final selected = i == selectedIndex;
           final hasUnread = i == 0 && unreadCount > 0;
-
           return GestureDetector(
             onTap: () => onTap(i),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 7),
               decoration: BoxDecoration(
                 color: selected ? cs.surface : Colors.transparent,
                 borderRadius: BorderRadius.circular(18),
@@ -251,28 +238,194 @@ class _PillTabBar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Icono con badge de notificaciones (usado en la barra inferior de iPhone)
+// Android: pill tabs en la barra inferior
 // ---------------------------------------------------------------------------
 
-class _BadgeIcon extends StatelessWidget {
-  final IconData icon;
-  final int count;
-  final bool selected;
+class _BottomPillNavBar extends StatelessWidget {
+  final int selectedIndex;
+  final List<String> labels;
+  final int unreadCount;
+  final ValueChanged<int> onTap;
 
-  const _BadgeIcon({
-    required this.icon,
-    required this.count,
-    this.selected = false,
+  const _BottomPillNavBar({
+    required this.selectedIndex,
+    required this.labels,
+    required this.unreadCount,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (count == 0) return Icon(icon);
-    return Badge(
-      label: Text(count > 99 ? '99+' : '$count'),
-      backgroundColor: const Color(0xFFE53935),
-      textColor: Colors.white,
-      child: Icon(icon),
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      color: cs.surface,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Center(
+            child: _PillTabBar(
+              selectedIndex: selectedIndex,
+              labels: labels,
+              unreadCount: unreadCount,
+              onTap: onTap,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// iPhone: Liquid Glass bottom nav — iOS 26 style
+// ---------------------------------------------------------------------------
+
+class _LiquidGlassNavBar extends StatelessWidget {
+  final int selectedIndex;
+  final List<String> labels;
+  final int unreadCount;
+  final ValueChanged<int> onTap;
+
+  const _LiquidGlassNavBar({
+    required this.selectedIndex,
+    required this.labels,
+    required this.unreadCount,
+    required this.onTap,
+  });
+
+  static const _icons = <(IconData, IconData)>[
+    (Icons.home_outlined,          Icons.home_rounded),
+    (Icons.library_music_outlined, Icons.library_music_rounded),
+    (Icons.photo_library_outlined, Icons.photo_library_rounded),
+    (Icons.favorite_border,        Icons.favorite_rounded),
+    (Icons.bar_chart_outlined,     Icons.bar_chart_rounded),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final cs         = Theme.of(context).colorScheme;
+    final isDark     = Theme.of(context).brightness == Brightness.dark;
+
+    // Fondo semitransparente según tema
+    final overlayColor = isDark
+        ? cs.surface.withValues(alpha: 0.72)
+        : Colors.white.withValues(alpha: 0.80);
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 32, sigmaY: 32),
+        child: Container(
+          decoration: BoxDecoration(
+            color: overlayColor,
+            border: Border(
+              top: BorderSide(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
+                width: 0.5,
+              ),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 58,
+              child: Row(
+                children: List.generate(_icons.length, (i) {
+                  final selected   = i == selectedIndex;
+                  final hasUnread  = i == 0 && unreadCount > 0;
+                  final iconData   = selected ? _icons[i].$2 : _icons[i].$1;
+                  final iconColor  = selected
+                      ? cs.onSurface
+                      : cs.onSurface.withValues(alpha: 0.42);
+                  final labelColor = iconColor;
+
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => onTap(i),
+                      behavior: HitTestBehavior.opaque,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Pill highlight en el icono seleccionado
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOutCubic,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 5),
+                            decoration: selected
+                                ? BoxDecoration(
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.13)
+                                        : Colors.black.withValues(alpha: 0.07),
+                                    borderRadius: BorderRadius.circular(20),
+                                    // Borde interior tipo vidrio
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.white.withValues(alpha: 0.18)
+                                          : Colors.black.withValues(alpha: 0.10),
+                                      width: 0.5,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.08),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  )
+                                : null,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              clipBehavior: Clip.none,
+                              children: [
+                                Icon(iconData, color: iconColor, size: 23),
+                                // Punto rojo de notificación
+                                if (hasUnread)
+                                  Positioned(
+                                    top: -3,
+                                    right: -3,
+                                    child: Container(
+                                      width: 7,
+                                      height: 7,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE53935),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: overlayColor,
+                                          width: 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 220),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: selected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: labelColor,
+                              letterSpacing: -0.1,
+                            ),
+                            child: Text(labels[i]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

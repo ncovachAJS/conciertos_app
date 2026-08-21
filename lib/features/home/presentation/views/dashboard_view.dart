@@ -251,12 +251,16 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 // Layout de 2 columnas para el dashboard en iPad
 // ---------------------------------------------------------------------------
 
-/// Secciones que ocupan ancho completo (carruseles, mapas, embeds).
+/// Secciones que ocupan ancho completo (carruseles, grids propios, embeds).
+/// - stats: necesita todo el ancho para mostrar 4 columnas en iPad
+/// - upcoming / favorites / recommended: carruseles horizontales
+/// - spotifyEmbed: embed de Spotify
 const _fullWidthSections = {
   DashboardSectionId.upcoming,
   DashboardSectionId.favorites,
   DashboardSectionId.recommended,
   DashboardSectionId.spotifyEmbed,
+  DashboardSectionId.stats,
 };
 
 class _TabletDashboardLayout extends StatelessWidget {

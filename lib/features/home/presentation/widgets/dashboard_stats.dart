@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+import '../../../../../core/responsive/responsive.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 
 class DashboardStats extends StatelessWidget {
@@ -11,13 +12,19 @@ class DashboardStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final isTablet = Responsive.isTablet(context);
+
+    // En iPad: 4 columnas compactas. En iPhone: 2 columnas cuadradas.
+    final columns = isTablet ? 4 : 2;
+    final aspectRatio = isTablet ? 1.15 : 1.0;
+
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
+      crossAxisCount: columns,
       mainAxisSpacing: 14,
       crossAxisSpacing: 14,
-      childAspectRatio: 1,
+      childAspectRatio: aspectRatio,
       children: [
         _StatCard(
           value: stats.total.toString(),

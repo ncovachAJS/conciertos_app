@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/responsive/responsive.dart';
 import '../../domain/achievement.dart';
 
-/// Número de logros visibles cuando el panel está colapsado (2 filas × 4 cols).
-const _kCollapsedCount = 8;
+/// Número de logros visibles cuando el panel está colapsado.
+/// - Teléfono: 2 filas × 4 cols = 8
+/// - Tablet:   2 filas × 8 cols = 16
+const _kCollapsedPhone = 8;
+const _kCollapsedTablet = 16;
 
 class AchievementsWidget extends StatefulWidget {
   final List<Achievement> achievements;
@@ -50,10 +54,15 @@ class _AchievementsWidgetState extends State<AchievementsWidget>
     final unlocked = achievements.where((a) => a.unlocked).length;
     final total = achievements.length;
     final cs = Theme.of(context).colorScheme;
+    final isTablet = Responsive.isTablet(context);
+
+    final collapsedCount =
+        isTablet ? _kCollapsedTablet : _kCollapsedPhone;
+    final columns = isTablet ? 8 : 4;
 
     final visibleItems =
-        _expanded ? achievements : achievements.take(_kCollapsedCount).toList();
-    final hasMore = achievements.length > _kCollapsedCount;
+        _expanded ? achievements : achievements.take(collapsedCount).toList();
+    final hasMore = achievements.length > collapsedCount;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,15 +129,17 @@ class _AchievementsWidgetState extends State<AchievementsWidget>
           child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.82,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              mainAxisSpacing: isTablet ? 8 : 12,
+              crossAxisSpacing: isTablet ? 8 : 12,
+              childAspectRatio: isTablet ? 0.9 : 0.82,
             ),
             itemCount: visibleItems.length,
-            itemBuilder: (context, i) =>
-                _TrophyTile(achievement: visibleItems[i]),
+            itemBuilder: (context, i) => _TrophyTile(
+              achievement: visibleItems[i],
+              compact: isTablet,
+            ),
           ),
         ),
 
@@ -143,7 +154,7 @@ class _AchievementsWidgetState extends State<AchievementsWidget>
                 builder: (_, __) => Text(
                   _expanded
                       ? 'Ver menos'
-                      : 'Ver todos los logros (${achievements.length - _kCollapsedCount} más)',
+                      : 'Ver todos los logros (${achievements.length - collapsedCount} más)',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -163,7 +174,8 @@ class _AchievementsWidgetState extends State<AchievementsWidget>
 
 class _TrophyTile extends StatelessWidget {
   final Achievement achievement;
-  const _TrophyTile({required this.achievement});
+  final bool compact;
+  const _TrophyTile({required this.achievement, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -193,8 +205,11 @@ class _TrophyTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(achievement.emoji, style: const TextStyle(fontSize: 26)),
-                  const SizedBox(height: 6),
+                  Text(
+                    achievement.emoji,
+                    style: TextStyle(fontSize: compact ? 18 : 26),
+                  ),
+                  SizedBox(height: compact ? 4 : 6),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Text(
@@ -203,7 +218,7 @@ class _TrophyTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: compact ? 8 : 10,
                         fontWeight: FontWeight.w600,
                         color: locked
                             ? cs.onSurface.withValues(alpha: 0.3)
