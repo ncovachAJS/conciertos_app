@@ -3,17 +3,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/tutorial/tutorial_content.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/spotify_artist.dart';
 import '../providers/spotify_provider.dart';
 
 /// Página de importación desde Spotify.
 /// El usuario conecta su cuenta y ve sus artistas más escuchados;
 /// al pulsar uno se abre AddConcertPage con el nombre pre-rellenado.
-class SpotifyImportPage extends ConsumerWidget {
+class SpotifyImportPage extends ConsumerStatefulWidget {
   const SpotifyImportPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SpotifyImportPage> createState() => _SpotifyImportPageState();
+}
+
+class _SpotifyImportPageState extends ConsumerState<SpotifyImportPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showTutorialIfNeeded());
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.spotifyImport);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.spotifyImport);
+    if (!mounted) return;
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.spotifyImport(AppLocalizations.of(context)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final artistsAsync = ref.watch(spotifyTopArtistsProvider);
     final cs = Theme.of(context).colorScheme;
 

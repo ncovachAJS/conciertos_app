@@ -30,6 +30,8 @@ import '../features/auth/presentation/pages/session_gate_page.dart';
 import '../features/statistics/presentation/pages/statistics_page.dart';
 import '../features/spotify/presentation/pages/spotify_import_page.dart';
 import '../features/spotify/presentation/pages/spotify_embed_page.dart';
+import '../features/spotify/presentation/pages/spotify_user_top_tracks_page.dart';
+import '../features/spotify/presentation/pages/spotify_playlist_embed_page.dart';
 
 import '../features/home/artist/presentation/pages/artist_page.dart';
 import '../features/friends/domain/entities/friend.dart';
@@ -190,12 +192,25 @@ final appRouter = GoRouter(
           builder: (context, state) => const SpotifyImportPage(),
         ),
         GoRoute(
+          path: '/spotify-top-tracks',
+          builder: (context, state) => const SpotifyUserTopTracksPage(),
+        ),
+        GoRoute(
+          path: '/spotify-playlist-embed',
+          builder: (context, state) => const SpotifyPlaylistEmbedPage(),
+        ),
+        GoRoute(
           path: '/spotify-embed',
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
+            final typeStr = extra?['type'] as String? ?? 'playlist';
+            final type = typeStr == 'track'
+                ? SpotifyEmbedType.track
+                : SpotifyEmbedType.playlist;
             return SpotifyEmbedPage(
-              playlistId: extra?['playlistId'] as String? ?? '4kqsEp7um2ySvyzW7L0sNI',
-              title: extra?['title'] as String? ?? 'Tus canciones favoritas',
+              resourceId: (extra?['playlistId'] ?? extra?['trackId'] ?? '') as String,
+              type: type,
+              title: extra?['title'] as String? ?? 'Spotify',
             );
           },
         ),

@@ -11,6 +11,10 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/tutorial/tutorial_content.dart';
+import '../../../../core/tutorial/tutorial_overlay.dart';
+import '../../../../core/tutorial/tutorial_service.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/concert.dart';
 import '../providers/concerts_provider.dart';
 
@@ -63,7 +67,21 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _buildGroups());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _buildGroups();
+      _showTutorialIfNeeded();
+    });
+  }
+
+  Future<void> _showTutorialIfNeeded() async {
+    final should = await TutorialService.shouldShow(TutorialService.concertMap);
+    if (!should || !mounted) return;
+    await TutorialService.markShown(TutorialService.concertMap);
+    if (!mounted) return;
+    await TutorialOverlay.show(
+      context,
+      steps: TutorialContent.concertMap(AppLocalizations.of(context)),
+    );
   }
 
   void _buildGroups() {

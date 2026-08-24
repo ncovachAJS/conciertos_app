@@ -2,6 +2,7 @@ import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/tutorial/tutorial_service.dart';
 import '../controllers/auth_controller.dart';
 import 'forgot_password_page.dart';
 
@@ -39,6 +40,10 @@ class _LoginPageState extends State<LoginPage> {
             .replaceAll('\r', ''),
         password: _passwordController.text.trim(),
       );
+
+      // Usuarios existentes no ven tutoriales automáticos;
+      // los tienen disponibles en Ajustes si los quieren revisar.
+      await TutorialService.markAllShown();
 
       if (!mounted) return;
       context.go('/');

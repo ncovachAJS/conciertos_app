@@ -77,9 +77,7 @@ class _ProPaywallSheet extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF2D1F5E)
-                  : const Color(0xFFEDE9FE),
+              color: isDark ? const Color(0xFF2D1F5E) : const Color(0xFFEDE9FE),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -92,16 +90,17 @@ class _ProPaywallSheet extends StatelessWidget {
 
           // Título
           Text(
-            'Límite de ${ProConfig.freeConcertLimit} conciertos alcanzado',
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+            'Lleva tu experiencia al siguiente nivel',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 10),
 
           // Descripción
           Text(
-            'Con la versión gratuita puedes guardar hasta ${ProConfig.freeConcertLimit} conciertos.\n'
-            'Pásate a Pro para añadir todos los que quieras.',
+            'Hazte Pro para añadir conciertos sin límites y desbloquear todo lo que la app tiene para ofrecerte.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.textTheme.bodySmall?.color,
               height: 1.5,
@@ -111,11 +110,26 @@ class _ProPaywallSheet extends StatelessWidget {
           const SizedBox(height: 28),
 
           // Beneficios
-          _Benefit(icon: Icons.all_inclusive_rounded, label: 'Conciertos ilimitados'),
-          _Benefit(icon: Icons.photo_library_rounded, label: 'Fotos ilimitadas por concierto'),
-          _Benefit(icon: Icons.picture_as_pdf_rounded, label: 'Exportar estadísticas a PDF'),
-          _Benefit(icon: Icons.dashboard_customize_rounded, label: 'Dashboard personalizable'),
-          _Benefit(icon: Icons.palette_rounded, label: 'Temas de color exclusivos'),
+          _Benefit(
+            icon: Icons.all_inclusive_rounded,
+            label: 'Conciertos ilimitados',
+          ),
+          _Benefit(
+            icon: Icons.photo_library_rounded,
+            label: 'Fotos ilimitadas por concierto',
+          ),
+          _Benefit(
+            icon: Icons.picture_as_pdf_rounded,
+            label: 'Exportar estadísticas a PDF',
+          ),
+          _Benefit(
+            icon: Icons.dashboard_customize_rounded,
+            label: 'Dashboard y estadísticas personalizables',
+          ),
+          _Benefit(
+            icon: Icons.palette_rounded,
+            label: 'Temas de color exclusivos',
+          ),
           const SizedBox(height: 28),
 
           // CTA

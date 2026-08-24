@@ -4,16 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
+/// Tipo de contenido que puede embeberse.
+enum SpotifyEmbedType { playlist, track }
+
 class SpotifyEmbedPage extends StatefulWidget {
-  /// ID de la playlist de Spotify a embeber.
-  final String playlistId;
+  /// ID del recurso (playlist o track).
+  final String resourceId;
+
+  /// Tipo de recurso: playlist (por defecto) o track individual.
+  final SpotifyEmbedType type;
+
   final String title;
 
   const SpotifyEmbedPage({
     super.key,
-    required this.playlistId,
-    this.title = 'Tus canciones favoritas',
+    required this.resourceId,
+    this.type = SpotifyEmbedType.playlist,
+    this.title = 'Spotify',
   });
+
+  /// Constructor de conveniencia para playlists (compatibilidad hacia atrás).
+  const SpotifyEmbedPage.playlist({
+    super.key,
+    required String playlistId,
+    String title = 'Tus canciones favoritas',
+  })  : resourceId = playlistId,
+        type = SpotifyEmbedType.playlist,
+        title = title;
+
+  /// Constructor de conveniencia para una canción concreta.
+  const SpotifyEmbedPage.track({
+    super.key,
+    required String trackId,
+    String title = '',
+  })  : resourceId = trackId,
+        type = SpotifyEmbedType.track,
+        title = title;
 
   @override
   State<SpotifyEmbedPage> createState() => _SpotifyEmbedPageState();
@@ -54,6 +80,13 @@ class _SpotifyEmbedPageState extends State<SpotifyEmbedPage> {
       ..setBackgroundColor(Colors.black);
   }
 
+  String get _embedUrl {
+    final typePath =
+        widget.type == SpotifyEmbedType.track ? 'track' : 'playlist';
+    return 'https://open.spotify.com/embed/$typePath/${widget.resourceId}'
+        '?utm_source=generator&theme=0';
+  }
+
   String _buildHtml() => '''
 <!DOCTYPE html>
 <html>
@@ -73,7 +106,7 @@ class _SpotifyEmbedPageState extends State<SpotifyEmbedPage> {
 </head>
 <body>
   <iframe
-    src="https://open.spotify.com/embed/playlist/${widget.playlistId}?utm_source=generator&theme=0"
+    src="$_embedUrl"
     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
     loading="lazy"
   ></iframe>

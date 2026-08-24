@@ -35,7 +35,8 @@ class SpotifyAuthService {
   static String get _clientId =>
       dotenv.env['SPOTIFY_CLIENT_ID'] ?? '';
   static const _redirectUri = 'lavdapp://spotify-callback';
-  static const _scopes = 'user-top-read user-read-recently-played';
+  static const _scopes =
+      'user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative';
 
   static const _storage = FlutterSecureStorage();
 

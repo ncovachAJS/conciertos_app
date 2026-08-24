@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../data/services/spotify_auth_service.dart';
 import '../../data/services/spotify_api_service.dart';
+import '../../data/services/spotify_auth_service.dart';
 import '../../domain/entities/spotify_track.dart';
 import '../../domain/spotify_artist.dart';
 
@@ -112,6 +112,18 @@ class SpotifyTopArtistsNotifier extends AsyncNotifier<List<SpotifyArtist>> {
     ref.invalidate(spotifyLoggedInProvider);
   }
 }
+
+// ─────────────────────────────────────────── Playlist personal del usuario
+
+/// Playlist del usuario en Spotify que se usará para el embed del dashboard.
+/// Prioriza playlists automáticas de Spotify ("Your Top Songs", etc.).
+/// Se invalida cuando cambia el usuario o el estado de sesión.
+final spotifyUserPlaylistProvider = FutureProvider<SpotifyPlaylist?>((ref) async {
+  ref.watch(authUserIdProvider);
+  final loggedIn = await ref.watch(spotifyAuthServiceProvider).isLoggedIn;
+  if (!loggedIn) return null;
+  return ref.read(spotifyApiServiceProvider).getTopTracksPlaylist();
+});
 
 // ─────────────────────────────────────────── Top canciones del usuario
 

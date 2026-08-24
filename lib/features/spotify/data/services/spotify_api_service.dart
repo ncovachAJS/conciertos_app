@@ -65,6 +65,43 @@ class SpotifyApiService {
         .toList();
   }
 
+  // ────────────────────────────────────────── Playlist personal del usuario
+
+  /// Busca en las playlists del usuario una que sirva como "top tracks":
+  /// primero busca las que Spotify genera automáticamente ("Your Top Songs",
+  /// "Tus mejores canciones", etc.), si no encuentra ninguna devuelve la
+  /// primera playlist disponible, y si no tiene ninguna devuelve null.
+  Future<SpotifyPlaylist?> getTopTracksPlaylist() async {
+    final uri = Uri.parse('$_base/me/playlists').replace(
+      queryParameters: {'limit': '50'},
+    );
+    final response = await http.get(uri, headers: await _headers());
+    if (response.statusCode != 200) return null;
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = (data['items'] as List<dynamic>)
+        .whereType<Map<String, dynamic>>()
+        .toList();
+    if (items.isEmpty) return null;
+
+    // Palabras clave que usan las playlists automáticas de Spotify
+    const keywords = [
+      'top songs', 'top tracks', 'mejores canciones', 'my top',
+      'tu mezcla', 'your top', 'tus mejores',
+    ];
+
+    // 1. Preferimos las playlists automáticas de Spotify
+    for (final item in items) {
+      final name = (item['name'] as String? ?? '').toLowerCase();
+      if (keywords.any(name.contains)) {
+        return SpotifyPlaylist._fromJson(item);
+      }
+    }
+
+    // 2. Si no hay ninguna "top", usamos la primera de la lista
+    return SpotifyPlaylist._fromJson(items.first);
+  }
+
   // ────────────────────────────────────────── Top canciones del usuario
 
   /// Canciones más escuchadas del usuario a largo plazo (hasta [limit]).
@@ -126,5 +163,27 @@ class SpotifyApiService {
       }
     }
     return artists;
+  }
+}
+
+/// Datos mínimos de una playlist de Spotify necesarios para el embed.
+class SpotifyPlaylist {
+  final String id;
+  final String name;
+  final String? imageUrl;
+
+  const SpotifyPlaylist({
+    required this.id,
+    required this.name,
+    this.imageUrl,
+  });
+
+  factory SpotifyPlaylist._fromJson(Map<String, dynamic> json) {
+    final images = json['images'] as List<dynamic>? ?? [];
+    return SpotifyPlaylist(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      imageUrl: images.isNotEmpty ? (images.first['url'] as String?) : null,
+    );
   }
 }
