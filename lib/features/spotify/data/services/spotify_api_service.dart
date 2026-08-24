@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../domain/entities/spotify_track.dart';
 import '../../domain/spotify_artist.dart';
 import 'spotify_auth_service.dart';
 
@@ -61,6 +62,29 @@ class SpotifyApiService {
     final items = data['items'] as List<dynamic>;
     return items
         .map((e) => SpotifyArtist.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  // ────────────────────────────────────────── Top canciones del usuario
+
+  /// Canciones más escuchadas del usuario a largo plazo (hasta [limit]).
+  /// Usa el token OAuth del usuario → resultado 100 % personal.
+  Future<List<SpotifyTrack>> getUserTopTracks({int limit = 30}) async {
+    final uri = Uri.parse('$_base/me/top/tracks').replace(
+      queryParameters: {'limit': '$limit', 'time_range': 'long_term'},
+    );
+
+    final response = await http.get(uri, headers: await _headers());
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          'Error al obtener canciones top: ${response.statusCode}');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final items = data['items'] as List<dynamic>;
+    return items
+        .map((e) => SpotifyTrack.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 

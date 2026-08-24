@@ -7,7 +7,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:http/http.dart' as http;
 
-import '../../../auth/presentation/controllers/auth_controller.dart';
 
 /// Credenciales obtenidas tras el flujo PKCE de Spotify.
 class SpotifyTokens {
@@ -25,6 +24,14 @@ class SpotifyTokens {
 }
 
 class SpotifyAuthService {
+  /// ID del usuario de la app asociado a esta instancia del servicio.
+  /// Se fija en el constructor para que el prefijo de almacenamiento sea
+  /// estable durante toda la vida del objeto (evita race conditions si
+  /// AuthController carga la sesión mientras el flujo OAuth está en marcha).
+  final String? _userId;
+
+  SpotifyAuthService({String? userId}) : _userId = userId;
+
   static String get _clientId =>
       dotenv.env['SPOTIFY_CLIENT_ID'] ?? '';
   static const _redirectUri = 'lavdapp://spotify-callback';
@@ -32,16 +39,39 @@ class SpotifyAuthService {
 
   static const _storage = FlutterSecureStorage();
 
-  /// Prefijo con el userId para que cada usuario de la app tenga
-  /// sus propios tokens de Spotify en el secure storage.
-  static String get _userPrefix {
-    final uid = AuthController.instance.user?.id ?? 'anonymous';
-    return 'spotify_${uid}_';
-  }
+  /// Prefijo estable para este usuario (nunca cambia en mitad de una operación).
+  String get _userPrefix => 'spotify_${_userId ?? 'anonymous'}_';
 
   String get _keyAccessToken  => '${_userPrefix}access_token';
   String get _keyRefreshToken => '${_userPrefix}refresh_token';
   String get _keyExpiresAt    => '${_userPrefix}expires_at';
+
+  // ---------------------------------- Migración de tokens anónimos
+
+  /// Si existían tokens guardados bajo el prefijo "anonymous" (porque el flujo
+  /// OAuth ocurrió antes de que terminase loadSession), los mueve al prefijo
+  /// correcto del usuario y borra las claves anónimas.
+  Future<void> migrateAnonymousTokens() async {
+    if (_userId == null) return; // nada que migrar si no hay usuario
+
+    const anonPrefix = 'spotify_anonymous_';
+    final anonAccess = await _storage.read(key: '${anonPrefix}access_token');
+    if (anonAccess == null) return; // no hay tokens anónimos
+
+    final anonRefresh = await _storage.read(key: '${anonPrefix}refresh_token');
+    final anonExpires = await _storage.read(key: '${anonPrefix}expires_at');
+
+    await Future.wait([
+      _storage.write(key: _keyAccessToken,  value: anonAccess),
+      if (anonRefresh != null)
+        _storage.write(key: _keyRefreshToken, value: anonRefresh),
+      if (anonExpires != null)
+        _storage.write(key: _keyExpiresAt,   value: anonExpires),
+      _storage.delete(key: '${anonPrefix}access_token'),
+      _storage.delete(key: '${anonPrefix}refresh_token'),
+      _storage.delete(key: '${anonPrefix}expires_at'),
+    ]);
+  }
 
   // ---------------------------------------------------------------- PKCE utils
 
@@ -76,10 +106,16 @@ class SpotifyAuthService {
       'code_challenge': challenge,
     });
 
-    // Abre WebView y espera el redirect con el code
+    // Abre WebView y espera el redirect con el code.
+    // preferEphemeral: true → usa una sesión de navegador limpia (sin cookies
+    // previas) y en Android activa un WebView embebido en lugar de Chrome
+    // Custom Tabs, lo que garantiza que el redirect lavdapp:// se capture
+    // correctamente en emuladores y dispositivos donde Custom Tabs no propaga
+    // bien los custom schemes.
     final result = await FlutterWebAuth2.authenticate(
       url: authUrl.toString(),
       callbackUrlScheme: 'lavdapp',
+      options: const FlutterWebAuth2Options(preferEphemeral: true),
     );
 
     final code = Uri.parse(result).queryParameters['code'];
