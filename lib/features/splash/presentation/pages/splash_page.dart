@@ -35,9 +35,15 @@ class _SplashPageState extends ConsumerState<SplashPage>
   // Con ref.read(concertsProvider.future) el notifier arranca build()
   // y la lista queda en caché para el resto de la app.
   late final AppInitializer _initializer = AppInitializer(
-    onLoadConcerts: () => ref
-        .read(concertsProvider.future)
-        .timeout(const Duration(seconds: 8), onTimeout: () => []),
+    onLoadConcerts: () async {
+      try {
+        await ref
+            .read(concertsProvider.future)
+            .timeout(const Duration(seconds: 8), onTimeout: () => []);
+      } catch (_) {
+        // Si la API falla, seguimos — la home mostrará el error con Reintentar
+      }
+    },
   );
 
   String _loadingMessage = '';
