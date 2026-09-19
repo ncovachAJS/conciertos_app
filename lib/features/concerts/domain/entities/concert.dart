@@ -26,6 +26,9 @@ class Concert {
   final String userName;
   final String userAvatarUrl;
   final String genre;
+  /// Si es false, este concierto no aparece en el feed de amigos ni en sus
+  /// estadísticas comparadas — solo lo ve el propio dueño.
+  final bool visibleToFriends;
 
   const Concert({
     required this.id,
@@ -52,6 +55,7 @@ class Concert {
     this.userName = '',
     this.userAvatarUrl = '',
     this.genre = '',
+    this.visibleToFriends = true,
   });
 
   bool get isPastConcert {
@@ -98,6 +102,7 @@ class Concert {
     String? userName,
     String? userAvatarUrl,
     String? genre,
+    bool? visibleToFriends,
   }) {
     return Concert(
       id: id ?? this.id,
@@ -124,6 +129,7 @@ class Concert {
       userName: userName ?? this.userName,
       userAvatarUrl: userAvatarUrl ?? this.userAvatarUrl,
       genre: genre ?? this.genre,
+      visibleToFriends: visibleToFriends ?? this.visibleToFriends,
     );
   }
 }

@@ -33,6 +33,7 @@ class ConcertModel extends Concert {
     super.userName = '',
     super.userAvatarUrl = '',
     super.genre = '',
+    super.visibleToFriends = true,
     this.taggedFriendIds = const [],
     this.backupPhotos = const [],
   });
@@ -113,6 +114,7 @@ class ConcertModel extends Concert {
       userName: ownerJson?['name']?.toString() ?? '',
       userAvatarUrl: ownerJson?['avatarUrl']?.toString() ?? '',
       genre: json['genre']?.toString() ?? '',
+      visibleToFriends: json['visibleToFriends'] as bool? ?? true,
       backupPhotos: backupPhotos,
     );
   }
@@ -143,6 +145,7 @@ class ConcertModel extends Concert {
       userName: concert.userName,
       userAvatarUrl: concert.userAvatarUrl,
       genre: concert.genre,
+      visibleToFriends: concert.visibleToFriends,
     );
   }
 
@@ -168,6 +171,7 @@ class ConcertModel extends Concert {
     'price': price,
     'description': notes,
     if (genre.isNotEmpty) 'genre': genre,
+    'visibleToFriends': visibleToFriends,
     'user': {
       'id': userId,
       'name': userName,
@@ -193,6 +197,7 @@ class ConcertModel extends Concert {
       'rating': rating,
       'liked': liked,
       'favorite': favorite,
+      'visibleToFriends': visibleToFriends,
       'taggedFriendIds': taggedFriendIds,
     };
     if (city.isNotEmpty) json['city'] = city;

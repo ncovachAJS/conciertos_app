@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
@@ -19,6 +20,7 @@ import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../friends/presentation/widgets/tag_friends_selector.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../spotify/data/services/spotify_search_service.dart';
+import '../../../spotify/domain/entities/spotify_artist.dart';
 
 class AddConcertPage extends ConsumerStatefulWidget {
   final Concert? concert;
@@ -58,6 +60,15 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   final _spotifyService = SpotifySearchService();
   bool _fetchingGenre = false;
 
+  // ── Autocompletar artista con Spotify ─────────────────────────────────────
+  final _artistFocusNode = FocusNode();
+  final _artistFieldKey = GlobalKey();
+  final _artistLayerLink = LayerLink();
+  OverlayEntry? _artistOverlayEntry;
+  Timer? _artistDebounce;
+  List<SpotifyArtist> _artistSuggestions = [];
+  bool _searchingArtists = false;
+
   final ImagePicker _picker = ImagePicker();
   final UploadService _uploadService = UploadService();
 
@@ -83,6 +94,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   }
   bool _liked = false;
   bool _favorite = false;
+  bool _visibleToFriends = true;
   List<String> _taggedFriendIds = [];
 
   bool get _isPastConcert {
@@ -100,6 +112,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   @override
   void initState() {
     super.initState();
+    _artistFocusNode.addListener(() {
+      if (!_artistFocusNode.hasFocus) _hideArtistOverlay();
+    });
     _festivalController.addListener(() {
       final hasFest = _festivalController.text.trim().isNotEmpty;
       if (hasFest != _hasFestival) setState(() => _hasFestival = hasFest);
@@ -118,6 +133,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       _artistRating = widget.concert!.artistRating;
       _liked = widget.concert!.liked;
       _favorite = widget.concert!.favorite;
+      _visibleToFriends = widget.concert!.visibleToFriends;
       _artistController.text = widget.concert!.artist;
       _festivalController.text = widget.concert!.festival;
       _hasFestival = widget.concert!.festival.trim().isNotEmpty;
@@ -196,6 +212,117 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     } catch (_) {} finally {
       if (mounted) setState(() => _fetchingGenre = false);
     }
+  }
+
+  // ── Autocompletar artista con Spotify ─────────────────────────────────────
+
+  void _onArtistTextChanged(String value) {
+    _artistDebounce?.cancel();
+    final q = value.trim();
+    if (q.length < 2) {
+      _hideArtistOverlay();
+      _artistSuggestions = [];
+      return;
+    }
+    _artistDebounce =
+        Timer(const Duration(milliseconds: 350), () => _searchArtists(q));
+  }
+
+  Future<void> _searchArtists(String q) async {
+    setState(() => _searchingArtists = true);
+    try {
+      final results = await _spotifyService.searchArtists(q);
+      if (!mounted) return;
+      setState(() {
+        _artistSuggestions = results;
+        _searchingArtists = false;
+      });
+      if (results.isNotEmpty && _artistFocusNode.hasFocus) {
+        _showArtistOverlay();
+      } else {
+        _hideArtistOverlay();
+      }
+    } catch (_) {
+      if (mounted) setState(() => _searchingArtists = false);
+    }
+  }
+
+  double get _artistFieldWidth {
+    final box =
+        _artistFieldKey.currentContext?.findRenderObject() as RenderBox?;
+    return box?.size.width ?? 300;
+  }
+
+  void _showArtistOverlay() {
+    _hideArtistOverlay();
+    final overlay = Overlay.of(context);
+    _artistOverlayEntry = OverlayEntry(
+      builder: (ctx) => Positioned(
+        width: _artistFieldWidth,
+        child: CompositedTransformFollower(
+          link: _artistLayerLink,
+          showWhenUnlinked: false,
+          offset: const Offset(0, 58),
+          child: Material(
+            elevation: 6,
+            borderRadius: BorderRadius.circular(12),
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 260),
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                itemCount: _artistSuggestions.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (_, i) {
+                  final artist = _artistSuggestions[i];
+                  return ListTile(
+                    dense: true,
+                    leading: CircleAvatar(
+                      radius: 16,
+                      backgroundImage: artist.image != null
+                          ? NetworkImage(artist.image!)
+                          : null,
+                      child: artist.image == null
+                          ? const Icon(Icons.person, size: 16)
+                          : null,
+                    ),
+                    title: Text(artist.name,
+                        style: const TextStyle(fontWeight: FontWeight.w500)),
+                    subtitle: artist.genres.isNotEmpty
+                        ? Text(artist.genres.first,
+                            maxLines: 1, overflow: TextOverflow.ellipsis)
+                        : null,
+                    onTap: () => _selectArtist(artist),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(_artistOverlayEntry!);
+  }
+
+  void _hideArtistOverlay() {
+    _artistOverlayEntry?.remove();
+    _artistOverlayEntry = null;
+  }
+
+  void _selectArtist(SpotifyArtist artist) {
+    _artistController.text = artist.name;
+    _hideArtistOverlay();
+    setState(() => _artistSuggestions = []);
+    if (artist.genres.isNotEmpty && _genreController.text.trim().isEmpty) {
+      final genre = artist.genres.first
+          .split(' ')
+          .map((w) =>
+              w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
+          .join(' ');
+      _genreController.text = genre;
+    }
+    _artistFocusNode.unfocus();
   }
 
   Future<void> _showTutorialIfNeeded() async {
@@ -295,6 +422,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         artistRating: _artistRating,
         liked: _liked,
         favorite: _favorite,
+        visibleToFriends: _visibleToFriends,
         venue: _venueController.text.trim(),
         city: _cityController.text.trim(),
         price: double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0.0,
@@ -336,6 +464,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
   @override
   void dispose() {
+    _artistDebounce?.cancel();
+    _hideArtistOverlay();
+    _artistFocusNode.dispose();
     _artistController.dispose();
     _festivalController.dispose();
     _dateController.dispose();
@@ -351,20 +482,36 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
 
   // ── Columna izquierda (campos de texto) ─────────────────────────────────────
   List<Widget> _buildFields(AppLocalizations l) => [
-        TextFormField(
-          controller: _artistController,
-          decoration: InputDecoration(
-            labelText: l.artistLabel,
-            border: const OutlineInputBorder(),
-            prefixIcon: const Icon(Icons.person),
+        CompositedTransformTarget(
+          link: _artistLayerLink,
+          child: TextFormField(
+            key: _artistFieldKey,
+            controller: _artistController,
+            focusNode: _artistFocusNode,
+            decoration: InputDecoration(
+              labelText: l.artistLabel,
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.person),
+              suffixIcon: _searchingArtists
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : null,
+            ),
+            onChanged: _onArtistTextChanged,
+            onEditingComplete: _suggestGenreFromSpotify,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return l.artistRequired;
+              }
+              return null;
+            },
           ),
-          onEditingComplete: _suggestGenreFromSpotify,
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return l.artistRequired;
-            }
-            return null;
-          },
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -813,6 +960,26 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                   hintText: '¿Qué recordás de este concierto?',
                   border: const OutlineInputBorder(),
                   alignLabelWithHint: true,
+                ),
+              ),
+
+              // ── Visibilidad para amigos ─────────────────────────────
+              const SizedBox(height: 24),
+              Card(
+                child: SwitchListTile(
+                  secondary: Icon(
+                    _visibleToFriends
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  title: const Text('Visible para mis amigos'),
+                  subtitle: Text(
+                    _visibleToFriends
+                        ? 'Aparece en tu feed de amigos y en las comparativas'
+                        : 'Solo tú lo verás — oculto para tus amigos',
+                  ),
+                  value: _visibleToFriends,
+                  onChanged: (v) => setState(() => _visibleToFriends = v),
                 ),
               ),
 

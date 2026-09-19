@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/responsive/responsive.dart';
+import '../features/friends/presentation/controllers/friends_controller.dart';
 import '../features/notifications/presentation/controllers/notifications_controller.dart';
 import '../l10n/generated/app_localizations.dart';
 
@@ -21,6 +22,9 @@ class _AppShellState extends State<AppShell> {
     super.initState();
     _notif.addListener(_rebuild);
     _notif.refreshUnreadCount();
+    // Carga la lista de amigos/solicitudes pendientes al arrancar para que
+    // el badge de "Amigos" en el dashboard tenga datos desde el primer momento.
+    FriendsController.instance.loadFriends();
   }
 
   void _rebuild() {

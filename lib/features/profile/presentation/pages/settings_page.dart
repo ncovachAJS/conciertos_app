@@ -31,6 +31,7 @@ import '../../data/services/user_api_service.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 const _kNotifFriends = 'notif_friend_activity';
 const _kNotifRecs    = 'notif_recommendations';
+const _kSplashSound  = 'splash_sound_enabled';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -46,6 +47,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   // Prefs de notificaciones
   bool _notifFriends = true;
   bool _notifRecs    = true;
+
+  // Sonido del splash de inicio
+  bool _splashSound = true;
 
   // Meta anual de conciertos
   int? _annualGoal;
@@ -68,6 +72,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     setState(() {
       _notifFriends = prefs.getBool(_kNotifFriends) ?? true;
       _notifRecs    = prefs.getBool(_kNotifRecs)    ?? true;
+      _splashSound  = prefs.getBool(_kSplashSound)  ?? true;
     });
   }
 
@@ -907,6 +912,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ],
             ),
             onTap: () => context.push('/color-theme'),
+          ),
+          const Divider(height: 1, indent: 56),
+          SwitchListTile(
+            secondary: const Icon(Icons.music_note_outlined),
+            title: const Text('Sonido de inicio'),
+            subtitle: const Text('Ambiente de público al abrir la app'),
+            value: _splashSound,
+            activeThumbColor: const Color(0xFFE53935),
+            onChanged: (v) {
+              setState(() => _splashSound = v);
+              _setNotifPref(_kSplashSound, v);
+            },
           ),
 
           // ── Mis datos ─────────────────────────────────────────────────────

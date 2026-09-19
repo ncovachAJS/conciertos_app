@@ -41,6 +41,7 @@ class ApiConfig {
 
   // Spotify (proxy en backend — el secret vive solo en el servidor)
   static const String spotifyArtistEndpoint = '$baseUrl/spotify/artist';
+  static const String spotifyArtistsSearchEndpoint = '$baseUrl/spotify/artists/search';
   static String spotifyTopTracksEndpoint(String artistId) =>
       '$baseUrl/spotify/artist/$artistId/top-tracks';
 

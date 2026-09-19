@@ -10,4 +10,8 @@ class SpotifySearchService {
 
   Future<SpotifyArtist?> searchArtist(String artist) =>
       _client.searchArtist(artist);
+
+  /// Varias coincidencias para autocompletar mientras el usuario escribe.
+  Future<List<SpotifyArtist>> searchArtists(String query, {int limit = 8}) =>
+      _client.searchArtists(query, limit: limit);
 }

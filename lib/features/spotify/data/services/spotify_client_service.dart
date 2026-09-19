@@ -65,6 +65,36 @@ class SpotifyClientService {
     }
   }
 
+  // ── Autocompletar (varios resultados) ─────────────────────────────────────
+
+  /// Busca varias coincidencias de artista para autocompletar mientras el
+  /// usuario escribe. A diferencia de [searchArtist], no cachea (la query
+  /// cambia en cada pulsación) y devuelve una lista en vez de un único match.
+  Future<List<SpotifyArtist>> searchArtists(String query, {int limit = 8}) async {
+    final q = query.trim();
+    if (q.isEmpty) return [];
+
+    try {
+      final uri = Uri.parse(ApiConfig.spotifyArtistsSearchEndpoint)
+          .replace(queryParameters: {'q': q, 'limit': '$limit'});
+      final response = await http
+          .get(uri, headers: await _authHeaders())
+          .timeout(_timeout);
+
+      if (response.statusCode != 200) return [];
+
+      final List data = jsonDecode(response.body) as List;
+      return data
+          .cast<Map<String, dynamic>>()
+          .map((json) => SpotifyArtist.fromJson(json))
+          .where((a) => a.id.isNotEmpty && a.name.isNotEmpty)
+          .toList();
+    } catch (e) {
+      debugPrint('[SpotifyClient] searchArtists error: $e');
+      return [];
+    }
+  }
+
   // ── Top tracks ────────────────────────────────────────────────────────────
 
   Future<List<SpotifyTrack>> getTopTracks(

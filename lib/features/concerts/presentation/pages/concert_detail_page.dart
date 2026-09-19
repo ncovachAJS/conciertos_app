@@ -335,6 +335,14 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
               subtitle: Text(concert.genre),
             ),
           ],
+          if (!concert.visibleToFriends) ...[
+            const Divider(height: 1),
+            const ListTile(
+              leading: Icon(Icons.visibility_off_outlined, color: Colors.orange),
+              title: Text('Oculto para tus amigos'),
+              subtitle: Text('Solo tú puedes ver este concierto'),
+            ),
+          ],
         ],
       ),
     );

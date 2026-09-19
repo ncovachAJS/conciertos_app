@@ -7,8 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/splash_progress.dart';
+
+/// Debe coincidir con la clave usada en SettingsPage.
+const _kSplashSound = 'splash_sound_enabled';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -66,6 +70,10 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
   Future<void> _playCrowd() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final enabled = prefs.getBool(_kSplashSound) ?? true;
+      if (!enabled) return;
+
       await _crowdPlayer.setReleaseMode(ReleaseMode.stop);
       await _crowdPlayer.setVolume(1.0);
       await _crowdPlayer.play(AssetSource('audio/crowd.mp3'));

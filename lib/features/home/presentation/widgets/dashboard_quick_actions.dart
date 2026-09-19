@@ -8,6 +8,7 @@ import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../import/presentation/pages/import_page.dart';
+import '../../../friends/presentation/controllers/friends_controller.dart';
 
 class DashboardQuickActions extends ConsumerWidget {
   const DashboardQuickActions({super.key});
@@ -60,6 +61,19 @@ class DashboardQuickActions extends ConsumerWidget {
             ),
           ),
         ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: ListenableBuilder(
+            listenable: FriendsController.instance,
+            builder: (context, _) => _QuickAction(
+              icon: Icons.people_alt_rounded,
+              title: l.friendsTitle,
+              color: const Color(0xFFAB47BC),
+              badge: FriendsController.instance.pendingRequests.length,
+              onTap: () => context.push('/friends'),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -70,12 +84,14 @@ class _QuickAction extends StatelessWidget {
   final String title;
   final Color color;
   final VoidCallback onTap;
+  final int badge;
 
   const _QuickAction({
     required this.icon,
     required this.title,
     required this.color,
     required this.onTap,
+    this.badge = 0,
   });
 
   @override
@@ -85,14 +101,42 @@ class _QuickAction extends StatelessWidget {
       onTap: onTap,
       child: Column(
         children: [
-          Container(
-            width: 68,
-            height: 68,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: .15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 32),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: .15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 28),
+              ),
+              if (badge > 0)
+                Positioned(
+                  top: -2,
+                  right: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE53935),
+                      shape: BoxShape.circle,
+                    ),
+                    constraints:
+                        const BoxConstraints(minWidth: 18, minHeight: 18),
+                    child: Text(
+                      badge > 99 ? '99+' : '$badge',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 10),
           Text(

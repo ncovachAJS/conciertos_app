@@ -47,12 +47,43 @@ class _SpotifyPlaylistEmbedPageState
     setState(() => _connecting = true);
     try {
       await ref.read(spotifyTopArtistsProvider.notifier).login();
+
+      // login() atrapa sus propios errores en el estado del provider en vez
+      // de relanzarlos — hay que revisarlo explícitamente para poder avisar
+      // al usuario si la vinculación falló (si no, el botón vuelve a
+      // "Conectar" sin explicación, como si no hubiera pasado nada).
+      final result = ref.read(spotifyTopArtistsProvider);
+      if (result.hasError && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_friendlySpotifyError(result.error)),
+            duration: const Duration(seconds: 6),
+          ),
+        );
+      }
+
       // Forzar recarga de la playlist tras el login
       ref.invalidate(spotifyLoggedInProvider);
       ref.invalidate(spotifyUserPlaylistProvider);
     } finally {
       if (mounted) setState(() => _connecting = false);
     }
+  }
+
+  /// Traduce errores comunes de la vinculación con Spotify a un mensaje
+  /// entendible. El más frecuente en usuarios que no son tú: la app de
+  /// Spotify está en "Development Mode" y solo permite hasta 25 usuarios
+  /// añadidos a mano en el Dashboard de developer.spotify.com.
+  String _friendlySpotifyError(Object? error) {
+    final msg = error.toString();
+    if (msg.contains('not authorized') ||
+        msg.toLowerCase().contains('403') ||
+        msg.toLowerCase().contains('forbidden')) {
+      return 'Spotify rechazó el acceso a esta cuenta. Puede que la app '
+          'esté en modo de desarrollo y esta cuenta no esté en la lista '
+          'de usuarios permitidos.';
+    }
+    return 'No se pudo vincular Spotify: $msg';
   }
 
   @override
