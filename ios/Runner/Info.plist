@@ -18,7 +18,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Conciertos App</string>
+	<string>La Vida en Directo</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -83,5 +83,11 @@
 	<string>La Vida en Directo usa tu ubicación para mostrarte conciertos cerca de ti.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>La Vida en Directo usa tu ubicación para mostrarte conciertos cerca de ti.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>La Vida en Directo necesita acceso a tus fotos para que puedas añadir imágenes a tus conciertos y personalizar tu avatar.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>La Vida en Directo necesita permiso para guardar fotos en tu biblioteca.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>La Vida en Directo necesita acceso a la cámara para que puedas hacer fotos de tus conciertos directamente desde la app.</string>
 </dict>
 </plist>
