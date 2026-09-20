@@ -352,7 +352,8 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                   ),
                 ),
 
-                // Banner Spotify
+                // Banner Spotify (solo si showSpotify está habilitado para el usuario)
+                if (AuthController.instance.user?.showSpotify ?? false)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),

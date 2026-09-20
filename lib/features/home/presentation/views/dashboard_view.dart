@@ -9,6 +9,7 @@ import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../../shared/widgets/skeletons/dashboard_skeleton.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../ticketmaster/presentation/widgets/recommended_concerts.dart';
@@ -198,18 +199,21 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 const SizedBox(height: 36),
               ],
 
-            DashboardSectionId.spotifyEmbed => [
-                DashboardSectionTitle(
-                  icon: Icons.headphones_rounded,
-                  title: 'Tus canciones favoritas',
-                ),
-                const SizedBox(height: 14),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: DashboardSpotifyEmbed(),
-                ),
-                const SizedBox(height: 36),
-              ],
+            DashboardSectionId.spotifyEmbed =>
+              (AuthController.instance.user?.showSpotify ?? false)
+                  ? [
+                      DashboardSectionTitle(
+                        icon: Icons.headphones_rounded,
+                        title: 'Tus canciones favoritas',
+                      ),
+                      const SizedBox(height: 14),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: DashboardSpotifyEmbed(),
+                      ),
+                      const SizedBox(height: 36),
+                    ]
+                  : [],
           };
         }
 
