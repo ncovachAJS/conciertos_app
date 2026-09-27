@@ -1,6 +1,6 @@
 # Política de Privacidad — La Vida en Directo
 
-**Última actualización:** [FECHA DE PUBLICACIÓN]  
+**Última actualización:** 27 de septiembre de 2026  
 **Versión:** 1.0
 
 ---
@@ -9,11 +9,9 @@
 
 | Campo | Datos |
 |-------|-------|
-| **Nombre / Razón social** | [TU NOMBRE O NOMBRE DE EMPRESA] |
-| **CIF / NIF** | [TU NIF/CIF] |
-| **Dirección** | [DIRECCIÓN COMPLETA] |
-| **Email de contacto** | [TU EMAIL DE CONTACTO] |
-| **Email de privacidad** | privacidad@[tudominio].com |
+| **Nombre / Razón social** | La Vida en Directo (Nicolás Covacha, desarrollador individual) |
+| **Email de contacto** | ncovach@gmail.com |
+| **Email de privacidad** | ncovach@gmail.com |
 
 ---
 
@@ -101,7 +99,7 @@ Bajo el RGPD y la LOPD-GDD tienes derecho a:
 - **Oposición**: oponerte al tratamiento basado en interés legítimo.
 - **Retirada del consentimiento**: cuando el tratamiento se basa en él.
 
-Para ejercer cualquiera de estos derechos, escríbenos a **privacidad@[tudominio].com** indicando tu nombre, email de registro y el derecho que deseas ejercer. Responderemos en el plazo máximo de **un mes** (ampliable dos meses más en casos complejos).
+Para ejercer cualquiera de estos derechos, escríbenos a **ncovach@gmail.com** indicando tu nombre, email de registro y el derecho que deseas ejercer. Responderemos en el plazo máximo de **un mes** (ampliable dos meses más en casos complejos).
 
 Si consideras que el tratamiento no es conforme al RGPD, puedes presentar una reclamación ante la **Agencia Española de Protección de Datos (AEPD)**: [https://www.aepd.es](https://www.aepd.es)
 
@@ -124,7 +122,7 @@ Aplicamos medidas técnicas y organizativas adecuadas para proteger tus datos:
 
 Esta aplicación **no está dirigida a menores de 14 años** (edad mínima legal en España para dar consentimiento digital). Si eres menor de 14 años, necesitas el consentimiento de tu padre, madre o tutor/a legal para usar la app.
 
-Si detectamos que hemos recogido datos de un menor sin consentimiento parental, los eliminaremos de inmediato. Contacta con nosotros en privacidad@[tudominio].com.
+Si detectamos que hemos recogido datos de un menor sin consentimiento parental, los eliminaremos de inmediato. Contacta con nosotros en ncovach@gmail.com.
 
 ---
 
@@ -169,9 +167,7 @@ Si realizamos cambios materiales en esta política, te notificaremos mediante un
 
 Para cualquier consulta sobre privacidad:
 
-📧 **privacidad@[tudominio].com**  
-📮 [DIRECCIÓN POSTAL]  
-[CIUDAD, CÓDIGO POSTAL, PAÍS]
+📧 **ncovach@gmail.com**
 
 ---
 
