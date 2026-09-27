@@ -83,5 +83,7 @@
 	<string>La Vida en Directo usa tu ubicación para mostrarte conciertos cerca de ti.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>La Vida en Directo usa tu ubicación para mostrarte conciertos cerca de ti.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
