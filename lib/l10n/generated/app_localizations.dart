@@ -1472,6 +1472,18 @@ abstract class AppLocalizations {
   /// **'Guarda aquí tu entrada (foto o PDF). Se queda solo en este dispositivo, nunca se sube a nuestros servidores.'**
   String get ticketWalletEmptyDescription;
 
+  /// No description provided for @ticketWalletFestivalTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrada del festival'**
+  String get ticketWalletFestivalTitle;
+
+  /// No description provided for @ticketWalletFestivalEmptyDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda aquí el pase del festival (foto o PDF). Se comparte entre todos los conciertos de este festival y se queda solo en este dispositivo.'**
+  String get ticketWalletFestivalEmptyDescription;
+
   /// No description provided for @ticketWalletAddPhoto.
   ///
   /// In es, this message translates to:

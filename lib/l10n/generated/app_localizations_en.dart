@@ -809,6 +809,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketWalletEmptyDescription => 'Keep your ticket here (photo or PDF). It stays on this device only, never uploaded to our servers.';
 
   @override
+  String get ticketWalletFestivalTitle => 'Festival ticket';
+
+  @override
+  String get ticketWalletFestivalEmptyDescription => 'Keep the festival pass here (photo or PDF). It\'s shared across all concerts from this festival and stays on this device only.';
+
+  @override
   String get ticketWalletAddPhoto => 'Photo';
 
   @override

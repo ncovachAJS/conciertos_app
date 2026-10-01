@@ -813,6 +813,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get ticketWalletEmptyDescription => 'Guarda aquí tu entrada (foto o PDF). Se queda solo en este dispositivo, nunca se sube a nuestros servidores.';
 
   @override
+  String get ticketWalletFestivalTitle => 'Entrada del festival';
+
+  @override
+  String get ticketWalletFestivalEmptyDescription => 'Guarda aquí el pase del festival (foto o PDF). Se comparte entre todos los conciertos de este festival y se queda solo en este dispositivo.';
+
+  @override
   String get ticketWalletAddPhoto => 'Foto';
 
   @override

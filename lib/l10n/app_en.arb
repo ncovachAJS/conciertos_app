@@ -364,6 +364,8 @@
 
   "ticketWalletTitle": "My ticket",
   "ticketWalletEmptyDescription": "Keep your ticket here (photo or PDF). It stays on this device only, never uploaded to our servers.",
+  "ticketWalletFestivalTitle": "Festival ticket",
+  "ticketWalletFestivalEmptyDescription": "Keep the festival pass here (photo or PDF). It's shared across all concerts from this festival and stays on this device only.",
   "ticketWalletAddPhoto": "Photo",
   "ticketWalletAddPdf": "PDF",
   "ticketWalletView": "View",

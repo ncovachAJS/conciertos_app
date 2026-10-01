@@ -9,13 +9,21 @@ import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 import '../../data/services/ticket_wallet_service.dart';
 
-/// Tarjeta para guardar la entrada de un concierto (foto o PDF) únicamente
-/// en el dispositivo. Nunca se envía al backend: así, aunque el servidor se
-/// vea comprometido, no hay ninguna entrada que robar.
+/// Tarjeta para guardar una entrada (foto o PDF) de un concierto o festival,
+/// únicamente en el dispositivo. Nunca se envía al backend: así, aunque el
+/// servidor se vea comprometido, no hay ninguna entrada que robar.
 class TicketWalletCard extends StatefulWidget {
-  final String concertId;
+  /// Identificador único bajo el que se guarda esta entrada: el id del
+  /// concierto, o `TicketWalletService.festivalKey(nombre)` para una
+  /// entrada compartida por todos los conciertos de ese festival.
+  final String walletId;
+  final bool isFestival;
 
-  const TicketWalletCard({super.key, required this.concertId});
+  const TicketWalletCard({
+    super.key,
+    required this.walletId,
+    this.isFestival = false,
+  });
 
   @override
   State<TicketWalletCard> createState() => _TicketWalletCardState();
@@ -40,7 +48,7 @@ class _TicketWalletCardState extends State<TicketWalletCard> {
   }
 
   Future<void> _load() async {
-    final ticket = await _service.getTicket(widget.concertId);
+    final ticket = await _service.getTicket(widget.walletId);
     if (!mounted) return;
     setState(() {
       _ticket = ticket;
@@ -52,7 +60,7 @@ class _TicketWalletCardState extends State<TicketWalletCard> {
     final image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 95);
     if (image == null || !mounted) return;
     final extension = image.path.split('.').last;
-    final saved = await _service.saveTicket(widget.concertId, File(image.path), extension);
+    final saved = await _service.saveTicket(widget.walletId, File(image.path), extension);
     if (!mounted) return;
     setState(() => _ticket = saved);
   }
@@ -66,7 +74,7 @@ class _TicketWalletCardState extends State<TicketWalletCard> {
     );
     final path = result?.files.single.path;
     if (path == null || !mounted) return;
-    final saved = await _service.saveTicket(widget.concertId, File(path), 'pdf');
+    final saved = await _service.saveTicket(widget.walletId, File(path), 'pdf');
     if (!mounted) return;
     setState(() => _ticket = saved);
   }
@@ -110,7 +118,7 @@ class _TicketWalletCardState extends State<TicketWalletCard> {
       ),
     );
     if (confirmed != true) return;
-    await _service.deleteTicket(widget.concertId);
+    await _service.deleteTicket(widget.walletId);
     if (!mounted) return;
     setState(() => _ticket = null);
   }
@@ -138,7 +146,7 @@ class _TicketWalletCardState extends State<TicketWalletCard> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  l.ticketWalletTitle,
+                  widget.isFestival ? l.ticketWalletFestivalTitle : l.ticketWalletTitle,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -154,7 +162,7 @@ class _TicketWalletCardState extends State<TicketWalletCard> {
             const SizedBox(height: 12),
             if (_ticket == null) ...[
               Text(
-                l.ticketWalletEmptyDescription,
+                widget.isFestival ? l.ticketWalletFestivalEmptyDescription : l.ticketWalletEmptyDescription,
                 style: TextStyle(
                   fontSize: 13,
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
