@@ -807,6 +807,36 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actionImport => 'Importar';
 
   @override
+  String get ticketWalletTitle => 'Mi entrada';
+
+  @override
+  String get ticketWalletEmptyDescription => 'Guarda aquí tu entrada (foto o PDF). Se queda solo en este dispositivo, nunca se sube a nuestros servidores.';
+
+  @override
+  String get ticketWalletAddPhoto => 'Foto';
+
+  @override
+  String get ticketWalletAddPdf => 'PDF';
+
+  @override
+  String get ticketWalletView => 'Ver';
+
+  @override
+  String get ticketWalletDelete => 'Eliminar';
+
+  @override
+  String get ticketWalletLocalBadge => 'Solo en este dispositivo';
+
+  @override
+  String get ticketWalletConfirmDeleteTitle => '¿Eliminar entrada?';
+
+  @override
+  String get ticketWalletConfirmDeleteBody => 'Se eliminará únicamente de este dispositivo.';
+
+  @override
+  String get ticketWalletPdfFile => 'Entrada en PDF';
+
+  @override
   String get tutorialWelcomeTitle => '¡Bienvenido a La Vida en Directo!';
 
   @override

@@ -23,6 +23,7 @@ import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../photos/presentation/widgets/memories_section.dart';
 import '../widgets/venue_map_card.dart';
+import '../widgets/ticket_wallet_card.dart';
 import '../../../setlist/data/services/setlist_service.dart';
 import '../../../setlist/domain/entities/setlist.dart';
 import '../../../setlist/presentation/widgets/setlist_section.dart';
@@ -493,6 +494,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     final memoriesSection  = MemoriesSection(concertId: widget.concert.id);
     final setlistWidget    = _buildSetlistWidget(concert, l);
     final commentsSection  = _CommentsSection(key: _commentsKey, concertId: widget.concert.id);
+    final ticketWalletCard = isOwner ? TicketWalletCard(concertId: widget.concert.id) : null;
 
     final hasMap          = concert.venue.isNotEmpty || concert.city.isNotEmpty;
     final hasParticipants = concert.participants.isNotEmpty;
@@ -568,6 +570,10 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                       spotifyWidget,
                       const SizedBox(height: 20),
                       memoriesSection,
+                      if (ticketWalletCard != null) ...[
+                        const SizedBox(height: 20),
+                        ticketWalletCard,
+                      ],
                       if (hasSubRatings) ...[
                         const SizedBox(height: 20),
                         _SubRatingsCard(concert: concert),
@@ -599,6 +605,11 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
           imageWidget,
           const SizedBox(height: 30),
           infoCard,
+
+          if (ticketWalletCard != null) ...[
+            const SizedBox(height: 20),
+            ticketWalletCard,
+          ],
 
           if (hasMap) ...[
             const SizedBox(height: 20),

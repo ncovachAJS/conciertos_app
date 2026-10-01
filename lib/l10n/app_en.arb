@@ -362,6 +362,17 @@
   "actionStats": "Stats",
   "actionImport": "Import",
 
+  "ticketWalletTitle": "My ticket",
+  "ticketWalletEmptyDescription": "Keep your ticket here (photo or PDF). It stays on this device only, never uploaded to our servers.",
+  "ticketWalletAddPhoto": "Photo",
+  "ticketWalletAddPdf": "PDF",
+  "ticketWalletView": "View",
+  "ticketWalletDelete": "Delete",
+  "ticketWalletLocalBadge": "On this device only",
+  "ticketWalletConfirmDeleteTitle": "Delete ticket?",
+  "ticketWalletConfirmDeleteBody": "It will only be removed from this device.",
+  "ticketWalletPdfFile": "PDF ticket",
+
   "tutorialWelcomeTitle": "Welcome to La Vida en Directo!",
   "tutorialWelcomeDesc": "Your personal concert diary. Here you'll find everything you need to remember every live show.",
   "tutorialAddTitle": "Add your first concert",

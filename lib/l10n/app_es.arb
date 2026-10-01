@@ -362,6 +362,17 @@
   "actionStats": "Stats",
   "actionImport": "Importar",
 
+  "ticketWalletTitle": "Mi entrada",
+  "ticketWalletEmptyDescription": "Guarda aquí tu entrada (foto o PDF). Se queda solo en este dispositivo, nunca se sube a nuestros servidores.",
+  "ticketWalletAddPhoto": "Foto",
+  "ticketWalletAddPdf": "PDF",
+  "ticketWalletView": "Ver",
+  "ticketWalletDelete": "Eliminar",
+  "ticketWalletLocalBadge": "Solo en este dispositivo",
+  "ticketWalletConfirmDeleteTitle": "¿Eliminar entrada?",
+  "ticketWalletConfirmDeleteBody": "Se eliminará únicamente de este dispositivo.",
+  "ticketWalletPdfFile": "Entrada en PDF",
+
   "tutorialWelcomeTitle": "¡Bienvenido a La Vida en Directo!",
   "tutorialWelcomeDesc": "Tu diario personal de conciertos. Aquí encontrarás todo lo que necesitas para recordar cada directo.",
   "tutorialAddTitle": "Añade tu primer concierto",

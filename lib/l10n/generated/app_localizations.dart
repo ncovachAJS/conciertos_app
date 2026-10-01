@@ -1460,6 +1460,66 @@ abstract class AppLocalizations {
   /// **'Importar'**
   String get actionImport;
 
+  /// No description provided for @ticketWalletTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi entrada'**
+  String get ticketWalletTitle;
+
+  /// No description provided for @ticketWalletEmptyDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda aquí tu entrada (foto o PDF). Se queda solo en este dispositivo, nunca se sube a nuestros servidores.'**
+  String get ticketWalletEmptyDescription;
+
+  /// No description provided for @ticketWalletAddPhoto.
+  ///
+  /// In es, this message translates to:
+  /// **'Foto'**
+  String get ticketWalletAddPhoto;
+
+  /// No description provided for @ticketWalletAddPdf.
+  ///
+  /// In es, this message translates to:
+  /// **'PDF'**
+  String get ticketWalletAddPdf;
+
+  /// No description provided for @ticketWalletView.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver'**
+  String get ticketWalletView;
+
+  /// No description provided for @ticketWalletDelete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get ticketWalletDelete;
+
+  /// No description provided for @ticketWalletLocalBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo en este dispositivo'**
+  String get ticketWalletLocalBadge;
+
+  /// No description provided for @ticketWalletConfirmDeleteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar entrada?'**
+  String get ticketWalletConfirmDeleteTitle;
+
+  /// No description provided for @ticketWalletConfirmDeleteBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se eliminará únicamente de este dispositivo.'**
+  String get ticketWalletConfirmDeleteBody;
+
+  /// No description provided for @ticketWalletPdfFile.
+  ///
+  /// In es, this message translates to:
+  /// **'Entrada en PDF'**
+  String get ticketWalletPdfFile;
+
   /// No description provided for @tutorialWelcomeTitle.
   ///
   /// In es, this message translates to:
