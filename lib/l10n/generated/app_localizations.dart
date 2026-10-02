@@ -389,7 +389,7 @@ abstract class AppLocalizations {
   /// No description provided for @concertNameLabel.
   ///
   /// In es, this message translates to:
-  /// **'Nombre del concierto'**
+  /// **'Nombre de gira/tour'**
   String get concertNameLabel;
 
   /// No description provided for @concertNameHint.

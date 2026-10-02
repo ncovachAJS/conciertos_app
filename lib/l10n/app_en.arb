@@ -52,7 +52,7 @@
   "editConcertTitle": "Edit concert",
   "artistLabel": "Artist",
   "festivalLabel": "Festival",
-  "concertNameLabel": "Concert name",
+  "concertNameLabel": "Tour name",
   "concertNameHint": "e.g. Iron Maiden - Future Past Tour",
   "imageUploadedSuccess": "✅ Image uploaded successfully",
   "imageUploadError": "Could not upload image. Try again.",
