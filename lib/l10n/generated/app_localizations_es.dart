@@ -282,7 +282,7 @@ class AppLocalizationsEs extends AppLocalizations {
       other: 'años',
       one: 'año',
     );
-    return 'Hace $years $_temp0';
+    return 'Tal día como hoy, hace $years $_temp0';
   }
 
   @override

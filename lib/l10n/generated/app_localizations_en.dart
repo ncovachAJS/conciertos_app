@@ -276,8 +276,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       years,
       locale: localeName,
-      other: '$years years ago',
-      one: '1 year ago',
+      other: 'On this exact day, $years years ago',
+      one: 'On this exact day, 1 year ago',
     );
     return '$_temp0';
   }
