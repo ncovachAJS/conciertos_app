@@ -599,7 +599,7 @@ abstract class AppLocalizations {
   /// No description provided for @onThisDayYearsAgo.
   ///
   /// In es, this message translates to:
-  /// **'Hace {years} {years, plural, =1{año} other{años}}'**
+  /// **'Tal día como hoy, hace {years} {years, plural, =1{año} other{años}}'**
   String onThisDayYearsAgo(int years);
 
   /// No description provided for @onThisDayInDays.

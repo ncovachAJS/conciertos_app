@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
@@ -39,7 +40,8 @@ class DashboardOnThisDay extends ConsumerWidget {
 
         String timeLabel;
         if (isExactDay) {
-          timeLabel = l.onThisDayYearsAgo(yearsAgo);
+          final exactDate = DateFormat('d MMM yyyy', 'es').format(concert.date);
+          timeLabel = '${l.onThisDayYearsAgo(yearsAgo)} · $exactDate';
         } else if (diffDays > 0) {
           timeLabel = l.onThisDayInDays(diffDays, yearsAgo);
         } else {

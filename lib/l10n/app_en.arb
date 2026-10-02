@@ -126,7 +126,7 @@
   },
   "noRatingYet": "You haven't rated this concert yet",
 
-  "onThisDayYearsAgo": "{years, plural, =1{1 year ago} other{{years} years ago}}",
+  "onThisDayYearsAgo": "{years, plural, =1{On this exact day, 1 year ago} other{On this exact day, {years} years ago}}",
   "@onThisDayYearsAgo": {
     "placeholders": {
       "years": { "type": "int" }

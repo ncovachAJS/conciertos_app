@@ -126,7 +126,7 @@
   },
   "noRatingYet": "Aún no has valorado este concierto",
 
-  "onThisDayYearsAgo": "Hace {years} {years, plural, =1{año} other{años}}",
+  "onThisDayYearsAgo": "Tal día como hoy, hace {years} {years, plural, =1{año} other{años}}",
   "@onThisDayYearsAgo": {
     "placeholders": {
       "years": { "type": "int" }
