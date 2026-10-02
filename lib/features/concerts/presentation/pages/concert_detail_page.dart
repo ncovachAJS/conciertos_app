@@ -749,30 +749,35 @@ class _CommentsSectionState extends State<_CommentsSection> {
             ),
             const SizedBox(height: 12),
 
-            // Lista
-            if (_loading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              )
-            else if (_comments.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Center(
-                  child: Text(
-                    'Sé el primero en comentar',
-                    style: TextStyle(color: cs.onSurface.withOpacity(0.4), fontSize: 14),
-                  ),
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _comments.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (_, i) => _CommentTile(comment: _comments[i], cs: cs),
-              ),
+            // Lista (altura animada para evitar un salto brusco del scroll
+            // cuando los comentarios terminan de cargar al final de la página)
+            AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeInOut,
+              alignment: Alignment.topCenter,
+              child: _loading
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    )
+                  : _comments.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: Text(
+                              'Sé el primero en comentar',
+                              style: TextStyle(color: cs.onSurface.withOpacity(0.4), fontSize: 14),
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _comments.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (_, i) => _CommentTile(comment: _comments[i], cs: cs),
+                        ),
+            ),
 
             const SizedBox(height: 12),
             const Divider(height: 1),

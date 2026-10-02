@@ -113,7 +113,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   void initState() {
     super.initState();
     _artistFocusNode.addListener(() {
-      if (!_artistFocusNode.hasFocus) _hideArtistOverlay();
+      if (!_artistFocusNode.hasFocus) {
+        _hideArtistOverlay();
+        _suggestGenreFromSpotify();
+      }
     });
     _festivalController.addListener(() {
       final hasFest = _festivalController.text.trim().isNotEmpty;

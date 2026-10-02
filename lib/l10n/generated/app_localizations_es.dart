@@ -154,7 +154,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get festivalLabel => 'Festival';
 
   @override
-  String get concertNameLabel => 'Nombre del concierto';
+  String get concertNameLabel => 'Nombre de gira/tour';
 
   @override
   String get concertNameHint => 'Ej. Iron Maiden - Future Past Tour';
