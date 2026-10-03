@@ -223,8 +223,13 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         final isTablet = Responsive.isTablet(context);
 
         // ── Layout ───────────────────────────────────────────────────────────
+        // El padding inferior solo necesita despejar el "home indicator" de
+        // iOS: la barra de navegación ahora es flotante de verdad (el
+        // Scaffold usa extendBody), así que el contenido debe poder seguir
+        // detrás de ella al hacer scroll hasta el final, en vez de quedarse
+        // corto con un hueco en blanco del tamaño de la barra.
         return SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(4, 4, 4, isTablet ? 32 : 100),
+          padding: EdgeInsets.fromLTRB(4, 4, 4, isTablet ? 32 : 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
