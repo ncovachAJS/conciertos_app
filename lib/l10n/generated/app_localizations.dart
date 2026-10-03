@@ -614,6 +614,18 @@ abstract class AppLocalizations {
   /// **'Hace {days} {days, plural, =1{día} other{días}}, hace {years} {years, plural, =1{año} other{años}}'**
   String onThisDayAgoDays(int days, int years);
 
+  /// No description provided for @onThisDaySeeMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver {count} más'**
+  String onThisDaySeeMore(int count);
+
+  /// No description provided for @onThisDaySeeLess.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver menos'**
+  String get onThisDaySeeLess;
+
   /// No description provided for @statisticsTitle.
   ///
   /// In es, this message translates to:

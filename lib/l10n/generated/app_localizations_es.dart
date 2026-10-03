@@ -320,6 +320,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String onThisDaySeeMore(int count) {
+    return 'Ver $count más';
+  }
+
+  @override
+  String get onThisDaySeeLess => 'Ver menos';
+
+  @override
   String get statisticsTitle => 'Estadísticas';
 
   @override
