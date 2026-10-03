@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -88,6 +90,10 @@ class _AppShellState extends State<AppShell> {
 
     // ── iPhone / Android: pill flotante al fondo ────────────────────────────
     return Scaffold(
+      // El body se extiende detrás de la bottomNavigationBar para que la
+      // barra sea flotante de verdad (contenido visible/difuminado debajo),
+      // en vez de un hueco reservado con un panel sólido encima.
+      extendBody: true,
       body: widget.child,
       bottomNavigationBar: _BottomPillNavBar(
         selectedIndex: idx,
@@ -265,9 +271,10 @@ class _BottomPillNavBar extends StatelessWidget {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-        child: Container(
+        child: DecoratedBox(
+          // La sombra va en una capa aparte: si viviera dentro del
+          // ClipRRect que recorta el blur, se recortaría con él.
           decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(26),
             boxShadow: [
               BoxShadow(
@@ -277,76 +284,91 @@ class _BottomPillNavBar extends StatelessWidget {
               ),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-            child: Row(
-              children: List.generate(labels.length, (i) {
-                final selected = i == selectedIndex;
-                final hasUnread = i == 0 && unreadCount > 0;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => onTap(i),
-                    behavior: HitTestBehavior.opaque,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeInOut,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? cs.surface.withValues(alpha: 0.85)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Icon(
-                                selected
-                                    ? _filledIcons[i]
-                                    : _outlinedIcons[i],
-                                size: 24,
-                                color: selected
-                                    ? cs.onSurface
-                                    : cs.onSurface.withValues(alpha: 0.45),
-                              ),
-                              if (hasUnread)
-                                Positioned(
-                                  top: -2,
-                                  right: -4,
-                                  child: Container(
-                                    width: 7,
-                                    height: 7,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFE53935),
-                                      shape: BoxShape.circle,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(26),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest.withValues(alpha: 0.72),
+                  borderRadius: BorderRadius.circular(26),
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  child: Row(
+                    children: List.generate(labels.length, (i) {
+                      final selected = i == selectedIndex;
+                      final hasUnread = i == 0 && unreadCount > 0;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => onTap(i),
+                          behavior: HitTestBehavior.opaque,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeInOut,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? cs.surface.withValues(alpha: 0.85)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Icon(
+                                      selected
+                                          ? _filledIcons[i]
+                                          : _outlinedIcons[i],
+                                      size: 24,
+                                      color: selected
+                                          ? cs.onSurface
+                                          : cs.onSurface
+                                              .withValues(alpha: 0.45),
                                     ),
+                                    if (hasUnread)
+                                      Positioned(
+                                        top: -2,
+                                        right: -4,
+                                        child: Container(
+                                          width: 7,
+                                          height: 7,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFE53935),
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  labels[i],
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: selected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                    color: selected
+                                        ? cs.onSurface
+                                        : cs.onSurface
+                                            .withValues(alpha: 0.45),
                                   ),
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            labels[i],
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: selected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: selected
-                                  ? cs.onSurface
-                                  : cs.onSurface.withValues(alpha: 0.45),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    }),
                   ),
-                );
-              }),
+                ),
+              ),
             ),
           ),
         ),
