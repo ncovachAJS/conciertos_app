@@ -191,6 +191,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,

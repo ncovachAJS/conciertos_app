@@ -17,6 +17,7 @@ class ProPaywallSheet {
   static Future<void> showPaywall(BuildContext context) =>
       showModalBottomSheet<void>(
         context: context,
+        useRootNavigator: true,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (_) => const _ProPaywallSheet(),
@@ -31,6 +32,7 @@ class ProPaywallSheet {
     if (isPro || ownConcertsCount < ProConfig.freeConcertLimit) return true;
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const _ProPaywallSheet(),

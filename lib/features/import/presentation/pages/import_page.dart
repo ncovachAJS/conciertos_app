@@ -942,6 +942,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
     final cs = Theme.of(context).colorScheme;
     return showModalBottomSheet<_LimitAction>(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => Container(

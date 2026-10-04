@@ -243,6 +243,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

@@ -29,6 +29,7 @@ class TutorialOverlay extends StatefulWidget {
   }) {
     return showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,

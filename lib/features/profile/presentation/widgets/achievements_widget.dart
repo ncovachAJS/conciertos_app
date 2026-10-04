@@ -251,6 +251,7 @@ class _TrophyTile extends StatelessWidget {
     final locked = !achievement.unlocked;
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

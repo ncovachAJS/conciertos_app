@@ -199,6 +199,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
     if (!mounted) return;
     await showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _ShareBottomSheet(concert: concert, cardKey: cardKey),

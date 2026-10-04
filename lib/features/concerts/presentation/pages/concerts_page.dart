@@ -270,6 +270,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
   Future<void> _openFilters(List<Concert> allConcerts) async {
     final result = await showModalBottomSheet<_ConcertFilter>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _FilterSheet(
