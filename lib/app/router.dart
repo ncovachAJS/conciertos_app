@@ -93,12 +93,19 @@ final appRouter = GoRouter(
         ),
         GoRoute(
           path: '/add',
-          builder: (context, state) {
+          pageBuilder: (context, state) {
             final extra = state.extra;
-            if (extra is Concert) return AddConcertPage(concert: extra);
-            if (extra is DateTime) return AddConcertPage(initialDate: extra);
-            if (extra is String) return AddConcertPage(initialArtist: extra);
-            return const AddConcertPage();
+            final Widget page;
+            if (extra is Concert) {
+              page = AddConcertPage(concert: extra);
+            } else if (extra is DateTime) {
+              page = AddConcertPage(initialDate: extra);
+            } else if (extra is String) {
+              page = AddConcertPage(initialArtist: extra);
+            } else {
+              page = const AddConcertPage();
+            }
+            return NoTransitionPage(child: page);
           },
         ),
         GoRoute(
