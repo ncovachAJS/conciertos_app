@@ -117,6 +117,7 @@ class _ActivityCard extends StatelessWidget {
   void _showComments(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _CommentsSheet(concertId: concert.id),

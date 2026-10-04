@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -190,6 +191,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -342,7 +344,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       body: Stack(
         children: [
           ListView(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              20,
+              20,
+              20 + floatingNavBarClearance(context),
+            ),
             children: [
               const Text(
                 'Tu acreditación',

@@ -63,6 +63,7 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: cs.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(

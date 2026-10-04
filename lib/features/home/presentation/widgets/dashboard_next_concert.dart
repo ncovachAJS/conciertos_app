@@ -54,10 +54,13 @@ class DashboardNextConcert extends StatelessWidget {
     ];
 
     final today = DateTime.now();
-
-    final days = concert.date
-        .difference(DateTime(today.year, today.month, today.day))
-        .inDays;
+    final todayDate = DateTime(today.year, today.month, today.day);
+    // Comparamos solo fecha contra fecha (sin la hora del concierto):
+    // restar duraciones cuando concert.date lleva hora (p. ej. 23:00) contra
+    // una medianoche podía desplazar el resultado en ±1 día según la hora.
+    final concertDate =
+        DateTime(concert.date.year, concert.date.month, concert.date.day);
+    final days = concertDate.difference(todayDate).inDays;
 
     final double progress = days <= 0
         ? 1

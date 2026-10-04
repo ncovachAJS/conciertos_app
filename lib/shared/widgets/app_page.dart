@@ -35,6 +35,12 @@ class AppPage extends StatelessWidget {
       behavior: HitTestBehavior.translucent,
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
+        // Transparente: este Scaffold vive anidado dentro del Scaffold raíz
+        // (AppShell), que ya usa extendBody + una barra de navegación
+        // flotante con blur. Si este Scaffold pintara su propio fondo opaco
+        // (el comportamiento por defecto), taparía el contenido justo donde
+        // debería verse (difuminado) a través de la barra flotante.
+        backgroundColor: Colors.transparent,
         appBar: showAppBar
             ? AppBar(
                 elevation: 0,

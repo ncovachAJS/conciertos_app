@@ -10,166 +10,229 @@ import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../artist/presentation/pages/artist_page.dart';
 
 /// "En tal día como hoy" — aniversarios exactos y conciertos de esta semana.
-class DashboardOnThisDay extends ConsumerWidget {
+/// Solo se muestra siempre el primero; el resto queda plegado detrás de un
+/// botón "ver más" (útil cuando hay varios conciertos del mismo festival).
+class DashboardOnThisDay extends ConsumerStatefulWidget {
   final List<Concert> concerts;
 
   const DashboardOnThisDay({super.key, required this.concerts});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardOnThisDay> createState() => _DashboardOnThisDayState();
+}
+
+class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final concerts = widget.concerts;
     if (concerts.isEmpty) return const SizedBox.shrink();
 
     final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final now = DateTime.now();
+    final rest = concerts.length > 1 ? concerts.sublist(1) : const <Concert>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: concerts.map((concert) {
-        final yearsAgo = now.year - concert.date.year;
-        final isExactDay =
-            concert.date.day == now.day && concert.date.month == now.month;
-        final thisYearDate = DateTime(
-          now.year,
-          concert.date.month,
-          concert.date.day,
-        );
-        final diffDays = thisYearDate
-            .difference(DateTime(now.year, now.month, now.day))
-            .inDays;
-
-        String timeLabel;
-        if (isExactDay) {
-          final exactDate = DateFormat('d MMM yyyy', 'es').format(concert.date);
-          timeLabel = '${l.onThisDayYearsAgo(yearsAgo)} · $exactDate';
-        } else if (diffDays > 0) {
-          timeLabel = l.onThisDayInDays(diffDays, yearsAgo);
-        } else {
-          timeLabel = l.onThisDayAgoDays(diffDays.abs(), yearsAgo);
-        }
-
-        return GestureDetector(
-          onTap: () {
-            // Navegar al detalle del artista
-            final allConcerts = ref.read(concertsProvider).asData?.value ?? [];
-            final artistConcerts = allConcerts
-                .where((c) => c.artist.trim() == concert.artist.trim())
-                .toList();
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ArtistPage(
-                  artist: concert.artist,
-                  concerts: artistConcerts,
-                ),
-              ),
-            );
-          },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: const Color(
-                  0xFFE53935,
-                ).withOpacity(isExactDay ? 0.5 : 0.2),
-                width: isExactDay ? 1.5 : 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: cs.shadow.withOpacity(0.06),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // Imagen o emoji
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: concert.imageUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: concert.imageUrl,
-                          width: 52,
-                          height: 52,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) =>
-                              _emojiPlaceholder(isExactDay),
-                        )
-                      : _emojiPlaceholder(isExactDay),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
+      children: [
+        _buildCard(context, cs, l, concerts.first),
+        if (rest.isNotEmpty) ...[
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: _expanded
+                ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        timeLabel,
-                        style: TextStyle(
-                          color: const Color(
-                            0xFFE53935,
-                          ).withOpacity(isExactDay ? 1 : 0.7),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        concert.artist,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        [
-                          if (concert.venue.isNotEmpty) concert.venue,
-                          if (concert.city.isNotEmpty) concert.city,
-                        ].join(', '),
-                        style: TextStyle(
-                          color: cs.onSurface.withOpacity(0.54),
-                          fontSize: 13,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                    children:
+                        rest.map((c) => _buildCard(context, cs, l, c)).toList(),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _expanded
+                        ? l.onThisDaySeeLess
+                        : l.onThisDaySeeMore(rest.length),
+                    style: TextStyle(
+                      color: cs.onSurface.withOpacity(0.6),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                if (concert.rating > 0) ...[
-                  const SizedBox(width: 8),
-                  Column(
-                    children: [
-                      Row(
-                        children: List.generate(
-                          concert.rating,
-                          (_) => const Icon(
-                            Icons.star_rounded,
-                            color: Color(0xFFFFC107),
-                            size: 13,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Icon(
+                    _expanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: cs.onSurface.withOpacity(0.6),
+                    size: 18,
                   ),
                 ],
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.chevron_right,
-                  color: cs.onSurface.withOpacity(0.3),
-                  size: 18,
-                ),
-              ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCard(
+    BuildContext context,
+    ColorScheme cs,
+    AppLocalizations l,
+    Concert concert,
+  ) {
+    final now = DateTime.now();
+    final yearsAgo = now.year - concert.date.year;
+    final isExactDay =
+        concert.date.day == now.day && concert.date.month == now.month;
+    final thisYearDate = DateTime(
+      now.year,
+      concert.date.month,
+      concert.date.day,
+    );
+    final diffDays = thisYearDate
+        .difference(DateTime(now.year, now.month, now.day))
+        .inDays;
+
+    String timeLabel;
+    if (isExactDay) {
+      final exactDate = DateFormat('d MMM yyyy', 'es').format(concert.date);
+      timeLabel = '${l.onThisDayYearsAgo(yearsAgo)} · $exactDate';
+    } else if (diffDays > 0) {
+      timeLabel = l.onThisDayInDays(diffDays, yearsAgo);
+    } else {
+      timeLabel = l.onThisDayAgoDays(diffDays.abs(), yearsAgo);
+    }
+
+    return GestureDetector(
+      onTap: () {
+        // Navegar al detalle del artista
+        final allConcerts = ref.read(concertsProvider).asData?.value ?? [];
+        final artistConcerts = allConcerts
+            .where((c) => c.artist.trim() == concert.artist.trim())
+            .toList();
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ArtistPage(
+              artist: concert.artist,
+              concerts: artistConcerts,
             ),
           ),
         );
-      }).toList(),
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(
+              0xFFE53935,
+            ).withOpacity(isExactDay ? 0.5 : 0.2),
+            width: isExactDay ? 1.5 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: cs.shadow.withOpacity(0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Imagen o emoji
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: concert.imageUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: concert.imageUrl,
+                      width: 52,
+                      height: 52,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) =>
+                          _emojiPlaceholder(isExactDay),
+                    )
+                  : _emojiPlaceholder(isExactDay),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    timeLabel,
+                    style: TextStyle(
+                      color: const Color(
+                        0xFFE53935,
+                      ).withOpacity(isExactDay ? 1 : 0.7),
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    concert.artist,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    [
+                      if (concert.venue.isNotEmpty) concert.venue,
+                      if (concert.city.isNotEmpty) concert.city,
+                    ].join(', '),
+                    style: TextStyle(
+                      color: cs.onSurface.withOpacity(0.54),
+                      fontSize: 13,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (concert.rating > 0) ...[
+              const SizedBox(width: 8),
+              Column(
+                children: [
+                  Row(
+                    children: List.generate(
+                      concert.rating,
+                      (_) => const Icon(
+                        Icons.star_rounded,
+                        color: Color(0xFFFFC107),
+                        size: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(width: 4),
+            Icon(
+              Icons.chevron_right,
+              color: cs.onSurface.withOpacity(0.3),
+              size: 18,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

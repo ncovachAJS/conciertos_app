@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -193,10 +195,33 @@ final concertsLoadingMoreProvider = Provider<bool>((ref) {
 // Providers derivados
 // ---------------------------------------------------------------------------
 
+/// Notifier "reloj": mantiene su estado actualizado cada minuto para que los
+/// providers que dependen de la fecha de hoy (p. ej. "próximos conciertos")
+/// se recalculen por el simple paso del tiempo, no solo cuando cambian los
+/// datos de conciertos. Sin esto, un concierto de "ayer" podía quedarse
+/// pegado en la lista de próximos si la app seguía abierta al cruzar la
+/// medianoche sin que nada más disparase un refresco.
+class _ClockTicker extends Notifier<DateTime> {
+  Timer? _timer;
+
+  @override
+  DateTime build() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      state = DateTime.now();
+    });
+    ref.onDispose(() => _timer?.cancel());
+    return DateTime.now();
+  }
+}
+
+final _clockTickerProvider =
+    NotifierProvider<_ClockTicker, DateTime>(_ClockTicker.new);
+
 /// Próximos conciertos ordenados de más cercano a más lejano.
 final upcomingConcertsProvider = Provider<List<Concert>>((ref) {
   final concerts = ref.watch(concertsProvider).asData?.value ?? [];
-  final today = DateTime.now();
+  final today = ref.watch(_clockTickerProvider);
   final todayMidnight = DateTime(today.year, today.month, today.day);
 
   return concerts.where((c) => !c.date.isBefore(todayMidnight)).toList()

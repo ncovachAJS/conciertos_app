@@ -146,6 +146,13 @@
       "years": { "type": "int" }
     }
   },
+  "onThisDaySeeMore": "Ver {count} más",
+  "@onThisDaySeeMore": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "onThisDaySeeLess": "Ver menos",
 
   "statisticsTitle": "Estadísticas",
   "totalConcertsLabel": "Conciertos",
