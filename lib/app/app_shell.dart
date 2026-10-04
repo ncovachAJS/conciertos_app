@@ -95,10 +95,22 @@ class _AppShellState extends State<AppShell> {
     // eso, el contenido ocupa el 100% de la pantalla y la barra flota
     // encima como overlay directo en el mismo Stack — así el blur siempre
     // tiene algo real debajo que difuminar.
+    //
+    // Como la barra ya no reserva su propio hueco (no hay bottomNavigationBar),
+    // reducimos la altura disponible del contenido por el espacio real que
+    // ocupa la barra, para que el final del scroll no quede tapado detrás.
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    const navBarFootprint = 79.0; // margen + paddings + icono + texto (ver _BottomPillNavBar)
+
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(child: widget.child),
+          Positioned.fill(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: bottomInset + navBarFootprint),
+              child: widget.child,
+            ),
+          ),
           Positioned(
             left: 0,
             right: 0,
