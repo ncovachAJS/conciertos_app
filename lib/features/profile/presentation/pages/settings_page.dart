@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../app/theme_pack_provider.dart';
 import '../../../../app/theme_provider.dart';
 import '../../../../shared/widgets/pro_paywall_sheet.dart';
@@ -814,6 +815,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Scaffold(
       appBar: AppBar(title: Text(l.settingsTitle)),
       body: ListView(
+        padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
         children: [
           // ── Cuenta ────────────────────────────────────────────────────────
           _SectionHeader(title: l.accountSection),
