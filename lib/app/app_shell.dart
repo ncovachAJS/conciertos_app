@@ -317,10 +317,15 @@ class _BottomPillNavBar extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(26),
             child: BackdropFilter(
+              // Menos opacidad que antes (0.72 → 0.4): con tanto cuerpo de
+              // color, el blur quedaba oculto detrás y la barra se veía
+              // como una cápsula sólida en vez de cristal esmerilado real
+              // (tipo WhatsApp), donde se distinguen formas de lo que hay
+              // detrás difuminado.
               filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
               child: Container(
                 decoration: BoxDecoration(
-                  color: cs.surfaceContainerHighest.withValues(alpha: 0.72),
+                  color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(26),
                 ),
                 child: Padding(
