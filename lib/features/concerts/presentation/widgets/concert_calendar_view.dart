@@ -204,14 +204,11 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                 child: GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  // Celdas más bajas (0.78 → 1.0): cuando el mes empieza a
-                  // mitad de semana, la primera fila queda casi vacía y con
-                  // celdas altas se veía como un hueco enorme arriba.
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 7,
                     mainAxisSpacing: 5,
                     crossAxisSpacing: 5,
-                    childAspectRatio: 1.0,
+                    childAspectRatio: 0.85,
                   ),
                   itemCount: rows * 7,
                   itemBuilder: (_, index) {
