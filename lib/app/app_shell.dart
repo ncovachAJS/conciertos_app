@@ -89,17 +89,28 @@ class _AppShellState extends State<AppShell> {
     }
 
     // ── iPhone / Android: pill flotante al fondo ────────────────────────────
+    // No usamos bottomNavigationBar/extendBody: con un Scaffold anidado
+    // dentro de widget.child (p. ej. AppPage), ese mecanismo no garantiza
+    // que el contenido real llegue a pintarse detrás de la barra. En vez de
+    // eso, el contenido ocupa el 100% de la pantalla y la barra flota
+    // encima como overlay directo en el mismo Stack — así el blur siempre
+    // tiene algo real debajo que difuminar.
     return Scaffold(
-      // El body se extiende detrás de la bottomNavigationBar para que la
-      // barra sea flotante de verdad (contenido visible/difuminado debajo),
-      // en vez de un hueco reservado con un panel sólido encima.
-      extendBody: true,
-      body: widget.child,
-      bottomNavigationBar: _BottomPillNavBar(
-        selectedIndex: idx,
-        labels: labels,
-        unreadCount: unread,
-        onTap: (i) => _navigate(context, i),
+      body: Stack(
+        children: [
+          Positioned.fill(child: widget.child),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _BottomPillNavBar(
+              selectedIndex: idx,
+              labels: labels,
+              unreadCount: unread,
+              onTap: (i) => _navigate(context, i),
+            ),
+          ),
+        ],
       ),
     );
   }
