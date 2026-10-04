@@ -8,6 +8,18 @@ import '../features/friends/presentation/controllers/friends_controller.dart';
 import '../features/notifications/presentation/controllers/notifications_controller.dart';
 import '../l10n/generated/app_localizations.dart';
 
+/// Espacio que debe reservar el final del scroll de cada página en
+/// iPhone/Android para que su contenido no quede tapado detrás de la barra
+/// flotante de navegación (ver _BottomPillNavBar). Incluye el inset de
+/// seguridad del home indicator, que la propia barra también añade.
+/// En iPad no hace falta: ahí la navegación es un AppBar superior, no una
+/// barra flotante al fondo.
+double floatingNavBarClearance(BuildContext context) {
+  if (Responsive.isTablet(context)) return 0;
+  final bottomInset = MediaQuery.of(context).padding.bottom;
+  return bottomInset + 79.0;
+}
+
 class AppShell extends StatefulWidget {
   final Widget child;
   const AppShell({super.key, required this.child});
@@ -96,21 +108,16 @@ class _AppShellState extends State<AppShell> {
     // encima como overlay directo en el mismo Stack — así el blur siempre
     // tiene algo real debajo que difuminar.
     //
-    // Como la barra ya no reserva su propio hueco (no hay bottomNavigationBar),
-    // reducimos la altura disponible del contenido por el espacio real que
-    // ocupa la barra, para que el final del scroll no quede tapado detrás.
-    final bottomInset = MediaQuery.of(context).padding.bottom;
-    const navBarFootprint = 79.0; // margen + paddings + icono + texto (ver _BottomPillNavBar)
-
+    // Importante: NO recortamos aquí la altura de widget.child con un
+    // Padding — eso dejaría un hueco con el fondo liso del Scaffold detrás
+    // de la barra en vez de contenido real, y se vería como si la barra
+    // tuviera un fondo sólido. El espacio de respiro para que el scroll no
+    // termine tapado va dentro de cada página (su propio scroll bottom
+    // padding), usando kFloatingNavBarClearance.
     return Scaffold(
       body: Stack(
         children: [
-          Positioned.fill(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: bottomInset + navBarFootprint),
-              child: widget.child,
-            ),
-          ),
+          Positioned.fill(child: widget.child),
           Positioned(
             left: 0,
             right: 0,

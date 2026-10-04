@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -1013,7 +1014,7 @@ class _GridView extends ConsumerWidget {
 
     return GridView.builder(
       controller: scrollController,
-      padding: EdgeInsets.zero,
+      padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
       // +1 para el spinner de carga al pie cuando loadingMore
       itemCount: concerts.length + (loadingMore ? 1 : 0),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -1171,6 +1172,7 @@ class _ListView extends ConsumerWidget {
       final rowCount = (concerts.length / 2).ceil();
       return ListView.separated(
         controller: scrollController,
+        padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
         itemCount: rowCount + (loadingMore ? 1 : 0),
         separatorBuilder: (_, __) => const SizedBox(height: 0),
         itemBuilder: (context, rowIndex) {
@@ -1201,6 +1203,7 @@ class _ListView extends ConsumerWidget {
     // ── iPhone: lista simple (sin cambios) ────────────────────────────────
     return ListView.separated(
       controller: scrollController,
+      padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
       itemCount: concerts.length + (loadingMore ? 1 : 0),
       separatorBuilder: (_, __) => const SizedBox(height: 24),
       itemBuilder: (context, index) {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/empty_state.dart';
@@ -133,7 +134,9 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                       accentColor: Colors.amber,
                     )
                   : GridView.builder(
-                      padding: EdgeInsets.zero,
+                      padding: EdgeInsets.only(
+                        bottom: floatingNavBarClearance(context),
+                      ),
                       itemCount: filtered.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: Responsive.gridColumns(

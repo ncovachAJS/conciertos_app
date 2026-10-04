@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -396,7 +397,12 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
           }
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              8,
+              20,
+              40 + floatingNavBarClearance(context),
+            ),
             // ignore: deprecated_member_use
             cacheExtent: 5000,
             children: [content, const SizedBox(height: 8)],

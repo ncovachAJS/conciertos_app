@@ -7,6 +7,7 @@ import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../../shared/widgets/app_page.dart';
@@ -164,6 +165,7 @@ class _FeedPageState extends State<FeedPage>
         child: RefreshIndicator(
           onRefresh: _load,
           child: ListView(
+            padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
             children: [
               const SizedBox(height: 120),
               Icon(
@@ -569,7 +571,9 @@ class _FeedPageState extends State<FeedPage>
                     ),
                   ],
 
-                const SliverToBoxAdapter(child: SizedBox(height: 48)),
+                SliverToBoxAdapter(
+                  child: SizedBox(height: 48 + floatingNavBarClearance(context)),
+                ),
               ],
             ),
           ),

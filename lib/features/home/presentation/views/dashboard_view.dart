@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -223,13 +224,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         final isTablet = Responsive.isTablet(context);
 
         // ── Layout ───────────────────────────────────────────────────────────
-        // El padding inferior solo necesita despejar el "home indicator" de
-        // iOS: la barra de navegación ahora es flotante de verdad (el
-        // Scaffold usa extendBody), así que el contenido debe poder seguir
-        // detrás de ella al hacer scroll hasta el final, en vez de quedarse
-        // corto con un hueco en blanco del tamaño de la barra.
+        // El padding inferior reserva justo el espacio que ocupa la barra
+        // flotante, para que el final del scroll no quede tapado detrás de
+        // ella sin dejar un hueco visible el resto del tiempo (el espacio
+        // solo aparece al llegar al final del contenido real).
         return SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(4, 4, 4, isTablet ? 32 : 24),
+          padding: EdgeInsets.fromLTRB(
+            4,
+            4,
+            4,
+            isTablet ? 32 : 24 + floatingNavBarClearance(context),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

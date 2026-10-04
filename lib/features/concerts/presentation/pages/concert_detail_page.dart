@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/widgets/app_page.dart';
@@ -611,7 +612,12 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
       showBackButton: true,
       actions: appPageActions,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          16 + floatingNavBarClearance(context),
+        ),
         children: [
           imageWidget,
           const SizedBox(height: 30),

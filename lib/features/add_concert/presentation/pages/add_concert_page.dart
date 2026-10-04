@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../concerts/data/models/concert_model.dart';
@@ -705,6 +706,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
           ? '➕ ${l.addConcertTitle}'
           : '✏️ ${l.editConcertTitle}',
       child: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
         child: Form(
           key: _formKey,
           child: Column(
