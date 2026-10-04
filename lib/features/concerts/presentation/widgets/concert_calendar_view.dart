@@ -170,6 +170,18 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
             },
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 260),
+              // Por defecto AnimatedSwitcher centra su contenido dentro del
+              // espacio disponible (Stack alignment: center). Como el
+              // Expanded le da toda la altura restante de la pantalla pero
+              // la rejilla ocupa menos, eso dejaba un hueco grande arriba
+              // (y otro abajo) en vez de pegar el calendario arriba del todo.
+              layoutBuilder: (currentChild, previousChildren) => Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  ...previousChildren,
+                  if (currentChild != null) currentChild,
+                ],
+              ),
               transitionBuilder: (child, animation) {
                 // Slide + fade: entra desde la derecha al avanzar, desde la izquierda al retroceder
                 final begin = _goingForward
