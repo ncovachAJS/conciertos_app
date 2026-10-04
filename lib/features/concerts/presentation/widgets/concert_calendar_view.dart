@@ -170,6 +170,18 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
             },
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 260),
+              // Por defecto AnimatedSwitcher centra su contenido dentro del
+              // espacio disponible (Stack alignment: center). Como el
+              // Expanded le da toda la altura restante de la pantalla pero
+              // la rejilla ocupa menos, eso dejaba un hueco grande arriba
+              // (y otro abajo) en vez de pegar el calendario arriba del todo.
+              layoutBuilder: (currentChild, previousChildren) => Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  ...previousChildren,
+                  if (currentChild != null) currentChild,
+                ],
+              ),
               transitionBuilder: (child, animation) {
                 // Slide + fade: entra desde la derecha al avanzar, desde la izquierda al retroceder
                 final begin = _goingForward
@@ -196,13 +208,24 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                     crossAxisCount: 7,
                     mainAxisSpacing: 5,
                     crossAxisSpacing: 5,
-                    childAspectRatio: 0.78,
+                    childAspectRatio: 0.85,
                   ),
                   itemCount: rows * 7,
                   itemBuilder: (_, index) {
                     final dayNum = index - startOffset + 1;
-                    if (dayNum < 1 || dayNum > daysInMonth) {
-                      return const SizedBox.shrink();
+                    if (dayNum < 1) {
+                      // Días del mes anterior: solo el número, sin fondo ni
+                      // interacción, para que nunca quede un hueco vacío.
+                      final prevMonth = DateTime(_focus.year, _focus.month - 1);
+                      final daysInPrevMonth = DateUtils.getDaysInMonth(
+                        prevMonth.year, prevMonth.month,
+                      );
+                      return _AdjacentMonthCell(
+                        day: daysInPrevMonth + dayNum,
+                      );
+                    }
+                    if (dayNum > daysInMonth) {
+                      return _AdjacentMonthCell(day: dayNum - daysInMonth);
                     }
                     final concerts = byDay[dayNum] ?? [];
                     final isToday = _focus.year == today.year &&
@@ -338,6 +361,29 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Celda de día — diseño con imagen de fondo + número encima
 // ─────────────────────────────────────────────────────────────────────────────
+
+/// Celda de relleno para días del mes anterior/siguiente — solo el número,
+/// sin fondo ni interacción, para que la cuadrícula nunca deje un hueco
+/// vacío al principio o al final.
+class _AdjacentMonthCell extends StatelessWidget {
+  final int day;
+  const _AdjacentMonthCell({required this.day});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Text(
+        '$day',
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: cs.onSurface.withValues(alpha: 0.18),
+        ),
+      ),
+    );
+  }
+}
 
 class _DayCell extends StatelessWidget {
   final int day;

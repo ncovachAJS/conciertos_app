@@ -61,12 +61,18 @@ final appRouter = GoRouter(
         return AppShell(child: child);
       },
       routes: [
-        GoRoute(path: '/', builder: (context, state) => const HomePage()),
+        GoRoute(
+          path: '/',
+          pageBuilder: (context, state) =>
+              const NoTransitionPage(child: HomePage()),
+        ),
         GoRoute(
           path: '/concerts',
-          builder: (context, state) => ConcertsPage(
-            openCalendar:
-                state.uri.queryParameters['view'] == 'calendar',
+          pageBuilder: (context, state) => NoTransitionPage(
+            child: ConcertsPage(
+              openCalendar:
+                  state.uri.queryParameters['view'] == 'calendar',
+            ),
           ),
         ),
         GoRoute(
@@ -87,26 +93,39 @@ final appRouter = GoRouter(
         ),
         GoRoute(
           path: '/add',
-          builder: (context, state) {
+          pageBuilder: (context, state) {
             final extra = state.extra;
-            if (extra is Concert) return AddConcertPage(concert: extra);
-            if (extra is DateTime) return AddConcertPage(initialDate: extra);
-            if (extra is String) return AddConcertPage(initialArtist: extra);
-            return const AddConcertPage();
+            final Widget page;
+            if (extra is Concert) {
+              page = AddConcertPage(concert: extra);
+            } else if (extra is DateTime) {
+              page = AddConcertPage(initialDate: extra);
+            } else if (extra is String) {
+              page = AddConcertPage(initialArtist: extra);
+            } else {
+              page = const AddConcertPage();
+            }
+            return NoTransitionPage(child: page);
           },
         ),
-        GoRoute(path: '/feed', builder: (context, state) => const FeedPage()),
+        GoRoute(
+          path: '/feed',
+          pageBuilder: (context, state) =>
+              const NoTransitionPage(child: FeedPage()),
+        ),
         GoRoute(
           path: '/friends-activity',
           builder: (context, state) => const FriendsActivityPage(),
         ),
         GoRoute(
           path: '/favorites',
-          builder: (context, state) => const FavoritesPage(),
+          pageBuilder: (context, state) =>
+              const NoTransitionPage(child: FavoritesPage()),
         ),
         GoRoute(
           path: '/statistics',
-          builder: (context, state) => const StatisticsPage(),
+          pageBuilder: (context, state) =>
+              const NoTransitionPage(child: StatisticsPage()),
         ),
         GoRoute(
           path: '/settings',
