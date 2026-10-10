@@ -1,6 +1,7 @@
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../friends/data/services/friends_api_service.dart';
 import '../../../friends/presentation/widgets/friend_avatar.dart';
 import '../../../friends/presentation/widgets/tag_friends_selector.dart';
@@ -211,11 +212,11 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
                     child: Hero(
                       tag: photo.id,
                       child: NetworkPhoto(
-                        url: photo.imageUrl,
+                        url: cloudinaryViewerImage(photo.imageUrl),
                         fit: BoxFit.contain,
                         loaderSize: 32,
                         errorIconSize: 80,
-                        memCacheWidth: null, // resolución completa en el viewer
+                        memCacheWidth: null, // ya limitado en origen por Cloudinary
                       ),
                     ),
                   ),

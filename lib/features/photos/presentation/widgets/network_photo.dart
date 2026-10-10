@@ -34,6 +34,12 @@ class NetworkPhoto extends StatelessWidget {
       memCacheWidth: memCacheWidth,
       placeholder: (context, url) => Container(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        alignment: Alignment.center,
+        child: SizedBox(
+          width: loaderSize,
+          height: loaderSize,
+          child: const CircularProgressIndicator(strokeWidth: 2.5),
+        ),
       ),
       errorWidget: (context, url, error) => _error(),
       // Sin fade para que las imágenes cacheadas aparezcan instantáneamente

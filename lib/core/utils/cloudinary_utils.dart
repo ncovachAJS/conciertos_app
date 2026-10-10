@@ -21,3 +21,21 @@ String cloudinaryThumbnail(String url, {int width = 300}) {
       'w_$width,c_fill,q_auto,f_auto/'
       '${url.substring(idx + marker.length)}';
 }
+
+/// Devuelve una URL de Cloudinary limitada a [width] de ancho, sin recortar
+/// (mantiene el aspect ratio) y con compresión/formato automáticos.
+///
+/// Pensada para el visor a pantalla completa: las fotos subidas desde un
+/// móvil pueden pesar varios MB a resolución original, lo que hace que
+/// tarden mucho en cargar sin aportar nada visible en pantalla. Al limitar
+/// el ancho servido, Cloudinary devuelve una versión mucho más ligera
+/// (WebP/AVIF) que sigue viéndose nítida a tamaño de pantalla.
+/// Si la URL no es de Cloudinary, la devuelve sin cambios.
+String cloudinaryViewerImage(String url, {int width = 1600}) {
+  const marker = '/upload/';
+  final idx = url.indexOf(marker);
+  if (idx == -1) return url;
+  return '${url.substring(0, idx + marker.length)}'
+      'w_$width,c_limit,q_auto,f_auto/'
+      '${url.substring(idx + marker.length)}';
+}
