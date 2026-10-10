@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../shared/widgets/shimmer_box.dart';
 
@@ -52,13 +52,6 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
       if (mounted) setState(() => hasError = true);
     }
     if (mounted) setState(() => loading = false);
-  }
-
-  Future<void> _openTicketmaster(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
   }
 
   @override
@@ -178,10 +171,19 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
                         event.city,
                         style: TextStyle(color: cs.onSurface.withOpacity(0.54)),
                       ),
-                      const SizedBox(height: 16),
-                      FilledButton(
-                        onPressed: () => _openTicketmaster(event.url),
-                        child: Text(l.viewOnTicketmaster),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_month_rounded,
+                              size: 16, color: cs.onSurface.withOpacity(0.54)),
+                          const SizedBox(width: 6),
+                          Text(
+                            DateFormat('d MMM yyyy', 'es').format(event.date),
+                            style: TextStyle(
+                                color: cs.onSurface.withOpacity(0.54),
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ),
                     ],
                   ),
