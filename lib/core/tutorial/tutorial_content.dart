@@ -26,22 +26,16 @@ class TutorialContent {
           'El widget "Por valorar" lista los conciertos pasados que todavía no tienen puntuación. Desliza entre ellos y toca uno para valorarlo en 5 criterios.',
     ),
     TutorialStep(
-      icon: Icons.headphones_rounded,
-      title: 'Tus canciones favoritas',
-      description:
-          'El widget de Spotify muestra tu playlist personal directamente en la app. Cada usuario ve la suya propia. Necesitas vincular tu cuenta de Spotify para activarlo.',
-    ),
-    TutorialStep(
       icon: Icons.local_fire_department_rounded,
       title: 'Conciertos recomendados',
       description:
-          'Descubre eventos próximos cerca de ti basados en tus artistas. Toca uno para ver detalles y acceder al enlace de compra de entradas.',
+          'Descubre eventos próximos cerca de ti basados en tus artistas. Toca uno para ver todos sus detalles.',
     ),
     TutorialStep(
       icon: Icons.tune_rounded,
-      title: 'Personalizar el dashboard (Pro)',
+      title: 'Personalizar el dashboard',
       description:
-          'Con la versión Pro puedes reorganizar, mostrar u ocultar los widgets del dashboard pulsando el icono de edición junto al saludo.',
+          'Reorganiza, muestra u oculta los widgets del dashboard pulsando el icono de edición junto al saludo.',
     ),
   ];
 
@@ -137,6 +131,12 @@ class TutorialContent {
       description:
           'Tus amigos pueden comentar el concierto si los etiquetaste. Abre la sección de comentarios para ver o continuar la conversación.',
     ),
+    TutorialStep(
+      icon: Icons.qr_code_2_rounded,
+      title: 'Guarda tu entrada',
+      description:
+          'Sube una foto o PDF de tu entrada para tenerla siempre a mano. Se guarda solo en tu dispositivo: nunca se sube a ningún servidor.',
+    ),
   ];
 
   // ── Lista de conciertos ──────────────────────────────────────────────────
@@ -177,6 +177,12 @@ class TutorialContent {
       title: 'Mapa de conciertos',
       description:
           'Toca el icono de mapa para ver todos tus conciertos geolocalizados. Explora en qué ciudades y recintos has estado y descubre patrones.',
+    ),
+    TutorialStep(
+      icon: Icons.groups_rounded,
+      title: 'Compartidos',
+      description:
+          'La pestaña "Compartidos" reúne los conciertos que han añadido tus amigos y en los que te han etiquetado, aunque no los hayas registrado tú.',
     ),
   ];
 
@@ -221,9 +227,9 @@ class TutorialContent {
     ),
     TutorialStep(
       icon: Icons.tune_rounded,
-      title: 'Personalizar secciones (Pro)',
+      title: 'Personalizar secciones',
       description:
-          'Con la versión Pro puedes elegir qué secciones de estadísticas quieres ver y reordenarlas a tu gusto pulsando el icono de edición.',
+          'Elige qué secciones de estadísticas quieres ver y reordénalas a tu gusto pulsando el icono de edición.',
     ),
   ];
 
@@ -256,9 +262,9 @@ class TutorialContent {
     ),
     TutorialStep(
       icon: Icons.palette_rounded,
-      title: 'Tema de color (Pro)',
+      title: 'Tema de color',
       description:
-          'Con la versión Pro puedes personalizar el color principal de la app desde los ajustes. Elige el que mejor refleje tu estilo musical.',
+          'Personaliza el color principal de la app desde los ajustes. Elige el que mejor refleje tu estilo musical.',
     ),
   ];
 
@@ -333,13 +339,13 @@ class TutorialContent {
       icon: Icons.confirmation_number_rounded,
       title: 'Quiero ir',
       description:
-          'Marca un evento como "Quiero ir" para guardarlo y acceder rápidamente al enlace de compra cuando estés listo para comprarlo.',
+          'Marca un evento como "Quiero ir" para guardarlo en tu lista y encontrarlo rápido más adelante.',
     ),
     TutorialStep(
       icon: Icons.add_circle_outline_rounded,
       title: 'Añadir directamente',
       description:
-          'Si ya tienes entradas para un evento recomendado, toca "Añadir" para registrarlo en tu historial como concierto futuro.',
+          'Si ya tienes entrada para un evento recomendado, toca "Añadir" para registrarlo en tu historial como concierto futuro.',
     ),
   ];
 
@@ -481,21 +487,6 @@ class TutorialContent {
       label: 'Importar conciertos',
       icon: Icons.download_rounded,
       steps: import_(l),
-    ),
-    TutorialEntry(
-      label: 'Spotify: canciones favoritas',
-      icon: Icons.headphones_rounded,
-      steps: spotifyPlaylist(l),
-    ),
-    TutorialEntry(
-      label: 'Importar desde Spotify',
-      icon: Icons.download_rounded,
-      steps: spotifyImport(l),
-    ),
-    TutorialEntry(
-      label: 'Mapa de conciertos',
-      icon: Icons.map_rounded,
-      steps: concertMap(l),
     ),
   ];
 }
