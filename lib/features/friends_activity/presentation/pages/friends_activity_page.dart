@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../../shared/widgets/app_page.dart';
@@ -89,7 +90,7 @@ class _FriendsActivityPageState extends ConsumerState<FriendsActivityPage> {
           final notifier = ref.read(friendsActivityProvider.notifier);
           return ListView.separated(
             controller: _scrollController,
-            padding: const EdgeInsets.only(bottom: 32),
+            padding: EdgeInsets.only(bottom: 32 + floatingNavBarClearance(context)),
             itemCount: concerts.length + (notifier.loadingMore ? 1 : 0),
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, i) {

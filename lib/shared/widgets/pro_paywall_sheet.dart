@@ -29,7 +29,10 @@ class ProPaywallSheet {
     int ownConcertsCount,
     bool isPro,
   ) async {
-    if (isPro || ownConcertsCount < ProConfig.freeConcertLimit) return true;
+    if (ProConfig.isUserPro(isPro) ||
+        ownConcertsCount < ProConfig.freeConcertLimit) {
+      return true;
+    }
     await showModalBottomSheet<void>(
       context: context,
       useRootNavigator: true,

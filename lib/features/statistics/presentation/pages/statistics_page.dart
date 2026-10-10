@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import '../../../../app/app_shell.dart';
+import '../../../../core/config/pro_config.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -92,7 +93,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
             icon: const Icon(Icons.tune_rounded),
             tooltip: 'Personalizar',
             onPressed: () async {
-              final isPro = AuthController.instance.user?.isPro ?? false;
+              final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
               if (!isPro) {
                 await ProPaywallSheet.showPaywall(context);
                 return;

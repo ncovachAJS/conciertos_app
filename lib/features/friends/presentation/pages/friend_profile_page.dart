@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -156,7 +157,12 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
           final stats = _Stats(past);
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              0,
+              20,
+              40 + floatingNavBarClearance(context),
+            ),
             children: [
               // ── Cabecera de perfil ─────────────────────────────────────
               _ProfileHeader(friend: widget.friend, cs: cs),

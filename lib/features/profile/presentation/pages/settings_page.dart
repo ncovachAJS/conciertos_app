@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../app/app_shell.dart';
 import '../../../../app/theme_pack_provider.dart';
 import '../../../../app/theme_provider.dart';
+import '../../../../core/config/pro_config.dart';
 import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../../../core/notifiers/annual_goal_notifier.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
@@ -527,7 +528,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _showExportPicker() {
-    final isPro = _auth.user?.isPro ?? false;
+    final isPro = ProConfig.isUserPro(_auth.user?.isPro);
     if (!isPro) {
       ProPaywallSheet.showPaywall(context);
       return;

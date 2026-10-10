@@ -876,7 +876,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
     if (_parsed.isEmpty || _selectedIdx.isEmpty) return;
 
     // ── Comprobación límite gratuito ────────────────────────────────────────
-    final isPro        = AuthController.instance.user?.isPro ?? false;
+    final isPro        = ProConfig.isUserPro(AuthController.instance.user?.isPro);
     final currentCount = ref.read(ownConcertsCountProvider);
     final limit        = ProConfig.freeConcertLimit;
     final hueco        = limit - currentCount; // cuántos caben hasta el límite

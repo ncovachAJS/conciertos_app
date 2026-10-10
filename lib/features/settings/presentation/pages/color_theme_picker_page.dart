@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../app/color_themes.dart';
 import '../../../../../app/theme_pack_provider.dart';
+import '../../../../../core/config/pro_config.dart';
 import '../../../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../../../../shared/widgets/pro_paywall_sheet.dart';
 
@@ -13,7 +14,7 @@ class ColorThemePickerPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final current = ref.watch(themePackProvider);
     final cs = Theme.of(context).colorScheme;
-    final isPro = AuthController.instance.user?.isPro ?? false;
+    final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Paleta de color')),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -116,7 +117,12 @@ class CompareStatsPage extends ConsumerWidget {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          0,
+          20,
+          40 + floatingNavBarClearance(context),
+        ),
         children: [
           // ── Cabecera con avatares ────────────────────────────────────────
           _CompareHeader(

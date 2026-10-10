@@ -814,13 +814,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketWalletTitle => 'My ticket';
 
   @override
-  String get ticketWalletEmptyDescription => 'Keep your ticket here (photo or PDF). It stays on this device only, never uploaded to our servers.';
+  String get ticketWalletEmptyDescription =>
+      'Keep your ticket here (photo or PDF). It stays on this device only, never uploaded to our servers.';
 
   @override
   String get ticketWalletFestivalTitle => 'Festival ticket';
 
   @override
-  String get ticketWalletFestivalEmptyDescription => 'Keep the festival pass here (photo or PDF). It\'s shared across all concerts from this festival and stays on this device only.';
+  String get ticketWalletFestivalEmptyDescription =>
+      'Keep the festival pass here (photo or PDF). It\'s shared across all concerts from this festival and stays on this device only.';
 
   @override
   String get ticketWalletAddPhoto => 'Photo';
@@ -841,7 +843,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ticketWalletConfirmDeleteTitle => 'Delete ticket?';
 
   @override
-  String get ticketWalletConfirmDeleteBody => 'It will only be removed from this device.';
+  String get ticketWalletConfirmDeleteBody =>
+      'It will only be removed from this device.';
 
   @override
   String get ticketWalletPdfFile => 'PDF ticket';

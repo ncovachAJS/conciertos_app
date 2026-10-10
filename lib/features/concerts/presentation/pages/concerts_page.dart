@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/app_shell.dart';
+import '../../../../core/config/pro_config.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -367,7 +368,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
 
   Future<void> _onAdd() async {
     final count = ref.read(ownConcertsCountProvider);
-    final isPro = AuthController.instance.user?.isPro ?? false;
+    final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
     final allowed = await ProPaywallSheet.checkLimit(context, count, isPro);
     if (!allowed || !mounted) return;
     final result = await context.push('/add');
@@ -530,7 +531,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                         concerts: _filtered(concerts),
                         onAddConcert: (date) async {
                           final count = ref.read(ownConcertsCountProvider);
-                          final isPro = AuthController.instance.user?.isPro ?? false;
+                          final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
                           final allowed = await ProPaywallSheet.checkLimit(context, count, isPro);
                           if (!allowed || !mounted) return;
                           final result =

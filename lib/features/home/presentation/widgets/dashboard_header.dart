@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../core/config/pro_config.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -151,7 +152,7 @@ class DashboardHeader extends ConsumerWidget {
 
         final tuneWidget = GestureDetector(
           onTap: () async {
-            final isPro = AuthController.instance.user?.isPro ?? false;
+            final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
             if (!isPro) {
               await ProPaywallSheet.showPaywall(context);
               return;

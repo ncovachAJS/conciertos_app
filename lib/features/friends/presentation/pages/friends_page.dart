@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -344,7 +345,7 @@ class _FriendsList extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.fromLTRB(0, 8, 0, 8 + floatingNavBarClearance(context)),
       itemCount: ctrl.friends.length,
       itemBuilder: (_, i) {
         final f = ctrl.friends[i];
@@ -413,7 +414,7 @@ class _PendingList extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.fromLTRB(0, 8, 0, 8 + floatingNavBarClearance(context)),
       itemCount: ctrl.pendingRequests.length,
       itemBuilder: (_, i) {
         final r = ctrl.pendingRequests[i];

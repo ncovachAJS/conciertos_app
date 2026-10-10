@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../core/config/pro_config.dart';
 import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -25,7 +26,7 @@ class DashboardQuickActions extends ConsumerWidget {
             color: const Color(0xFFE53935),
             onTap: () async {
               final count = ref.read(ownConcertsCountProvider);
-              final isPro = AuthController.instance.user?.isPro ?? false;
+              final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
               final allowed =
                   await ProPaywallSheet.checkLimit(context, count, isPro);
               if (allowed && context.mounted) context.push('/add');
