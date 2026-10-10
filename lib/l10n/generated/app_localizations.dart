@@ -1454,11 +1454,11 @@ abstract class AppLocalizations {
   /// **'Añadir'**
   String get actionAdd;
 
-  /// No description provided for @actionTickets.
+  /// No description provided for @actionEvents.
   ///
   /// In es, this message translates to:
-  /// **'Entradas'**
-  String get actionTickets;
+  /// **'Eventos'**
+  String get actionEvents;
 
   /// No description provided for @actionStats.
   ///

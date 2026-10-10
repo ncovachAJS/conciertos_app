@@ -802,7 +802,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionAdd => 'Add';
 
   @override
-  String get actionTickets => 'Tickets';
+  String get actionEvents => 'Events';
 
   @override
   String get actionStats => 'Stats';

@@ -806,7 +806,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get actionAdd => 'Añadir';
 
   @override
-  String get actionTickets => 'Entradas';
+  String get actionEvents => 'Eventos';
 
   @override
   String get actionStats => 'Stats';

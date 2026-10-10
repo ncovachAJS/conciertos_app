@@ -36,8 +36,8 @@ class DashboardQuickActions extends ConsumerWidget {
         const SizedBox(width: 14),
         Expanded(
           child: _QuickAction(
-            icon: Icons.confirmation_number_outlined,
-            title: l.actionTickets,
+            icon: Icons.explore_outlined,
+            title: l.actionEvents,
             color: const Color(0xFF42A5F5),
             onTap: () => context.push('/recommendations'),
           ),
