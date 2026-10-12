@@ -8,7 +8,6 @@ import '../../../../core/config/pro_config.dart';
 import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
-import '../../../import/presentation/pages/import_page.dart';
 import '../../../friends/presentation/controllers/friends_controller.dart';
 
 class DashboardQuickActions extends ConsumerWidget {
@@ -57,9 +56,7 @@ class DashboardQuickActions extends ConsumerWidget {
             icon: Icons.download_rounded,
             title: l.actionImport,
             color: const Color(0xFF66BB6A),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const ImportPage()),
-            ),
+            onTap: () => context.push('/import'),
           ),
         ),
         const SizedBox(width: 14),

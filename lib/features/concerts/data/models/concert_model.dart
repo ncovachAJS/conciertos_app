@@ -213,7 +213,15 @@ class ConcertModel extends Concert {
     return json;
   }
 
-  Map<String, dynamic> toUpdateJson() => toCreateJson();
+  Map<String, dynamic> toUpdateJson() {
+    final json = toCreateJson();
+    // A diferencia de toCreateJson, aquí hay que enviar imageUrl siempre
+    // (incluso vacío) para poder borrar la foto al editar: toCreateJson
+    // omite la clave si está vacía, lo que en una actualización deja el
+    // valor anterior intacto en el backend en vez de limpiarlo.
+    json['imageUrl'] = imageUrl;
+    return json;
+  }
 
   Map<String, dynamic> toJson() => toCreateJson()..['id'] = id;
 }
