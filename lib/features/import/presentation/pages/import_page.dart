@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -313,15 +314,6 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
         Positioned.fill(
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            floatingActionButton: _selected.isNotEmpty && !_importing
-                ? FloatingActionButton.extended(
-                    onPressed: _importSelected,
-                    icon: const Icon(Icons.download_rounded),
-                    label: Text(l.importButton(_selected.length)),
-                    backgroundColor: const Color(0xFFE53935),
-                    foregroundColor: Colors.white,
-                  )
-                : null,
             body: CustomScrollView(
               slivers: [
                 // Cabecera
@@ -694,6 +686,23 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
             ),
           ),
         ),
+
+        // Botón importar — flotante, por encima de la barra de navegación
+        if (_selected.isNotEmpty && !_importing)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 16 + floatingNavBarClearance(context),
+            child: Center(
+              child: FloatingActionButton.extended(
+                onPressed: _importSelected,
+                icon: const Icon(Icons.download_rounded),
+                label: Text(l.importButton(_selected.length)),
+                backgroundColor: const Color(0xFFE53935),
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ),
 
         // Overlay importando
         if (_importing)
