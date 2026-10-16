@@ -1,6 +1,7 @@
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../friends/data/services/friends_api_service.dart';
 import '../../../friends/presentation/widgets/friend_avatar.dart';
@@ -196,110 +197,118 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: total,
-              onPageChanged: (i) => setState(() => _currentIndex = i),
-              itemBuilder: (_, i) {
-                final photo = _photos[i];
-                return InteractiveViewer(
-                  minScale: 0.8,
-                  maxScale: 5,
-                  child: Center(
-                    child: Hero(
-                      tag: photo.id,
-                      child: NetworkPhoto(
-                        url: cloudinaryViewerImage(photo.imageUrl),
-                        fit: BoxFit.contain,
-                        loaderSize: 32,
-                        errorIconSize: 80,
-                        memCacheWidth: null, // ya limitado en origen por Cloudinary
+      body: Padding(
+        padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: total,
+                onPageChanged: (i) => setState(() => _currentIndex = i),
+                itemBuilder: (_, i) {
+                  final photo = _photos[i];
+                  return InteractiveViewer(
+                    minScale: 0.8,
+                    maxScale: 5,
+                    child: Center(
+                      child: Hero(
+                        tag: photo.id,
+                        child: NetworkPhoto(
+                          url: cloudinaryViewerImage(photo.imageUrl),
+                          fit: BoxFit.contain,
+                          loaderSize: 32,
+                          errorIconSize: 80,
+                          memCacheWidth:
+                              null, // ya limitado en origen por Cloudinary
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // Participantes etiquetados
-          if (_current.participants.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              color: Colors.black,
-              child: Row(
-                children: [
-                  const Icon(Icons.person_pin, color: Colors.white54, size: 16),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Wrap(
-                      spacing: 8,
-                      children: _current.participants
-                          .map(
-                            (p) => Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                FriendAvatar(
-                                  name: p.name,
-                                  avatarUrl: p.avatarUrl,
-                                  radius: 10,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  p.name.split(' ').first,
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          // Caption
-          if (_current.caption.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              color: Colors.black,
-              child: Text(
-                _current.caption,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-
-          // Indicadores
-          if (total > 1)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24, top: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(total, (i) {
-                  final active = i == _currentIndex;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: active ? 10 : 6,
-                    height: active ? 10 : 6,
-                    decoration: BoxDecoration(
-                      color: active ? Colors.white : Colors.white38,
-                      shape: BoxShape.circle,
-                    ),
                   );
-                }),
+                },
               ),
             ),
-        ],
+
+            // Participantes etiquetados
+            if (_current.participants.isNotEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                color: Colors.black,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.person_pin,
+                      color: Colors.white54,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        children: _current.participants
+                            .map(
+                              (p) => Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  FriendAvatar(
+                                    name: p.name,
+                                    avatarUrl: p.avatarUrl,
+                                    radius: 10,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    p.name.split(' ').first,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // Caption
+            if (_current.caption.isNotEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                color: Colors.black,
+                child: Text(
+                  _current.caption,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+
+            // Indicadores
+            if (total > 1)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24, top: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(total, (i) {
+                    final active = i == _currentIndex;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: active ? 10 : 6,
+                      height: active ? 10 : 6,
+                      decoration: BoxDecoration(
+                        color: active ? Colors.white : Colors.white38,
+                        shape: BoxShape.circle,
+                      ),
+                    );
+                  }),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
