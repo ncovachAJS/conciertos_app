@@ -3,6 +3,7 @@ import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/utils/month_names.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/concerts/domain/entities/concert.dart';
 
@@ -73,22 +74,7 @@ class ConcertCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDateBadge() {
-    const months = [
-      '',
-      'ENE',
-      'FEB',
-      'MAR',
-      'ABR',
-      'MAY',
-      'JUN',
-      'JUL',
-      'AGO',
-      'SEP',
-      'OCT',
-      'NOV',
-      'DIC',
-    ];
+  Widget _buildDateBadge(AppLocalizations l) {
     return Container(
       width: 76,
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -109,7 +95,7 @@ class ConcertCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            months[concert.date.month],
+            monthAbbr(l, concert.date.month),
             style: const TextStyle(
               color: Colors.red,
               fontWeight: FontWeight.bold,
@@ -174,7 +160,7 @@ class ConcertCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Positioned(top: 18, left: 18, child: _buildDateBadge()),
+                    Positioned(top: 18, left: 18, child: _buildDateBadge(l)),
                     Positioned(
                       left: 22,
                       right: 22,
@@ -292,7 +278,7 @@ class ConcertCard extends StatelessWidget {
                           ),
                         ] else
                           Text(
-                            'Sin valorar',
+                            l.ratingNone,
                             style: TextStyle(
                               color: cs.onSurface.withOpacity(0.4),
                               fontSize: 13,

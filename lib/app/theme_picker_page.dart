@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ class ThemePickerPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final current = ref.watch(themeProvider);
 
     return Scaffold(
@@ -20,9 +22,9 @@ class ThemePickerPage extends ConsumerWidget {
             children: [
               const SizedBox(height: 24),
 
-              const Text(
-                '¿Cómo prefieres\nver la app?',
-                style: TextStyle(
+              Text(
+                l.themePickerTitle,
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   height: 1.2,
@@ -30,7 +32,7 @@ class ThemePickerPage extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Puedes cambiarlo después en Ajustes.',
+                l.themePickerHint,
                 style: TextStyle(
                   color: Theme.of(
                     context,
@@ -43,8 +45,8 @@ class ThemePickerPage extends ConsumerWidget {
 
               _ThemeOption(
                 icon: Icons.brightness_auto,
-                title: 'Por defecto del sistema',
-                subtitle: 'Sigue el ajuste de tu móvil',
+                title: l.themeSystemDefault,
+                subtitle: l.themeSystemDesc,
                 selected: current == ThemeMode.system,
                 onTap: () =>
                     ref.read(themeProvider.notifier).setTheme(ThemeMode.system),
@@ -52,8 +54,8 @@ class ThemePickerPage extends ConsumerWidget {
               const SizedBox(height: 16),
               _ThemeOption(
                 icon: Icons.dark_mode_rounded,
-                title: 'Oscuro',
-                subtitle: 'Fondo negro, ideal para conciertos',
+                title: l.themeDark,
+                subtitle: l.themeDarkDesc,
                 selected: current == ThemeMode.dark,
                 onTap: () =>
                     ref.read(themeProvider.notifier).setTheme(ThemeMode.dark),
@@ -61,8 +63,8 @@ class ThemePickerPage extends ConsumerWidget {
               const SizedBox(height: 16),
               _ThemeOption(
                 icon: Icons.light_mode_rounded,
-                title: 'Claro',
-                subtitle: 'Fondo blanco, máxima legibilidad',
+                title: l.themeLight,
+                subtitle: l.themeLightDesc,
                 selected: current == ThemeMode.light,
                 onTap: () =>
                     ref.read(themeProvider.notifier).setTheme(ThemeMode.light),
@@ -74,7 +76,7 @@ class ThemePickerPage extends ConsumerWidget {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: () => context.go('/splash'),
-                  child: const Text('Empezar'),
+                  child: Text(l.getStartedLabel),
                 ),
               ),
 
@@ -88,7 +90,7 @@ class ThemePickerPage extends ConsumerWidget {
                     context.go('/splash');
                   },
                   child: Text(
-                    'Usar el del sistema',
+                    l.useSystemThemeLabel,
                     style: TextStyle(
                       color: Theme.of(
                         context,

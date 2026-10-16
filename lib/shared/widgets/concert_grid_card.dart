@@ -238,7 +238,7 @@ class ConcertGridCard extends StatelessWidget {
                       )
                     else
                       Text(
-                        'Sin valorar',
+                        l.ratingNone,
                         style: TextStyle(
                           color: Colors.amber.withOpacity(0.45),
                           fontSize: 11,

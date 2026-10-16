@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/month_names.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
 class DashboardNextConcert extends StatelessWidget {
@@ -36,22 +37,6 @@ class DashboardNextConcert extends StatelessWidget {
     }
 
     final concert = this.concert!;
-
-    const months = [
-      '',
-      'ENE',
-      'FEB',
-      'MAR',
-      'ABR',
-      'MAY',
-      'JUN',
-      'JUL',
-      'AGO',
-      'SEP',
-      'OCT',
-      'NOV',
-      'DIC',
-    ];
 
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
@@ -141,7 +126,7 @@ class DashboardNextConcert extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      months[concert.date.month],
+                      monthAbbr(l, concert.date.month),
                       style: const TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,

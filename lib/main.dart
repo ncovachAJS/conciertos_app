@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'firebase_options.dart';
 
 import 'app/app.dart';
@@ -16,6 +17,7 @@ Future<void> main() async {
 
 Future<void> _run() async {
   WidgetsFlutterBinding.ensureInitialized();
+  timeago.setLocaleMessages('es', timeago.EsMessages());
 
   // Cada paso de inicialización va envuelto en try/catch con timeout:
   // si dotenv, Firebase o Crashlytics fallan o se cuelgan (Play Services

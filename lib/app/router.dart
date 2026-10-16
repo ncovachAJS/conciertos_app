@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/concerts/presentation/providers/concerts_provider.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../shared/widgets/skeletons/generic_page_skeleton.dart';
 
 import '../features/profile/presentation/pages/profile_page.dart';
@@ -260,6 +261,7 @@ class _ConcertDetailById extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final concertsAsync = ref.watch(concertsProvider);
 
     return concertsAsync.when(
@@ -271,10 +273,10 @@ class _ConcertDetailById extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('No se encontró el concierto'),
+              Text(l.concertNotFoundError),
               TextButton(
                 onPressed: () => context.go('/'),
-                child: const Text('Volver'),
+                child: Text(l.backLabel),
               ),
             ],
           ),
@@ -292,17 +294,17 @@ class _ConcertDetailById extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Concierto no encontrado'),
+                  Text(l.concertNotFoundTitle),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Puede que ya no formes parte de este concierto',
+                  Text(
+                    l.concertNotFoundHint,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () => context.go('/'),
-                    child: const Text('Volver'),
+                    child: Text(l.backLabel),
                   ),
                 ],
               ),

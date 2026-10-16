@@ -178,7 +178,8 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
                               size: 16, color: cs.onSurface.withOpacity(0.54)),
                           const SizedBox(width: 6),
                           Text(
-                            DateFormat('d MMM yyyy', 'es').format(event.date),
+                            DateFormat('d MMM yyyy', Localizations.localeOf(context).languageCode)
+                                .format(event.date),
                             style: TextStyle(
                                 color: cs.onSurface.withOpacity(0.54),
                                 fontWeight: FontWeight.w600),

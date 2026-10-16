@@ -9,6 +9,7 @@ import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
+import '../../../../core/utils/month_names.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../../shared/widgets/pro_paywall_sheet.dart';
@@ -91,7 +92,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.tune_rounded),
-            tooltip: 'Personalizar',
+            tooltip: l.statsCustomizeTooltip,
             onPressed: () async {
               final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
               if (!isPro) {
@@ -247,7 +248,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
               StatsSectionId.byMonth => [
                   _SectionTitle(
                     icon: Icons.calendar_view_month_rounded,
-                    title: 'Conciertos por mes',
+                    title: l.statsByMonth,
                   ),
                   const SizedBox(height: 16),
                   _MonthBars(byMonth: stats.byMonth),
@@ -256,7 +257,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
               StatsSectionId.byDayOfWeek => [
                   _SectionTitle(
                     icon: Icons.view_week_outlined,
-                    title: 'Día de la semana favorito',
+                    title: l.statsByWeekday,
                   ),
                   const SizedBox(height: 16),
                   _WeekdayBars(byDow: stats.byDayOfWeek),
@@ -278,7 +279,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                   ? [
                       _SectionTitle(
                         icon: Icons.library_music_outlined,
-                        title: 'Géneros musicales',
+                        title: l.statsGenres,
                       ),
                       const SizedBox(height: 16),
                       _HorizontalBars(
@@ -318,7 +319,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                   ? [
                       _SectionTitle(
                         icon: Icons.stadium_rounded,
-                        title: 'Recintos más visitados',
+                        title: l.statsVenues,
                       ),
                       const SizedBox(height: 16),
                       _HorizontalBars(
@@ -331,7 +332,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
               StatsSectionId.festivalSplit => [
                   _SectionTitle(
                     icon: Icons.compare_arrows_rounded,
-                    title: 'Festival vs. individual',
+                    title: l.statsFestivalVsSingle,
                   ),
                   const SizedBox(height: 16),
                   _FestivalSplit(
@@ -354,7 +355,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                     ? [
                         _SectionTitle(
                           icon: Icons.trending_up_rounded,
-                          title: 'Valoración media por año',
+                          title: l.statsAvgRatingByYear,
                         ),
                         const SizedBox(height: 16),
                         _AvgRatingByYear(data: stats.avgRatingByYear),
@@ -366,7 +367,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                     ? [
                         _SectionTitle(
                           icon: Icons.emoji_events_rounded,
-                          title: 'Artistas mejor valorados',
+                          title: l.statsTopRatedArtists,
                         ),
                         const SizedBox(height: 16),
                         _TopRatedArtistsBars(
@@ -466,27 +467,27 @@ class _SummaryGrid extends StatelessWidget {
       if (stats.concertsWithPrice > 0)
         _CardData(
           '${stats.totalSpent.toStringAsFixed(0)} €',
-          'Gasto total',
+          l.statsTotalSpent,
           Icons.euro_rounded,
           const Color(0xFF26A69A),
         ),
       if (stats.longestStreakMonths > 1)
         _CardData(
-          '${stats.longestStreakMonths} meses',
-          'Racha más larga',
+          l.statsMonthsCount(stats.longestStreakMonths),
+          l.statsLongestStreak,
           Icons.local_fire_department_rounded,
           const Color(0xFFFF7043),
         ),
       if (stats.longestGapDays > 0)
         _CardData(
-          '${stats.longestGapDays} días',
-          'Mayor hueco',
+          l.statsDaysCount(stats.longestGapDays),
+          l.statsLongestGap,
           Icons.hourglass_empty_rounded,
           const Color(0xFF78909C),
         ),
       _CardData(
         '${stats.repeatArtistPercent.toStringAsFixed(0)} %',
-        'Artistas repetidos',
+        l.statsRepeatedArtists,
         Icons.replay_rounded,
         const Color(0xFF8D6E63),
       ),
@@ -873,10 +874,9 @@ class _MonthBars extends StatelessWidget {
   final Map<int, int> byMonth;
   const _MonthBars({required this.byMonth});
 
-  static const _labels = ['E','F','M','A','M','J','J','A','S','O','N','D'];
-
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final maxVal = byMonth.values.isEmpty
         ? 1
@@ -937,7 +937,7 @@ class _MonthBars extends StatelessWidget {
                 if (m > 1) const SizedBox(width: gap),
                 Expanded(
                   child: Text(
-                    _labels[m - 1],
+                    monthName(l, m).substring(0, 1).toUpperCase(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 9,
@@ -962,11 +962,20 @@ class _WeekdayBars extends StatelessWidget {
   final Map<int, int> byDow;
   const _WeekdayBars({required this.byDow});
 
-  static const _labels = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
   static const _weekend = {6, 7};
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final labels = [
+      l.weekdayShortMon,
+      l.weekdayShortTue,
+      l.weekdayShortWed,
+      l.weekdayShortThu,
+      l.weekdayShortFri,
+      l.weekdayShortSat,
+      l.weekdayShortSun,
+    ];
     final cs = Theme.of(context).colorScheme;
     final maxVal =
         byDow.values.isEmpty ? 1 : byDow.values.reduce((a, b) => a > b ? a : b).clamp(1, 999);
@@ -1027,7 +1036,7 @@ class _WeekdayBars extends StatelessWidget {
                 if (d > 1) const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    _labels[d - 1],
+                    labels[d - 1],
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 9,
@@ -1060,6 +1069,7 @@ class _FestivalSplit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final total = festival + solo;
 
@@ -1075,14 +1085,14 @@ class _FestivalSplit extends StatelessWidget {
             children: [
               _SplitTile(
                 icon: Icons.festival_rounded,
-                label: 'Festivales',
+                label: l.uniqueFestivalsLabel,
                 count: festival,
                 color: const Color(0xFF42A5F5),
               ),
               const SizedBox(width: 16),
               _SplitTile(
                 icon: Icons.music_note_rounded,
-                label: 'Individuales',
+                label: l.statsSingleConcerts,
                 count: solo,
                 color: const Color(0xFFE53935),
               ),

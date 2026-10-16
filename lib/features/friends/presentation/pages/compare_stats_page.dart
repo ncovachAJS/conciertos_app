@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 import '../../../../app/app_shell.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -20,6 +21,7 @@ class CompareStatsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final allMyConcerts = ref.watch(concertsProvider).asData?.value ?? [];
 
@@ -27,7 +29,7 @@ class CompareStatsPage extends ConsumerWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final currentUserId = AuthController.instance.user?.id ?? '';
-    final currentUserName = AuthController.instance.user?.name ?? 'Tú';
+    final currentUserName = AuthController.instance.user?.name ?? l.youLabel;
 
     // Incluir propios + compartidos, deduplicar por artista+fecha
     final _pastAll = allMyConcerts.where((c) => c.date.isBefore(today)).toList()
@@ -112,7 +114,7 @@ class CompareStatsPage extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Tú vs ${friend.name.split(' ').first}',
+          l.compareStatsAppBarTitle(l.youLabel, friend.name.split(' ').first),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
@@ -134,20 +136,21 @@ class CompareStatsPage extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // ── Tabla de estadísticas ────────────────────────────────────────
-          _SectionTitle(title: 'ESTADÍSTICAS', icon: Icons.bar_chart_rounded),
+          _SectionTitle(title: l.statisticsSection, icon: Icons.bar_chart_rounded),
           const SizedBox(height: 12),
           _StatsTable(
             myStats: myStats,
             friendStats: friendStats,
             friendName: friend.name.split(' ').first,
             cs: cs,
+            l: l,
           ),
           const SizedBox(height: 28),
 
           // ── Artistas en común ────────────────────────────────────────────
           if (commonArtists.isNotEmpty) ...[
             _SectionTitle(
-              title: 'ARTISTAS EN COMÚN',
+              title: l.commonArtistsTitle,
               icon: Icons.favorite_rounded,
               color: Colors.pinkAccent,
             ),
@@ -163,7 +166,7 @@ class CompareStatsPage extends ConsumerWidget {
           // ── Solo yo ──────────────────────────────────────────────────────
           if (onlyMyArtists.isNotEmpty) ...[
             _SectionTitle(
-              title: 'SOLO TÚ HAS VISTO',
+              title: l.onlyYouSawTitle,
               icon: Icons.person_rounded,
               color: const Color(0xFF42A5F5),
             ),
@@ -179,7 +182,7 @@ class CompareStatsPage extends ConsumerWidget {
           // ── Solo el amigo ────────────────────────────────────────────────
           if (onlyFriendArtists.isNotEmpty) ...[
             _SectionTitle(
-              title: 'SOLO ${friend.name.split(' ').first.toUpperCase()} HA VISTO',
+              title: l.onlyFriendSawTitle(friend.name.split(' ').first.toUpperCase()),
               icon: Icons.person_rounded,
               color: Colors.deepPurpleAccent,
             ),
@@ -304,7 +307,7 @@ class _CompareHeader extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
-              'VS',
+              AppLocalizations.of(context).vsLabel,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
@@ -351,33 +354,35 @@ class _StatsTable extends StatelessWidget {
   final _ConcertStats friendStats;
   final String friendName;
   final ColorScheme cs;
+  final AppLocalizations l;
 
   const _StatsTable({
     required this.myStats,
     required this.friendStats,
     required this.friendName,
     required this.cs,
+    required this.l,
   });
 
   @override
   Widget build(BuildContext context) {
     final rows = [
       _StatRow(
-        label: 'Total conciertos',
+        label: l.compareTotalConcertsLabel,
         myValue: '${myStats.total}',
         friendValue: '${friendStats.total}',
         myWins: myStats.total > friendStats.total,
         friendWins: friendStats.total > myStats.total,
       ),
       _StatRow(
-        label: 'Artistas únicos',
+        label: l.compareUniqueArtistsLabel,
         myValue: '${myStats.uniqueArtists}',
         friendValue: '${friendStats.uniqueArtists}',
         myWins: myStats.uniqueArtists > friendStats.uniqueArtists,
         friendWins: friendStats.uniqueArtists > myStats.uniqueArtists,
       ),
       _StatRow(
-        label: 'Media rating',
+        label: l.compareAvgRatingLabel,
         myValue: myStats.avgRating > 0
             ? '${myStats.avgRating.toStringAsFixed(1)} ⭐'
             : '—',
@@ -388,14 +393,14 @@ class _StatsTable extends StatelessWidget {
         friendWins: friendStats.avgRating > myStats.avgRating,
       ),
       _StatRow(
-        label: 'Este año',
+        label: l.compareThisYearLabel,
         myValue: '${myStats.thisYear}',
         friendValue: '${friendStats.thisYear}',
         myWins: myStats.thisYear > friendStats.thisYear,
         friendWins: friendStats.thisYear > myStats.thisYear,
       ),
       _StatRow(
-        label: 'Artista top',
+        label: l.compareTopArtistLabel,
         myValue: myStats.topArtist,
         friendValue: friendStats.topArtist,
         myWins: false,

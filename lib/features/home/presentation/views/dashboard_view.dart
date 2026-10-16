@@ -144,7 +144,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 DashboardSectionTitle(
                   icon: Icons.calendar_month_rounded,
                   title: l.upcomingConcerts,
-                  action: 'Calendario',
+                  action: l.dashCalendarAction,
                   onAction: () =>
                       context.go('/concerts?view=calendar'),
                 ),

@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/utils/month_names.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/concert.dart';
 
 class ConcertCalendarView extends StatefulWidget {
@@ -25,11 +27,6 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
   late DateTime _focus;
   bool _goingForward = true; // para la dirección del slide
 
-  static const _weekdays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-  static const _months = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-  ];
 
   @override
   void initState() {
@@ -69,6 +66,8 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context);
+    final weekdays = l.calendarWeekdayInitials.split(',');
     final byDay = _byDay();
 
     final firstOfMonth = DateTime(_focus.year, _focus.month, 1);
@@ -94,7 +93,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
               ),
               Expanded(
                 child: Text(
-                  '${_months[_focus.month - 1]} ${_focus.year}',
+                  '${monthName(l, _focus.month)} ${_focus.year}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 16,
@@ -116,9 +115,9 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                       color: const Color(0xFFE53935).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
-                      'Hoy',
-                      style: TextStyle(
+                    child: Text(
+                      l.today,
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFFE53935),
@@ -144,7 +143,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
             return Expanded(
               child: Center(
                 child: Text(
-                  _weekdays[i],
+                  weekdays[i],
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -261,7 +260,8 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
     DateTime date,
   ) {
     final cs = Theme.of(context).colorScheme;
-    final label = '$day de ${_months[_focus.month - 1]}';
+    final l = AppLocalizations.of(context);
+    final label = l.calendarDayLabel(day, monthName(l, _focus.month));
     final addConcert = widget.onAddConcert;
 
     showModalBottomSheet(
@@ -306,7 +306,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${concerts.length} concierto${concerts.length > 1 ? 's' : ''}',
+                      l.concertCountLabel(concerts.length),
                       style: const TextStyle(
                         fontSize: 12, fontWeight: FontWeight.w600,
                         color: Color(0xFFE53935),
@@ -339,7 +339,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                       addConcert(date);
                     },
                     icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('Añadir concierto en esta fecha'),
+                    label: Text(l.calendarAddOnDate),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFFE53935),
                       padding: const EdgeInsets.symmetric(vertical: 14),

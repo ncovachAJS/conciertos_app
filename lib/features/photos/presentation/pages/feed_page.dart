@@ -10,6 +10,7 @@ import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
+import '../../../../core/utils/month_names.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../data/models/concert_photo_model.dart';
@@ -602,21 +603,8 @@ class _FeedPageState extends State<FeedPage>
   }
 
   String _formatDate(DateTime d) {
-    const months = [
-      'ene',
-      'feb',
-      'mar',
-      'abr',
-      'may',
-      'jun',
-      'jul',
-      'ago',
-      'sep',
-      'oct',
-      'nov',
-      'dic',
-    ];
-    return '${d.day} ${months[d.month - 1]} ${d.year}';
+    final l = AppLocalizations.of(context);
+    return '${d.day} ${monthAbbr(l, d.month).toLowerCase()} ${d.year}';
   }
 }
 

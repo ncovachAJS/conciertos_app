@@ -153,7 +153,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
         actions: [
           IconButton(
             icon: Icon(_isCompact ? Icons.grid_view_rounded : Icons.view_list_rounded),
-            tooltip: _isCompact ? 'Vista tarjeta' : 'Vista compacta',
+            tooltip: _isCompact ? l.recsViewCardTooltip : l.recsViewCompactTooltip,
             onPressed: () => setState(() => _isCompact = !_isCompact),
           ),
         ],
@@ -212,7 +212,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
           TabBar(
             controller: _tabController,
             tabs: [
-              Tab(text: 'Resultados${_events.isNotEmpty ? ' (${_events.length})' : ''}'),
+              Tab(text: '${l.recsResultsTab}${_events.isNotEmpty ? ' (${_events.length})' : ''}'),
               Tab(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -220,7 +220,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
                     const Icon(Icons.check_circle_rounded,
                         size: 16, color: Colors.greenAccent),
                     const SizedBox(width: 6),
-                    Text('Quiero ir${wantList.isNotEmpty ? ' (${wantList.length})' : ''}'),
+                    Text('${l.wantToGoTab}${wantList.isNotEmpty ? ' (${wantList.length})' : ''}'),
                   ],
                 ),
               ),
@@ -244,7 +244,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
                         wantToAttendIds: _wantToAttendIds,
                         isCompact: _isCompact,
                         onToggle: _toggleWantToAttend,
-                        emptyText: 'Aún no has marcado ningún concierto.',
+                        emptyText: l.recsWantEmpty,
                       ),
                     ],
                   ),

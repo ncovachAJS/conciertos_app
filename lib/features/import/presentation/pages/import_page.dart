@@ -73,9 +73,9 @@ class _ImportPageState extends ConsumerState<ImportPage>
         centerTitle: false,
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.search_rounded), text: 'Setlist.fm'),
-            Tab(icon: Icon(Icons.restore_rounded), text: 'Copia de seguridad'),
+          tabs: [
+            const Tab(icon: Icon(Icons.search_rounded), text: 'Setlist.fm'),
+            Tab(icon: const Icon(Icons.restore_rounded), text: l.importBackupTab),
           ],
         ),
       ),
@@ -109,6 +109,7 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
   final _spotifyService   = SpotifySearchService();
 
   String _detectedGenre = '';
+  String _detectedImage = '';
 
   List<SetlistConcertModel> _concerts = [];
   final Set<String> _selected = {};
@@ -164,19 +165,24 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
         _page  = 1;
         _total = 0;
         _detectedGenre = '';
+        _detectedImage = '';
       }
     });
 
     if (!more) {
       _spotifyService.searchArtist(q).then((artist) {
         if (!mounted) return;
-        if (artist != null && artist.genres.isNotEmpty) {
-          final genre = artist.genres.first
-              .split(' ')
-              .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
-              .join(' ');
-          setState(() => _detectedGenre = genre);
-        }
+        setState(() {
+          if (artist != null && artist.genres.isNotEmpty) {
+            _detectedGenre = artist.genres.first
+                .split(' ')
+                .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
+                .join(' ');
+          }
+          if (artist != null && (artist.image ?? '').isNotEmpty) {
+            _detectedImage = artist.image!;
+          }
+        });
       }).catchError((_) {});
     }
 
@@ -244,7 +250,9 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
     Concert? lastCreated;
 
     try {
-      final img = await _imageService.getImage(toImport.first.artist) ?? '';
+      final img = _detectedImage.isNotEmpty
+          ? _detectedImage
+          : await _imageService.getImage(toImport.first.artist) ?? '';
       for (final c in toImport) {
         if (!mounted) return;
         setState(() {
@@ -379,7 +387,7 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Importar desde Spotify',
+                                    l.importFromSpotifyTitle,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
@@ -387,7 +395,7 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                                     ),
                                   ),
                                   Text(
-                                    'Conecta tu cuenta y ve tus artistas favoritos',
+                                    l.importFromSpotifyDesc,
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: cs.onSurface.withValues(alpha: .6),
@@ -681,7 +689,11 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                     },
                   ),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: _selected.isNotEmpty && !_importing ? 180 : 100,
+                  ),
+                ),
               ],
             ),
           ),
@@ -783,6 +795,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
   List<ConcertModel> get _parsed => _ownConcerts;
 
   Future<void> _pickFile() async {
+    final l = AppLocalizations.of(context);
     setState(() {
       _ownConcerts    = [];
       _sharedConcerts = [];
@@ -828,7 +841,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
           ..addAll(List.generate(own.length, (i) => i));
       });
     } catch (e) {
-      setState(() => _errorMsg = e.toString());
+      setState(() => _errorMsg = e is FormatException ? l.backupFormatUnrecognized : e.toString());
     }
   }
 
@@ -949,6 +962,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
     required int currentCount,
   }) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context);
     return showModalBottomSheet<_LimitAction>(
       context: context,
       useRootNavigator: true,
@@ -986,10 +1000,10 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                       color: Colors.white, size: 22),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Límite de conciertos gratuito',
-                    style: TextStyle(
+                    l.limitSheetTitle,
+                    style: const TextStyle(
                         fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -997,9 +1011,8 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
             ),
             const SizedBox(height: 14),
             Text(
-              'Tienes $currentCount conciertos de un máximo de ${ProConfig.freeConcertLimit} '
-              'en la versión gratuita. Has seleccionado $selected conciertos para importar'
-              '${hueco > 0 ? ', pero solo caben $hueco más.' : ' y ya has alcanzado el límite.'}',
+              l.limitSheetBody(
+                  currentCount, ProConfig.freeConcertLimit, selected, hueco),
               style: TextStyle(
                   fontSize: 14,
                   color: cs.onSurface.withValues(alpha: .7),
@@ -1010,8 +1023,8 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
               _LimitOption(
                 icon: Icons.filter_list_rounded,
                 color: const Color(0xFF1E88E5),
-                title: 'Importar los primeros $hueco',
-                subtitle: 'Se importarán los primeros $hueco conciertos seleccionados',
+                title: l.limitImportFirstTitle(hueco),
+                subtitle: l.limitImportFirstDesc(hueco),
                 onTap: () => Navigator.pop(context, _LimitAction.importFirst),
               ),
               const SizedBox(height: 10),
@@ -1019,16 +1032,16 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
             _LimitOption(
               icon: Icons.checklist_rounded,
               color: const Color(0xFF43A047),
-              title: 'Elegir manualmente',
-              subtitle: 'Vuelve a la lista y selecciona solo los que quieras',
+              title: l.limitChooseTitle,
+              subtitle: l.limitChooseDesc,
               onTap: () => Navigator.pop(context, _LimitAction.selectManually),
             ),
             const SizedBox(height: 10),
             _LimitOption(
               icon: Icons.workspace_premium_rounded,
               color: const Color(0xFF7C3AED),
-              title: 'Hazte Pro',
-              subtitle: 'Sin límite de conciertos y más funciones',
+              title: l.limitProTitle,
+              subtitle: l.limitProDesc,
               onTap: () => Navigator.pop(context, _LimitAction.goPro),
             ),
           ],
@@ -1054,6 +1067,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context);
 
     return Stack(
       fit: StackFit.expand,
@@ -1065,7 +1079,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
             children: [
               // ── Cabecera ──────────────────────────────────────────────────
               Text(
-                'Restaurar copia de seguridad',
+                l.backupRestoreTitle,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -1074,7 +1088,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Selecciona el archivo JSON generado desde Ajustes → Exportar mis conciertos para recuperar todos tus conciertos.',
+                l.backupRestoreIntro,
                 style: TextStyle(
                   fontSize: 14,
                   color: cs.onSurface.withValues(alpha: .55),
@@ -1101,7 +1115,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Para crear una copia de seguridad ve a Ajustes → "Exportar mis conciertos" y elige JSON. El archivo incluye todos los datos e imágenes.',
+                        l.backupHowTo,
                         style: TextStyle(
                           fontSize: 13,
                           color: cs.onSurface.withValues(alpha: .7),
@@ -1123,7 +1137,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                   label: Text(
                     _fileName != null
                         ? _fileName!
-                        : 'Seleccionar archivo JSON',
+                        : l.backupPickFile,
                     overflow: TextOverflow.ellipsis,
                   ),
                   style: OutlinedButton.styleFrom(
@@ -1154,7 +1168,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Archivo no válido: $_errorMsg',
+                          l.backupInvalidFile(_errorMsg!),
                           style: TextStyle(
                               color: cs.error, fontSize: 13),
                         ),
@@ -1177,7 +1191,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                   children: [
                     Expanded(
                       child: Text(
-                        '${_parsed.length} conciertos propios',
+                        l.backupOwnCount(_parsed.length),
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -1196,8 +1210,8 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                       }),
                       child: Text(
                         _selectedIdx.length == _parsed.length
-                            ? 'Deseleccionar todo'
-                            : 'Seleccionar todo',
+                            ? l.backupDeselectAll
+                            : l.backupSelectAll,
                         style: const TextStyle(
                             color: Color(0xFFE53935), fontSize: 13),
                       ),
@@ -1206,7 +1220,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                 ),
                 if (_selectedIdx.isNotEmpty) ...[
                   Text(
-                    '${_selectedIdx.length} seleccionado${_selectedIdx.length == 1 ? '' : 's'}',
+                    l.concertsSelectedCount(_selectedIdx.length),
                     style: TextStyle(
                       fontSize: 13,
                       color: const Color(0xFFE53935).withValues(alpha: .8),
@@ -1224,8 +1238,8 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                     icon: const Icon(Icons.restore_rounded, size: 18),
                     label: Text(
                       _selectedIdx.length == _parsed.length
-                          ? 'Restaurar todo'
-                          : 'Restaurar ${_selectedIdx.length} seleccionado${_selectedIdx.length == 1 ? '' : 's'}',
+                          ? l.backupRestoreAll
+                          : l.backupRestoreSelected(_selectedIdx.length),
                     ),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFFE53935),
@@ -1247,7 +1261,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                 if (_sharedConcerts.isNotEmpty) ...[
                   const SizedBox(height: 20),
                   Text(
-                    '${_sharedConcerts.length} compartido${_sharedConcerts.length == 1 ? '' : 's'} (no restaurables)',
+                    l.backupSharedNotRestorable(_sharedConcerts.length),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -1290,8 +1304,8 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                       Expanded(
                         child: Text(
                           _failed.isEmpty
-                              ? '$_restoredCount conciertos restaurados correctamente ✅'
-                              : '$_restoredCount restaurados · ${_failed.length} fallaron',
+                              ? l.backupRestoredOk(_restoredCount)
+                              : l.backupRestoredPartial(_restoredCount, _failed.length),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -1307,7 +1321,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                 if (_failed.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Text(
-                    'Conciertos que fallaron:',
+                    l.backupFailedTitle,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -1322,7 +1336,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                     child: OutlinedButton.icon(
                       onPressed: _importing ? null : _retryFailed,
                       icon: const Icon(Icons.refresh_rounded),
-                      label: Text('Reintentar ${_failed.length} fallidos'),
+                      label: Text(l.backupRetryFailed(_failed.length)),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.orange,
                         side: const BorderSide(color: Colors.orange),
@@ -1350,9 +1364,9 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                   const CircularProgressIndicator(
                       color: Color(0xFFE53935)),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Restaurando...',
-                    style: TextStyle(
+                  Text(
+                    l.backupRestoring,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -1563,7 +1577,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                   if (c.userName.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
-                      'De: ${c.userName}',
+                      AppLocalizations.of(context).sharedFromUser(c.userName),
                       style: TextStyle(
                           fontSize: 11,
                           color: cs.onSurface.withValues(alpha: .4)),

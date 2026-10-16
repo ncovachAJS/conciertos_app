@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/recommended_event.dart';
 
 class RecommendationCard extends StatelessWidget {
@@ -90,7 +91,9 @@ class RecommendationCard extends StatelessWidget {
 
   Widget _buildCompact(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final dateStr = DateFormat('d MMM yyyy', 'es').format(event.date);
+    final dateStr = DateFormat(
+            'd MMM yyyy', Localizations.localeOf(context).languageCode)
+        .format(event.date);
     final subtitle = [event.city, event.venue].where((s) => s.isNotEmpty).join(' · ');
 
     return Padding(
@@ -167,6 +170,7 @@ class _WantToAttendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final color = active ? Colors.greenAccent : Colors.white70;
 
     if (filled) {
@@ -191,7 +195,7 @@ class _WantToAttendButton extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                active ? 'Apuntado' : 'Quiero ir',
+                active ? l.recsAttending : l.wantToGoTab,
                 style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600),
               ),
             ],
@@ -209,7 +213,7 @@ class _WantToAttendButton extends StatelessWidget {
         active ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
         color: active ? Colors.greenAccent : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
       ),
-      tooltip: active ? 'Quitar de mi lista' : 'Quiero asistir',
+      tooltip: active ? l.recsRemoveFromList : l.recsWantToAttend,
     );
   }
 }

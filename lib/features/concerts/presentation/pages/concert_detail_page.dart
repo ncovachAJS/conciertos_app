@@ -127,6 +127,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
   }
 
   Future<void> _searchSpotify(String query) async {
+    final l = AppLocalizations.of(context);
     if (query.trim().isEmpty) return;
     setState(() => _loadingSpotify = true);
     try {
@@ -136,14 +137,14 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
         setState(() => _spotifyArtist = artist);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Artista no encontrado en Spotify: "${query.trim()}"')),
+          SnackBar(content: Text(l.detailSpotifyNotFound(query.trim()))),
         );
       }
     } catch (e) {
       debugPrint('Spotify search error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al buscar en Spotify: $e')),
+          SnackBar(content: Text(l.detailSpotifySearchError(e.toString()))),
         );
       }
     } finally {
@@ -312,8 +313,8 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
             ListTile(
               leading: const Icon(Icons.euro_rounded),
               title: Text(concert.festival.isNotEmpty
-                  ? 'Precio del festival'
-                  : 'Precio de la entrada'),
+                  ? l.priceFestivalLabel
+                  : l.priceTicketLabel),
               subtitle: Text('${concert.price.toStringAsFixed(2)} €'),
             ),
           ],
@@ -335,16 +336,16 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.library_music_outlined),
-              title: const Text('Género'),
+              title: Text(l.genreLabel),
               subtitle: Text(concert.genre),
             ),
           ],
           if (!concert.visibleToFriends) ...[
             const Divider(height: 1),
-            const ListTile(
-              leading: Icon(Icons.visibility_off_outlined, color: Colors.orange),
-              title: Text('Oculto para tus amigos'),
-              subtitle: Text('Solo tú puedes ver este concierto'),
+            ListTile(
+              leading: const Icon(Icons.visibility_off_outlined, color: Colors.orange),
+              title: Text(l.detailHiddenTitle),
+              subtitle: Text(l.detailHiddenDesc),
             ),
           ],
         ],
@@ -353,6 +354,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
   }
 
   Widget _buildSpotifyWidget() {
+    final l = AppLocalizations.of(context);
     if (_loadingSpotify) {
       return Card(
         clipBehavior: Clip.antiAlias,
@@ -397,15 +399,15 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                 child: const Icon(Icons.music_note_rounded, color: Colors.black, size: 22),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Vincular artista de Spotify',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    SizedBox(height: 2),
-                    Text('Ver canciones populares y perfil',
-                        style: TextStyle(color: Colors.white54, fontSize: 12)),
+                    Text(l.detailLinkSpotifyTitle,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    const SizedBox(height: 2),
+                    Text(l.detailLinkSpotifyDesc,
+                        style: const TextStyle(color: Colors.white54, fontSize: 12)),
                   ],
                 ),
               ),
@@ -424,12 +426,12 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.notes_rounded, color: Colors.amber),
-                SizedBox(width: 10),
-                Text('Notas',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Icon(Icons.notes_rounded, color: Colors.amber),
+                const SizedBox(width: 10),
+                Text(AppLocalizations.of(context).notesTitle,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(height: 12),
@@ -512,7 +514,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
 
     final appPageActions = [
       IconButton(
-        tooltip: 'Compartir',
+        tooltip: l.shareLabel,
         onPressed: () => _shareCard(concert),
         icon: const Icon(Icons.ios_share_rounded),
       ),
@@ -735,7 +737,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
                 const Icon(Icons.chat_bubble_outline_rounded, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Comentarios',
+                  AppLocalizations.of(context).commentsTitle,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 if (_comments.isNotEmpty) ...[
@@ -772,7 +774,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Center(
                             child: Text(
-                              'Sé el primero en comentar',
+                              AppLocalizations.of(context).commentsEmpty,
                               style: TextStyle(color: cs.onSurface.withOpacity(0.4), fontSize: 14),
                             ),
                           ),
@@ -797,7 +799,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
                   child: TextField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      hintText: 'Escribe un comentario…',
+                      hintText: AppLocalizations.of(context).commentHint,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -871,7 +873,7 @@ class _CommentTile extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    _timeAgo(comment.createdAt),
+                    _timeAgo(AppLocalizations.of(context), comment.createdAt),
                     style: TextStyle(fontSize: 11, color: cs.onSurface.withOpacity(0.45)),
                   ),
                 ],
@@ -885,12 +887,12 @@ class _CommentTile extends StatelessWidget {
     );
   }
 
-  String _timeAgo(DateTime dt) {
+  String _timeAgo(AppLocalizations l, DateTime dt) {
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return 'ahora';
-    if (diff.inMinutes < 60) return 'hace ${diff.inMinutes} min';
-    if (diff.inHours < 24) return 'hace ${diff.inHours} h';
-    if (diff.inDays < 7) return 'hace ${diff.inDays} d';
+    if (diff.inMinutes < 1) return l.timeNow;
+    if (diff.inMinutes < 60) return l.timeMinutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l.timeHoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l.timeDaysAgo(diff.inDays);
     return '${dt.day}/${dt.month}/${dt.year}';
   }
 }
@@ -953,6 +955,7 @@ class _ShareBottomSheetState extends State<_ShareBottomSheet> {
   bool _sharing = false;
 
   Future<void> _capture() async {
+    final lang = Localizations.localeOf(context).languageCode;
     setState(() => _sharing = true);
     try {
       await Future.delayed(const Duration(milliseconds: 80));
@@ -971,7 +974,7 @@ class _ShareBottomSheetState extends State<_ShareBottomSheet> {
         ShareParams(
           files: [XFile(file.path)],
           text:
-              '${widget.concert.artist} · ${DateFormat('d MMM yyyy', 'es').format(widget.concert.date)}',
+              '${widget.concert.artist} · ${DateFormat('d MMM yyyy', lang).format(widget.concert.date)}',
         ),
       );
     } finally {
@@ -1023,7 +1026,7 @@ class _ShareBottomSheetState extends State<_ShareBottomSheet> {
                         ),
                       )
                     : const Icon(Icons.ios_share_rounded),
-                label: Text(_sharing ? 'Preparando...' : 'Compartir'),
+                label: Text(_sharing ? AppLocalizations.of(context).preparingLabel : AppLocalizations.of(context).shareLabel),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(52),
                   backgroundColor: const Color(0xFFE53935),
@@ -1053,7 +1056,9 @@ class _ConcertShareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasImage = concert.imageUrl.isNotEmpty;
     final dateStr =
-        DateFormat('d MMM yyyy', 'es').format(concert.date).toUpperCase();
+        DateFormat('d MMM yyyy', Localizations.localeOf(context).languageCode)
+            .format(concert.date)
+            .toUpperCase();
     final location = [concert.venue, concert.city]
         .where((s) => s.isNotEmpty)
         .join(' · ');
@@ -1323,36 +1328,37 @@ class _SubRatingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context);
 
     final items = [
       if (concert.artistRating > 0)
         _SubRatingItem(
           icon: Icons.mic_external_on_rounded,
-          label: 'Artista',
+          label: l.ratingCriterionArtist,
           value: concert.artistRating,
         ),
       if (concert.soundRating > 0)
         _SubRatingItem(
           icon: Icons.volume_up_rounded,
-          label: 'Sonido',
+          label: l.ratingCriterionSound,
           value: concert.soundRating,
         ),
       if (concert.atmosphereRating > 0)
         _SubRatingItem(
           icon: Icons.people_rounded,
-          label: 'Ambiente',
+          label: l.ratingCriterionAtmosphere,
           value: concert.atmosphereRating,
         ),
       if (concert.setlistRating > 0)
         _SubRatingItem(
           icon: Icons.queue_music_rounded,
-          label: 'Setlist',
+          label: l.ratingCriterionSetlist,
           value: concert.setlistRating,
         ),
       if (concert.valueRating > 0)
         _SubRatingItem(
           icon: Icons.attach_money_rounded,
-          label: 'Precio / valor',
+          label: l.ratingCriterionValue,
           value: concert.valueRating,
         ),
     ];
@@ -1363,13 +1369,13 @@ class _SubRatingsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.tune_rounded, color: Colors.amber),
-                SizedBox(width: 10),
+                const Icon(Icons.tune_rounded, color: Colors.amber),
+                const SizedBox(width: 10),
                 Text(
-                  'Valoración detallada',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  l.detailedRatingTitle,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),

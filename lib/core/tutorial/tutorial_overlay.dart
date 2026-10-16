@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
+
 /// Paso individual del tutorial
 class TutorialStep {
   final IconData icon;
@@ -84,6 +86,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final step = widget.steps[_step];
     final total = widget.steps.length;
     final cs = Theme.of(context).colorScheme;
@@ -181,7 +184,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                     TextButton(
                       onPressed: _skip,
                       child: Text(
-                        'Saltar',
+                        l.tutorialSkip,
                         style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
                       ),
                     ),
@@ -197,7 +200,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                       ),
                     ),
                     child: Text(
-                      isLast ? '¡Empezar! 🎸' : 'Siguiente',
+                      isLast ? l.tutorialStart : l.tutorialNext,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../app/color_themes.dart';
+import '../../../../../l10n/generated/app_localizations.dart';
 import '../../../../../app/theme_pack_provider.dart';
 import '../../../../../core/config/pro_config.dart';
 import '../../../../../features/auth/presentation/controllers/auth_controller.dart';
@@ -12,20 +13,20 @@ class ColorThemePickerPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final current = ref.watch(themePackProvider);
     final cs = Theme.of(context).colorScheme;
     final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Paleta de color')),
+      appBar: AppBar(title: Text(l.colorPaletteLabel)),
       body: CustomScrollView(
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             sliver: SliverToBoxAdapter(
               child: Text(
-                'Cambia el acento de color de toda la app. '
-                'Las paletas Pro requieren suscripción activa.',
+                l.colorPaletteIntro,
                 style: TextStyle(
                   fontSize: 13,
                   color: cs.onSurface.withValues(alpha: .55),
@@ -134,16 +135,16 @@ class _ThemeCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          pack.name,
+                          pack.localizedName(AppLocalizations.of(context)),
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
                           ),
                         ),
                         if (pack.isPro && !selected)
-                          const Text(
-                            'Pro',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context).proBadgeLabel,
+                            style: const TextStyle(
                               fontSize: 11,
                               color: Color(0xFF9C27B0),
                               fontWeight: FontWeight.w600,

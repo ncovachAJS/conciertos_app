@@ -60,7 +60,7 @@ class _SetlistSectionState extends State<SetlistSection> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                'Datos de setlist.fm',
+                AppLocalizations.of(context).setlistDataFrom,
                 style: TextStyle(
                   fontSize: 10,
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),

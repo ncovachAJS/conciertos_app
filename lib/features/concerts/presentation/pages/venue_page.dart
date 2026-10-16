@@ -137,7 +137,7 @@ class VenuePage extends ConsumerWidget {
                     _StatChip(
                       icon: Icons.people_outline,
                       label: '${artists.length}',
-                      sublabel: artists.length == 1 ? 'artista' : 'artistas',
+                      sublabel: l.venueArtistsLabel(artists.length),
                       color: Colors.blueAccent,
                     ),
                     if (upcoming.isNotEmpty) ...[
@@ -145,9 +145,7 @@ class VenuePage extends ConsumerWidget {
                       _StatChip(
                         icon: Icons.event_outlined,
                         label: '${upcoming.length}',
-                        sublabel: upcoming.length == 1
-                            ? 'próximo'
-                            : 'próximos',
+                        sublabel: l.venueUpcomingLabel(upcoming.length),
                         color: Colors.green,
                       ),
                     ],
@@ -167,7 +165,7 @@ class VenuePage extends ConsumerWidget {
                         size: 14, color: cs.onSurface.withOpacity(0.4)),
                     const SizedBox(width: 6),
                     Text(
-                      'Primera visita: ${DateFormatter.short(firstVisit.date)}',
+                      l.venueFirstVisit(DateFormatter.short(firstVisit.date)),
                       style: TextStyle(
                           color: cs.onSurface.withOpacity(0.5),
                           fontSize: 13),
@@ -178,7 +176,7 @@ class VenuePage extends ConsumerWidget {
                           size: 14, color: cs.onSurface.withOpacity(0.4)),
                       const SizedBox(width: 6),
                       Text(
-                        'Última: ${DateFormatter.short(lastVisit.date)}',
+                        l.venueLastVisit(DateFormatter.short(lastVisit.date)),
                         style: TextStyle(
                             color: cs.onSurface.withOpacity(0.5),
                             fontSize: 13),
@@ -228,7 +226,7 @@ class VenuePage extends ConsumerWidget {
                         size: 64, color: cs.onSurface.withOpacity(0.15)),
                     const SizedBox(height: 16),
                     Text(
-                      'No hay conciertos en este recinto',
+                      l.venueNoConcerts,
                       style: TextStyle(
                           color: cs.onSurface.withOpacity(0.4),
                           fontSize: 15),

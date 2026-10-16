@@ -97,7 +97,8 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
       if (mounted) {
         setState(() {
           _friendUpcoming = results[0] as List<Concert>;
-          _friendAchievements = AchievementsEngine.compute(results[1] as UserStats);
+          _friendAchievements = AchievementsEngine.compute(
+              AppLocalizations.of(context), results[1] as UserStats);
           _friendAllConcerts = results[2] as List<Concert>;
         });
       }
@@ -178,7 +179,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                   },
                 ),
                 icon: const Icon(Icons.compare_arrows_rounded),
-                label: const Text('Comparar estadísticas'),
+                label: Text(l.compareStatsButton),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(44),
                 ),
@@ -194,7 +195,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
               // ── Próximos conciertos propios del amigo ─────────────────
               _SectionTitle(
                 icon: Icons.calendar_month_rounded,
-                title: 'PRÓXIMOS CONCIERTOS DE ${widget.friend.name.toUpperCase().split(' ').first}',
+                title: l.friendUpcomingTitle(widget.friend.name.toUpperCase().split(' ').first),
                 color: Colors.deepPurpleAccent,
               ),
               const SizedBox(height: 12),
@@ -204,7 +205,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
-                    'No tiene conciertos próximos',
+                    l.friendNoUpcoming,
                     style: TextStyle(
                       color: cs.onSurface.withOpacity(0.4),
                       fontSize: 14,
@@ -230,8 +231,8 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                         children: [
                           Text(
                             _upcomingExpanded
-                                ? 'Ver menos'
-                                : 'Ver ${_friendUpcoming.length - _upcomingCollapsedCount} más',
+                                ? l.onThisDaySeeLess
+                                : l.onThisDaySeeMore(_friendUpcoming.length - _upcomingCollapsedCount),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -262,7 +263,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                 if (upcoming.isNotEmpty) ...[
                   _SectionTitle(
                     icon: Icons.people_rounded,
-                    title: 'PRÓXIMOS CONCIERTOS JUNTOS',
+                    title: l.upcomingTogetherTitle,
                     color: Colors.green,
                   ),
                   const SizedBox(height: 12),
@@ -274,7 +275,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                 if (past.isNotEmpty) ...[
                   _SectionTitle(
                     icon: Icons.history_rounded,
-                    title: 'NÚMEROS JUNTOS',
+                    title: l.numbersTogetherTitle,
                     color: Colors.orange,
                   ),
                   const SizedBox(height: 16),
@@ -294,7 +295,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
 
                   _SectionTitle(
                     icon: Icons.queue_music_rounded,
-                    title: 'HISTORIAL',
+                    title: l.artistHistory,
                     color: Colors.tealAccent,
                   ),
                   const SizedBox(height: 12),
@@ -373,6 +374,7 @@ class _EmptyShared extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
@@ -384,7 +386,7 @@ class _EmptyShared extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Aún no habéis ido a ningún\nconcierto juntos.',
+            l.emptySharedLine1,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15,
@@ -393,7 +395,7 @@ class _EmptyShared extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '¡Etiquetad vuestros próximos directos!',
+            l.emptySharedLine2,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
@@ -685,7 +687,9 @@ class _ConcertRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('d MMM yyyy', 'es').format(concert.date);
+    final dateStr = DateFormat('d MMM yyyy',
+            Localizations.localeOf(context).languageCode)
+        .format(concert.date);
     final subtitle =
         [concert.venue, concert.city].where((s) => s.isNotEmpty).join(' · ');
 

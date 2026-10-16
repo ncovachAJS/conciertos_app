@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/config/pro_config.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 /// Muestra el bottom sheet de límite alcanzado y devuelve `true` si el usuario
 /// tenía permiso para continuar (isPro o bajo el límite), `false` si se bloqueó.
@@ -49,6 +50,7 @@ class _ProPaywallSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -95,7 +97,7 @@ class _ProPaywallSheet extends StatelessWidget {
 
           // Título
           Text(
-            'Lleva tu experiencia al siguiente nivel',
+            l.paywallTitle,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -105,7 +107,7 @@ class _ProPaywallSheet extends StatelessWidget {
 
           // Descripción
           Text(
-            'Hazte Pro para añadir conciertos sin límites y desbloquear todo lo que la app tiene para ofrecerte.',
+            l.paywallDesc,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.textTheme.bodySmall?.color,
               height: 1.5,
@@ -117,23 +119,23 @@ class _ProPaywallSheet extends StatelessWidget {
           // Beneficios
           _Benefit(
             icon: Icons.all_inclusive_rounded,
-            label: 'Conciertos ilimitados',
+            label: l.paywallBenefitConcerts,
           ),
           _Benefit(
             icon: Icons.photo_library_rounded,
-            label: 'Fotos ilimitadas por concierto',
+            label: l.paywallBenefitPhotos,
           ),
           _Benefit(
             icon: Icons.picture_as_pdf_rounded,
-            label: 'Exportar estadísticas a PDF',
+            label: l.paywallBenefitPdf,
           ),
           _Benefit(
             icon: Icons.dashboard_customize_rounded,
-            label: 'Dashboard y estadísticas personalizables',
+            label: l.paywallBenefitCustom,
           ),
           _Benefit(
             icon: Icons.palette_rounded,
-            label: 'Temas de color exclusivos',
+            label: l.paywallBenefitThemes,
           ),
           const SizedBox(height: 28),
 
@@ -153,9 +155,9 @@ class _ProPaywallSheet extends StatelessWidget {
                 Navigator.of(context).pop();
                 // TODO: navegar a la pantalla de pago cuando esté integrado RevenueCat
               },
-              child: const Text(
-                'Hacerse Pro',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              child: Text(
+                l.paywallCta,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -165,7 +167,7 @@ class _ProPaywallSheet extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
-              'Ahora no',
+              l.paywallLater,
               style: TextStyle(color: theme.textTheme.bodySmall?.color),
             ),
           ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../app/app_shell.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../../shared/widgets/app_page.dart';
@@ -44,15 +45,16 @@ class _FriendsActivityPageState extends ConsumerState<FriendsActivityPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final activityAsync = ref.watch(friendsActivityProvider);
     final cs = Theme.of(context).colorScheme;
 
     return AppPage(
-      title: 'Actividad de amigos',
+      title: l.friendActivityNotifTitle,
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh_rounded),
-          tooltip: 'Actualizar',
+          tooltip: l.refreshTooltip,
           onPressed: () => ref.read(friendsActivityProvider.notifier).reload(),
         ),
       ],
@@ -75,7 +77,7 @@ class _FriendsActivityPageState extends ConsumerState<FriendsActivityPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Tus amigos no han agregado\nconciertos todavía',
+                    l.friendsActivityEmpty,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: cs.onSurface.withOpacity(0.4),
@@ -127,8 +129,11 @@ class _ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final dateStr = DateFormat('d MMM yyyy', 'es').format(concert.date);
+    final dateStr = DateFormat(
+            'd MMM yyyy', Localizations.localeOf(context).languageCode)
+        .format(concert.date);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -188,7 +193,7 @@ class _ActivityCard extends StatelessWidget {
                             child: Text(
                               concert.userName.isNotEmpty
                                   ? concert.userName
-                                  : 'Amigo',
+                                  : l.friendDefaultName,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: cs.onSurface.withOpacity(0.55),
@@ -293,7 +298,7 @@ class _ActivityCard extends StatelessWidget {
                   color: cs.onSurface.withOpacity(0.5),
                 ),
                 label: Text(
-                  'Comentar',
+                  l.commentAction,
                   style: TextStyle(
                     fontSize: 12,
                     color: cs.onSurface.withOpacity(0.5),
@@ -379,6 +384,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
@@ -412,9 +418,9 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                   children: [
                     const Icon(Icons.chat_bubble_outline_rounded),
                     const SizedBox(width: 10),
-                    const Text(
-                      'Comentarios',
-                      style: TextStyle(
+                    Text(
+                      l.commentsTitle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -448,7 +454,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Sé el primero en comentar',
+                              l.commentsEmpty,
                               style: TextStyle(
                                 color: cs.onSurface.withOpacity(0.4),
                                 fontSize: 14,
@@ -492,7 +498,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                           child: TextField(
                             controller: _textController,
                             decoration: InputDecoration(
-                              hintText: 'Escribe un comentario…',
+                              hintText: l.commentHint,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
@@ -545,7 +551,9 @@ class _CommentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timeStr = _formatTime(comment.createdAt);
+    final l = AppLocalizations.of(context);
+    final timeStr = _formatTime(
+        l, Localizations.localeOf(context).languageCode, comment.createdAt);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -578,7 +586,7 @@ class _CommentTile extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    comment.userName.isNotEmpty ? comment.userName : 'Usuario',
+                    comment.userName.isNotEmpty ? comment.userName : l.userDefaultName,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -606,13 +614,13 @@ class _CommentTile extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime dt) {
+  String _formatTime(AppLocalizations l, String lang, DateTime dt) {
     final now = DateTime.now();
     final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return 'ahora';
-    if (diff.inMinutes < 60) return 'hace ${diff.inMinutes} min';
-    if (diff.inHours < 24) return 'hace ${diff.inHours} h';
-    if (diff.inDays < 7) return 'hace ${diff.inDays} d';
-    return DateFormat('d MMM', 'es').format(dt);
+    if (diff.inMinutes < 1) return l.timeNow;
+    if (diff.inMinutes < 60) return l.timeMinutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l.timeHoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l.timeDaysAgo(diff.inDays);
+    return DateFormat('d MMM', lang).format(dt);
   }
 }

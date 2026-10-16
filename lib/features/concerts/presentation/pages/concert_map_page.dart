@@ -338,7 +338,7 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
               bottom: 24,
               right: 16,
               child: FloatingActionButton.small(
-                tooltip: 'Centrar',
+                tooltip: l.mapCenterTooltip,
                 backgroundColor: cs.surface,
                 foregroundColor: cs.onSurface,
                 onPressed: _fitBounds,

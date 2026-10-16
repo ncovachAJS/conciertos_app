@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 import '../../domain/achievement.dart';
 
@@ -73,6 +74,7 @@ class _AchievementToastState extends State<_AchievementToast>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Positioned(
       top: MediaQuery.of(context).padding.top + 12,
       left: 16,
@@ -122,9 +124,9 @@ class _AchievementToastState extends State<_AchievementToast>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          '🏆 Logro desbloqueado',
-                          style: TextStyle(
+                        Text(
+                          l.achievementUnlockedBanner,
+                          style: const TextStyle(
                             fontSize: 11,
                             color: Color(0xFFFFC107),
                             fontWeight: FontWeight.w600,

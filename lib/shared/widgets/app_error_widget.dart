@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
+
 /// Widget de error reutilizable con ícono, mensaje y botón de reintentar.
 /// Úsalo en cualquier pantalla en lugar de texto plano de error.
 class AppErrorWidget extends StatelessWidget {
@@ -14,26 +16,27 @@ class AppErrorWidget extends StatelessWidget {
     this.customMessage,
   });
 
-  String _message() {
+  String _message(AppLocalizations l) {
     if (customMessage != null) return customMessage!;
     final err = error?.toString() ?? '';
     if (err.contains('SocketException') || err.contains('Failed host lookup')) {
-      return 'Sin conexión a internet';
+      return l.appErrorNoInternet;
     }
     if (err.contains('TimeoutException')) {
-      return 'El servidor tardó demasiado en responder';
+      return l.appErrorTimeout;
     }
-    if (err.contains('401')) return 'Sesión expirada. Vuelve a iniciar sesión';
-    if (err.contains('403')) return 'No tienes permiso para ver esto';
-    if (err.contains('404')) return 'No se encontró el contenido';
+    if (err.contains('401')) return l.appErrorSessionExpired;
+    if (err.contains('403')) return l.appErrorForbidden;
+    if (err.contains('404')) return l.appErrorNotFound;
     if (err.contains('500') || err.contains('503')) {
-      return 'Error en el servidor. Inténtalo más tarde';
+      return l.appErrorServer;
     }
-    return 'Algo salió mal. Inténtalo de nuevo';
+    return l.appErrorGeneric;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return Center(
@@ -49,7 +52,7 @@ class AppErrorWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              _message(),
+              _message(l),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: cs.onSurface.withOpacity(0.55),
@@ -61,7 +64,7 @@ class AppErrorWidget extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Reintentar'),
+                label: Text(l.retry),
               ),
             ],
           ],

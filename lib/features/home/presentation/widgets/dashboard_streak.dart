@@ -60,7 +60,7 @@ class DashboardStreak extends StatelessWidget {
       // En iPad: mostramos "tu último concierto fue hace X días" para no dejar el hueco
       if (Responsive.isTablet(context)) {
         emoji = '🎵';
-        title = 'Tu último concierto';
+        title = l.dashLastConcertTitle;
         subtitle = l.lastConcertDaysAgo(daysSinceLast);
         color = cs.onSurface.withOpacity(0.4);
       } else {

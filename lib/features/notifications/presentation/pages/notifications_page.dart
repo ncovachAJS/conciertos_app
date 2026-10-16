@@ -92,7 +92,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ? EmptyState(
               emoji: '🔔',
               title: l.noNotifications,
-              subtitle: 'Aquí aparecerán tus avisos y actividad de amigos',
+              subtitle: l.notificationsEmptyHint,
             )
           : ListView.separated(
               itemCount: _ctrl.notifications.length,
@@ -225,7 +225,7 @@ class _NotificationTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    timeago.format(notification.createdAt, locale: 'es'),
+                    timeago.format(notification.createdAt, locale: Localizations.localeOf(context).languageCode),
                     style: TextStyle(
                       fontSize: 11,
                       color: cs.onSurface.withOpacity(0.4),

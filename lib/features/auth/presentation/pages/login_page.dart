@@ -51,13 +51,14 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       debugPrint('❌ LOGIN ERROR: $e');
 
-      String message = 'No se ha podido iniciar sesión.';
+      final l = AppLocalizations.of(context);
+      String message = l.loginErrorGeneric;
       final error = e.toString().toLowerCase();
 
       if (error.contains('incorrectos') || error.contains('unauthorized')) {
-        message = 'Correo o contraseña incorrectos.';
+        message = l.loginErrorInvalidCredentials;
       } else if (error.contains('timeout') || error.contains('timed out')) {
-        message = 'El servidor tardó demasiado. Inténtalo de nuevo.';
+        message = l.serverTimeout;
       }
 
       ScaffoldMessenger.of(
@@ -91,12 +92,12 @@ class _LoginPageState extends State<LoginPage> {
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     autocorrect: false,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration: InputDecoration(
+                      labelText: l.emailLabel,
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Introduce tu correo'
+                        ? l.emailRequired
                         : null,
                   ),
 
@@ -106,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Contraseña',
+                      labelText: l.passwordLabel,
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -120,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     validator: (v) => (v == null || v.isEmpty)
-                        ? 'Introduce tu contraseña'
+                        ? l.passwordRequired
                         : null,
                   ),
 

@@ -20,7 +20,6 @@ class DashboardLayoutService {
     DashboardSection(id: DashboardSectionId.recommended, visible: true),
     DashboardSection(id: DashboardSectionId.favorites, visible: true),
     DashboardSection(id: DashboardSectionId.recent, visible: true),
-    DashboardSection(id: DashboardSectionId.spotifyEmbed, visible: true),
   ];
 
   Future<List<DashboardSection>> load() async {
@@ -32,6 +31,8 @@ class DashboardLayoutService {
       final list = jsonDecode(raw) as List<dynamic>;
       final saved = list
           .map((e) => DashboardSection.fromJson(e as Map<String, dynamic>))
+          // Eliminada: ya no es una sección personalizable del dashboard.
+          .where((s) => s.id != DashboardSectionId.spotifyEmbed)
           .toList();
 
       // Compatibilidad hacia adelante: si se añaden secciones nuevas

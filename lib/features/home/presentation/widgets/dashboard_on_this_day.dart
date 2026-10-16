@@ -105,7 +105,9 @@ class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
 
     String timeLabel;
     if (isExactDay) {
-      final exactDate = DateFormat('d MMM yyyy', 'es').format(concert.date);
+      final exactDate = DateFormat(
+              'd MMM yyyy', Localizations.localeOf(context).languageCode)
+          .format(concert.date);
       timeLabel = '${l.onThisDayYearsAgo(yearsAgo)} · $exactDate';
     } else if (diffDays > 0) {
       timeLabel = l.onThisDayInDays(diffDays, yearsAgo);

@@ -55,17 +55,18 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       if (!mounted) return;
 
-      String message = 'Ha ocurrido un error.';
+      final l = AppLocalizations.of(context);
+      String message = l.registerErrorGeneric;
       final error = e.toString().toLowerCase();
 
       if (error.contains('email must be an email')) {
-        message = 'Introduce un correo electrónico válido.';
+        message = l.registerErrorInvalidEmail;
       } else if (error.contains('already') || error.contains('ya existe')) {
-        message = 'Ya existe una cuenta con ese correo.';
+        message = l.registerErrorEmailTaken;
       } else if (error.contains('password')) {
-        message = 'La contraseña no es válida.';
+        message = l.registerErrorInvalidPassword;
       } else if (error.contains('timeout') || error.contains('timed out')) {
-        message = 'El servidor tardó demasiado. Inténtalo de nuevo.';
+        message = l.serverTimeout;
       }
 
       ScaffoldMessenger.of(
@@ -91,12 +92,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   TextFormField(
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre',
-                      prefixIcon: Icon(Icons.person),
+                    decoration: InputDecoration(
+                      labelText: l.usernameLabel,
+                      prefixIcon: const Icon(Icons.person),
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Introduce tu nombre'
+                        ? l.usernameRequired
                         : null,
                   ),
 
@@ -105,12 +106,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email),
+                    decoration: InputDecoration(
+                      labelText: l.emailLabel,
+                      prefixIcon: const Icon(Icons.email),
                     ),
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Introduce tu correo'
+                        ? l.emailRequired
                         : null,
                   ),
 
@@ -119,12 +120,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Contraseña',
-                      prefixIcon: Icon(Icons.lock),
+                    decoration: InputDecoration(
+                      labelText: l.passwordLabel,
+                      prefixIcon: const Icon(Icons.lock),
                     ),
                     validator: (v) => (v == null || v.length < 6)
-                        ? 'Mínimo 6 caracteres'
+                        ? l.passwordMinLength
                         : null,
                   ),
 

@@ -116,7 +116,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
             const SizedBox(height: 20),
 
             Text(
-              '${filtered.length} artista${filtered.length != 1 ? "s" : ""}',
+              l.favoritesArtistCount(filtered.length),
               style: TextStyle(
                 color: cs.onSurface.withOpacity(0.6),
                 fontWeight: FontWeight.w600,
@@ -130,7 +130,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                   ? EmptyState(
                       emoji: '⭐',
                       title: l.noFavoritesMessage,
-                      subtitle: 'Marca conciertos como favoritos para verlos aquí agrupados por artista',
+                      subtitle: l.favoritesEmptySubtitle,
                       accentColor: Colors.amber,
                     )
                   : GridView.builder(

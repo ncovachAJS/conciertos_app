@@ -82,7 +82,7 @@ class _FriendsPageState extends State<FriendsPage>
         actions: [
           IconButton(
             icon: const Icon(Icons.dynamic_feed_rounded),
-            tooltip: 'Actividad de amigos',
+            tooltip: AppLocalizations.of(context).friendActivityNotifTitle,
             onPressed: () => context.push('/friends-activity'),
           ),
           IconButton(

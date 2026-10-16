@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/app_shell.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../domain/stats_section.dart';
 import '../providers/stats_layout_provider.dart';
@@ -24,48 +26,47 @@ class StatsEditPage extends ConsumerWidget {
         StatsSectionId.topRatedArtists => Icons.emoji_events_rounded,
       };
 
-  static String _label(StatsSectionId id) => switch (id) {
-        StatsSectionId.summary => 'Resumen (tarjetas)',
-        StatsSectionId.byYear => 'Conciertos por año',
-        StatsSectionId.byMonth => 'Conciertos por mes',
-        StatsSectionId.byDayOfWeek => 'Día de la semana favorito',
-        StatsSectionId.topArtists => 'Top artistas',
-        StatsSectionId.topGenres => 'Géneros musicales',
-        StatsSectionId.topFestivals => 'Top festivales',
-        StatsSectionId.topCities => 'Ciudades favoritas',
-        StatsSectionId.topVenues => 'Recintos más visitados',
-        StatsSectionId.festivalSplit => 'Festival vs. individual',
-        StatsSectionId.ratingDist => 'Distribución de valoraciones',
-        StatsSectionId.avgRatingByYear => 'Valoración media por año',
-        StatsSectionId.topRatedArtists => 'Artistas mejor valorados',
+  static String _label(AppLocalizations l, StatsSectionId id) => switch (id) {
+        StatsSectionId.summary => l.statsEditSummary,
+        StatsSectionId.byYear => l.concertsByYear,
+        StatsSectionId.byMonth => l.statsByMonth,
+        StatsSectionId.byDayOfWeek => l.statsByWeekday,
+        StatsSectionId.topArtists => l.statsEditTopArtists,
+        StatsSectionId.topGenres => l.statsGenres,
+        StatsSectionId.topFestivals => l.statsEditTopFestivals,
+        StatsSectionId.topCities => l.favoriteCities,
+        StatsSectionId.topVenues => l.statsVenues,
+        StatsSectionId.festivalSplit => l.statsFestivalVsSingle,
+        StatsSectionId.ratingDist => l.ratingDistribution,
+        StatsSectionId.avgRatingByYear => l.statsAvgRatingByYear,
+        StatsSectionId.topRatedArtists => l.statsTopRatedArtists,
       };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final sectionsAsync = ref.watch(statsLayoutProvider);
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Personalizar estadísticas'),
+        title: Text(l.statsEditTitle),
         actions: [
           TextButton(
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Restablecer orden'),
-                  content: const Text(
-                    '¿Restaurar la disposición por defecto?',
-                  ),
+                  title: Text(l.layoutResetTitle),
+                  content: Text(l.statsEditResetConfirm),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
+                      child: Text(l.cancel),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Restablecer'),
+                      child: Text(l.resetLabel),
                     ),
                   ],
                 ),
@@ -74,20 +75,20 @@ class StatsEditPage extends ConsumerWidget {
                 await ref.read(statsLayoutProvider.notifier).reset();
               }
             },
-            child: const Text('Restablecer'),
+            child: Text(l.resetLabel),
           ),
         ],
       ),
       body: sectionsAsync.when(
         loading: () => const GenericPageSkeleton(itemCount: 8, withHeader: true),
         error: (e, _) =>
-            const Center(child: Text('Error cargando la configuración')),
+            Center(child: Text(l.layoutLoadError)),
         data: (sections) => Column(
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Text(
-                'Arrastra   para reordenar · activa o desactiva cada sección',
+                l.layoutEditHint,
                 style: TextStyle(
                   fontSize: 13,
                   color: cs.onSurface.withValues(alpha: .55),
@@ -96,8 +97,12 @@ class StatsEditPage extends ConsumerWidget {
             ),
             Expanded(
               child: ReorderableListView.builder(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: EdgeInsets.fromLTRB(
+                  12,
+                  4,
+                  12,
+                  16 + floatingNavBarClearance(context),
+                ),
                 itemCount: sections.length,
                 onReorder: (oldIndex, newIndex) => ref
                     .read(statsLayoutProvider.notifier)
@@ -115,7 +120,7 @@ class StatsEditPage extends ConsumerWidget {
                     index: index,
                     section: section,
                     icon: _icon(section.id),
-                    label: _label(section.id),
+                    label: _label(l, section.id),
                     onToggle: () => ref
                         .read(statsLayoutProvider.notifier)
                         .toggleVisibility(section.id),
@@ -180,7 +185,7 @@ class _SectionTile extends StatelessWidget {
           subtitle: visible
               ? null
               : Text(
-                  'Oculta',
+                  AppLocalizations.of(context).hiddenLabel,
                   style: TextStyle(
                     fontSize: 12,
                     color: cs.onSurface.withValues(alpha: .4),

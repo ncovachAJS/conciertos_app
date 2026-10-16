@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 import '../../../../core/responsive/responsive.dart';
 import '../../domain/achievement.dart';
@@ -50,6 +51,7 @@ class _AchievementsWidgetState extends State<AchievementsWidget>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final achievements = widget.achievements;
     final unlocked = achievements.where((a) => a.unlocked).length;
     final total = achievements.length;
@@ -75,9 +77,9 @@ class _AchievementsWidgetState extends State<AchievementsWidget>
             children: [
               const Text('🏆', style: TextStyle(fontSize: 18)),
               const SizedBox(width: 8),
-              const Text(
-                'LOGROS',
-                style: TextStyle(
+              Text(
+                l.achievementsSectionTitle,
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFFFFC107),
@@ -153,8 +155,8 @@ class _AchievementsWidgetState extends State<AchievementsWidget>
                 animation: _ctrl,
                 builder: (_, __) => Text(
                   _expanded
-                      ? 'Ver menos'
-                      : 'Ver todos los logros (${achievements.length - collapsedCount} más)',
+                      ? l.onThisDaySeeLess
+                      : l.achievementsSeeMoreCount(achievements.length - collapsedCount),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -248,6 +250,7 @@ class _TrophyTile extends StatelessWidget {
   }
 
   void _showDetail(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final locked = !achievement.unlocked;
     showModalBottomSheet(
       context: context,
@@ -307,7 +310,7 @@ class _TrophyTile extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    locked ? 'Bloqueado' : '¡Desbloqueado!',
+                    locked ? l.achievementLocked : l.achievementUnlocked,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

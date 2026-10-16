@@ -1,3 +1,5 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
+
 class Achievement {
   final String id;
   final String emoji;
@@ -71,86 +73,86 @@ class UserStats {
 }
 
 class AchievementsEngine {
-  static List<Achievement> compute(UserStats s) {
+  static List<Achievement> compute(AppLocalizations l, UserStats s) {
     final now = DateTime.now().year;
     final yearsSince = s.oldestYear > 0 ? now - s.oldestYear : 0;
 
     return [
       // ── Cantidad de conciertos ────────────────────────────────────────────
-      _a('first_concert',   '🎵', 'Primer directo',
-          'Asiste a tu primer concierto',                   s.totalConcerts >= 1),
-      _a('five_concerts',   '🎶', 'Habitual',
-          '5 conciertos en el cuerpo',                      s.totalConcerts >= 5),
-      _a('twenty_five',     '🏆', 'Veterano',
-          '25 conciertos no es para cualquiera',            s.totalConcerts >= 25),
-      _a('fifty_concerts',  '🔥', 'Experto',
-          '50 conciertos. Ya lo has visto todo',            s.totalConcerts >= 50),
-      _a('hundred_concerts','👑', 'Leyenda',
-          '100 conciertos. Eres una leyenda del directo',   s.totalConcerts >= 100),
-      _a('two_hundred',     '🌠', 'Inmortal',
-          '200 conciertos. A otro nivel',                   s.totalConcerts >= 200),
+      _a('first_concert',   '🎵', l.achvFirstConcertTitle,
+          l.achvFirstConcertDesc,                           s.totalConcerts >= 1),
+      _a('five_concerts',   '🎶', l.achvFiveConcertsTitle,
+          l.achvFiveConcertsDesc,                           s.totalConcerts >= 5),
+      _a('twenty_five',     '🏆', l.achvTwentyFiveTitle,
+          l.achvTwentyFiveDesc,                             s.totalConcerts >= 25),
+      _a('fifty_concerts',  '🔥', l.achvFiftyConcertsTitle,
+          l.achvFiftyConcertsDesc,                          s.totalConcerts >= 50),
+      _a('hundred_concerts','👑', l.achvHundredConcertsTitle,
+          l.achvHundredConcertsDesc,                        s.totalConcerts >= 100),
+      _a('two_hundred',     '🌠', l.achvTwoHundredTitle,
+          l.achvTwoHundredDesc,                             s.totalConcerts >= 200),
 
       // ── Géneros ───────────────────────────────────────────────────────────
-      _a('rockero',         '🎸', 'Rockero',
-          '3 conciertos de rock',                           s.rockConcerts >= 3),
-      _a('rockero_pro',     '⚡', 'Rock Puro',
-          '10 conciertos de rock',                          s.rockConcerts >= 10),
-      _a('metalero',        '🤘', 'Metalero',
-          '3 conciertos de metal o heavy',                  s.metalConcerts >= 3),
-      _a('urbano',          '🎤', 'Urbano',
-          '3 conciertos de hip-hop, rap o trap',            s.urbanConcerts >= 3),
+      _a('rockero',         '🎸', l.achvRockeroTitle,
+          l.achvRockeroDesc,                                s.rockConcerts >= 3),
+      _a('rockero_pro',     '⚡', l.achvRockeroProTitle,
+          l.achvRockeroProDesc,                              s.rockConcerts >= 10),
+      _a('metalero',        '🤘', l.achvMetaleroTitle,
+          l.achvMetaleroDesc,                                s.metalConcerts >= 3),
+      _a('urbano',          '🎤', l.achvUrbanoTitle,
+          l.achvUrbanoDesc,                                  s.urbanConcerts >= 3),
 
       // ── Festivales ────────────────────────────────────────────────────────
-      _a('first_festival',  '🎪', 'Festivalero',
-          'Tu primer festival',                             s.uniqueFestivals >= 1),
-      _a('five_festivals',  '🌈', 'Festival Addict',
-          '5 festivales distintos',                         s.uniqueFestivals >= 5),
-      _a('ten_festivals',   '🎠', 'Rey del Festival',
-          '10 festivales distintos',                        s.uniqueFestivals >= 10),
+      _a('first_festival',  '🎪', l.achvFirstFestivalTitle,
+          l.achvFirstFestivalDesc,                           s.uniqueFestivals >= 1),
+      _a('five_festivals',  '🌈', l.achvFiveFestivalsTitle,
+          l.achvFiveFestivalsDesc,                           s.uniqueFestivals >= 5),
+      _a('ten_festivals',   '🎠', l.achvTenFestivalsTitle,
+          l.achvTenFestivalsDesc,                            s.uniqueFestivals >= 10),
 
       // ── Artistas ─────────────────────────────────────────────────────────
-      _a('eclectico',       '🎨', 'Ecléctico',
-          '10 artistas distintos',                          s.uniqueArtists >= 10),
-      _a('explorador',      '🌍', 'Explorador',
-          '25 artistas distintos',                          s.uniqueArtists >= 25),
-      _a('coleccionista',   '🗂️', 'Coleccionista',
-          '50 artistas distintos',                          s.uniqueArtists >= 50),
+      _a('eclectico',       '🎨', l.achvEclecticoTitle,
+          l.achvEclecticoDesc,                               s.uniqueArtists >= 10),
+      _a('explorador',      '🌍', l.achvExploradorTitle,
+          l.achvExploradorDesc,                              s.uniqueArtists >= 25),
+      _a('coleccionista',   '🗂️', l.achvColeccionistaTitle,
+          l.achvColeccionistaDesc,                           s.uniqueArtists >= 50),
 
       // ── Superfan ──────────────────────────────────────────────────────────
-      _a('superfan',        '💘', 'Superfan',
-          'Viste al mismo artista 3 veces',                 s.maxSameArtist >= 3),
-      _a('obsesionado',     '🔁', 'Obsesionado',
-          'Viste al mismo artista 5 veces',                 s.maxSameArtist >= 5),
+      _a('superfan',        '💘', l.achvSuperfanTitle,
+          l.achvSuperfanDesc,                                s.maxSameArtist >= 3),
+      _a('obsesionado',     '🔁', l.achvObsesionadoTitle,
+          l.achvObsesionadoDesc,                             s.maxSameArtist >= 5),
 
       // ── Ciudades ─────────────────────────────────────────────────────────
-      _a('viajero',         '🗺️', 'Viajero',
-          'Conciertos en 3 ciudades distintas',             s.uniqueCities >= 3),
-      _a('turista',         '✈️', 'Turista Musical',
-          'Conciertos en 10 ciudades distintas',            s.uniqueCities >= 10),
+      _a('viajero',         '🗺️', l.achvViajeroTitle,
+          l.achvViajeroDesc,                                 s.uniqueCities >= 3),
+      _a('turista',         '✈️', l.achvTuristaTitle,
+          l.achvTuristaDesc,                                 s.uniqueCities >= 10),
 
       // ── Crítico / valoraciones ────────────────────────────────────────────
-      _a('critico',         '⭐', 'Crítico',
-          'Valora tu primer concierto',                     s.totalRated >= 1),
-      _a('gran_critico',    '🎯', 'Gran Crítico',
-          'Valora 10 conciertos',                           s.totalRated >= 10),
-      _a('analitico',       '📊', 'Analítico',
-          'Valora 25 conciertos',                           s.totalRated >= 25),
-      _a('perfeccionista',  '💯', 'Perfeccionista',
-          'Da 5 estrellas a un concierto',                  s.fiveStarConcerts >= 1),
+      _a('critico',         '⭐', l.achvCriticoTitle,
+          l.achvCriticoDesc,                                 s.totalRated >= 1),
+      _a('gran_critico',    '🎯', l.achvGranCriticoTitle,
+          l.achvGranCriticoDesc,                             s.totalRated >= 10),
+      _a('analitico',       '📊', l.achvAnaliticoTitle,
+          l.achvAnaliticoDesc,                               s.totalRated >= 25),
+      _a('perfeccionista',  '💯', l.achvPerfeccionistaTitle,
+          l.achvPerfeccionistaDesc,                          s.fiveStarConcerts >= 1),
 
       // ── Favoritos ────────────────────────────────────────────────────────
-      _a('apasionado',      '❤️', 'Apasionado',
-          '10 conciertos en favoritos',                     s.totalFavorites >= 10),
+      _a('apasionado',      '❤️', l.achvApasionadoTitle,
+          l.achvApasionadoDesc,                              s.totalFavorites >= 10),
 
       // ── Dinero ───────────────────────────────────────────────────────────
-      _a('maniroto',        '💸', 'Maniroto',
-          'Más de 500 € gastados en entradas',              s.totalSpent >= 500),
+      _a('maniroto',        '💸', l.achvManirotoTitle,
+          l.achvManirotoDesc,                                s.totalSpent >= 500),
 
       // ── Antigüedad ────────────────────────────────────────────────────────
-      _a('historico',       '📅', 'Fan Histórico',
-          'Llevas más de 5 años yendo a conciertos',        yearsSince >= 5),
-      _a('decada',          '🕰️', 'Una Década',
-          'Más de 10 años en la brecha',                    yearsSince >= 10),
+      _a('historico',       '📅', l.achvHistoricoTitle,
+          l.achvHistoricoDesc,                               yearsSince >= 5),
+      _a('decada',          '🕰️', l.achvDecadaTitle,
+          l.achvDecadaDesc,                                  yearsSince >= 10),
     ];
   }
 

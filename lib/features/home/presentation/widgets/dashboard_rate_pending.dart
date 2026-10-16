@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -63,10 +64,11 @@ class _DashboardRatePendingState extends ConsumerState<DashboardRatePending> {
               children: [
                 const Text('⭐', style: TextStyle(fontSize: 18)),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Por valorar',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    AppLocalizations.of(context).dashRatePendingTitle,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                 ),
                 // Navegación  ◀ N/total ▶
@@ -162,7 +164,9 @@ class _PendingConcertRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final dateStr = DateFormat('d MMM yyyy', 'es').format(concert.date);
+    final dateStr = DateFormat(
+            'd MMM yyyy', Localizations.localeOf(context).languageCode)
+        .format(concert.date);
 
     return InkWell(
       onTap: () => context.push('/add', extra: concert),

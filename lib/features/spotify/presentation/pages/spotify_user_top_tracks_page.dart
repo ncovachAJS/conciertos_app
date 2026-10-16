@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/spotify_track.dart';
 import '../providers/spotify_provider.dart';
 
@@ -25,9 +26,9 @@ class SpotifyUserTopTracksPage extends ConsumerWidget {
           children: [
             _SpotifyDot(size: 22),
             const SizedBox(width: 8),
-            const Flexible(
+            Flexible(
               child: Text(
-                'Mis canciones favoritas',
+                AppLocalizations.of(context).spotifyTopTracksTitle,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -40,7 +41,7 @@ class SpotifyUserTopTracksPage extends ConsumerWidget {
             data: (connected) => connected
                 ? IconButton(
                     icon: const Icon(Icons.logout_rounded),
-                    tooltip: 'Desconectar Spotify',
+                    tooltip: AppLocalizations.of(context).spotifyDisconnect,
                     onPressed: () =>
                         ref.read(spotifyTopArtistsProvider.notifier).logout(),
                   )
@@ -89,7 +90,7 @@ class _ConnectView extends StatelessWidget {
             _SpotifyDot(size: 72),
             const SizedBox(height: 28),
             Text(
-              'Tus canciones más escuchadas',
+              AppLocalizations.of(context).spotifyTopTracksConnectTitle,
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -99,7 +100,7 @@ class _ConnectView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Conecta tu cuenta de Spotify para ver aquí tus canciones favoritas.',
+              AppLocalizations.of(context).spotifyTopTracksConnectDesc,
               style: TextStyle(
                 fontSize: 15,
                 color: cs.onSurface.withValues(alpha: .6),
@@ -119,9 +120,9 @@ class _ConnectView extends StatelessWidget {
                 ),
               ),
               icon: _SpotifyDot(size: 20),
-              label: const Text(
-                'Conectar con Spotify',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              label: Text(
+                AppLocalizations.of(context).spotifyConnect,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ],
@@ -192,7 +193,7 @@ class _TrackListViewState extends State<_TrackListView> {
               children: [
                 Expanded(
                   child: Text(
-                    'Tus ${widget.tracks.length} canciones más escuchadas',
+                    AppLocalizations.of(context).spotifyTopTracksCount(widget.tracks.length),
                     style: TextStyle(
                       fontSize: 14,
                       color: cs.onSurface.withValues(alpha: .5),
@@ -200,7 +201,7 @@ class _TrackListViewState extends State<_TrackListView> {
                   ),
                 ),
                 Text(
-                  'Datos de Spotify',
+                  AppLocalizations.of(context).spotifyDataFrom,
                   style: TextStyle(
                     fontSize: 11,
                     color: cs.onSurface.withValues(alpha: .3),
@@ -388,7 +389,7 @@ class _ErrorView extends StatelessWidget {
                 size: 52, color: cs.error.withValues(alpha: .7)),
             const SizedBox(height: 16),
             Text(
-              'No se pudo cargar',
+              AppLocalizations.of(context).spotifyLoadError,
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -409,7 +410,7 @@ class _ErrorView extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
+              label: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),

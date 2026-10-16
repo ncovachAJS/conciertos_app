@@ -76,7 +76,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Introduce tu email y te enviaremos un enlace para crear una nueva contraseña.',
+            l.forgotPasswordIntro,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               fontSize: 15,
@@ -87,13 +87,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Email',
-              prefixIcon: Icon(Icons.email_outlined),
+            decoration: InputDecoration(
+              labelText: l.emailLabel,
+              prefixIcon: const Icon(Icons.email_outlined),
             ),
             validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Introduce tu email';
-              if (!v.contains('@')) return 'Email no válido';
+              if (v == null || v.trim().isEmpty) return l.emailRequired;
+              if (!v.contains('@')) return l.emailInvalid;
               return null;
             },
           ),
@@ -130,14 +130,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           color: Color(0xFFE53935),
         ),
         const SizedBox(height: 24),
-        const Text(
-          '¡Email enviado!',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        Text(
+          l.emailSentTitle,
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
         Text(
-          'Si el email existe, recibirás un enlace para restablecer tu contraseña.\n\nRevisa también la carpeta de spam.',
+          l.emailSentBody,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             fontSize: 15,

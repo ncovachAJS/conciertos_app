@@ -219,26 +219,25 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
       setState(() => _selectedIds.addAll(concerts.map((c) => c.id)));
 
   Future<void> _deleteSelected() async {
+    final l = AppLocalizations.of(context);
     final ids = Set<String>.from(_selectedIds);
     final count = ids.length;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar conciertos'),
-        content: Text(
-          '¿Eliminar $count concierto${count == 1 ? '' : 's'}?\nEsta acción no se puede deshacer.',
-        ),
+        title: Text(l.deleteConcertsTitle),
+        content: Text(l.deleteConcertsConfirm(count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFFE53935),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar'),
+            child: Text(l.delete),
           ),
         ],
       ),
@@ -261,9 +260,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
     setState(() => _deleting = false);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          '$deleted concierto${deleted == 1 ? '' : 's'} eliminado${deleted == 1 ? '' : 's'}',
-        ),
+        content: Text(l.concertsDeletedCount(deleted)),
       ),
     );
   }
@@ -385,7 +382,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
 
     return AppPage(
       title: _selectionMode && _selectedIds.isNotEmpty
-          ? '${_selectedIds.length} seleccionado${_selectedIds.length == 1 ? '' : 's'}'
+          ? l.concertsSelectedCount(_selectedIds.length)
           : l.concertsTitle,
       actions: _selectionMode
           ? [
@@ -400,22 +397,22 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                       .toList();
                   _selectAll(mine);
                 },
-                child: const Text(
-                  'Todo',
-                  style: TextStyle(color: Color(0xFFE53935)),
+                child: Text(
+                  l.selectAllLabel,
+                  style: const TextStyle(color: Color(0xFFE53935)),
                 ),
               ),
               // Eliminar seleccionados
               IconButton(
                 icon: const Icon(Icons.delete_rounded),
                 color: const Color(0xFFE53935),
-                tooltip: 'Eliminar seleccionados',
+                tooltip: l.deleteSelectedTooltip,
                 onPressed: _selectedIds.isEmpty ? null : _deleteSelected,
               ),
               // Salir de selección
               IconButton(
                 icon: const Icon(Icons.close_rounded),
-                tooltip: 'Cancelar selección',
+                tooltip: l.cancelSelectionTooltip,
                 onPressed: _exitSelection,
               ),
             ]
@@ -424,7 +421,7 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
               if (_viewMode != _ViewMode.calendar)
                 IconButton(
                   icon: const Icon(Icons.checklist_rounded),
-                  tooltip: 'Seleccionar',
+                  tooltip: l.selectTooltip,
                   onPressed: () => setState(() => _selectionMode = true),
                 ),
               _ViewToggle(
@@ -670,13 +667,13 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                                   ),
                                 if (_filter.onlyFavorites)
                                   _ActiveChip(
-                                    label: '⭐ Favoritos',
+                                    label: '⭐ ${l.favoritesTitle}',
                                     onRemove: () => setState(() => _filter =
                                         _filter.copyWith(onlyFavorites: false)),
                                   ),
                                 if (_filter.onlyLiked)
                                   _ActiveChip(
-                                    label: '❤️ Me gustan',
+                                    label: '❤️ ${l.filterLiked}',
                                     onRemove: () => setState(() => _filter =
                                         _filter.copyWith(onlyLiked: false)),
                                   ),
@@ -688,9 +685,9 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                         TextButton(
                           onPressed: () =>
                               setState(() => _filter = const _ConcertFilter()),
-                          child: const Text(
-                            'Limpiar',
-                            style: TextStyle(color: Color(0xFFE53935)),
+                          child: Text(
+                            l.clearLabel,
+                            style: const TextStyle(color: Color(0xFFE53935)),
                           ),
                         ),
                       ],
@@ -812,6 +809,7 @@ class _ViewToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context);
 
     Widget btn(_ViewMode mode, IconData icon, String tooltip) {
       final selected = current == mode;
@@ -845,11 +843,11 @@ class _ViewToggle extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          btn(_ViewMode.list,     Icons.view_list_rounded,    'Lista'),
+          btn(_ViewMode.list,     Icons.view_list_rounded,    l.viewList),
           const SizedBox(width: 2),
-          btn(_ViewMode.grid,     Icons.grid_view_rounded,    'Cuadrícula'),
+          btn(_ViewMode.grid,     Icons.grid_view_rounded,    l.viewGrid),
           const SizedBox(width: 2),
-          btn(_ViewMode.calendar, Icons.calendar_month_rounded, 'Calendario'),
+          btn(_ViewMode.calendar, Icons.calendar_month_rounded, l.viewCalendar),
         ],
       ),
     );
@@ -905,26 +903,27 @@ class _TabContent extends StatelessWidget {
     return '🎵';
   }
 
-  String? _emptySubtitle(IconData icon) {
+  String? _emptySubtitle(AppLocalizations l, IconData icon) {
     if (icon == Icons.history_rounded) {
-      return 'Tus conciertos pasados aparecerán aquí';
+      return l.emptyPastSubtitle;
     }
     if (icon == Icons.calendar_month_rounded) {
-      return 'Añade un concierto futuro para no perderte nada';
+      return l.emptyUpcomingSubtitle;
     }
     if (icon == Icons.group_outlined) {
-      return 'Cuando tus amigos compartan conciertos, los verás aquí';
+      return l.emptySharedSubtitle;
     }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     if (concerts.isEmpty) {
       return EmptyState(
         emoji: _emptyEmoji(emptyIcon),
         title: emptyText,
-        subtitle: _emptySubtitle(emptyIcon),
+        subtitle: _emptySubtitle(l, emptyIcon),
         accentColor: const Color(0xFFE53935),
       );
     }
@@ -1331,6 +1330,7 @@ class _FilterSheetState extends State<_FilterSheet> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.72,
@@ -1359,15 +1359,15 @@ class _FilterSheetState extends State<_FilterSheet> {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
               child: Row(
                 children: [
-                  const Text(
-                    'Filtrar conciertos',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  Text(
+                    l.filterSheetTitle,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                   const Spacer(),
                   TextButton(
                     onPressed: () => setState(() => _f = const _ConcertFilter()),
-                    child: const Text('Limpiar',
-                        style: TextStyle(color: Color(0xFFE53935))),
+                    child: Text(l.clearLabel,
+                        style: const TextStyle(color: Color(0xFFE53935))),
                   ),
                 ],
               ),
@@ -1379,7 +1379,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                 children: [
                   _FilterSection(
-                    title: 'Año',
+                    title: l.year,
                     child: Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -1400,7 +1400,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                   ),
                   if (_genres.isNotEmpty)
                     _FilterSection(
-                      title: 'Género',
+                      title: l.genreLabel,
                       child: Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -1421,7 +1421,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                     ),
                   if (_cities.isNotEmpty)
                     _FilterSection(
-                      title: 'Ciudad',
+                      title: l.cityLabel,
                       child: Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -1441,7 +1441,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                       ),
                     ),
                   _FilterSection(
-                    title: 'Valoración mínima',
+                    title: l.filterMinRating,
                     child: Row(
                       children: List.generate(5, (i) {
                         final stars = i + 1;
@@ -1463,12 +1463,12 @@ class _FilterSheetState extends State<_FilterSheet> {
                     ),
                   ),
                   _FilterSection(
-                    title: 'Mostrar solo',
+                    title: l.filterShowOnly,
                     child: Column(
                       children: [
                         SwitchListTile.adaptive(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Favoritos'),
+                          title: Text(l.favoritesTitle),
                           value: _f.onlyFavorites,
                           activeColor: const Color(0xFFE53935),
                           onChanged: (v) =>
@@ -1476,7 +1476,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                         ),
                         SwitchListTile.adaptive(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Me gustan'),
+                          title: Text(l.filterLiked),
                           value: _f.onlyLiked,
                           activeColor: const Color(0xFFE53935),
                           onChanged: (v) =>
@@ -1500,8 +1500,8 @@ class _FilterSheetState extends State<_FilterSheet> {
                         borderRadius: BorderRadius.circular(16)),
                   ),
                   onPressed: () => Navigator.pop(context, _f),
-                  child: const Text('Aplicar filtros',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: Text(l.applyFilters,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ),
