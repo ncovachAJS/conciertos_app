@@ -193,11 +193,51 @@ footer{background:var(--bg);border-top:1px solid var(--border);
 .hero-inner .btns{animation:fadeUp .7s .56s both}
 .phones{animation:fadeIn 1s .7s both}
 
+/* NAV MENU */
+.nav-links{list-style:none;display:flex;align-items:center;gap:4px}
+.nav-links a{font-size:13px;font-weight:600;letter-spacing:.04em;padding:7px 13px;border-radius:8px;
+  color:var(--fg-dim);transition:color .15s,background .15s}
+.nav-links a:hover{color:var(--fg);background:var(--surface)}
+.nav-links .nav-cta-link{background:var(--accent);color:#fff !important;border-radius:100px;
+  padding:9px 18px;font-size:12px;letter-spacing:.07em;text-transform:uppercase;font-weight:700}
+.nav-links .nav-cta-link:hover{background:#d43d12 !important}
+.nav-burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px}
+.nav-burger span{display:block;width:22px;height:2px;background:var(--fg);border-radius:2px;
+  transition:transform .25s,opacity .25s}
+.nav-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-burger.open span:nth-child(2){opacity:0}
+.nav-burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* active nav link highlight */
+.nav-links a.active{color:var(--fg);background:var(--surface)}
+
+@media(max-width:768px){
+  .nav-links{
+    display:none;flex-direction:column;align-items:flex-start;gap:2px;
+    position:fixed;top:57px;left:0;right:0;
+    background:rgba(8,8,8,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);padding:12px 20px 20px;z-index:99
+  }
+  .nav-links.open{display:flex}
+  .nav-links a{width:100%;padding:12px 14px;font-size:15px}
+  .nav-links .nav-cta-link{margin-top:8px;text-align:center;width:100%;padding:13px 18px}
+  .nav-burger{display:flex}
+}
+
 </style>
 
 <nav>
   <div class="nav-logo"><div class="dot"></div>La Vida en Directo</div>
-  <a href="#descarga" class="nav-cta">Descarga la app</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#historial">Historial</a></li>
+    <li><a href="#estadisticas">Stats</a></li>
+    <li><a href="#amigos">Amigos</a></li>
+    <li><a href="#wrapped">Wrapped</a></li>
+    <li><a href="#descarga" class="nav-cta-link">Descargar</a></li>
+  </ul>
+  <button class="nav-burger" id="navBurger" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- HERO -->
@@ -230,7 +270,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);
 </div>
 
 <!-- FEATURE 1: Tu historial -->
-<section style="background:var(--bg2)">
+<section id="historial" style="background:var(--bg2)">
   <div class="wrap">
     <div class="feat-row">
       <div class="phone-wrap">
@@ -261,7 +301,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);
 </section>
 
 <!-- FEATURE 2: Añadir concierto -->
-<section style="background:var(--bg)">
+<section id="anadir" style="background:var(--bg)">
   <div class="wrap">
     <div class="feat-row rev">
       <div class="feat-text">
@@ -292,7 +332,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);
 </section>
 
 <!-- FEATURE 3: Estadísticas -->
-<section style="background:var(--bg2)">
+<section id="estadisticas" style="background:var(--bg2)">
   <div class="wrap">
     <div class="feat-row">
       <div class="phone-wrap">
@@ -323,7 +363,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);
 </section>
 
 <!-- FEATURE 4: Recomendados y favoritos -->
-<section style="background:var(--bg)">
+<section id="descubre" style="background:var(--bg)">
   <div class="wrap">
     <div class="feat-row rev">
       <div class="feat-text">
@@ -534,5 +574,39 @@ const nav = document.querySelector('nav');
 window.addEventListener('scroll',()=>{
   nav.style.background = window.scrollY > 40 ? 'rgba(8,8,8,.97)' : 'rgba(8,8,8,.88)';
 },{passive:true});
+</script>
+
+<script>
+// Burger menu
+const burger = document.getElementById('navBurger');
+const navLinks = document.getElementById('navLinks');
+burger.addEventListener('click', () => {
+  burger.classList.toggle('open');
+  navLinks.classList.toggle('open');
+});
+// Close on link click
+navLinks.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    burger.classList.remove('open');
+    navLinks.classList.remove('open');
+  });
+});
+// Active link on scroll
+const sections = ['historial','anadir','estadisticas','descubre','amigos','wrapped','descarga'];
+const linkMap = {};
+sections.forEach(id => {
+  const el = document.getElementById(id);
+  const a  = navLinks.querySelector(`a[href="#${id}"]`);
+  if(el && a) linkMap[id] = {el, a};
+});
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY + 100;
+  let active = null;
+  Object.values(linkMap).forEach(({el, a}) => {
+    if(el.offsetTop <= scrollY) active = a;
+  });
+  navLinks.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+  if(active) active.classList.add('active');
+}, {passive: true});
 </script>
 
