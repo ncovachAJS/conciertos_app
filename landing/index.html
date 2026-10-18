@@ -134,6 +134,16 @@ footer{background:var(--bg);border-top:1px solid var(--border);
   section{padding-block:60px}
   .cta{padding-block:68px}
 }
+/* STORE BADGES */
+.store-badge{display:inline-flex;align-items:center;gap:11px;
+  background:#111;border:1px solid rgba(255,255,255,.18);border-radius:12px;
+  padding:10px 20px;color:#fff;text-decoration:none;
+  transition:border-color .18s,transform .18s,box-shadow .18s}
+.store-badge:hover{border-color:rgba(255,255,255,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.store-badge div{display:flex;flex-direction:column;line-height:1.1}
+.store-badge small{font-size:10px;font-weight:500;letter-spacing:.04em;color:rgba(255,255,255,.65);text-transform:uppercase}
+.store-badge strong{font-size:18px;font-weight:700;letter-spacing:.01em;white-space:nowrap}
+
 /* ===== ANIMATIONS ===== */
 @keyframes heroGlow{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
@@ -249,8 +259,8 @@ footer{background:var(--bg);border-top:1px solid var(--border);
     <h1 class="hero-title">La Vida<span>en Directo</span></h1>
     <p class="hero-sub">Tu diario de conciertos. Guarda cada show que viviste, revisá tus estadísticas y conectá con amigos que comparten tu gusto musical.</p>
     <div class="btns">
-      <a href="#descarga" style="display:inline-flex;align-items:center"><img src="assets/badge-appstore.png" alt="App Store" style="height:46px"></a>
-      <a href="#descarga" style="display:inline-flex;align-items:center"><img src="assets/badge-googleplay.png" alt="Google Play" style="height:46px"></a>
+      <a href="#descarga" class="store-badge"><svg width="22" height="22" viewBox="0 0 814 1000" fill="#fff"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.8 135.4-317.7 268.5-317.7 99.8 0 183 65.8 245.8 65.8 59.2 0 152-69.1 264.4-69.1 42.8 0 164.9 3.9 243.2 117.9zm-166.3-116c-37.8-45.1-91.7-79.3-152.9-79.3-9 0-18.1 .8-26.9 2.6 2.6-15.4 4.5-31.8 4.5-47.5 0-60.4-24.4-122.6-73.8-168.2-46.7-43.4-108.2-68.7-166.3-68.7-2.6 0-5.1 .3-7.7 .5 1.3-10.3 2.1-20.6 2.1-31 0-56.3-19.7-113.1-58-154.7C120.7 37.7 64.8 13.3 9 13.3c-3.2 0-6.4 .2-9.6 .5 37.8 45.1 56.3 104.8 56.3 164.3 0 56.3-17.9 112.6-52.7 155.8C-31.4 384.3 9 420 34.7 435.5c28.5 17.3 60.5 26.3 92.8 26.3 46.7 0 89.7-18.1 122.9-45.4 35.6-29.1 64.9-69.8 79.5-117.1z"/></svg><div><small>Available on the</small><strong>App Store</strong></div></a>
+      <a href="#descarga" class="store-badge"><svg width="22" height="22" viewBox="0 0 512 512"><path fill="#4fc3f7" d="M48 432L240 256 48 80v352z"/><path fill="#f9a825" d="M304 192l-64-112-192 176 192 176 64-112-128-64 128-64z"/><path fill="#e53935" d="M304 320l96-64-96-64v128z"/><path fill="#66bb6a" d="M240 144L48 80l192 176V144z"/></svg><div><small>GET IT ON</small><strong>Google Play</strong></div></a>
     </div>
     <div class="phones">
       <div class="phone side"><img src="assets/concerts2.gif" alt="Conciertos"></div>
@@ -564,8 +574,8 @@ footer{background:var(--bg);border-top:1px solid var(--border);
     <h2 class="cta-title">Empieza a contar<br><span style="color:var(--accent)">tus shows.</span></h2>
     <p class="cta-sub">Gratis para iOS y Android. Sin publicidad.</p>
     <div class="store-row">
-      <a href="#" style="display:inline-flex;align-items:center"><img src="assets/badge-appstore.png" alt="App Store" style="height:52px"></a>
-      <a href="#" style="display:inline-flex;align-items:center"><img src="assets/badge-googleplay.png" alt="Google Play" style="height:52px"></a>
+      <a href="#" class="store-badge"><svg width="22" height="22" viewBox="0 0 814 1000" fill="#fff"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.8 135.4-317.7 268.5-317.7 99.8 0 183 65.8 245.8 65.8 59.2 0 152-69.1 264.4-69.1 42.8 0 164.9 3.9 243.2 117.9zm-166.3-116c-37.8-45.1-91.7-79.3-152.9-79.3-9 0-18.1 .8-26.9 2.6 2.6-15.4 4.5-31.8 4.5-47.5 0-60.4-24.4-122.6-73.8-168.2-46.7-43.4-108.2-68.7-166.3-68.7-2.6 0-5.1 .3-7.7 .5 1.3-10.3 2.1-20.6 2.1-31 0-56.3-19.7-113.1-58-154.7C120.7 37.7 64.8 13.3 9 13.3c-3.2 0-6.4 .2-9.6 .5 37.8 45.1 56.3 104.8 56.3 164.3 0 56.3-17.9 112.6-52.7 155.8C-31.4 384.3 9 420 34.7 435.5c28.5 17.3 60.5 26.3 92.8 26.3 46.7 0 89.7-18.1 122.9-45.4 35.6-29.1 64.9-69.8 79.5-117.1z"/></svg><div><small>Available on the</small><strong>App Store</strong></div></a>
+      <a href="#" class="store-badge"><svg width="22" height="22" viewBox="0 0 512 512"><path fill="#4fc3f7" d="M48 432L240 256 48 80v352z"/><path fill="#f9a825" d="M304 192l-64-112-192 176 192 176 64-112-128-64 128-64z"/><path fill="#e53935" d="M304 320l96-64-96-64v128z"/><path fill="#66bb6a" d="M240 144L48 80l192 176V144z"/></svg><div><small>GET IT ON</small><strong>Google Play</strong></div></a>
     </div>
   </div>
 </section>
