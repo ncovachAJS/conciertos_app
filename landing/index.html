@@ -134,6 +134,65 @@ footer{background:var(--bg);border-top:1px solid var(--border);
   section{padding-block:60px}
   .cta{padding-block:68px}
 }
+/* ===== ANIMATIONS ===== */
+@keyframes heroGlow{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes floatSide{0%,100%{transform:translateY(24px)}50%{transform:translateY(14px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 8px var(--accent)}50%{box-shadow:0 0 18px var(--accent),0 0 32px rgba(232,73,26,.45)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes gradShift{0%,100%{opacity:.8}50%{opacity:1}}
+
+.hero-bg{animation:gradShift 6s ease-in-out infinite}
+.dot{animation:pulse 2.4s ease-in-out infinite}
+
+/* floating phones */
+.phones .phone.main{animation:float 5s ease-in-out infinite}
+.phones .phone.side:first-child{animation:floatSide 6s ease-in-out infinite}
+.phones .phone.side:last-child{animation:floatSide 5.5s ease-in-out 0.7s infinite}
+
+/* nav hover */
+.nav-cta{transition:transform .18s,box-shadow .18s}
+.nav-cta:hover{transform:scale(1.04);box-shadow:0 0 20px rgba(232,73,26,.5)}
+
+/* button hover */
+.btn-w,.btn-g{transition:transform .18s,box-shadow .18s}
+.btn-w:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(242,237,232,.15)}
+.btn-g:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4);border-color:rgba(255,255,255,.2)}
+
+/* feature phone glow pulse */
+.phone-wrap .phone{transition:transform .3s}
+.phone-wrap:hover .phone{transform:translateY(-6px) scale(1.012)}
+
+/* scroll reveal */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-32px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(32px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+
+/* stagger children */
+.stagger > *{opacity:0;transform:translateY(20px);transition:opacity .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1)}
+.stagger.visible > *:nth-child(1){opacity:1;transform:none;transition-delay:.05s}
+.stagger.visible > *:nth-child(2){opacity:1;transform:none;transition-delay:.15s}
+.stagger.visible > *:nth-child(3){opacity:1;transform:none;transition-delay:.25s}
+.stagger.visible > *:nth-child(4){opacity:1;transform:none;transition-delay:.35s}
+.stagger.visible > *:nth-child(5){opacity:1;transform:none;transition-delay:.45s}
+
+/* stats shimmer */
+.stat-n{background:linear-gradient(90deg,var(--fg) 0%,var(--accent) 40%,var(--gold) 60%,var(--fg) 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-n.animated{animation:shimmer 2.5s linear}
+
+/* hero inner anim */
+.hero-inner .pill{animation:fadeUp .7s .1s both}
+.hero-inner .hero-title{animation:fadeUp .75s .25s both}
+.hero-inner .hero-sub{animation:fadeUp .7s .42s both}
+.hero-inner .btns{animation:fadeUp .7s .56s both}
+.phones{animation:fadeIn 1s .7s both}
+
 </style>
 
 <nav>
@@ -316,3 +375,65 @@ footer{background:var(--bg);border-top:1px solid var(--border);
     <a href="#">Instagram</a>
   </div>
 </footer>
+
+<script>
+// Scroll reveal
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:0.12});
+
+// Add reveal classes and observe
+document.querySelectorAll('section').forEach((sec,i)=>{
+  // section label + title + sub
+  sec.querySelectorAll('.section-lbl,.section-title,.section-sub').forEach(el=>{
+    el.classList.add('reveal');
+    io.observe(el);
+  });
+  // feature rows
+  sec.querySelectorAll('.feat-row').forEach(row=>{
+    const phoneWrap = row.querySelector('.phone-wrap');
+    const featText  = row.querySelector('.feat-text');
+    const isRev = row.classList.contains('rev');
+    if(phoneWrap){ phoneWrap.classList.add(isRev?'reveal-right':'reveal-left'); io.observe(phoneWrap); }
+    if(featText){  featText.classList.add(isRev?'reveal-left':'reveal-right');  io.observe(featText); }
+  });
+  // bullets stagger
+  sec.querySelectorAll('.bullets').forEach(b=>{ b.classList.add('stagger'); io.observe(b); });
+});
+
+// Stats bar reveal + counter animation
+const statsItems = document.querySelectorAll('.stat-item');
+const statsIO = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('reveal','visible');
+      const numEl = e.target.querySelector('.stat-n');
+      if(numEl){ numEl.classList.add('animated'); }
+      statsIO.unobserve(e.target);
+    }
+  });
+},{threshold:0.3});
+statsItems.forEach((item,i)=>{
+  item.style.transitionDelay = (i*0.12)+'s';
+  item.classList.add('reveal');
+  statsIO.observe(item);
+});
+
+// CTA section reveal
+document.querySelectorAll('.cta-inner,.cta .btns').forEach(el=>{
+  el.classList.add('reveal');
+  io.observe(el);
+});
+
+// Nav scroll effect
+const nav = document.querySelector('nav');
+window.addEventListener('scroll',()=>{
+  nav.style.background = window.scrollY > 40 ? 'rgba(8,8,8,.97)' : 'rgba(8,8,8,.88)';
+},{passive:true});
+</script>
+
