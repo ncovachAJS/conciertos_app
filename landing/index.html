@@ -353,6 +353,74 @@ footer{background:var(--bg);border-top:1px solid var(--border);
   </div>
 </section>
 
+<!-- AMIGOS -->
+<section id="amigos">
+  <div class="wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center">
+      <!-- Visual left -->
+      <div class="reveal-left" style="display:flex;justify-content:center">
+        <div style="position:relative;width:260px;height:260px">
+          <!-- Central icon -->
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+            width:96px;height:96px;border-radius:28px;
+            background:linear-gradient(135deg,var(--accent),rgba(123,79,207,.8));
+            display:flex;align-items:center;justify-content:center;font-size:44px;
+            box-shadow:0 0 48px rgba(232,73,26,.35),0 0 96px rgba(123,79,207,.15);
+            z-index:2">👥</div>
+          <!-- Orbiting user bubbles -->
+          <div style="position:absolute;top:10px;left:30px;
+            width:56px;height:56px;border-radius:50%;
+            background:var(--bg3);border:2px solid rgba(232,73,26,.4);
+            display:flex;align-items:center;justify-content:center;font-size:22px;
+            box-shadow:0 4px 16px rgba(0,0,0,.4)">🤘</div>
+          <div style="position:absolute;top:10px;right:30px;
+            width:56px;height:56px;border-radius:50%;
+            background:var(--bg3);border:2px solid rgba(123,79,207,.4);
+            display:flex;align-items:center;justify-content:center;font-size:22px;
+            box-shadow:0 4px 16px rgba(0,0,0,.4)">🎸</div>
+          <div style="position:absolute;bottom:10px;left:20px;
+            width:56px;height:56px;border-radius:50%;
+            background:var(--bg3);border:2px solid rgba(201,162,39,.4);
+            display:flex;align-items:center;justify-content:center;font-size:22px;
+            box-shadow:0 4px 16px rgba(0,0,0,.4)">🎺</div>
+          <div style="position:absolute;bottom:10px;right:20px;
+            width:56px;height:56px;border-radius:50%;
+            background:var(--bg3);border:2px solid rgba(34,201,123,.4);
+            display:flex;align-items:center;justify-content:center;font-size:22px;
+            box-shadow:0 4px 16px rgba(0,0,0,.4)">🥁</div>
+          <!-- Connecting lines SVG -->
+          <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="58" y1="38" x2="130" y2="130" stroke="rgba(232,73,26,.2)" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <line x1="202" y1="38" x2="130" y2="130" stroke="rgba(123,79,207,.2)" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <line x1="48" y1="222" x2="130" y2="130" stroke="rgba(201,162,39,.2)" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <line x1="212" y1="222" x2="130" y2="130" stroke="rgba(34,201,123,.2)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          </svg>
+        </div>
+      </div>
+      <!-- Text right -->
+      <div class="feat-text reveal-right">
+        <p class="section-lbl" style="color:var(--purple)">Social</p>
+        <h2 class="section-title">Conciertos<br><span style="color:var(--purple)">en compañía</span></h2>
+        <p class="section-sub">Conecta con amigos que comparten tu gusto musical y compara historiales, favoritos y próximos shows.</p>
+        <div class="bullets stagger" style="margin-top:26px">
+          <div class="bullet">
+            <div class="b-icon" style="background:rgba(123,79,207,.15)">🔗</div>
+            <div class="b-text"><strong>Comparte tu historial</strong> de conciertos con amigos y ve el de ellos en tiempo real.</div>
+          </div>
+          <div class="bullet">
+            <div class="b-icon" style="background:rgba(232,73,26,.15)">📍</div>
+            <div class="b-text"><strong>¿Coincidieron en el mismo show?</strong> La app lo detecta y lo marca como experiencia compartida.</div>
+          </div>
+          <div class="bullet">
+            <div class="b-icon" style="background:rgba(34,201,123,.15)">📅</div>
+            <div class="b-text"><strong>Próximos conciertos compartidos</strong> — descubre qué shows tienen en común antes de que se agoten.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- WRAPPED -->
 <section id="wrapped" style="background:linear-gradient(180deg,var(--bg) 0%,rgba(232,73,26,.06) 50%,var(--bg) 100%)">
   <div class="wrap">
