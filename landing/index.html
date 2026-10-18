@@ -124,15 +124,40 @@ footer{background:var(--bg);border-top:1px solid var(--border);
 .footer-links a{font-size:12px;color:var(--fg-muted)}
 
 @media(max-width:760px){
+  /* Feature sections */
   .feat-row{grid-template-columns:1fr;gap:36px}
   .feat-row.rev .phone-wrap,.feat-row.rev .feat-text{order:unset}
   .phone-wrap .phone{width:210px}
+  /* Hero phones */
   .phones .phone.side{display:none}
+  .phones .phone.main{width:200px;margin:0}
+  /* Stats */
   .stats-bar .wrap{flex-direction:column}
   .stat-item{border-right:none;border-bottom:1px solid var(--border);padding:24px 16px}
   .stat-item:last-child{border-bottom:none}
-  section{padding-block:60px}
-  .cta{padding-block:68px}
+  /* Sections */
+  section{padding-block:52px}
+  .cta{padding-block:56px}
+  /* Hero */
+  .hero{padding:100px 20px 48px}
+  .btns{flex-direction:column;align-items:center;gap:12px;margin-bottom:36px}
+  /* Inline grids: Recuerdos & Amigos */
+  #recuerdos .wrap > div,
+  #amigos .wrap > div{grid-template-columns:1fr !important;gap:40px !important}
+  #recuerdos .wrap > div > div:last-child,
+  #amigos .wrap > div > div:first-child{order:2}
+  /* Wrapped phone */
+  .phone-wrap .phone{max-width:220px}
+  /* Badges */
+  .store-row{gap:10px}
+  .btns a.badge-img img{height:40px !important}
+  /* CTA badges */
+  .store-row a.badge-img img{height:44px !important}
+  /* Section title */
+  .section-title{font-size:clamp(36px,9vw,52px)}
+  /* Footer */
+  footer{flex-direction:column;text-align:center;gap:16px}
+  .footer-links{flex-wrap:wrap;justify-content:center;gap:14px}
 }
 /* STORE BADGES */
 .store-badge{display:inline-flex;align-items:center;gap:11px;
