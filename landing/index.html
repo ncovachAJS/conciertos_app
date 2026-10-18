@@ -74,13 +74,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;
   box-shadow:0 64px 128px rgba(0,0,0,.75),0 0 0 1px rgba(232,73,26,.25),inset 0 1px 0 rgba(255,255,255,.11)}
 .phone.side{opacity:.62;transform:translateY(24px)}
 
-/* STATS BAR */
-.stats-bar{background:var(--bg3);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.stats-bar .wrap{display:flex;justify-content:space-around;flex-wrap:wrap;padding-block:0}
-.stat-item{padding:34px 20px;text-align:center;border-right:1px solid var(--border);flex:1;min-width:130px}
-.stat-item:last-child{border-right:none}
-.stat-n{font-family:var(--display);font-size:52px;letter-spacing:.02em;line-height:1}
-.stat-l{font-size:11px;color:var(--fg-muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
 
 /* SECTIONS */
 section{padding-block:92px}
@@ -133,10 +126,6 @@ footer{background:var(--bg);border-top:1px solid var(--border);
   /* Hero phones */
   .phones .phone.side{display:none}
   .phones .phone.main{width:200px;margin:0}
-  /* Stats */
-  .stats-bar .wrap{flex-direction:column}
-  .stat-item{border-right:none;border-bottom:1px solid var(--border);padding:24px 16px}
-  .stat-item:last-child{border-bottom:none}
   /* Sections */
   section{padding-block:52px}
   .cta{padding-block:56px}
@@ -147,9 +136,6 @@ footer{background:var(--bg);border-top:1px solid var(--border);
   .btns{flex-direction:column;align-items:center;gap:12px;margin-bottom:36px}
   /* Badges hero row */
   .btns a.badge-img img,.btns a.badge-plain img{height:46px !important}
-  /* Stats */
-  .stat-n{font-size:42px}
-  .stat-item{padding:20px 12px}
   /* Inline grids: Recuerdos & Amigos */
   #recuerdos .wrap > div,
   #amigos .wrap > div{grid-template-columns:1fr !important;gap:40px !important}
@@ -236,9 +222,6 @@ a.badge-img img{vertical-align:bottom}
 .stagger.visible > *:nth-child(4){opacity:1;transform:none;transition-delay:.35s}
 .stagger.visible > *:nth-child(5){opacity:1;transform:none;transition-delay:.45s}
 
-/* stats shimmer */
-.stat-n{background:linear-gradient(90deg,var(--fg) 0%,var(--accent) 40%,var(--gold) 60%,var(--fg) 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat-n.animated{animation:shimmer 2.5s linear}
 
 /* hero inner anim */
 .hero-inner .pill{animation:fadeUp .7s .1s both}
@@ -318,14 +301,6 @@ a.badge-img img{vertical-align:bottom}
   </div>
 </section>
 
-<!-- STATS BAR -->
-<div class="stats-bar">
-  <div class="wrap">
-    <div class="stat-item"><div class="stat-n" style="color:var(--accent)">+100</div><div class="stat-l">Conciertos</div></div>
-    <div class="stat-item"><div class="stat-n" style="color:var(--gold)">28</div><div class="stat-l">Logros a desbloquear</div></div>
-    <div class="stat-item"><div class="stat-n" style="color:var(--green)">5</div><div class="stat-l">Pestañas de navegación</div></div>
-    <div class="stat-item"><div class="stat-n" style="color:var(--purple)">0€</div><div class="stat-l">Precio base</div></div>
-  </div>
 </div>
 
 <!-- FEATURE 1: Tu historial -->
@@ -670,23 +645,6 @@ document.querySelectorAll('section').forEach((sec,i)=>{
   sec.querySelectorAll('.bullets').forEach(b=>{ b.classList.add('stagger'); io.observe(b); });
 });
 
-// Stats bar reveal + counter animation
-const statsItems = document.querySelectorAll('.stat-item');
-const statsIO = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      e.target.classList.add('reveal','visible');
-      const numEl = e.target.querySelector('.stat-n');
-      if(numEl){ numEl.classList.add('animated'); }
-      statsIO.unobserve(e.target);
-    }
-  });
-},{threshold:0.3});
-statsItems.forEach((item,i)=>{
-  item.style.transitionDelay = (i*0.12)+'s';
-  item.classList.add('reveal');
-  statsIO.observe(item);
-});
 
 // CTA section reveal
 document.querySelectorAll('.cta-inner,.cta .btns').forEach(el=>{
