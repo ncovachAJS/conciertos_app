@@ -1,7 +1,12 @@
 class ApiConfig {
   ApiConfig._();
 
-  static const String baseUrl = 'https://conciertos-backend.onrender.com';
+  /// Por defecto apunta a producción. Para desarrollo:
+  ///   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://conciertos-backend.onrender.com',
+  );
 
   static const String concertsEndpoint = '$baseUrl/concerts';
   static const String friendsActivityEndpoint = '$baseUrl/concerts/friends-activity';
@@ -54,4 +59,9 @@ class ApiConfig {
   static String photoEndpoint(String photoId) => '$baseUrl/photos/$photoId';
   static String photoTagEndpoint(String photoId, String friendId) =>
       '$baseUrl/photos/$photoId/tag/$friendId';
+
+  // Colección de discos (proxy Discogs en backend)
+  static const String recordsEndpoint = '$baseUrl/records';
+  static const String recordsSearchEndpoint = '$baseUrl/records/search';
+  static String recordEndpoint(String id) => '$baseUrl/records/$id';
 }

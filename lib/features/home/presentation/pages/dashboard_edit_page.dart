@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/app_shell.dart';
 import '../../../../l10n/generated/app_localizations.dart';
@@ -22,6 +23,7 @@ class DashboardEditPage extends ConsumerWidget {
         DashboardSectionId.favorites => Icons.favorite_rounded,
         DashboardSectionId.recent => Icons.history_rounded,
         DashboardSectionId.spotifyEmbed => Icons.headphones_rounded,
+        DashboardSectionId.records => Icons.album_rounded,
       };
 
   static String _label(AppLocalizations l, DashboardSectionId id) =>
@@ -36,6 +38,7 @@ class DashboardEditPage extends ConsumerWidget {
         DashboardSectionId.favorites => l.dashSectionFavorites,
         DashboardSectionId.recent => l.dashSectionRecent,
         DashboardSectionId.spotifyEmbed => l.dashSectionSpotify,
+        DashboardSectionId.records => l.recordsTitle,
       };
 
   @override
@@ -80,6 +83,27 @@ class DashboardEditPage extends ConsumerWidget {
         error: (e, _) => Center(child: Text(l.layoutLoadError)),
         data: (sections) => Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: .10),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: cs.primary.withValues(alpha: .25)),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.dashboard_customize_rounded,
+                      color: cs.primary),
+                  title: Text(
+                    l.quickActionsEditTitle,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(l.quickActionsEditTileSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/quick-actions-edit'),
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Text(

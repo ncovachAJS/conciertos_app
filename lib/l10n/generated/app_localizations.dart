@@ -1217,7 +1217,7 @@ abstract class AppLocalizations {
   /// No description provided for @noMemories.
   ///
   /// In es, this message translates to:
-  /// **'Aún no hay recuerdos.\nAñade fotos desde el detalle de un concierto.'**
+  /// **'Aún no hay recuerdos.\nPulsa el icono de la cámara para añadir tus primeras fotos.'**
   String get noMemories;
 
   /// No description provided for @noMemoriesShort.
@@ -6031,6 +6031,384 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No se pudo cargar'**
   String get spotifyLoadError;
+
+  /// No description provided for @recordsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi colección'**
+  String get recordsTitle;
+
+  /// No description provided for @recordsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 disco} other{{count} discos}}'**
+  String recordsCount(int count);
+
+  /// No description provided for @recordsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes discos'**
+  String get recordsEmpty;
+
+  /// No description provided for @recordsEmptyHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa + para buscar un vinilo o CD y añadirlo a tu colección.'**
+  String get recordsEmptyHint;
+
+  /// No description provided for @recordsFormatAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get recordsFormatAll;
+
+  /// No description provided for @recordsFormatVinyl.
+  ///
+  /// In es, this message translates to:
+  /// **'Vinilo'**
+  String get recordsFormatVinyl;
+
+  /// No description provided for @recordsFormatCd.
+  ///
+  /// In es, this message translates to:
+  /// **'CD'**
+  String get recordsFormatCd;
+
+  /// No description provided for @recordsFormatOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro'**
+  String get recordsFormatOther;
+
+  /// No description provided for @recordsLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cargar tu colección'**
+  String get recordsLoadError;
+
+  /// No description provided for @recordsSearchTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir disco'**
+  String get recordsSearchTitle;
+
+  /// No description provided for @recordsSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Artista, álbum o código de barras'**
+  String get recordsSearchHint;
+
+  /// No description provided for @recordsSearchPrompt.
+  ///
+  /// In es, this message translates to:
+  /// **'Busca por artista, título o código de barras.'**
+  String get recordsSearchPrompt;
+
+  /// No description provided for @recordsSearchEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin resultados'**
+  String get recordsSearchEmpty;
+
+  /// No description provided for @recordsSearchError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo buscar. Inténtalo de nuevo.'**
+  String get recordsSearchError;
+
+  /// No description provided for @recordsAdded.
+  ///
+  /// In es, this message translates to:
+  /// **'Disco añadido'**
+  String get recordsAdded;
+
+  /// No description provided for @recordsAlreadyAdded.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya tienes este disco'**
+  String get recordsAlreadyAdded;
+
+  /// No description provided for @recordsAddError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo añadir el disco'**
+  String get recordsAddError;
+
+  /// No description provided for @recordsAddManual.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir a mano'**
+  String get recordsAddManual;
+
+  /// No description provided for @recordsTitleLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Título'**
+  String get recordsTitleLabel;
+
+  /// No description provided for @recordsArtistLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Artista'**
+  String get recordsArtistLabel;
+
+  /// No description provided for @recordsDeleteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar disco'**
+  String get recordsDeleteTitle;
+
+  /// No description provided for @recordsDeleteConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar «{title}» de tu colección?'**
+  String recordsDeleteConfirm(String title);
+
+  /// No description provided for @recordsNotes.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis notas'**
+  String get recordsNotes;
+
+  /// No description provided for @recordsNotesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Edición, estado del disco, dónde lo compraste...'**
+  String get recordsNotesHint;
+
+  /// No description provided for @recordsNotesSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas guardadas'**
+  String get recordsNotesSaved;
+
+  /// No description provided for @recordsTracklist.
+  ///
+  /// In es, this message translates to:
+  /// **'Canciones'**
+  String get recordsTracklist;
+
+  /// No description provided for @recordsNoTracklist.
+  ///
+  /// In es, this message translates to:
+  /// **'Discogs no tiene la lista de canciones de este disco'**
+  String get recordsNoTracklist;
+
+  /// No description provided for @recordsDetailError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cargar la información del disco'**
+  String get recordsDetailError;
+
+  /// No description provided for @recordsOpenDiscogs.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver en Discogs'**
+  String get recordsOpenDiscogs;
+
+  /// No description provided for @recordsTabCollection.
+  ///
+  /// In es, this message translates to:
+  /// **'Colección'**
+  String get recordsTabCollection;
+
+  /// No description provided for @recordsTabWishlist.
+  ///
+  /// In es, this message translates to:
+  /// **'Deseos'**
+  String get recordsTabWishlist;
+
+  /// No description provided for @recordsWishlistEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu lista de deseos está vacía'**
+  String get recordsWishlistEmpty;
+
+  /// No description provided for @recordsWishlistEmptyHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Pulsa + para guardar los discos que te gustaría conseguir.'**
+  String get recordsWishlistEmptyHint;
+
+  /// No description provided for @recordsSearchWishlistTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir a deseos'**
+  String get recordsSearchWishlistTitle;
+
+  /// No description provided for @recordsSpent.
+  ///
+  /// In es, this message translates to:
+  /// **'{amount} € gastados'**
+  String recordsSpent(String amount);
+
+  /// No description provided for @recordsMarkOwned.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya lo tengo'**
+  String get recordsMarkOwned;
+
+  /// No description provided for @recordsRating.
+  ///
+  /// In es, this message translates to:
+  /// **'Valoración'**
+  String get recordsRating;
+
+  /// No description provided for @recordsCondition.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado del disco'**
+  String get recordsCondition;
+
+  /// No description provided for @recordsPrice.
+  ///
+  /// In es, this message translates to:
+  /// **'Precio pagado'**
+  String get recordsPrice;
+
+  /// No description provided for @recordsPriceInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'El precio no es válido'**
+  String get recordsPriceInvalid;
+
+  /// No description provided for @recordsArtistRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus discos de este artista'**
+  String get recordsArtistRecords;
+
+  /// No description provided for @recordsVinylCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 vinilo} other{{count} vinilos}}'**
+  String recordsVinylCount(int count);
+
+  /// No description provided for @recordsCdCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 CD} other{{count} CDs}}'**
+  String recordsCdCount(int count);
+
+  /// No description provided for @recordsWishlistCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} en deseos'**
+  String recordsWishlistCount(int count);
+
+  /// No description provided for @dashRecordsViewAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver todo'**
+  String get dashRecordsViewAll;
+
+  /// No description provided for @dashRecordsEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza tu colección'**
+  String get dashRecordsEmptyTitle;
+
+  /// No description provided for @dashRecordsEmptyHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade tus vinilos y CDs buscándolos en Discogs.'**
+  String get dashRecordsEmptyHint;
+
+  /// No description provided for @quickActionsEditTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Accesos rápidos'**
+  String get quickActionsEditTitle;
+
+  /// No description provided for @quickActionsEditTileSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige qué atajos aparecen en el inicio'**
+  String get quickActionsEditTileSubtitle;
+
+  /// No description provided for @quickActionsEditHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige hasta {max} atajos y arrástralos para ordenarlos. También puedes abrir esto manteniendo pulsado un atajo del inicio.'**
+  String quickActionsEditHint(int max);
+
+  /// No description provided for @quickActionsYours.
+  ///
+  /// In es, this message translates to:
+  /// **'Tus accesos ({count}/{max})'**
+  String quickActionsYours(int count, int max);
+
+  /// No description provided for @quickActionsAvailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Disponibles'**
+  String get quickActionsAvailable;
+
+  /// No description provided for @quickActionsMaxReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Máximo {max} accesos. Quita uno para añadir otro.'**
+  String quickActionsMaxReached(int max);
+
+  /// No description provided for @quickActionRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'Discos'**
+  String get quickActionRecords;
+
+  /// No description provided for @memoryAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Añadir recuerdo'**
+  String get memoryAdd;
+
+  /// No description provided for @quickActionMemory.
+  ///
+  /// In es, this message translates to:
+  /// **'Recuerdo'**
+  String get quickActionMemory;
+
+  /// No description provided for @memoryPickConcert.
+  ///
+  /// In es, this message translates to:
+  /// **'¿De qué concierto es?'**
+  String get memoryPickConcert;
+
+  /// No description provided for @memoryNoResults.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin resultados'**
+  String get memoryNoResults;
+
+  /// No description provided for @memoryNoConcerts.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes conciertos. Añade uno para poder vincularle recuerdos.'**
+  String get memoryNoConcerts;
+
+  /// No description provided for @memoryUploading.
+  ///
+  /// In es, this message translates to:
+  /// **'Subiendo {done} de {total}…'**
+  String memoryUploading(int done, int total);
+
+  /// No description provided for @memoryAddedTo.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Recuerdo añadido a {artist}} other{{count} recuerdos añadidos a {artist}}}'**
+  String memoryAddedTo(int count, String artist);
+
+  /// No description provided for @memoryAddedPartial.
+  ///
+  /// In es, this message translates to:
+  /// **'{added} añadidos, {failed} no se pudieron subir'**
+  String memoryAddedPartial(int added, int failed);
+
+  /// No description provided for @memoryView.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver concierto'**
+  String get memoryView;
 }
 
 class _AppLocalizationsDelegate

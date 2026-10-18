@@ -24,6 +24,7 @@ import '../widgets/dashboard_on_this_day.dart';
 import '../widgets/dashboard_quick_actions.dart';
 import '../widgets/dashboard_rate_pending.dart';
 import '../widgets/dashboard_recent_concerts.dart';
+import '../widgets/dashboard_records.dart';
 import '../widgets/dashboard_section_title.dart';
 import '../widgets/dashboard_stats.dart';
 import '../widgets/dashboard_streak.dart';
@@ -200,6 +201,22 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 const SizedBox(height: 36),
               ],
 
+            // Fase de pruebas: solo isPro real (ProConfig.isUserPro está abierto a todos).
+            DashboardSectionId.records =>
+              (AuthController.instance.user?.isPro == true)
+                  ? [
+                      DashboardSectionTitle(
+                        icon: Icons.album_rounded,
+                        title: l.recordsTitle,
+                        action: l.dashRecordsViewAll,
+                        onAction: () => context.push('/records'),
+                      ),
+                      const SizedBox(height: 14),
+                      const DashboardRecords(),
+                      const SizedBox(height: 36),
+                    ]
+                  : [],
+
             DashboardSectionId.spotifyEmbed =>
               (AuthController.instance.user?.showSpotify ?? false)
                   ? [
@@ -275,6 +292,7 @@ const _fullWidthSections = {
   DashboardSectionId.recommended,
   DashboardSectionId.spotifyEmbed,
   DashboardSectionId.stats,
+  DashboardSectionId.records,
 };
 
 class _TabletDashboardLayout extends StatelessWidget {

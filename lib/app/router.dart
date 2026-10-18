@@ -17,11 +17,15 @@ import '../features/profile/presentation/pages/settings_page.dart';
 import '../features/profile/presentation/pages/report_issue_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/home/presentation/pages/dashboard_edit_page.dart';
+import '../features/home/presentation/pages/quick_actions_edit_page.dart';
 import '../features/settings/presentation/pages/color_theme_picker_page.dart';
 import '../features/statistics/presentation/pages/stats_edit_page.dart';
 import '../features/statistics/presentation/pages/annual_summary_page.dart';
 import '../features/setlist/presentation/pages/setlist_test_page.dart';
 import '../features/import/presentation/pages/import_page.dart';
+import '../features/records/presentation/pages/records_page.dart';
+import '../features/records/presentation/pages/record_search_page.dart';
+import '../features/records/presentation/pages/record_detail_page.dart';
 import '../features/photos/presentation/pages/feed_page.dart';
 import '../features/friends_activity/presentation/pages/friends_activity_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
@@ -137,6 +141,21 @@ final appRouter = GoRouter(
           builder: (context, state) => const ReportIssuePage(),
         ),
         GoRoute(
+          path: '/records',
+          builder: (context, state) => const RecordsPage(),
+        ),
+        GoRoute(
+          path: '/records/search',
+          builder: (context, state) => RecordSearchPage(
+            wishlist: state.uri.queryParameters['wishlist'] == '1',
+          ),
+        ),
+        GoRoute(
+          path: '/record/:id',
+          builder: (context, state) =>
+              RecordDetailPage(recordId: state.pathParameters['id']!),
+        ),
+        GoRoute(
           path: '/import',
           builder: (context, state) => const ImportPage(),
         ),
@@ -190,6 +209,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/dashboard-edit',
           builder: (context, state) => const DashboardEditPage(),
+        ),
+        GoRoute(
+          path: '/quick-actions-edit',
+          builder: (context, state) => const QuickActionsEditPage(),
         ),
         GoRoute(
           path: '/color-theme',

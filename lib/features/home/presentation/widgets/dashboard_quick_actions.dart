@@ -7,73 +7,71 @@ import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import '../../../../core/config/pro_config.dart';
 import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../friends/presentation/controllers/friends_controller.dart';
+import '../../domain/quick_action.dart';
+import '../providers/quick_actions_provider.dart';
+import 'quick_action_catalog.dart';
 
+/// Fila de accesos rápidos del dashboard. Los atajos son configurables:
+/// mantener pulsado uno abre el editor (misma regla Pro que el resto de la
+/// personalización del inicio).
 class DashboardQuickActions extends ConsumerWidget {
   const DashboardQuickActions({super.key});
+
+  Future<void> _openEditor(BuildContext context) async {
+    final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
+    if (!isPro) {
+      await ProPaywallSheet.showPaywall(context);
+      return;
+    }
+    if (context.mounted) context.push('/quick-actions-edit');
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    // Mientras carga mostramos los de siempre para que no parpadee la fila.
+    final actions =
+        ref.watch(quickActionsProvider).asData?.value ?? kDefaultQuickActions;
+
     return Row(
       children: [
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.add_rounded,
-            title: l.actionAdd,
-            color: const Color(0xFFE53935),
-            onTap: () async {
-              final count = ref.read(ownConcertsCountProvider);
-              final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
-              final allowed =
-                  await ProPaywallSheet.checkLimit(context, count, isPro);
-              if (allowed && context.mounted) context.push('/add');
-            },
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.explore_outlined,
-            title: l.actionEvents,
-            color: const Color(0xFF42A5F5),
-            onTap: () => context.push('/recommendations'),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.bar_chart_rounded,
-            title: l.actionStats,
-            color: const Color(0xFFFFB300),
-            onTap: () => context.push('/statistics'),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.download_rounded,
-            title: l.actionImport,
-            color: const Color(0xFF66BB6A),
-            onTap: () => context.push('/import'),
-          ),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: ListenableBuilder(
-            listenable: FriendsController.instance,
-            builder: (context, _) => _QuickAction(
-              icon: Icons.people_alt_rounded,
-              title: l.friendsTitle,
-              color: const Color(0xFFAB47BC),
-              badge: FriendsController.instance.pendingRequests.length,
-              onTap: () => context.push('/friends'),
+        for (var i = 0; i < actions.length; i++) ...[
+          if (i > 0) const SizedBox(width: 14),
+          Expanded(
+            child: _badged(
+              actions[i],
+              (badge) {
+                final spec = kQuickActionSpecs[actions[i]]!;
+                return _QuickAction(
+                  icon: spec.icon,
+                  title: spec.label(l),
+                  color: spec.color,
+                  badge: badge,
+                  onTap: () => runQuickAction(context, ref, actions[i]),
+                  onLongPress: () => _openEditor(context),
+                );
+              },
             ),
           ),
-        ),
+        ],
       ],
     );
+  }
+
+  /// El atajo de amigos muestra el contador de solicitudes pendientes y se
+  /// reconstruye al cambiar su controlador.
+  Widget _badged(QuickActionId id, Widget Function(int badge) build) {
+    switch (id) {
+      case QuickActionId.friends:
+        return ListenableBuilder(
+          listenable: FriendsController.instance,
+          builder: (_, _) =>
+              build(FriendsController.instance.pendingRequests.length),
+        );
+      default:
+        return build(0);
+    }
   }
 }
 
@@ -82,6 +80,7 @@ class _QuickAction extends StatelessWidget {
   final String title;
   final Color color;
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
   final int badge;
 
   const _QuickAction({
@@ -89,6 +88,7 @@ class _QuickAction extends StatelessWidget {
     required this.title,
     required this.color,
     required this.onTap,
+    required this.onLongPress,
     this.badge = 0,
   });
 
@@ -97,6 +97,7 @@ class _QuickAction extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(22),
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Column(
         children: [
           Stack(
@@ -137,10 +138,16 @@ class _QuickAction extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          // scaleDown: las etiquetas largas (p. ej. "Calendario") se encogen
+          // en vez de desbordar o partirse en dos líneas.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              title,
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),

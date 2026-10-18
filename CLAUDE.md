@@ -106,3 +106,16 @@ Cuando el servidor MCP de SonarQube esté disponible:
 - Al terminar, llama a `analyze_file_list` con los archivos modificados y vuelve a activar el análisis automático.
 - Usa `search_my_sonarqube_projects` para obtener las project keys — nunca las adivines.
 - Se requieren tokens de USUARIO; los tokens de proyecto devuelven 401.
+
+## Entornos (desarrollo / producción)
+
+`ApiConfig.baseUrl` lee `--dart-define=API_BASE_URL=...` y por defecto apunta a producción.
+Configuraciones de VS Code en `.vscode/launch.json` (emulador Android usa `10.0.2.2:3000`).
+El backend local, su BBDD (Docker) y las migraciones están en `conciertos_backend/DESARROLLO.md`.
+Nunca ejecutes migraciones de Prisma contra el `.env` de producción.
+
+## Colección de discos
+
+`lib/features/records/` — vinilos y CDs del usuario. Búsqueda vía backend (`/records/search`, proxy de
+Discogs; el token vive solo en el backend). La entidad se llama `AlbumRecord` para no chocar con `Record` de Dart 3.
+Acceso desde Ajustes → Mis datos → Mi colección (`/records`).

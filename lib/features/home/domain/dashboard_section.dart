@@ -10,6 +10,8 @@ enum DashboardSectionId {
   favorites,
   recent,
   spotifyEmbed,
+  /// Colección de discos (vinilos y CDs). Solo visible para usuarios Pro.
+  records,
 }
 
 /// Estado de una sección: posición (implícita por el orden en la lista)

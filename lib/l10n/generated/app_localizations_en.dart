@@ -645,7 +645,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noMemories =>
-      'No memories yet.\nAdd photos from a concert\'s detail.';
+      'No memories yet.\nTap the camera icon to add your first photos.';
 
   @override
   String get noMemoriesShort => 'No memories yet. Add your concert photos!';
@@ -3521,4 +3521,246 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spotifyLoadError => 'Couldn\'t load';
+
+  @override
+  String get recordsTitle => 'My collection';
+
+  @override
+  String recordsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count records',
+      one: '1 record',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recordsEmpty => 'You have no records yet';
+
+  @override
+  String get recordsEmptyHint =>
+      'Tap + to search for a vinyl or CD and add it to your collection.';
+
+  @override
+  String get recordsFormatAll => 'All';
+
+  @override
+  String get recordsFormatVinyl => 'Vinyl';
+
+  @override
+  String get recordsFormatCd => 'CD';
+
+  @override
+  String get recordsFormatOther => 'Other';
+
+  @override
+  String get recordsLoadError => 'Couldn\'t load your collection';
+
+  @override
+  String get recordsSearchTitle => 'Add record';
+
+  @override
+  String get recordsSearchHint => 'Artist, album or barcode';
+
+  @override
+  String get recordsSearchPrompt => 'Search by artist, title or barcode.';
+
+  @override
+  String get recordsSearchEmpty => 'No results';
+
+  @override
+  String get recordsSearchError => 'Search failed. Please try again.';
+
+  @override
+  String get recordsAdded => 'Record added';
+
+  @override
+  String get recordsAlreadyAdded => 'You already have this record';
+
+  @override
+  String get recordsAddError => 'Couldn\'t add the record';
+
+  @override
+  String get recordsAddManual => 'Add manually';
+
+  @override
+  String get recordsTitleLabel => 'Title';
+
+  @override
+  String get recordsArtistLabel => 'Artist';
+
+  @override
+  String get recordsDeleteTitle => 'Delete record';
+
+  @override
+  String recordsDeleteConfirm(String title) {
+    return 'Remove “$title” from your collection?';
+  }
+
+  @override
+  String get recordsNotes => 'My notes';
+
+  @override
+  String get recordsNotesHint => 'Edition, condition, where you bought it...';
+
+  @override
+  String get recordsNotesSaved => 'Notes saved';
+
+  @override
+  String get recordsTracklist => 'Tracklist';
+
+  @override
+  String get recordsNoTracklist => 'Discogs has no tracklist for this record';
+
+  @override
+  String get recordsDetailError => 'Couldn\'t load the record details';
+
+  @override
+  String get recordsOpenDiscogs => 'View on Discogs';
+
+  @override
+  String get recordsTabCollection => 'Collection';
+
+  @override
+  String get recordsTabWishlist => 'Wishlist';
+
+  @override
+  String get recordsWishlistEmpty => 'Your wishlist is empty';
+
+  @override
+  String get recordsWishlistEmptyHint =>
+      'Tap + to save the records you\'d like to get.';
+
+  @override
+  String get recordsSearchWishlistTitle => 'Add to wishlist';
+
+  @override
+  String recordsSpent(String amount) {
+    return '€$amount spent';
+  }
+
+  @override
+  String get recordsMarkOwned => 'I have it now';
+
+  @override
+  String get recordsRating => 'Rating';
+
+  @override
+  String get recordsCondition => 'Condition';
+
+  @override
+  String get recordsPrice => 'Price paid';
+
+  @override
+  String get recordsPriceInvalid => 'Invalid price';
+
+  @override
+  String get recordsArtistRecords => 'Your records by this artist';
+
+  @override
+  String recordsVinylCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vinyls',
+      one: '1 vinyl',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recordsCdCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count CDs',
+      one: '1 CD',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recordsWishlistCount(int count) {
+    return '$count on wishlist';
+  }
+
+  @override
+  String get dashRecordsViewAll => 'See all';
+
+  @override
+  String get dashRecordsEmptyTitle => 'Start your collection';
+
+  @override
+  String get dashRecordsEmptyHint =>
+      'Add your vinyl and CDs by searching Discogs.';
+
+  @override
+  String get quickActionsEditTitle => 'Quick actions';
+
+  @override
+  String get quickActionsEditTileSubtitle =>
+      'Choose which shortcuts appear on the home screen';
+
+  @override
+  String quickActionsEditHint(int max) {
+    return 'Pick up to $max shortcuts and drag to reorder them. You can also open this by long-pressing a shortcut on the home screen.';
+  }
+
+  @override
+  String quickActionsYours(int count, int max) {
+    return 'Your shortcuts ($count/$max)';
+  }
+
+  @override
+  String get quickActionsAvailable => 'Available';
+
+  @override
+  String quickActionsMaxReached(int max) {
+    return 'Maximum $max shortcuts. Remove one to add another.';
+  }
+
+  @override
+  String get quickActionRecords => 'Records';
+
+  @override
+  String get memoryAdd => 'Add memory';
+
+  @override
+  String get quickActionMemory => 'Memory';
+
+  @override
+  String get memoryPickConcert => 'Which concert is it from?';
+
+  @override
+  String get memoryNoResults => 'No results';
+
+  @override
+  String get memoryNoConcerts =>
+      'You have no concerts yet. Add one to link memories to it.';
+
+  @override
+  String memoryUploading(int done, int total) {
+    return 'Uploading $done of $total…';
+  }
+
+  @override
+  String memoryAddedTo(int count, String artist) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count memories added to $artist',
+      one: 'Memory added to $artist',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String memoryAddedPartial(int added, int failed) {
+    return '$added added, $failed couldn\'t be uploaded';
+  }
+
+  @override
+  String get memoryView => 'View concert';
 }

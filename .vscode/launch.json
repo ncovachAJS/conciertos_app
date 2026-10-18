@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Dev (emulador Android → backend local)",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--dart-define=API_BASE_URL=http://10.0.2.2:3000"]
+    },
+    {
+      "name": "Dev (iOS sim / escritorio / web → backend local)",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--dart-define=API_BASE_URL=http://localhost:3000"]
+    },
+    {
+      "name": "Dev (móvil físico → backend en tu PC)",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--dart-define=API_BASE_URL=http://192.168.1.XX:3000"]
+    },
+    {
+      "name": "Producción",
+      "request": "launch",
+      "type": "dart"
+    }
+  ]
+}

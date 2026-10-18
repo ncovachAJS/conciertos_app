@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
@@ -15,16 +16,18 @@ import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../data/models/concert_photo_model.dart';
 import '../../data/services/photo_api_service.dart';
+import '../flows/add_memory_flow.dart';
+import '../memories_events.dart';
 import 'photo_viewer_page.dart';
 
-class FeedPage extends StatefulWidget {
+class FeedPage extends ConsumerStatefulWidget {
   const FeedPage({super.key});
 
   @override
-  State<FeedPage> createState() => _FeedPageState();
+  ConsumerState<FeedPage> createState() => _FeedPageState();
 }
 
-class _FeedPageState extends State<FeedPage>
+class _FeedPageState extends ConsumerState<FeedPage>
     with AutomaticKeepAliveClientMixin {
   final PhotoApiService _service = PhotoApiService();
   List<ConcertPhotoModel> _photos = [];
@@ -43,10 +46,24 @@ class _FeedPageState extends State<FeedPage>
   void initState() {
     super.initState();
     _load();
+    // Recarga cuando se añaden recuerdos desde fuera (atajo del inicio).
+    memoriesChanged.addListener(_load);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _showTutorialIfNeeded(),
     );
   }
+
+  @override
+  void dispose() {
+    memoriesChanged.removeListener(_load);
+    super.dispose();
+  }
+
+  Widget _addMemoryButton(AppLocalizations l) => IconButton(
+        tooltip: l.memoryAdd,
+        icon: const Icon(Icons.add_a_photo_outlined),
+        onPressed: () => startAddMemory(context, ref),
+      );
 
   Future<void> _showTutorialIfNeeded() async {
     final should = await TutorialService.shouldShow(TutorialService.feed);
@@ -163,6 +180,7 @@ class _FeedPageState extends State<FeedPage>
     if (_photos.isEmpty) {
       return AppPage(
         title: l.memoriesTitle,
+        actions: [_addMemoryButton(l)],
         child: RefreshIndicator(
           onRefresh: _load,
           child: ListView(
@@ -269,6 +287,7 @@ class _FeedPageState extends State<FeedPage>
                         onPressed: _deleteSelected,
                       )
                     else ...[
+                      _addMemoryButton(l),
                       IconButton(
                         tooltip: _timelineMode
                             ? l.gridView

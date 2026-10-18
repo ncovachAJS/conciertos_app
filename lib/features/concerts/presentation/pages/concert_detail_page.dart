@@ -24,6 +24,7 @@ import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../photos/presentation/widgets/memories_section.dart';
 import '../widgets/venue_map_card.dart';
+import '../../../records/presentation/widgets/artist_records_card.dart';
 import '../widgets/ticket_wallet_card.dart';
 import '../../data/services/ticket_wallet_service.dart';
 import '../../../setlist/data/services/setlist_service.dart';
@@ -507,6 +508,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
           )
         : null;
 
+    final artistRecords = isOwner ? ArtistRecordsCard(artist: concert.artist) : null;
     final hasMap          = concert.venue.isNotEmpty || concert.city.isNotEmpty;
     final hasParticipants = concert.participants.isNotEmpty;
     final hasNotes        = concert.notes.isNotEmpty;
@@ -555,6 +557,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       infoCard,
+                      ?artistRecords,
                       if (hasMap) ...[
                         const SizedBox(height: 20),
                         VenueMapCard(venue: concert.venue, city: concert.city),
@@ -625,6 +628,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
           imageWidget,
           const SizedBox(height: 30),
           infoCard,
+          ?artistRecords,
 
           if (ticketWalletCard != null) ...[
             const SizedBox(height: 20),
