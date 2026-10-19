@@ -64,4 +64,11 @@ class ApiConfig {
   static const String recordsEndpoint = '$baseUrl/records';
   static const String recordsSearchEndpoint = '$baseUrl/records/search';
   static String recordEndpoint(String id) => '$baseUrl/records/$id';
+
+  // Vinculación OAuth con Discogs
+  static const String discogsStartEndpoint = '$baseUrl/discogs/connect/start';
+  static const String discogsFinishEndpoint = '$baseUrl/discogs/connect/finish';
+  static const String discogsStatusEndpoint = '$baseUrl/discogs/status';
+  static const String discogsImportEndpoint = '$baseUrl/discogs/import';
+  static const String discogsConnectionEndpoint = '$baseUrl/discogs/connection';
 }

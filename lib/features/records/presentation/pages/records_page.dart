@@ -31,7 +31,16 @@ class _RecordsPageState extends ConsumerState<RecordsPage> {
     final records = ref.watch(recordsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.recordsTitle)),
+      appBar: AppBar(
+        title: Text(l.recordsTitle),
+        actions: [
+          IconButton(
+            tooltip: l.discogsMenu,
+            icon: const Icon(Icons.link),
+            onPressed: () => context.push('/records/discogs'),
+          ),
+        ],
+      ),
       floatingActionButton: Padding(
         padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
         child: FloatingActionButton(

@@ -3701,6 +3701,60 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get discogsTitle => 'Cuenta de Discogs';
+
+  @override
+  String get discogsMenu => 'Vincular Discogs';
+
+  @override
+  String get discogsIntro =>
+      'Vincula tu cuenta de Discogs para traer tu colección y tu lista de deseos a la app.';
+
+  @override
+  String get discogsConnect => 'Iniciar sesión en Discogs';
+
+  @override
+  String discogsConnectedAs(String username) {
+    return 'Conectado como $username';
+  }
+
+  @override
+  String get discogsImport => 'Importar mi colección';
+
+  @override
+  String get discogsImporting => 'Importando…';
+
+  @override
+  String discogsImportDone(int collection, int wishlist) {
+    return '$collection discos y $wishlist deseos importados';
+  }
+
+  @override
+  String discogsImportSkipped(int count) {
+    return '$count ya estaban en tu colección';
+  }
+
+  @override
+  String get discogsImportError => 'No se pudo importar desde Discogs';
+
+  @override
+  String get discogsDisconnect => 'Desvincular cuenta';
+
+  @override
+  String get discogsDisconnectConfirm =>
+      '¿Desvincular tu cuenta de Discogs? Los discos ya importados se quedan en la app.';
+
+  @override
+  String get discogsConnectError => 'No se pudo vincular la cuenta de Discogs';
+
+  @override
+  String get discogsDenied => 'Cancelaste la autorización de Discogs';
+
+  @override
+  String get discogsImportHint =>
+      'Los discos que ya tienes no se modifican. Solo se añaden los nuevos.';
+
+  @override
   String get dashRecordsViewAll => 'Ver todo';
 
   @override

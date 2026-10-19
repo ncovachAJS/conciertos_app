@@ -3687,6 +3687,60 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get discogsTitle => 'Discogs account';
+
+  @override
+  String get discogsMenu => 'Link Discogs';
+
+  @override
+  String get discogsIntro =>
+      'Link your Discogs account to bring your collection and wantlist into the app.';
+
+  @override
+  String get discogsConnect => 'Sign in to Discogs';
+
+  @override
+  String discogsConnectedAs(String username) {
+    return 'Connected as $username';
+  }
+
+  @override
+  String get discogsImport => 'Import my collection';
+
+  @override
+  String get discogsImporting => 'Importing…';
+
+  @override
+  String discogsImportDone(int collection, int wishlist) {
+    return '$collection records and $wishlist wishlist items imported';
+  }
+
+  @override
+  String discogsImportSkipped(int count) {
+    return '$count were already in your collection';
+  }
+
+  @override
+  String get discogsImportError => 'Couldn\'t import from Discogs';
+
+  @override
+  String get discogsDisconnect => 'Unlink account';
+
+  @override
+  String get discogsDisconnectConfirm =>
+      'Unlink your Discogs account? Records already imported stay in the app.';
+
+  @override
+  String get discogsConnectError => 'Couldn\'t link your Discogs account';
+
+  @override
+  String get discogsDenied => 'You cancelled the Discogs authorization';
+
+  @override
+  String get discogsImportHint =>
+      'Records you already have are not modified. Only new ones are added.';
+
+  @override
   String get dashRecordsViewAll => 'See all';
 
   @override

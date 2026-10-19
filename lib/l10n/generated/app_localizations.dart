@@ -6296,6 +6296,96 @@ abstract class AppLocalizations {
   /// **'{count} en deseos'**
   String recordsWishlistCount(int count);
 
+  /// No description provided for @discogsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta de Discogs'**
+  String get discogsTitle;
+
+  /// No description provided for @discogsMenu.
+  ///
+  /// In es, this message translates to:
+  /// **'Vincular Discogs'**
+  String get discogsMenu;
+
+  /// No description provided for @discogsIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Vincula tu cuenta de Discogs para traer tu colección y tu lista de deseos a la app.'**
+  String get discogsIntro;
+
+  /// No description provided for @discogsConnect.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar sesión en Discogs'**
+  String get discogsConnect;
+
+  /// No description provided for @discogsConnectedAs.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectado como {username}'**
+  String discogsConnectedAs(String username);
+
+  /// No description provided for @discogsImport.
+  ///
+  /// In es, this message translates to:
+  /// **'Importar mi colección'**
+  String get discogsImport;
+
+  /// No description provided for @discogsImporting.
+  ///
+  /// In es, this message translates to:
+  /// **'Importando…'**
+  String get discogsImporting;
+
+  /// No description provided for @discogsImportDone.
+  ///
+  /// In es, this message translates to:
+  /// **'{collection} discos y {wishlist} deseos importados'**
+  String discogsImportDone(int collection, int wishlist);
+
+  /// No description provided for @discogsImportSkipped.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} ya estaban en tu colección'**
+  String discogsImportSkipped(int count);
+
+  /// No description provided for @discogsImportError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo importar desde Discogs'**
+  String get discogsImportError;
+
+  /// No description provided for @discogsDisconnect.
+  ///
+  /// In es, this message translates to:
+  /// **'Desvincular cuenta'**
+  String get discogsDisconnect;
+
+  /// No description provided for @discogsDisconnectConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Desvincular tu cuenta de Discogs? Los discos ya importados se quedan en la app.'**
+  String get discogsDisconnectConfirm;
+
+  /// No description provided for @discogsConnectError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo vincular la cuenta de Discogs'**
+  String get discogsConnectError;
+
+  /// No description provided for @discogsDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelaste la autorización de Discogs'**
+  String get discogsDenied;
+
+  /// No description provided for @discogsImportHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Los discos que ya tienes no se modifican. Solo se añaden los nuevos.'**
+  String get discogsImportHint;
+
   /// No description provided for @dashRecordsViewAll.
   ///
   /// In es, this message translates to:
