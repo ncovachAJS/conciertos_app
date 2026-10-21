@@ -236,7 +236,10 @@ class VenuePage extends ConsumerWidget {
               ),
             ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          // Espacio para que la barra de navegación flotante no tape el último registro
+          SliverToBoxAdapter(
+            child: SizedBox(height: 100 + MediaQuery.paddingOf(context).bottom),
+          ),
         ],
       ),
     );
