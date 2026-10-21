@@ -263,11 +263,11 @@ class _ArtistCard extends StatelessWidget {
                       imageUrl: artist.imageUrl!,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (_, __) => Container(
+                      placeholder: (_, _) => Container(
                         color: cs.surfaceContainerHighest,
                         child: const Icon(Icons.person_rounded, size: 40),
                       ),
-                      errorWidget: (_, __, ___) =>
+                      errorWidget: (_, _, _) =>
                           _ArtistPlaceholder(name: artist.name, cs: cs),
                     )
                   : _ArtistPlaceholder(name: artist.name, cs: cs),

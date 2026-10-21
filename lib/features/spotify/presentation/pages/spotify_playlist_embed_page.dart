@@ -112,7 +112,7 @@ class _SpotifyPlaylistEmbedPageState
         loading: () => const Center(
           child: CircularProgressIndicator(color: Color(0xFF1DB954)),
         ),
-        error: (_, __) => _ConnectView(
+        error: (_, _) => _ConnectView(
           connecting: _connecting,
           onConnect: _connectSpotify,
         ),

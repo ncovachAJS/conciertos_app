@@ -72,7 +72,7 @@ class ProfileCard extends StatelessWidget {
                   width: 70,
                   height: 70,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(.15),
+                    color: Colors.white.withValues(alpha: .15),
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white38, width: 2),
                   ),
@@ -81,7 +81,7 @@ class ProfileCard extends StatelessWidget {
                       ? Image.network(
                           avatarUrl!,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(
+                          errorBuilder: (_, _, _) => const Icon(
                             Icons.person_outline,
                             color: Colors.white,
                             size: 36,
@@ -194,7 +194,7 @@ class ProfileCard extends StatelessWidget {
                   width: 90,
                   height: 90,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(.15),
+                    color: Colors.white.withValues(alpha: .15),
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white38, width: 2),
                   ),
@@ -203,7 +203,7 @@ class ProfileCard extends StatelessWidget {
                       ? Image.network(
                           avatarUrl!,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(
+                          errorBuilder: (_, _, _) => const Icon(
                             Icons.person_outline,
                             color: Colors.white,
                             size: 48,
@@ -258,7 +258,7 @@ class ProfileCard extends StatelessWidget {
           Text(
             l.memberNumber(memberNumber.toString().padLeft(6, '0')),
             style: TextStyle(
-              color: Colors.white.withOpacity(.7),
+              color: Colors.white.withValues(alpha: .7),
               letterSpacing: 2,
               fontSize: 12,
               fontWeight: FontWeight.bold,

@@ -36,7 +36,7 @@ class ThemePickerPage extends ConsumerWidget {
                 style: TextStyle(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.54),
+                  ).colorScheme.onSurface.withValues(alpha: 0.54),
                   fontSize: 15,
                 ),
               ),
@@ -94,7 +94,7 @@ class ThemePickerPage extends ConsumerWidget {
                     style: TextStyle(
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.5),
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -133,13 +133,13 @@ class _ThemeOption extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFFE53935).withOpacity(0.1)
+              ? const Color(0xFFE53935).withValues(alpha: 0.1)
               : cs.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: selected
                 ? const Color(0xFFE53935)
-                : cs.onSurface.withOpacity(0.12),
+                : cs.onSurface.withValues(alpha: 0.12),
             width: selected ? 2 : 1,
           ),
         ),
@@ -150,15 +150,15 @@ class _ThemeOption extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: selected
-                    ? const Color(0xFFE53935).withOpacity(0.15)
-                    : cs.onSurface.withOpacity(0.06),
+                    ? const Color(0xFFE53935).withValues(alpha: 0.15)
+                    : cs.onSurface.withValues(alpha: 0.06),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 color: selected
                     ? const Color(0xFFE53935)
-                    : cs.onSurface.withOpacity(0.6),
+                    : cs.onSurface.withValues(alpha: 0.6),
                 size: 24,
               ),
             ),
@@ -179,7 +179,7 @@ class _ThemeOption extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.54),
+                      color: cs.onSurface.withValues(alpha: 0.54),
                       fontSize: 13,
                     ),
                   ),

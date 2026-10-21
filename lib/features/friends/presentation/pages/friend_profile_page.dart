@@ -132,7 +132,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
       ),
       body: concertsAsync.when(
         loading: () => const GenericPageSkeleton(itemCount: 5, withHeader: true),
-        error: (_, __) => Center(child: Text(l.error)),
+        error: (_, _) => Center(child: Text(l.error)),
         data: (allConcerts) {
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
@@ -207,7 +207,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                   child: Text(
                     l.friendNoUpcoming,
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.4),
+                      color: cs.onSurface.withValues(alpha: 0.4),
                       fontSize: 14,
                     ),
                   ),
@@ -352,7 +352,7 @@ class _ProfileHeader extends StatelessWidget {
                   friend.email,
                   style: TextStyle(
                     fontSize: 13,
-                    color: cs.onSurface.withOpacity(0.5),
+                    color: cs.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -382,7 +382,7 @@ class _EmptyShared extends StatelessWidget {
           Icon(
             Icons.music_off_rounded,
             size: 64,
-            color: cs.onSurface.withOpacity(0.18),
+            color: cs.onSurface.withValues(alpha: 0.18),
           ),
           const SizedBox(height: 16),
           Text(
@@ -390,7 +390,7 @@ class _EmptyShared extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15,
-              color: cs.onSurface.withOpacity(0.45),
+              color: cs.onSurface.withValues(alpha: 0.45),
             ),
           ),
           const SizedBox(height: 8),
@@ -399,7 +399,7 @@ class _EmptyShared extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
-              color: cs.onSurface.withOpacity(0.3),
+              color: cs.onSurface.withValues(alpha: 0.3),
             ),
           ),
         ],
@@ -499,7 +499,7 @@ class _StatCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: data.color.withOpacity(.15),
+              color: data.color.withValues(alpha: .15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(data.icon, color: data.color, size: 20),
@@ -516,7 +516,7 @@ class _StatCard extends StatelessWidget {
             data.label,
             style: TextStyle(
               color:
-                  Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -538,7 +538,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.54);
+    final c = color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54);
     return Row(
       children: [
         Icon(icon, color: c, size: 18),
@@ -604,7 +604,7 @@ class _HorizontalBars extends StatelessWidget {
                           Container(
                             height: 8,
                             decoration: BoxDecoration(
-                              color: cs.onSurface.withOpacity(0.1),
+                              color: cs.onSurface.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -669,7 +669,7 @@ class _ConcertList extends StatelessWidget {
                 height: 1,
                 indent: 16,
                 endIndent: 16,
-                color: cs.onSurface.withOpacity(0.08),
+                color: cs.onSurface.withValues(alpha: 0.08),
               ),
             _ConcertRow(concert: concerts[i], cs: cs, accent: accent),
           ],
@@ -708,7 +708,7 @@ class _ConcertRow extends StatelessWidget {
                   width: 48,
                   height: 48,
                   fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => _PlaceholderIcon(cs: cs),
+                  errorWidget: (_, _, _) => _PlaceholderIcon(cs: cs),
                 ),
               )
             else
@@ -733,7 +733,7 @@ class _ConcertRow extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 12,
-                        color: cs.onSurface.withOpacity(0.5),
+                        color: cs.onSurface.withValues(alpha: 0.5),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -750,7 +750,7 @@ class _ConcertRow extends StatelessWidget {
                   dateStr,
                   style: TextStyle(
                     fontSize: 11,
-                    color: cs.onSurface.withOpacity(0.45),
+                    color: cs.onSurface.withValues(alpha: 0.45),
                   ),
                 ),
                 if (concert.rating > 0) ...[
@@ -791,7 +791,7 @@ class _ConcertRow extends StatelessWidget {
             Icon(
               Icons.chevron_right_rounded,
               size: 18,
-              color: cs.onSurface.withOpacity(0.3),
+              color: cs.onSurface.withValues(alpha: 0.3),
             ),
           ],
         ),
@@ -810,12 +810,12 @@ class _PlaceholderIcon extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: cs.onSurface.withOpacity(0.06),
+        color: cs.onSurface.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(
         Icons.music_note_rounded,
-        color: cs.onSurface.withOpacity(0.3),
+        color: cs.onSurface.withValues(alpha: 0.3),
         size: 24,
       ),
     );

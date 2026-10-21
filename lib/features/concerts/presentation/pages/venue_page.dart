@@ -64,7 +64,7 @@ class VenuePage extends ConsumerWidget {
                     CachedNetworkImage(
                       imageUrl: coverImage,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) =>
+                      errorWidget: (_, _, _) =>
                           Container(color: const Color(0xFF1A1A1A)),
                     )
                   else
@@ -162,23 +162,23 @@ class VenuePage extends ConsumerWidget {
                 child: Row(
                   children: [
                     Icon(Icons.history_rounded,
-                        size: 14, color: cs.onSurface.withOpacity(0.4)),
+                        size: 14, color: cs.onSurface.withValues(alpha: 0.4)),
                     const SizedBox(width: 6),
                     Text(
                       l.venueFirstVisit(DateFormatter.short(firstVisit.date)),
                       style: TextStyle(
-                          color: cs.onSurface.withOpacity(0.5),
+                          color: cs.onSurface.withValues(alpha: 0.5),
                           fontSize: 13),
                     ),
                     if (lastVisit != null && lastVisit.id != firstVisit.id) ...[
                       const SizedBox(width: 16),
                       Icon(Icons.update_rounded,
-                          size: 14, color: cs.onSurface.withOpacity(0.4)),
+                          size: 14, color: cs.onSurface.withValues(alpha: 0.4)),
                       const SizedBox(width: 6),
                       Text(
                         l.venueLastVisit(DateFormatter.short(lastVisit.date)),
                         style: TextStyle(
-                            color: cs.onSurface.withOpacity(0.5),
+                            color: cs.onSurface.withValues(alpha: 0.5),
                             fontSize: 13),
                       ),
                     ],
@@ -223,12 +223,12 @@ class VenuePage extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.stadium,
-                        size: 64, color: cs.onSurface.withOpacity(0.15)),
+                        size: 64, color: cs.onSurface.withValues(alpha: 0.15)),
                     const SizedBox(height: 16),
                     Text(
                       l.venueNoConcerts,
                       style: TextStyle(
-                          color: cs.onSurface.withOpacity(0.4),
+                          color: cs.onSurface.withValues(alpha: 0.4),
                           fontSize: 15),
                     ),
                   ],
@@ -264,9 +264,9 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -284,7 +284,7 @@ class _StatChip extends StatelessWidget {
               Text(sublabel,
                   style: TextStyle(
                       fontSize: 11,
-                      color: cs.onSurface.withOpacity(0.5))),
+                      color: cs.onSurface.withValues(alpha: 0.5))),
             ],
           ),
         ],
@@ -355,7 +355,7 @@ class _ConcertRow extends StatelessWidget {
                     ? CachedNetworkImage(
                         imageUrl: concert.imageUrl,
                         fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => _placeholder(cs),
+                        errorWidget: (_, _, _) => _placeholder(cs),
                       )
                     : _placeholder(cs),
               ),
@@ -376,7 +376,7 @@ class _ConcertRow extends StatelessWidget {
                   Text(
                     DateFormatter.short(concert.date),
                     style: TextStyle(
-                        color: cs.onSurface.withOpacity(0.5), fontSize: 13),
+                        color: cs.onSurface.withValues(alpha: 0.5), fontSize: 13),
                   ),
                 ],
               ),
@@ -393,7 +393,7 @@ class _ConcertRow extends StatelessWidget {
             ],
             const SizedBox(width: 8),
             Icon(Icons.chevron_right_rounded,
-                color: cs.onSurface.withOpacity(0.3)),
+                color: cs.onSurface.withValues(alpha: 0.3)),
           ],
         ),
       ),
@@ -403,6 +403,6 @@ class _ConcertRow extends StatelessWidget {
   Widget _placeholder(ColorScheme cs) => Container(
         color: cs.surfaceContainerHighest,
         child: Icon(Icons.music_note,
-            color: cs.onSurface.withOpacity(0.2), size: 24),
+            color: cs.onSurface.withValues(alpha: 0.2), size: 24),
       );
 }

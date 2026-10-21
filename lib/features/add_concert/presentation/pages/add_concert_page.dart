@@ -347,7 +347,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 itemCount: _artistSuggestions.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (_, i) {
                   final artist = _artistSuggestions[i];
                   return ListTile(
@@ -766,7 +766,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                         _imageUrl!,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _placeholderImage(),
+                        errorBuilder: (_, _, _) => _placeholderImage(),
                       )
                     : _placeholderImage(),
           ),
@@ -872,7 +872,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                           Text(
                             l.ratingNone,
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                               fontSize: 13,
                             ),
                           ),
@@ -883,7 +883,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                       l.ratingAutoNote,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -974,7 +974,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                                     ? Colors.blueAccent
                                     : Theme.of(
                                         context,
-                                      ).colorScheme.onSurface.withOpacity(0.6),
+                                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                           ),
@@ -1020,7 +1020,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                                     ? Colors.amber
                                     : Theme.of(
                                         context,
-                                      ).colorScheme.onSurface.withOpacity(0.6),
+                                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                           ),
@@ -1149,7 +1149,7 @@ class _SubRatingRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: cs.onSurface.withOpacity(0.6)),
+          Icon(icon, size: 20, color: cs.onSurface.withValues(alpha: 0.6)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -1167,7 +1167,7 @@ class _SubRatingRow extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: Icon(
                     active ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: active ? Colors.amber : cs.onSurface.withOpacity(0.25),
+                    color: active ? Colors.amber : cs.onSurface.withValues(alpha: 0.25),
                     size: 26,
                   ),
                 ),

@@ -178,7 +178,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                 alignment: Alignment.topCenter,
                 children: [
                   ...previousChildren,
-                  if (currentChild != null) currentChild,
+                  ?currentChild,
                 ],
               ),
               transitionBuilder: (child, animation) {

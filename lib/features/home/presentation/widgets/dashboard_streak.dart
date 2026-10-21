@@ -62,7 +62,7 @@ class DashboardStreak extends StatelessWidget {
         emoji = '🎵';
         title = l.dashLastConcertTitle;
         subtitle = l.lastConcertDaysAgo(daysSinceLast);
-        color = cs.onSurface.withOpacity(0.4);
+        color = cs.onSurface.withValues(alpha: 0.4);
       } else {
         return const SizedBox.shrink();
       }
@@ -71,9 +71,9 @@ class DashboardStreak extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withOpacity(0.25), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 1),
       ),
       child: Row(
         children: [
@@ -95,7 +95,7 @@ class DashboardStreak extends StatelessWidget {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: cs.onSurface.withOpacity(0.6),
+                    color: cs.onSurface.withValues(alpha: 0.6),
                     fontSize: 13,
                   ),
                 ),

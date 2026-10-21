@@ -459,12 +459,12 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                   Icon(
                     Icons.wifi_off,
                     size: 48,
-                    color: cs.onSurface.withOpacity(0.3),
+                    color: cs.onSurface.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     l.error,
-                    style: TextStyle(color: cs.onSurface.withOpacity(0.5)),
+                    style: TextStyle(color: cs.onSurface.withValues(alpha: 0.5)),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
@@ -701,10 +701,10 @@ class _ConcertsPageState extends ConsumerState<ConcertsPage>
                     isScrollable: true,
                     tabAlignment: TabAlignment.start,
                     labelColor: const Color(0xFFE53935),
-                    unselectedLabelColor: cs.onSurface.withOpacity(0.5),
+                    unselectedLabelColor: cs.onSurface.withValues(alpha: 0.5),
                     indicatorColor: const Color(0xFFE53935),
                     indicatorWeight: 2,
-                    dividerColor: cs.onSurface.withOpacity(0.08),
+                    dividerColor: cs.onSurface.withValues(alpha: 0.08),
                     tabs: [
                       Tab(text: '${l.tabPast} (${past.length})'),
                       Tab(text: '${l.tabUpcoming} (${upcoming.length})'),
@@ -1175,7 +1175,7 @@ class _ListView extends ConsumerWidget {
         controller: scrollController,
         padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
         itemCount: rowCount + (loadingMore ? 1 : 0),
-        separatorBuilder: (_, __) => const SizedBox(height: 0),
+        separatorBuilder: (_, _) => const SizedBox(height: 0),
         itemBuilder: (context, rowIndex) {
           if (rowIndex == rowCount) {
             return const Padding(
@@ -1206,7 +1206,7 @@ class _ListView extends ConsumerWidget {
       controller: scrollController,
       padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
       itemCount: concerts.length + (loadingMore ? 1 : 0),
-      separatorBuilder: (_, __) => const SizedBox(height: 24),
+      separatorBuilder: (_, _) => const SizedBox(height: 24),
       itemBuilder: (context, index) {
         if (index == concerts.length) {
           return const Padding(

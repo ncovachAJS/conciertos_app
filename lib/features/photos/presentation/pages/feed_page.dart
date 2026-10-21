@@ -192,7 +192,7 @@ class _FeedPageState extends ConsumerState<FeedPage>
                 size: 80,
                 color: Theme.of(
                   context,
-                ).colorScheme.onSurface.withOpacity(0.15),
+                ).colorScheme.onSurface.withValues(alpha: 0.15),
               ),
               const SizedBox(height: 16),
               Center(
@@ -202,7 +202,7 @@ class _FeedPageState extends ConsumerState<FeedPage>
                   style: TextStyle(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.4),
+                    ).colorScheme.onSurface.withValues(alpha: 0.4),
                     fontSize: 15,
                   ),
                 ),
@@ -364,17 +364,18 @@ class _FeedPageState extends ConsumerState<FeedPage>
                                       gaplessPlayback: true,
                                       frameBuilder:
                                           (_, child, frame, wasSyncLoaded) {
-                                            if (wasSyncLoaded || frame != null)
+                                            if (wasSyncLoaded || frame != null) {
                                               return child;
+                                            }
                                             return Container(
                                               color: cs.surfaceContainerHighest,
                                             );
                                           },
-                                      errorBuilder: (_, __, ___) => Container(
+                                      errorBuilder: (_, _, _) => Container(
                                         color: cs.surfaceContainerHighest,
                                         child: Icon(
                                           Icons.broken_image_outlined,
-                                          color: cs.onSurface.withOpacity(0.2),
+                                          color: cs.onSurface.withValues(alpha: 0.2),
                                           size: 24,
                                         ),
                                       ),
@@ -383,7 +384,7 @@ class _FeedPageState extends ConsumerState<FeedPage>
                                   // Overlay oscuro + check cuando está seleccionada
                                   if (isSelected)
                                     Container(
-                                      color: Colors.black.withOpacity(0.4),
+                                      color: Colors.black.withValues(alpha: 0.4),
                                       child: const Center(
                                         child: Icon(
                                           Icons.check_circle_rounded,
@@ -442,7 +443,7 @@ class _FeedPageState extends ConsumerState<FeedPage>
                             const SizedBox(width: 12),
                             Expanded(
                               child: Divider(
-                                color: cs.onSurface.withOpacity(0.12),
+                                color: cs.onSurface.withValues(alpha: 0.12),
                                 thickness: 1,
                               ),
                             ),
@@ -475,7 +476,7 @@ class _FeedPageState extends ConsumerState<FeedPage>
                                         left: leftPad - lineWidth / 2,
                                         child: Container(
                                           width: lineWidth,
-                                          color: lineColor.withOpacity(0.3),
+                                          color: lineColor.withValues(alpha: 0.3),
                                         ),
                                       ),
                                       Positioned(
@@ -531,8 +532,8 @@ class _FeedPageState extends ConsumerState<FeedPage>
                                             ].join(' · '),
                                             style: TextStyle(
                                               fontSize: 12,
-                                              color: cs.onSurface.withOpacity(
-                                                0.5,
+                                              color: cs.onSurface.withValues(
+                                                alpha: 0.5,
                                               ),
                                             ),
                                             maxLines: 1,
@@ -543,7 +544,7 @@ class _FeedPageState extends ConsumerState<FeedPage>
                                             _formatDate(ref.date),
                                             style: TextStyle(
                                               fontSize: 11,
-                                              color: lineColor.withOpacity(0.8),
+                                              color: lineColor.withValues(alpha: 0.8),
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -566,7 +567,7 @@ class _FeedPageState extends ConsumerState<FeedPage>
                                                       Axis.horizontal,
                                                   itemCount:
                                                       concertPhotos.length,
-                                                  separatorBuilder: (_, __) =>
+                                                  separatorBuilder: (_, _) =>
                                                       const SizedBox(width: 6),
                                                   itemBuilder: (_, j) =>
                                                       _ThumbPhoto(
@@ -650,16 +651,16 @@ class _ThumbPhoto extends StatelessWidget {
             height: 140,
             memCacheWidth: 240,
             fadeInDuration: Duration.zero,
-            placeholder: (_, __) => Container(
+            placeholder: (_, _) => Container(
               width: 120,
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
-            errorWidget: (_, __, ___) => Container(
+            errorWidget: (_, _, _) => Container(
               width: 120,
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Icon(
                 Icons.broken_image_outlined,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
               ),
             ),
           ),

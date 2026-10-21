@@ -62,7 +62,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -96,7 +95,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             )
           : ListView.separated(
               itemCount: _ctrl.notifications.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (_, i) {
                 final n = _ctrl.notifications[i];
                 return Dismissible(
@@ -183,7 +182,7 @@ class _NotificationTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: unread ? red.withOpacity(0.06) : null,
+        color: unread ? red.withValues(alpha: 0.06) : null,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +195,7 @@ class _NotificationTile extends StatelessWidget {
                   )
                 : CircleAvatar(
                     radius: 22,
-                    backgroundColor: red.withOpacity(0.12),
+                    backgroundColor: red.withValues(alpha: 0.12),
                     child: Icon(_icon(), color: red, size: 20),
                   ),
 
@@ -218,7 +217,7 @@ class _NotificationTile extends StatelessWidget {
                     notification.body,
                     style: TextStyle(
                       fontSize: 13,
-                      color: cs.onSurface.withOpacity(0.6),
+                      color: cs.onSurface.withValues(alpha: 0.6),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -228,7 +227,7 @@ class _NotificationTile extends StatelessWidget {
                     timeago.format(notification.createdAt, locale: Localizations.localeOf(context).languageCode),
                     style: TextStyle(
                       fontSize: 11,
-                      color: cs.onSurface.withOpacity(0.4),
+                      color: cs.onSurface.withValues(alpha: 0.4),
                     ),
                   ),
                 ],

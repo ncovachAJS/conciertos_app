@@ -94,7 +94,7 @@ class _FriendsPageState extends State<FriendsPage>
         bottom: TabBar(
           controller: _tabs,
           labelColor: red,
-          unselectedLabelColor: cs.onSurface.withOpacity(0.5),
+          unselectedLabelColor: cs.onSurface.withValues(alpha: 0.5),
           indicatorColor: red,
           tabs: [
             Tab(text: AppLocalizations.of(context).friendsTabFriends(_ctrl.friends.length)),
@@ -175,7 +175,7 @@ class _FriendSearchDelegate extends SearchDelegate<void> {
 
     return ListenableBuilder(
       listenable: ctrl,
-      builder: (_, __) {
+      builder: (_, _) {
         if (ctrl.searching) {
           return const GenericPageSkeleton(itemCount: 3);
         }
@@ -189,12 +189,12 @@ class _FriendSearchDelegate extends SearchDelegate<void> {
                 Icon(
                   Icons.person_search_rounded,
                   size: 64,
-                  color: cs.onSurface.withOpacity(0.15),
+                  color: cs.onSurface.withValues(alpha: 0.15),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   l.friendsTypeToSearch,
-                  style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
+                  style: TextStyle(color: cs.onSurface.withValues(alpha: 0.4)),
                 ),
               ],
             ),
@@ -205,7 +205,7 @@ class _FriendSearchDelegate extends SearchDelegate<void> {
           return Center(
             child: Text(
               AppLocalizations.of(context).friendsNoUsersFound,
-              style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
+              style: TextStyle(color: cs.onSurface.withValues(alpha: 0.4)),
             ),
           );
         }
@@ -230,7 +230,6 @@ class _SearchResultTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    const red = Color(0xFFE53935);
 
     final l = AppLocalizations.of(context);
     Widget trailing;
@@ -248,7 +247,7 @@ class _SearchResultTile extends StatelessWidget {
           ? Text(
               l.friendRequestSent,
               style: TextStyle(
-                color: cs.onSurface.withOpacity(0.5),
+                color: cs.onSurface.withValues(alpha: 0.5),
                 fontSize: 12,
               ),
             )
@@ -305,7 +304,7 @@ class _SearchResultTile extends StatelessWidget {
       ),
       subtitle: Text(
         user.email,
-        style: TextStyle(color: cs.onSurface.withOpacity(0.5), fontSize: 12),
+        style: TextStyle(color: cs.onSurface.withValues(alpha: 0.5), fontSize: 12),
       ),
       trailing: trailing,
     );
@@ -331,13 +330,13 @@ class _FriendsList extends StatelessWidget {
             Icon(
               Icons.group_outlined,
               size: 64,
-              color: cs.onSurface.withOpacity(0.15),
+              color: cs.onSurface.withValues(alpha: 0.15),
             ),
             const SizedBox(height: 16),
             Text(
               l.friendsNoFriendsHere,
               textAlign: TextAlign.center,
-              style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
+              style: TextStyle(color: cs.onSurface.withValues(alpha: 0.4)),
             ),
           ],
         ),
@@ -363,7 +362,7 @@ class _FriendsList extends StatelessWidget {
           trailing: IconButton(
             icon: Icon(
               Icons.person_remove_outlined,
-              color: cs.onSurface.withOpacity(0.4),
+              color: cs.onSurface.withValues(alpha: 0.4),
             ),
             tooltip: l.deleteFriendTitle,
             onPressed: () async {
@@ -408,7 +407,7 @@ class _PendingList extends StatelessWidget {
       return Center(
         child: Text(
           l.friendsNoPendingRequests,
-          style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
+          style: TextStyle(color: cs.onSurface.withValues(alpha: 0.4)),
         ),
       );
     }
@@ -443,7 +442,7 @@ class _PendingList extends StatelessWidget {
               IconButton(
                 icon: Icon(
                   Icons.cancel_outlined,
-                  color: cs.onSurface.withOpacity(0.4),
+                  color: cs.onSurface.withValues(alpha: 0.4),
                 ),
                 tooltip: l.friendReject,
                 onPressed: () => ctrl.removeFriend(r.friendshipId!),

@@ -427,7 +427,7 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                               width: aw,
                               child: ListenableBuilder(
                                 listenable: _searchController,
-                                builder: (_, __) => TextField(
+                                builder: (_, _) => TextField(
                                   controller: _searchController,
                                   onSubmitted: (_) => _search(),
                                   textInputAction: TextInputAction.search,
@@ -458,7 +458,7 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                             SizedBox(
                               width: yw,
                               child: DropdownButtonFormField<int>(
-                                value: _artistYear,
+                                initialValue: _artistYear,
                                 style: TextStyle(
                                     color: cs.onSurface, fontSize: 14),
                                 dropdownColor: cs.surface,
@@ -1444,7 +1444,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                     c.imageUrl,
                     width: 44, height: 44,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _placeholder(c.artist, cs),
+                    errorBuilder: (_, _, _) => _placeholder(c.artist, cs),
                   )
                 : _placeholder(c.artist, cs),
           ),
@@ -1552,7 +1552,7 @@ class _BackupTabState extends ConsumerState<_BackupTab> {
                   ? Image.network(c.imageUrl,
                       width: 44, height: 44,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder(c.artist, cs))
+                      errorBuilder: (_, _, _) => _placeholder(c.artist, cs))
                   : _placeholder(c.artist, cs),
             ),
             const SizedBox(width: 12),

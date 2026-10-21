@@ -28,7 +28,7 @@ class HeroConcertCard extends StatelessWidget {
                   ? CachedNetworkImage(
                       imageUrl: concert.imageUrl,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => Container(
+                      errorWidget: (_, _, _) => Container(
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [

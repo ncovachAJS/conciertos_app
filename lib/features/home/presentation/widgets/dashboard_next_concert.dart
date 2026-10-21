@@ -76,7 +76,7 @@ class DashboardNextConcert extends StatelessWidget {
             CachedNetworkImage(
               imageUrl: concert.imageUrl,
               fit: BoxFit.cover,
-              errorWidget: (_, __, ___) {
+              errorWidget: (_, _, _) {
                 return Container(
                   color: const Color(0xFF303542),
                   child: const Center(
@@ -97,8 +97,8 @@ class DashboardNextConcert extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(.10),
-                    Colors.black.withOpacity(.98),
+                    Colors.black.withValues(alpha: .10),
+                    Colors.black.withValues(alpha: .98),
                   ],
                   stops: const [0, .45, 1],
                 ),

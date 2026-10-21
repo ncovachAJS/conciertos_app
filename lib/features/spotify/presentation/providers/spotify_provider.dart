@@ -16,10 +16,10 @@ class _AuthUserIdNotifier extends Notifier<String?> {
   String? build() {
     final controller = AuthController.instance;
 
-    void _onAuthChanged() => state = controller.user?.id;
+    void onAuthChanged() => state = controller.user?.id;
 
-    controller.addListener(_onAuthChanged);
-    ref.onDispose(() => controller.removeListener(_onAuthChanged));
+    controller.addListener(onAuthChanged);
+    ref.onDispose(() => controller.removeListener(onAuthChanged));
 
     return controller.user?.id;
   }

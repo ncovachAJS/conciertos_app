@@ -91,12 +91,13 @@ class _MemoriesSectionState extends State<MemoriesSection> {
           context,
         ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).photoUploadError(e.toString()))));
       } finally {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _uploading = false;
             _uploadCurrent = 0;
             _uploadTotal = 0;
           });
+        }
       }
       return;
     }
@@ -233,7 +234,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                 child: Text(
                   l.noMemoriesShort,
                   style: TextStyle(
-                    color: cs.onSurface.withOpacity(0.5),
+                    color: cs.onSurface.withValues(alpha: 0.5),
                     fontSize: 15,
                   ),
                 ),
@@ -266,10 +267,10 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                                 memCacheWidth: 300,
                                 fadeInDuration: Duration.zero,
                                 fadeOutDuration: Duration.zero,
-                                placeholder: (_, __) => Container(
+                                placeholder: (_, _) => Container(
                                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                                 ),
-                                errorWidget: (_, __, ___) => Container(
+                                errorWidget: (_, _, _) => Container(
                                   color: const Color(0xFF2B2B2B),
                                   child: const Icon(Icons.broken_image_outlined, color: Colors.white24),
                                 ),

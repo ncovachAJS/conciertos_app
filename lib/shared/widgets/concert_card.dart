@@ -44,7 +44,7 @@ class ConcertCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: cs.onSurface.withOpacity(0.7), size: 16),
+          Icon(icon, color: cs.onSurface.withValues(alpha: 0.7), size: 16),
           const SizedBox(width: 6),
           Text(
             text,
@@ -123,7 +123,7 @@ class ConcertCard extends StatelessWidget {
       child: Material(
         color: cs.surface,
         elevation: 4,
-        shadowColor: cs.shadow.withOpacity(0.15),
+        shadowColor: cs.shadow.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(28),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -143,7 +143,7 @@ class ConcertCard extends StatelessWidget {
                           ? CachedNetworkImage(
                               imageUrl: concert.imageUrl,
                               fit: BoxFit.cover,
-                              errorWidget: (_, __, ___) => _placeholder(),
+                              errorWidget: (_, _, _) => _placeholder(),
                             )
                           : _placeholder(),
                     ),
@@ -249,7 +249,7 @@ class ConcertCard extends StatelessWidget {
                   // Valoración solo si es el dueño y el concierto es pasado
                   if (concert.isPastConcert && isOwner) ...[
                     const SizedBox(height: 22),
-                    Divider(color: cs.onSurface.withOpacity(0.12), height: 1),
+                    Divider(color: cs.onSurface.withValues(alpha: 0.12), height: 1),
                     const SizedBox(height: 18),
                     Row(
                       children: [
@@ -280,7 +280,7 @@ class ConcertCard extends StatelessWidget {
                           Text(
                             l.ratingNone,
                             style: TextStyle(
-                              color: cs.onSurface.withOpacity(0.4),
+                              color: cs.onSurface.withValues(alpha: 0.4),
                               fontSize: 13,
                             ),
                           ),
@@ -296,7 +296,7 @@ class ConcertCard extends StatelessWidget {
                                 : Icons.favorite_border,
                             color: concert.liked
                                 ? Colors.red
-                                : cs.onSurface.withOpacity(0.5),
+                                : cs.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                         IconButton(
@@ -308,7 +308,7 @@ class ConcertCard extends StatelessWidget {
                             concert.favorite ? Icons.star : Icons.star_border,
                             color: concert.favorite
                                 ? Colors.amber
-                                : cs.onSurface.withOpacity(0.5),
+                                : cs.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -316,7 +316,7 @@ class ConcertCard extends StatelessWidget {
                   ],
 
                   const SizedBox(height: 20),
-                  Divider(color: cs.onSurface.withOpacity(0.12)),
+                  Divider(color: cs.onSurface.withValues(alpha: 0.12)),
                   const SizedBox(height: 20),
 
                   // Botones editar/eliminar solo si es el dueño

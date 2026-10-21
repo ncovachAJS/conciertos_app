@@ -39,7 +39,7 @@ class RecommendationCard extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: event.imageUrl,
                   fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => Container(
+                  errorWidget: (_, _, _) => Container(
                     color: const Color(0xFF2B2B2B),
                     child: const Icon(Icons.music_note, color: Colors.white24, size: 60),
                   ),
@@ -107,7 +107,7 @@ class RecommendationCard extends StatelessWidget {
               width: 48,
               height: 48,
               fit: BoxFit.cover,
-              errorWidget: (_, __, ___) => Container(
+              errorWidget: (_, _, _) => Container(
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(

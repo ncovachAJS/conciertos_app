@@ -48,14 +48,14 @@ class AppErrorWidget extends StatelessWidget {
             Icon(
               Icons.wifi_off_rounded,
               size: 56,
-              color: cs.onSurface.withOpacity(0.25),
+              color: cs.onSurface.withValues(alpha: 0.25),
             ),
             const SizedBox(height: 16),
             Text(
               _message(l),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: cs.onSurface.withOpacity(0.55),
+                color: cs.onSurface.withValues(alpha: 0.55),
                 fontSize: 15,
               ),
             ),

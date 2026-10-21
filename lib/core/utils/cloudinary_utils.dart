@@ -2,7 +2,7 @@
 ///
 /// Cloudinary permite insertar parámetros de transformación en la URL
 /// sin necesidad de cambiar nada en el backend ni en el storage.
-library cloudinary_utils;
+library;
 
 /// Devuelve una URL de thumbnail optimizada para una imagen de Cloudinary.
 ///

@@ -1,4 +1,3 @@
-import 'dart:async';
 
 class SplashController {
   final List<String> messages = [

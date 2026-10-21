@@ -72,7 +72,7 @@ class ArtistPage extends StatelessWidget {
                     CachedNetworkImage(
                       imageUrl: coverImage,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) =>
+                      errorWidget: (_, _, _) =>
                           Container(color: const Color(0xFF1A1A1A)),
                     )
                   else
@@ -150,20 +150,19 @@ class ArtistPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
-                        if (firstConcert != null)
-                          Expanded(
-                            child: _HighlightCard(
-                              icon: Icons.history_rounded,
-                              label: l.artistFirstConcert,
-                              value: DateFormatter.short(firstConcert.date),
-                              sub: firstConcert.venue.isNotEmpty
-                                  ? firstConcert.venue
-                                  : null,
-                              color: red,
-                            ),
+                        Expanded(
+                          child: _HighlightCard(
+                            icon: Icons.history_rounded,
+                            label: l.artistFirstConcert,
+                            value: DateFormatter.short(firstConcert.date),
+                            sub: firstConcert.venue.isNotEmpty
+                                ? firstConcert.venue
+                                : null,
+                            color: red,
                           ),
+                        ),
                         if (bestConcert != null &&
-                            bestConcert.id != firstConcert?.id) ...[
+                            bestConcert.id != firstConcert.id) ...[
                           const SizedBox(width: 10),
                           Expanded(
                             child: _HighlightCard(
@@ -260,7 +259,7 @@ class _StatChip extends StatelessWidget {
                     sublabel,
                     style: TextStyle(
                       fontSize: 10,
-                      color: cs.onSurface.withOpacity(0.5),
+                      color: cs.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -296,7 +295,7 @@ class _HighlightCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,7 +329,7 @@ class _HighlightCard extends StatelessWidget {
               sub!,
               style: TextStyle(
                 fontSize: 12,
-                color: cs.onSurface.withOpacity(0.5),
+                color: cs.onSurface.withValues(alpha: 0.5),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -354,14 +353,14 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: cs.onSurface.withOpacity(0.5)),
+          Icon(icon, size: 16, color: cs.onSurface.withValues(alpha: 0.5)),
           const SizedBox(width: 8),
           Text(
             title,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: cs.onSurface.withOpacity(0.5),
+              color: cs.onSurface.withValues(alpha: 0.5),
               letterSpacing: 1.1,
             ),
           ),
@@ -394,7 +393,7 @@ class _ConcertRow extends StatelessWidget {
                       width: 52,
                       height: 52,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => _placeholder(),
+                      errorWidget: (_, _, _) => _placeholder(),
                     )
                   : _placeholder(),
             ),
@@ -422,7 +421,7 @@ class _ConcertRow extends StatelessWidget {
                     ].join(' · '),
                     style: TextStyle(
                       fontSize: 12,
-                      color: cs.onSurface.withOpacity(0.5),
+                      color: cs.onSurface.withValues(alpha: 0.5),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -446,7 +445,7 @@ class _ConcertRow extends StatelessWidget {
             const SizedBox(width: 4),
             Icon(
               Icons.chevron_right,
-              color: cs.onSurface.withOpacity(0.3),
+              color: cs.onSurface.withValues(alpha: 0.3),
               size: 18,
             ),
           ],
@@ -460,7 +459,7 @@ class _ConcertRow extends StatelessWidget {
       width: 52,
       height: 52,
       decoration: BoxDecoration(
-        color: const Color(0xFFE53935).withOpacity(0.12),
+        color: const Color(0xFFE53935).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(10),
       ),
       child: const Icon(Icons.music_note, color: Color(0xFFE53935), size: 24),

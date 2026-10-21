@@ -104,8 +104,8 @@ class _SpotifyTopTracksSectionState extends State<SpotifyTopTracksSection> {
                     fit: BoxFit.cover,
                     color: Colors.black.withValues(alpha: 0.5),
                     colorBlendMode: BlendMode.darken,
-                    placeholder: (_, __) => Container(color: cs.surfaceContainerHighest),
-                    errorWidget: (_, __, ___) => Container(color: cs.surfaceContainerHighest),
+                    placeholder: (_, _) => Container(color: cs.surfaceContainerHighest),
+                    errorWidget: (_, _, _) => Container(color: cs.surfaceContainerHighest),
                   )
                 else
                   Container(color: cs.surfaceContainerHighest),
@@ -363,9 +363,9 @@ class _TrackRow extends StatelessWidget {
                       imageUrl: track.albumImageUrl!,
                       width: 40, height: 40,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) =>
+                      placeholder: (_, _) =>
                           const ShimmerBox(width: 40, height: 40, borderRadius: 6),
-                      errorWidget: (_, __, ___) => _AlbumPlaceholder(),
+                      errorWidget: (_, _, _) => _AlbumPlaceholder(),
                     )
                   : _AlbumPlaceholder(),
             ),

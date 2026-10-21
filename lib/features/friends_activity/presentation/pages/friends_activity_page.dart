@@ -73,14 +73,14 @@ class _FriendsActivityPageState extends ConsumerState<FriendsActivityPage> {
                   Icon(
                     Icons.group_outlined,
                     size: 64,
-                    color: cs.onSurface.withOpacity(0.15),
+                    color: cs.onSurface.withValues(alpha: 0.15),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     l.friendsActivityEmpty,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.4),
+                      color: cs.onSurface.withValues(alpha: 0.4),
                       fontSize: 15,
                     ),
                   ),
@@ -94,7 +94,7 @@ class _FriendsActivityPageState extends ConsumerState<FriendsActivityPage> {
             controller: _scrollController,
             padding: EdgeInsets.only(bottom: 32 + floatingNavBarClearance(context)),
             itemCount: concerts.length + (notifier.loadingMore ? 1 : 0),
-            separatorBuilder: (_, __) => const Divider(height: 1),
+            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, i) {
               if (i == concerts.length) {
                 return const Padding(
@@ -154,7 +154,7 @@ class _ActivityCard extends StatelessWidget {
                           width: 72,
                           height: 72,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _placeholder(cs),
+                          errorBuilder: (_, _, _) => _placeholder(cs),
                         )
                       : _placeholder(cs),
                 ),
@@ -196,7 +196,7 @@ class _ActivityCard extends StatelessWidget {
                                   : l.friendDefaultName,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: cs.onSurface.withOpacity(0.55),
+                                color: cs.onSurface.withValues(alpha: 0.55),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -218,7 +218,7 @@ class _ActivityCard extends StatelessWidget {
                           concert.name,
                           style: TextStyle(
                             fontSize: 13,
-                            color: cs.onSurface.withOpacity(0.65),
+                            color: cs.onSurface.withValues(alpha: 0.65),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -229,14 +229,14 @@ class _ActivityCard extends StatelessWidget {
                           Icon(
                             Icons.calendar_today_outlined,
                             size: 12,
-                            color: cs.onSurface.withOpacity(0.4),
+                            color: cs.onSurface.withValues(alpha: 0.4),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             dateStr,
                             style: TextStyle(
                               fontSize: 12,
-                              color: cs.onSurface.withOpacity(0.4),
+                              color: cs.onSurface.withValues(alpha: 0.4),
                             ),
                           ),
                           if (concert.city.isNotEmpty) ...[
@@ -244,7 +244,7 @@ class _ActivityCard extends StatelessWidget {
                             Icon(
                               Icons.location_on_outlined,
                               size: 12,
-                              color: cs.onSurface.withOpacity(0.4),
+                              color: cs.onSurface.withValues(alpha: 0.4),
                             ),
                             const SizedBox(width: 2),
                             Expanded(
@@ -252,7 +252,7 @@ class _ActivityCard extends StatelessWidget {
                                 concert.city,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: cs.onSurface.withOpacity(0.4),
+                                  color: cs.onSurface.withValues(alpha: 0.4),
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -295,13 +295,13 @@ class _ActivityCard extends StatelessWidget {
                 icon: Icon(
                   Icons.chat_bubble_outline_rounded,
                   size: 16,
-                  color: cs.onSurface.withOpacity(0.5),
+                  color: cs.onSurface.withValues(alpha: 0.5),
                 ),
                 label: Text(
                   l.commentAction,
                   style: TextStyle(
                     fontSize: 12,
-                    color: cs.onSurface.withOpacity(0.5),
+                    color: cs.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 style: TextButton.styleFrom(
@@ -328,7 +328,7 @@ class _ActivityCard extends StatelessWidget {
       ),
       child: Icon(
         Icons.music_note_rounded,
-        color: cs.onSurface.withOpacity(0.2),
+        color: cs.onSurface.withValues(alpha: 0.2),
       ),
     );
   }
@@ -406,7 +406,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: cs.onSurface.withOpacity(0.2),
+                  color: cs.onSurface.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -450,13 +450,13 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                             Icon(
                               Icons.chat_bubble_outline_rounded,
                               size: 48,
-                              color: cs.onSurface.withOpacity(0.15),
+                              color: cs.onSurface.withValues(alpha: 0.15),
                             ),
                             const SizedBox(height: 12),
                             Text(
                               l.commentsEmpty,
                               style: TextStyle(
-                                color: cs.onSurface.withOpacity(0.4),
+                                color: cs.onSurface.withValues(alpha: 0.4),
                                 fontSize: 14,
                               ),
                             ),
@@ -470,7 +470,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                       itemCount: all.length,
-                      separatorBuilder: (_, __) =>
+                      separatorBuilder: (_, _) =>
                           const SizedBox(height: 12),
                       itemBuilder: (_, i) =>
                           _CommentTile(comment: all[i], cs: cs),
@@ -597,7 +597,7 @@ class _CommentTile extends StatelessWidget {
                     timeStr,
                     style: TextStyle(
                       fontSize: 11,
-                      color: cs.onSurface.withOpacity(0.4),
+                      color: cs.onSurface.withValues(alpha: 0.4),
                     ),
                   ),
                 ],

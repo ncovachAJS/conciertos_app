@@ -63,7 +63,7 @@ class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
                         ? l.onThisDaySeeLess
                         : l.onThisDaySeeMore(rest.length),
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.6),
+                      color: cs.onSurface.withValues(alpha: 0.6),
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -72,7 +72,7 @@ class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
                     _expanded
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
-                    color: cs.onSurface.withOpacity(0.6),
+                    color: cs.onSurface.withValues(alpha: 0.6),
                     size: 18,
                   ),
                 ],
@@ -140,12 +140,12 @@ class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
           border: Border.all(
             color: const Color(
               0xFFE53935,
-            ).withOpacity(isExactDay ? 0.5 : 0.2),
+            ).withValues(alpha: isExactDay ? 0.5 : 0.2),
             width: isExactDay ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: cs.shadow.withOpacity(0.06),
+              color: cs.shadow.withValues(alpha: 0.06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -162,7 +162,7 @@ class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
                       width: 52,
                       height: 52,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) =>
+                      errorWidget: (_, _, _) =>
                           _emojiPlaceholder(isExactDay),
                     )
                   : _emojiPlaceholder(isExactDay),
@@ -177,7 +177,7 @@ class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
                     style: TextStyle(
                       color: const Color(
                         0xFFE53935,
-                      ).withOpacity(isExactDay ? 1 : 0.7),
+                      ).withValues(alpha: isExactDay ? 1 : 0.7),
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
@@ -200,7 +200,7 @@ class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
                       if (concert.city.isNotEmpty) concert.city,
                     ].join(', '),
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.54),
+                      color: cs.onSurface.withValues(alpha: 0.54),
                       fontSize: 13,
                     ),
                     maxLines: 1,
@@ -229,7 +229,7 @@ class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
             const SizedBox(width: 4),
             Icon(
               Icons.chevron_right,
-              color: cs.onSurface.withOpacity(0.3),
+              color: cs.onSurface.withValues(alpha: 0.3),
               size: 18,
             ),
           ],
@@ -243,7 +243,7 @@ class _DashboardOnThisDayState extends ConsumerState<DashboardOnThisDay> {
       width: 52,
       height: 52,
       decoration: BoxDecoration(
-        color: const Color(0xFFE53935).withOpacity(0.12),
+        color: const Color(0xFFE53935).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(

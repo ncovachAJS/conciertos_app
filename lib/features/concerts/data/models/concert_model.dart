@@ -53,7 +53,7 @@ class ConcertModel extends Concert {
         .toList();
 
     final participants = participantsList
-        .where((p) => p is Map)
+        .whereType<Map>()
         .map((p) => ConcertParticipant.fromJson(p as Map<String, dynamic>))
         .where((p) => p.id.isNotEmpty)
         .toList();

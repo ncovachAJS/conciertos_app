@@ -66,7 +66,7 @@ class _TagFriendsSelectorState extends State<TagFriendsSelector> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Text(
           l.noFriendsYet,
-          style: TextStyle(color: cs.onSurface.withOpacity(0.4), fontSize: 13),
+          style: TextStyle(color: cs.onSurface.withValues(alpha: 0.4), fontSize: 13),
         ),
       );
     }
@@ -79,7 +79,7 @@ class _TagFriendsSelectorState extends State<TagFriendsSelector> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: cs.onSurface.withOpacity(0.7),
+            color: cs.onSurface.withValues(alpha: 0.7),
           ),
         ),
         const SizedBox(height: 10),
@@ -108,7 +108,7 @@ class _TagFriendsSelectorState extends State<TagFriendsSelector> {
               },
               color: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.selected)) {
-                  return red.withOpacity(0.2);
+                  return red.withValues(alpha: 0.2);
                 }
                 return cs.surface;
               }),
@@ -120,7 +120,7 @@ class _TagFriendsSelectorState extends State<TagFriendsSelector> {
                 fontSize: 13,
               ),
               side: BorderSide(
-                color: selected ? red : cs.onSurface.withOpacity(0.2),
+                color: selected ? red : cs.onSurface.withValues(alpha: 0.2),
                 width: selected ? 1.5 : 1,
               ),
             );

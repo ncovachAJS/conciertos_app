@@ -32,7 +32,7 @@ class CompareStatsPage extends ConsumerWidget {
     final currentUserName = AuthController.instance.user?.name ?? l.youLabel;
 
     // Incluir propios + compartidos, deduplicar por artista+fecha
-    final _pastAll = allMyConcerts.where((c) => c.date.isBefore(today)).toList()
+    final pastAll = allMyConcerts.where((c) => c.date.isBefore(today)).toList()
       ..sort((a, b) {
         // Propios primero para que la versión propia gane en deduplicación
         final aOwn = (a.userId == currentUserId || a.userId.isEmpty) ? 0 : 1;
@@ -40,28 +40,28 @@ class CompareStatsPage extends ConsumerWidget {
         return aOwn.compareTo(bOwn);
       });
 
-    final _seenKeys = <String>{};
+    final seenKeys = <String>{};
     final myConcerts = <Concert>[];
-    for (final c in _pastAll) {
+    for (final c in pastAll) {
       final key =
           '${c.artist.trim().toLowerCase()}_${DateTime(c.date.year, c.date.month, c.date.day)}';
-      if (_seenKeys.add(key)) myConcerts.add(c);
+      if (seenKeys.add(key)) myConcerts.add(c);
     }
 
     // Deduplicar conciertos del amigo por artista+fecha (propios ganan sobre compartidos)
-    final _friendSorted = friendConcerts.where((c) => c.date.isBefore(today)).toList()
+    final friendSorted = friendConcerts.where((c) => c.date.isBefore(today)).toList()
       ..sort((a, b) {
         final aOwn = a.userId == friend.id ? 0 : 1;
         final bOwn = b.userId == friend.id ? 0 : 1;
         return aOwn.compareTo(bOwn);
       });
 
-    final _friendSeenKeys = <String>{};
+    final friendSeenKeys = <String>{};
     final friendPast = <Concert>[];
-    for (final c in _friendSorted) {
+    for (final c in friendSorted) {
       final key =
           '${c.artist.trim().toLowerCase()}_${DateTime(c.date.year, c.date.month, c.date.day)}';
-      if (_friendSeenKeys.add(key)) friendPast.add(c);
+      if (friendSeenKeys.add(key)) friendPast.add(c);
     }
 
     final myStats = _ConcertStats(myConcerts);
@@ -274,7 +274,7 @@ class _CompareHeader extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: const Color(0xFFE53935).withOpacity(0.2),
+                  backgroundColor: const Color(0xFFE53935).withValues(alpha: 0.2),
                   backgroundImage: (myAvatarUrl != null && myAvatarUrl!.isNotEmpty)
                       ? NetworkImage(myAvatarUrl!)
                       : null,
@@ -311,7 +311,7 @@ class _CompareHeader extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
-                color: cs.onSurface.withOpacity(0.4),
+                color: cs.onSurface.withValues(alpha: 0.4),
                 letterSpacing: 2,
               ),
             ),
@@ -421,7 +421,7 @@ class _StatsTable extends StatelessWidget {
                 height: 1,
                 indent: 16,
                 endIndent: 16,
-                color: cs.onSurface.withOpacity(0.08),
+                color: cs.onSurface.withValues(alpha: 0.08),
               ),
             _StatsTableRow(row: rows[i], cs: cs),
           ],
@@ -484,7 +484,7 @@ class _StatsTableRow extends StatelessWidget {
               row.label,
               style: TextStyle(
                 fontSize: 11,
-                color: cs.onSurface.withOpacity(0.5),
+                color: cs.onSurface.withValues(alpha: 0.5),
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
@@ -540,8 +540,8 @@ class _ArtistChipsList extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          backgroundColor: color.withOpacity(0.1),
-          side: BorderSide(color: color.withOpacity(0.3)),
+          backgroundColor: color.withValues(alpha: 0.1),
+          side: BorderSide(color: color.withValues(alpha: 0.3)),
           padding: const EdgeInsets.symmetric(horizontal: 4),
         );
       }).toList(),
@@ -566,7 +566,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.54);
+    final c = color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54);
     return Row(
       children: [
         Icon(icon, color: c, size: 18),

@@ -20,7 +20,7 @@ class DashboardFavorites extends StatelessWidget {
           child: Text(
             l.noFavorites,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
               fontSize: 16,
             ),
           ),
@@ -33,7 +33,7 @@ class DashboardFavorites extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: concerts.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        separatorBuilder: (_, _) => const SizedBox(width: 16),
         itemBuilder: (_, index) => _FavoriteCard(concert: concerts[index]),
       ),
     );
@@ -57,7 +57,7 @@ class _FavoriteCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: cs.shadow.withOpacity(0.08),
+            color: cs.shadow.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -74,7 +74,7 @@ class _FavoriteCard extends StatelessWidget {
                   imageUrl: concert.imageUrl,
                   fit: BoxFit.cover,
                   fadeInDuration: Duration.zero,
-                  errorWidget: (_, __, ___) => Container(
+                  errorWidget: (_, _, _) => Container(
                     color: const Color(0xFF303542),
                     child: const Icon(
                       Icons.music_note,
@@ -91,7 +91,7 @@ class _FavoriteCard extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(.85),
+                          Colors.black.withValues(alpha: .85),
                         ],
                       ),
                     ),
@@ -104,7 +104,7 @@ class _FavoriteCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -139,7 +139,7 @@ class _FavoriteCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: cs.onSurface.withOpacity(0.5),
+                    color: cs.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),

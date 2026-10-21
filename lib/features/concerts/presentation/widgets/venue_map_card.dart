@@ -129,13 +129,13 @@ class _VenueMapCardState extends State<VenueMapCard> {
                             Icon(
                               Icons.location_off_rounded,
                               size: 36,
-                              color: cs.onSurface.withOpacity(0.25),
+                              color: cs.onSurface.withValues(alpha: 0.25),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               l.mapNotAvailable,
                               style: TextStyle(
-                                color: cs.onSurface.withOpacity(0.4),
+                                color: cs.onSurface.withValues(alpha: 0.4),
                                 fontSize: 13,
                               ),
                             ),

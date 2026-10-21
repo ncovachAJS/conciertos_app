@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/app_shell.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
-import '../../../friends/data/services/friends_api_service.dart';
 import '../../../friends/presentation/widgets/friend_avatar.dart';
 import '../../../friends/presentation/widgets/tag_friends_selector.dart';
 import '../../data/models/concert_photo_model.dart';
@@ -162,7 +161,6 @@ class _PhotoViewerPageState extends State<PhotoViewerPage> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final total = _photos.length;
-    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       backgroundColor: Colors.black,

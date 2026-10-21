@@ -61,8 +61,8 @@ class DashboardSkeleton extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: 3,
-              separatorBuilder: (_, _s) => const SizedBox(width: 14),
-              itemBuilder: (_, __) => const ShimmerBox(
+              separatorBuilder: (_, s) => const SizedBox(width: 14),
+              itemBuilder: (_, _) => const ShimmerBox(
                 width: 160,
                 height: 180,
                 borderRadius: 22,

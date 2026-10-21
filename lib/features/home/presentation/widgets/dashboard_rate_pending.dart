@@ -49,9 +49,9 @@ class _DashboardRatePendingState extends ConsumerState<DashboardRatePending> {
 
     return Container(
       decoration: BoxDecoration(
-        color: amber.withOpacity(0.07),
+        color: amber.withValues(alpha: 0.07),
         borderRadius: radius,
-        border: Border.all(color: amber.withOpacity(0.25)),
+        border: Border.all(color: amber.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,7 +89,7 @@ class _DashboardRatePendingState extends ConsumerState<DashboardRatePending> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: amber.withOpacity(0.9),
+                    color: amber.withValues(alpha: 0.9),
                   ),
                 ),
                 const SizedBox(width: 2),
@@ -149,7 +149,7 @@ class _NavButton extends StatelessWidget {
         size: 22,
         color: enabled
             ? const Color(0xFFFFC107)
-            : const Color(0xFFFFC107).withOpacity(0.25),
+            : const Color(0xFFFFC107).withValues(alpha: 0.25),
       ),
     );
   }
@@ -183,7 +183,7 @@ class _PendingConcertRow extends StatelessWidget {
                       width: 44,
                       height: 44,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder(),
+                      errorBuilder: (_, _, _) => _placeholder(),
                     )
                   : _placeholder(),
             ),
@@ -206,7 +206,7 @@ class _PendingConcertRow extends StatelessWidget {
                   Text(
                     dateStr,
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.5),
+                      color: cs.onSurface.withValues(alpha: 0.5),
                       fontSize: 12,
                     ),
                   ),
@@ -218,7 +218,7 @@ class _PendingConcertRow extends StatelessWidget {
                 color: Color(0xFFFFC107), size: 18),
             const SizedBox(width: 4),
             Icon(Icons.chevron_right_rounded,
-                color: cs.onSurface.withOpacity(0.3), size: 18),
+                color: cs.onSurface.withValues(alpha: 0.3), size: 18),
           ],
         ),
       ),
@@ -229,7 +229,7 @@ class _PendingConcertRow extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: const Color(0xFFFFC107).withOpacity(0.15),
+          color: const Color(0xFFFFC107).withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Icon(Icons.music_note_rounded,

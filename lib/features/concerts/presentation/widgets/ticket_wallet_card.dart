@@ -165,7 +165,7 @@ class _TicketWalletCardState extends State<TicketWalletCard> {
                 widget.isFestival ? l.ticketWalletFestivalEmptyDescription : l.ticketWalletEmptyDescription,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 14),

@@ -1,4 +1,3 @@
-import '../../../friends/domain/entities/friend.dart';
 
 class PhotoConcertRef {
   final String id;

@@ -213,7 +213,7 @@ class _TrackListViewState extends State<_TrackListView> {
         ),
         SliverList.separated(
           itemCount: widget.tracks.length,
-          separatorBuilder: (_, __) => Divider(
+          separatorBuilder: (_, _) => Divider(
             height: 1,
             indent: 16,
             endIndent: 16,
@@ -291,8 +291,8 @@ class _TrackRow extends StatelessWidget {
                       width: 44,
                       height: 44,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => _AlbumPlaceholder(),
-                      errorWidget: (_, __, ___) => _AlbumPlaceholder(),
+                      placeholder: (_, _) => _AlbumPlaceholder(),
+                      errorWidget: (_, _, _) => _AlbumPlaceholder(),
                     )
                   : _AlbumPlaceholder(),
             ),

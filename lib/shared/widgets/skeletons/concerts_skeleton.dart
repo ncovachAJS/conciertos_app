@@ -13,8 +13,8 @@ class ConcertsSkeleton extends StatelessWidget {
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       itemCount: 7,
-      separatorBuilder: (_, _s) => const SizedBox(height: 12),
-      itemBuilder: (_, __) => const _ConcertCardSkeleton(),
+      separatorBuilder: (_, s) => const SizedBox(height: 12),
+      itemBuilder: (_, _) => const _ConcertCardSkeleton(),
     );
   }
 }

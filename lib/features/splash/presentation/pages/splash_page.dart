@@ -1,6 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:conciertos_app/core/initialization/app_initializer.dart';
-import 'package:conciertos_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:conciertos_app/features/concerts/presentation/providers/concerts_provider.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +28,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
   late Animation<Offset> _titleSlideAnimation;
 
   final AudioPlayer _crowdPlayer = AudioPlayer();
-  final _authController = AuthController.instance;
 
   // AppInitializer recibe un callback que pre-calienta el provider.
   // Con ref.read(concertsProvider.future) el notifier arranca build()
@@ -156,7 +154,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
           ),
 
           Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.50)),
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.50)),
           ),
 
           SafeArea(

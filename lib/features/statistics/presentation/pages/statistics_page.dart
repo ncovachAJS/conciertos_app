@@ -115,7 +115,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                 size: 48,
                 color: Theme.of(
                   context,
-                ).colorScheme.onSurface.withOpacity(0.38),
+                ).colorScheme.onSurface.withValues(alpha: 0.38),
               ),
               const SizedBox(height: 12),
               Text(
@@ -123,7 +123,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                 style: TextStyle(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.54),
+                  ).colorScheme.onSurface.withValues(alpha: 0.54),
                 ),
               ),
               const SizedBox(height: 16),
@@ -165,7 +165,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                       size: 64,
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.24),
+                      ).colorScheme.onSurface.withValues(alpha: 0.24),
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -173,7 +173,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                       style: TextStyle(
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.54),
+                        ).colorScheme.onSurface.withValues(alpha: 0.54),
                         fontSize: 16,
                       ),
                       textAlign: TextAlign.center,
@@ -204,7 +204,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                       size: 64,
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.24),
+                      ).colorScheme.onSurface.withValues(alpha: 0.24),
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -212,7 +212,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                       style: TextStyle(
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.54),
+                        ).colorScheme.onSurface.withValues(alpha: 0.54),
                         fontSize: 16,
                       ),
                       textAlign: TextAlign.center,
@@ -502,7 +502,7 @@ class _SummaryGrid extends StatelessWidget {
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          separatorBuilder: (_, _) => const SizedBox(width: 12),
           itemBuilder: (_, i) => SizedBox(
             width: 155,
             child: _SummaryCard(data: items[i]),
@@ -562,7 +562,7 @@ class _SummaryCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: data.color.withOpacity(.15),
+              color: data.color.withValues(alpha: .15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(data.icon, color: data.color, size: 20),
@@ -578,7 +578,7 @@ class _SummaryCard extends StatelessWidget {
           Text(
             data.label,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -604,7 +604,7 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Icon(
           icon,
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
           size: 18,
         ),
         const SizedBox(width: 8),
@@ -613,7 +613,7 @@ class _SectionTitle extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
             letterSpacing: 1.1,
           ),
         ),
@@ -688,7 +688,7 @@ class _YearBarChartState extends State<_YearBarChart> {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.06),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -757,7 +757,7 @@ class _YearBarChartState extends State<_YearBarChart> {
                         style: TextStyle(
                           color: Theme.of(
                             context,
-                          ).colorScheme.onSurface.withOpacity(0.54),
+                          ).colorScheme.onSurface.withValues(alpha: 0.54),
                           fontSize: 10,
                         ),
                       ),
@@ -826,7 +826,7 @@ class _HorizontalBars extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Theme.of(
                                 context,
-                              ).colorScheme.onSurface.withOpacity(0.1),
+                              ).colorScheme.onSurface.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -1412,7 +1412,7 @@ class _RatingBars extends StatelessWidget {
                           ? const Color(0xFFFFC107)
                           : Theme.of(
                               context,
-                            ).colorScheme.onSurface.withOpacity(0.24),
+                            ).colorScheme.onSurface.withValues(alpha: 0.24),
                       size: 14,
                     ),
                   ),
@@ -1431,7 +1431,7 @@ class _RatingBars extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Theme.of(
                                 context,
-                              ).colorScheme.onSurface.withOpacity(0.1),
+                              ).colorScheme.onSurface.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -1457,7 +1457,7 @@ class _RatingBars extends StatelessWidget {
                     style: TextStyle(
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.6),
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                       fontSize: 13,
                     ),
                   ),

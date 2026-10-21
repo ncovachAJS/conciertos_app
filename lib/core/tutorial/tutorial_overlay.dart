@@ -99,7 +99,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -125,7 +125,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                     decoration: BoxDecoration(
                       color: active
                           ? const Color(0xFFE53935)
-                          : cs.onSurface.withOpacity(0.15),
+                          : cs.onSurface.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   );
@@ -139,7 +139,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE53935).withOpacity(0.12),
+                  color: const Color(0xFFE53935).withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -169,7 +169,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                 step.description,
                 style: TextStyle(
                   fontSize: 15,
-                  color: cs.onSurface.withOpacity(0.6),
+                  color: cs.onSurface.withValues(alpha: 0.6),
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -185,7 +185,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                       onPressed: _skip,
                       child: Text(
                         l.tutorialSkip,
-                        style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
+                        style: TextStyle(color: cs.onSurface.withValues(alpha: 0.4)),
                       ),
                     ),
                   const Spacer(),

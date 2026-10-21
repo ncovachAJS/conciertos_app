@@ -40,7 +40,7 @@ class ConcertGridCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: cs.shadow.withOpacity(0.08),
+              color: cs.shadow.withValues(alpha: 0.08),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -65,12 +65,12 @@ class ConcertGridCard extends StatelessWidget {
                         imageUrl: concert.imageUrl,
                         fit: BoxFit.cover,
                         fadeInDuration: Duration.zero,
-                        errorWidget: (_, __, ___) => Container(
+                        errorWidget: (_, _, _) => Container(
                           color: cs.surfaceContainerHighest,
                           child: Icon(
                             Icons.music_note,
                             size: 48,
-                            color: cs.onSurface.withOpacity(0.2),
+                            color: cs.onSurface.withValues(alpha: 0.2),
                           ),
                         ),
                       ),
@@ -83,7 +83,7 @@ class ConcertGridCard extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.85),
+                            color: Colors.white.withValues(alpha: 0.85),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -102,7 +102,7 @@ class ConcertGridCard extends StatelessWidget {
                               icon: Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.4),
+                                  color: Colors.black.withValues(alpha: 0.4),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -145,7 +145,7 @@ class ConcertGridCard extends StatelessWidget {
                           : Container(
                               padding: const EdgeInsets.all(5),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.4),
+                                color: Colors.black.withValues(alpha: 0.4),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -182,7 +182,7 @@ class ConcertGridCard extends StatelessWidget {
                       Icon(
                         Icons.location_on,
                         size: 12,
-                        color: const Color(0xFFE53935).withOpacity(0.8),
+                        color: const Color(0xFFE53935).withValues(alpha: 0.8),
                       ),
                       const SizedBox(width: 3),
                       Expanded(
@@ -193,7 +193,7 @@ class ConcertGridCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: cs.onSurface.withOpacity(0.55),
+                            color: cs.onSurface.withValues(alpha: 0.55),
                             fontSize: 12,
                           ),
                         ),
@@ -206,13 +206,13 @@ class ConcertGridCard extends StatelessWidget {
                       Icon(
                         Icons.calendar_today,
                         size: 12,
-                        color: const Color(0xFFE53935).withOpacity(0.8),
+                        color: const Color(0xFFE53935).withValues(alpha: 0.8),
                       ),
                       const SizedBox(width: 3),
                       Text(
                         '${concert.date.day}/${concert.date.month}/${concert.date.year}',
                         style: TextStyle(
-                          color: cs.onSurface.withOpacity(0.55),
+                          color: cs.onSurface.withValues(alpha: 0.55),
                           fontSize: 12,
                         ),
                       ),
@@ -240,7 +240,7 @@ class ConcertGridCard extends StatelessWidget {
                       Text(
                         l.ratingNone,
                         style: TextStyle(
-                          color: Colors.amber.withOpacity(0.45),
+                          color: Colors.amber.withValues(alpha: 0.45),
                           fontSize: 11,
                         ),
                       ),

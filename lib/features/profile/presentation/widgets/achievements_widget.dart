@@ -153,7 +153,7 @@ class _AchievementsWidgetState extends State<AchievementsWidget>
             child: Center(
               child: AnimatedBuilder(
                 animation: _ctrl,
-                builder: (_, __) => Text(
+                builder: (_, _) => Text(
                   _expanded
                       ? l.onThisDaySeeLess
                       : l.achievementsSeeMoreCount(achievements.length - collapsedCount),

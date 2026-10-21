@@ -13,7 +13,7 @@ class DashboardConcertMap extends StatelessWidget {
     const radius = BorderRadius.all(Radius.circular(22));
 
     return Material(
-      color: const Color(0xFFE53935).withOpacity(.10),
+      color: const Color(0xFFE53935).withValues(alpha: .10),
       borderRadius: radius,
       child: InkWell(
         borderRadius: radius,
@@ -24,7 +24,7 @@ class DashboardConcertMap extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: radius,
             border: Border.all(
-              color: const Color(0xFFE53935).withOpacity(.18),
+              color: const Color(0xFFE53935).withValues(alpha: .18),
               width: 1.2,
             ),
           ),
@@ -34,7 +34,7 @@ class DashboardConcertMap extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE53935).withOpacity(.15),
+                  color: const Color(0xFFE53935).withValues(alpha: .15),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -60,7 +60,7 @@ class DashboardConcertMap extends StatelessWidget {
                       l.concertMapDashboardSubtitle,
                       style: TextStyle(
                         fontSize: 13,
-                        color: cs.onSurface.withOpacity(0.55),
+                        color: cs.onSurface.withValues(alpha: 0.55),
                       ),
                     ),
                   ],
@@ -68,7 +68,7 @@ class DashboardConcertMap extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: cs.onSurface.withOpacity(0.35),
+                color: cs.onSurface.withValues(alpha: 0.35),
               ),
             ],
           ),

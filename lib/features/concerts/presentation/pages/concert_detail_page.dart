@@ -13,7 +13,6 @@ import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
@@ -189,8 +188,8 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
       PageRouteBuilder(
         opaque: false,
         barrierColor: Colors.black,
-        pageBuilder: (_, __, ___) => _FullscreenImageViewer(url: url),
-        transitionsBuilder: (_, animation, __, child) =>
+        pageBuilder: (_, _, _) => _FullscreenImageViewer(url: url),
+        transitionsBuilder: (_, animation, _, child) =>
             FadeTransition(opacity: animation, child: child),
       ),
     );
@@ -270,7 +269,7 @@ class _ConcertDetailPageState extends ConsumerState<ConcertDetailPage> {
                 ? CachedNetworkImage(
                     imageUrl: concert.imageUrl,
                     fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => Container(
+                    errorWidget: (_, _, _) => Container(
                       color: const Color(0xFF2B2B2B),
                       child: const Icon(Icons.music_note, color: Colors.white24, size: 80),
                     ),
@@ -749,12 +748,12 @@ class _CommentsSectionState extends State<_CommentsSection> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                     decoration: BoxDecoration(
-                      color: cs.onSurface.withOpacity(0.12),
+                      color: cs.onSurface.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       '${_comments.length}',
-                      style: TextStyle(fontSize: 12, color: cs.onSurface.withOpacity(0.7)),
+                      style: TextStyle(fontSize: 12, color: cs.onSurface.withValues(alpha: 0.7)),
                     ),
                   ),
                 ],
@@ -779,7 +778,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
                           child: Center(
                             child: Text(
                               AppLocalizations.of(context).commentsEmpty,
-                              style: TextStyle(color: cs.onSurface.withOpacity(0.4), fontSize: 14),
+                              style: TextStyle(color: cs.onSurface.withValues(alpha: 0.4), fontSize: 14),
                             ),
                           ),
                         )
@@ -787,7 +786,7 @@ class _CommentsSectionState extends State<_CommentsSection> {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: _comments.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          separatorBuilder: (_, _) => const SizedBox(height: 12),
                           itemBuilder: (_, i) => _CommentTile(comment: _comments[i], cs: cs),
                         ),
             ),
@@ -853,7 +852,7 @@ class _CommentTile extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 16,
-          backgroundColor: cs.onSurface.withOpacity(0.1),
+          backgroundColor: cs.onSurface.withValues(alpha: 0.1),
           backgroundImage: comment.userAvatarUrl.isNotEmpty
               ? NetworkImage(comment.userAvatarUrl)
               : null,
@@ -878,7 +877,7 @@ class _CommentTile extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     _timeAgo(AppLocalizations.of(context), comment.createdAt),
-                    style: TextStyle(fontSize: 11, color: cs.onSurface.withOpacity(0.45)),
+                    style: TextStyle(fontSize: 11, color: cs.onSurface.withValues(alpha: 0.45)),
                   ),
                 ],
               ),
@@ -929,7 +928,7 @@ class _FullscreenImageViewer extends StatelessWidget {
           child: CachedNetworkImage(
             imageUrl: url,
             fit: BoxFit.contain,
-            errorWidget: (_, __, ___) => const Icon(
+            errorWidget: (_, _, _) => const Icon(
               Icons.broken_image_outlined,
               color: Colors.white38,
               size: 64,
@@ -1005,7 +1004,7 @@ class _ShareBottomSheetState extends State<_ShareBottomSheet> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: cs.onSurface.withOpacity(0.2),
+                color: cs.onSurface.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1088,7 +1087,7 @@ class _ConcertShareCard extends StatelessWidget {
                   CachedNetworkImage(
                     imageUrl: concert.imageUrl,
                     fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) =>
+                    errorWidget: (_, _, _) =>
                         const _ShareCardPlaceholder(),
                   )
                 else
@@ -1102,7 +1101,7 @@ class _ConcertShareCard extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          const Color(0xFF121212).withOpacity(0.5),
+                          const Color(0xFF121212).withValues(alpha: 0.5),
                           const Color(0xFF121212),
                         ],
                         stops: const [0.5, 0.8, 1.0],
@@ -1307,7 +1306,7 @@ class _ParticipantsCard extends StatelessWidget {
                       p.name.split(' ').first, // solo el primer nombre
                       style: TextStyle(
                         fontSize: 12,
-                        color: cs.onSurface.withOpacity(0.7),
+                        color: cs.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -1416,7 +1415,7 @@ class _SubRatingDetailRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(item.icon, size: 18, color: cs.onSurface.withOpacity(0.6)),
+        Icon(item.icon, size: 18, color: cs.onSurface.withValues(alpha: 0.6)),
         const SizedBox(width: 10),
         SizedBox(
           width: 100,
@@ -1428,7 +1427,7 @@ class _SubRatingDetailRow extends StatelessWidget {
         Expanded(
           child: LinearProgressIndicator(
             value: item.value / 5.0,
-            backgroundColor: cs.onSurface.withOpacity(0.1),
+            backgroundColor: cs.onSurface.withValues(alpha: 0.1),
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
             borderRadius: BorderRadius.circular(4),
             minHeight: 8,

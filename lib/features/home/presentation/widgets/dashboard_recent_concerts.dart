@@ -20,7 +20,7 @@ class DashboardRecentConcerts extends StatelessWidget {
           child: Text(
             l.noConcerts,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.54),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
               fontSize: 16,
             ),
           ),
@@ -33,7 +33,7 @@ class DashboardRecentConcerts extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: concerts.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        separatorBuilder: (_, _) => const SizedBox(width: 16),
         itemBuilder: (_, index) => _RecentCard(concert: concerts[index]),
       ),
     );
@@ -57,7 +57,7 @@ class _RecentCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: cs.shadow.withOpacity(0.1),
+            color: cs.shadow.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -77,12 +77,12 @@ class _RecentCard extends StatelessWidget {
                     imageUrl: concert.imageUrl,
                     fit: BoxFit.cover,
                     fadeInDuration: Duration.zero,
-                    errorWidget: (_, __, ___) => Container(
+                    errorWidget: (_, _, _) => Container(
                       color: cs.surfaceContainerHighest,
                       child: Icon(
                         Icons.music_note,
                         size: 48,
-                        color: cs.onSurface.withOpacity(0.2),
+                        color: cs.onSurface.withValues(alpha: 0.2),
                       ),
                     ),
                   ),
@@ -93,7 +93,7 @@ class _RecentCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.85),
+                          color: Colors.white.withValues(alpha: 0.85),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -129,7 +129,7 @@ class _RecentCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: cs.onSurface.withOpacity(0.5),
+                    color: cs.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),

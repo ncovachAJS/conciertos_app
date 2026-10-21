@@ -296,7 +296,7 @@ class _ConcertDetailById extends ConsumerWidget {
       loading: () => const Scaffold(
         body: GenericPageSkeleton(itemCount: 4, withHeader: true),
       ),
-      error: (_, __) => Scaffold(
+      error: (_, _) => Scaffold(
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
