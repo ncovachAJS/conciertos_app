@@ -9,7 +9,7 @@
 
 | Campo | Datos |
 |-------|-------|
-| **Nombre / Razón social** | La Vida en Directo (Nicolás Covacha, desarrollador individual) |
+| **Nombre / Razón social** | La Vida en Directo (Nicolás Covach, desarrollador individual) |
 | **Email de contacto** | ncovach@gmail.com |
 | **Email de privacidad** | ncovach@gmail.com |
 
@@ -146,7 +146,7 @@ Ninguna de estas integraciones transmite datos personales del usuario a dichos t
 
 ## 11. Eliminación de cuenta
 
-Puedes eliminar tu cuenta desde **Ajustes → Eliminar cuenta** en la app. La eliminación borra permanentemente:
+Puedes eliminar tu cuenta desde **Perfil → Ajustes → Eliminar cuenta** en la app. La eliminación borra permanentemente:
 
 - Tu perfil y datos de registro.
 - Todos tus conciertos y fotos.
