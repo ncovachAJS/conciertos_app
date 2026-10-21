@@ -181,18 +181,17 @@ class ProfileCard extends StatelessWidget {
       BuildContext context, AppLocalizations l, BoxDecoration decoration) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
       decoration: decoration,
       child: Column(
         children: [
-          const SizedBox(height: 12),
           GestureDetector(
             onTap: onAvatarTap,
             child: Stack(
               children: [
                 Container(
-                  width: 90,
-                  height: 90,
+                  width: 64,
+                  height: 64,
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: .15),
                     shape: BoxShape.circle,
@@ -206,21 +205,21 @@ class ProfileCard extends StatelessWidget {
                           errorBuilder: (_, _, _) => const Icon(
                             Icons.person_outline,
                             color: Colors.white,
-                            size: 48,
+                            size: 34,
                           ),
                         )
                       : const Icon(
                           Icons.person_outline,
                           color: Colors.white,
-                          size: 48,
+                          size: 34,
                         ),
                 ),
                 Positioned(
                   bottom: 0,
                   right: 0,
                   child: Container(
-                    width: 28,
-                    height: 28,
+                    width: 22,
+                    height: 22,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
@@ -228,22 +227,22 @@ class ProfileCard extends StatelessWidget {
                           color: const Color(0xFFE53935), width: 2),
                     ),
                     child: const Icon(Icons.camera_alt,
-                        size: 14, color: Color(0xFFE53935)),
+                        size: 11, color: Color(0xFFE53935)),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 4),
           Text(
             name,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 30,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 4),
           Text(
             subtitle,
             textAlign: TextAlign.center,
@@ -252,19 +251,19 @@ class ProfileCard extends StatelessWidget {
               fontStyle: FontStyle.italic,
             ),
           ),
-          const SizedBox(height: 24),
-          const Divider(color: Colors.white24),
+          const SizedBox(height: 10),
+          const Divider(color: Colors.white24, height: 1),
           const SizedBox(height: 8),
           Text(
             l.memberNumber(memberNumber.toString().padLeft(6, '0')),
             style: TextStyle(
               color: Colors.white.withValues(alpha: .7),
               letterSpacing: 2,
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 4),
           Row(
             children: [
               Expanded(
@@ -272,6 +271,7 @@ class ProfileCard extends StatelessWidget {
                   icon: Icons.music_note,
                   value: totalConcerts.toString(),
                   label: l.concertsStatLabel,
+                  compact: true,
                 ),
               ),
               Expanded(
@@ -279,6 +279,7 @@ class ProfileCard extends StatelessWidget {
                   icon: Icons.star,
                   value: totalFavorites.toString(),
                   label: l.favoritesStatLabel,
+                  compact: true,
                 ),
               ),
               Expanded(
@@ -286,6 +287,7 @@ class ProfileCard extends StatelessWidget {
                   icon: Icons.photo_camera,
                   value: totalPhotos.toString(),
                   label: l.memoriesStatLabel,
+                  compact: true,
                 ),
               ),
             ],
@@ -297,31 +299,37 @@ class ProfileCard extends StatelessWidget {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat({required this.icon, required this.value, required this.label});
+  const _Stat({
+    required this.icon,
+    required this.value,
+    required this.label,
+    this.compact = false,
+  });
 
   final IconData icon;
   final String value;
   final String label;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white70, size: 20),
-        const SizedBox(height: 8),
+        Icon(icon, color: Colors.white70, size: compact ? 16 : 20),
+        SizedBox(height: compact ? 4 : 8),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 24,
+            fontSize: compact ? 19 : 24,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: compact ? 2 : 6),
         Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: Colors.white70, fontSize: compact ? 12 : null),
         ),
       ],
     );
