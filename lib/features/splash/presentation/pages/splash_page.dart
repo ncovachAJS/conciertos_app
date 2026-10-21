@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:conciertos_app/core/utils/user_prefs.dart';
 
 import '../widgets/splash_progress.dart';
 
@@ -77,7 +78,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
   Future<void> _playCrowd() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final enabled = prefs.getBool(_kSplashSound) ?? true;
+      await UserPrefs.claimLegacy(prefs, _kSplashSound);
+      final enabled = prefs.getBool(UserPrefs.key(_kSplashSound)) ?? true;
       if (!enabled) return;
 
       await _crowdPlayer.setReleaseMode(ReleaseMode.stop);

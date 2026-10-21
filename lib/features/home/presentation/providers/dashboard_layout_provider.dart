@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:conciertos_app/features/auth/presentation/providers/current_user_provider.dart';
 import '../../data/dashboard_layout_service.dart';
 import '../../domain/dashboard_section.dart';
 
@@ -8,7 +9,10 @@ class DashboardLayoutNotifier
   final _service = DashboardLayoutService();
 
   @override
-  Future<List<DashboardSection>> build() => _service.load();
+  Future<List<DashboardSection>> build() {
+    ref.watch(currentUserIdProvider);
+    return _service.load();
+  }
 
   /// Mueve una sección de [oldIndex] a [newIndex].
   /// ReorderableListView ya ajusta newIndex internamente (newIndex > oldIndex → newIndex - 1),

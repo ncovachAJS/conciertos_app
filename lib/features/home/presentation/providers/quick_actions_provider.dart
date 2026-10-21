@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:conciertos_app/features/auth/presentation/providers/current_user_provider.dart';
 import '../../data/quick_actions_service.dart';
 import '../../domain/quick_action.dart';
 
@@ -7,7 +8,10 @@ class QuickActionsNotifier extends AsyncNotifier<List<QuickActionId>> {
   final _service = QuickActionsService();
 
   @override
-  Future<List<QuickActionId>> build() => _service.load();
+  Future<List<QuickActionId>> build() {
+    ref.watch(currentUserIdProvider);
+    return _service.load();
+  }
 
   List<QuickActionId> get _current =>
       state.asData?.value ?? List.of(kDefaultQuickActions);

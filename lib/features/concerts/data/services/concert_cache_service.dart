@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:conciertos_app/core/utils/user_prefs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/concert_model.dart';
@@ -18,9 +19,9 @@ class ConcertCacheService {
   Future<void> save(List<ConcertModel> concerts) async {
     final prefs = await SharedPreferences.getInstance();
     final jsonList = concerts.map((c) => c.toCacheJson()).toList();
-    await prefs.setString(_kCacheKey, jsonEncode(jsonList));
+    await prefs.setString(UserPrefs.key(_kCacheKey), jsonEncode(jsonList));
     await prefs.setInt(
-      _kCacheTimestampKey,
+      UserPrefs.key(_kCacheTimestampKey),
       DateTime.now().millisecondsSinceEpoch,
     );
   }
@@ -28,7 +29,7 @@ class ConcertCacheService {
   /// Lee la lista del caché. Devuelve lista vacía si no hay datos.
   Future<List<ConcertModel>> load() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_kCacheKey);
+    final raw = prefs.getString(UserPrefs.key(_kCacheKey));
     if (raw == null) return [];
     try {
       final list = jsonDecode(raw) as List<dynamic>;
@@ -41,19 +42,19 @@ class ConcertCacheService {
   /// Indica si el caché tiene datos válidos (no vacíos y no expirados).
   Future<bool> isValid() async {
     final prefs = await SharedPreferences.getInstance();
-    final ts = prefs.getInt(_kCacheTimestampKey);
+    final ts = prefs.getInt(UserPrefs.key(_kCacheTimestampKey));
     if (ts == null) return false;
     final age = DateTime.now().difference(
       DateTime.fromMillisecondsSinceEpoch(ts),
     );
-    final hasData = (prefs.getString(_kCacheKey)?.isNotEmpty) ?? false;
+    final hasData = (prefs.getString(UserPrefs.key(_kCacheKey))?.isNotEmpty) ?? false;
     return hasData && age < _maxAge;
   }
 
   /// Borra el caché.
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_kCacheKey);
-    await prefs.remove(_kCacheTimestampKey);
+    await prefs.remove(UserPrefs.key(_kCacheKey));
+    await prefs.remove(UserPrefs.key(_kCacheTimestampKey));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../auth/presentation/providers/current_user_provider.dart';
 import '../../data/services/records_api_service.dart';
 import '../../domain/artist_match.dart';
 import '../../domain/entities/album_record.dart';
@@ -8,7 +9,10 @@ class RecordsNotifier extends AsyncNotifier<List<AlbumRecord>> {
   final _api = RecordsApiService();
 
   @override
-  Future<List<AlbumRecord>> build() => _api.getAll();
+  Future<List<AlbumRecord>> build() {
+    ref.watch(currentUserIdProvider);
+    return _api.getAll();
+  }
 
   /// Añade un disco. Lanza [RecordAlreadyExistsException] si ya estaba.
   Future<void> add(AlbumRecord record) async {

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:conciertos_app/core/utils/user_prefs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../auth/presentation/controllers/auth_controller.dart';
@@ -63,7 +64,8 @@ class DashboardLayoutService {
     final isPro = AuthController.instance.user?.isPro == true;
 
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
+    await UserPrefs.claimLegacy(prefs, _key);
+    final raw = prefs.getString(UserPrefs.key(_key));
     if (raw == null) return merge(const [], isPro: isPro);
 
     try {
@@ -80,13 +82,13 @@ class DashboardLayoutService {
   Future<void> save(List<DashboardSection> sections) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-      _key,
+      UserPrefs.key(_key),
       jsonEncode(sections.map((s) => s.toJson()).toList()),
     );
   }
 
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key);
+    await prefs.remove(UserPrefs.key(_key));
   }
 }

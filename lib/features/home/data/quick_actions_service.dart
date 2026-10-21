@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:conciertos_app/core/utils/user_prefs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../auth/presentation/controllers/auth_controller.dart';
@@ -29,7 +30,8 @@ class QuickActionsService {
     // Fase de pruebas: isPro real (ProConfig.isUserPro está abierto a todos).
     final isPro = AuthController.instance.user?.isPro == true;
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
+    await UserPrefs.claimLegacy(prefs, _key);
+    final raw = prefs.getString(UserPrefs.key(_key));
     if (raw == null) return List.of(kDefaultQuickActions);
     try {
       final names = (jsonDecode(raw) as List<dynamic>).cast<String>();
@@ -42,13 +44,13 @@ class QuickActionsService {
   Future<void> save(List<QuickActionId> actions) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-      _key,
+      UserPrefs.key(_key),
       jsonEncode(actions.map((a) => a.name).toList()),
     );
   }
 
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key);
+    await prefs.remove(UserPrefs.key(_key));
   }
 }

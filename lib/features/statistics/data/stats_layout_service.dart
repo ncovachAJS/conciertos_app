@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:conciertos_app/core/utils/user_prefs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/stats_section.dart';
@@ -25,7 +26,8 @@ class StatsLayoutService {
 
   Future<List<StatsSection>> load() async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
+    await UserPrefs.claimLegacy(prefs, _key);
+    final raw = prefs.getString(UserPrefs.key(_key));
     if (raw == null) return List.of(defaults);
 
     try {
@@ -44,13 +46,13 @@ class StatsLayoutService {
   Future<void> save(List<StatsSection> sections) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-      _key,
+      UserPrefs.key(_key),
       jsonEncode(sections.map((s) => s.toJson()).toList()),
     );
   }
 
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key);
+    await prefs.remove(UserPrefs.key(_key));
   }
 }

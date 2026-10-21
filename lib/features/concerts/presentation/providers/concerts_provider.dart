@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../auth/presentation/providers/current_user_provider.dart';
 import '../../data/models/concert_model.dart';
 import '../../data/services/concert_api_service.dart';
 import '../../data/services/concert_cache_service.dart';
@@ -38,6 +39,7 @@ class ConcertsNotifier extends AsyncNotifier<List<Concert>> {
 
   @override
   Future<List<Concert>> build() async {
+    ref.watch(currentUserIdProvider);
     // 1. Cargamos el caché primero para respuesta instantánea.
     final cached = await _cache.load();
     if (cached.isNotEmpty) {

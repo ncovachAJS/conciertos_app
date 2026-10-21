@@ -13,6 +13,7 @@ import '../../data/services/jira_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:conciertos_app/core/utils/user_prefs.dart';
 
 import '../../../../app/app_shell.dart';
 import '../../../../app/color_themes.dart';
@@ -71,11 +72,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _loadNotifPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+    for (final k in [_kNotifFriends, _kNotifRecs, _kSplashSound]) {
+      await UserPrefs.claimLegacy(prefs, k);
+    }
     if (!mounted) return;
     setState(() {
-      _notifFriends = prefs.getBool(_kNotifFriends) ?? true;
-      _notifRecs    = prefs.getBool(_kNotifRecs)    ?? true;
-      _splashSound  = prefs.getBool(_kSplashSound)  ?? true;
+      _notifFriends = prefs.getBool(UserPrefs.key(_kNotifFriends)) ?? true;
+      _notifRecs    = prefs.getBool(UserPrefs.key(_kNotifRecs))    ?? true;
+      _splashSound  = prefs.getBool(UserPrefs.key(_kSplashSound))  ?? true;
     });
   }
 
@@ -166,7 +170,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _setNotifPref(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
+    await prefs.setBool(UserPrefs.key(key), value);
   }
 
   // ── Cuenta ──────────────────────────────────────────────────────────────────

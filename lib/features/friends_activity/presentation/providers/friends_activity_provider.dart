@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../auth/presentation/providers/current_user_provider.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../data/friends_activity_service.dart';
 
@@ -16,6 +17,7 @@ class FriendsActivityNotifier extends AsyncNotifier<List<Concert>> {
 
   @override
   Future<List<Concert>> build() async {
+    ref.watch(currentUserIdProvider);
     final list = await _service.getActivity(page: 1, limit: _pageSize);
     _page = 1;
     _hasMore = list.length >= _pageSize;
