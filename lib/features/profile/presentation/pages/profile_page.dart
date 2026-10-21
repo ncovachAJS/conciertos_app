@@ -387,42 +387,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
 
               const SizedBox(height: 30),
-
-              // ── Mis artistas ─────────────────────────────────────────
-              if (concerts.isNotEmpty)
-                TopArtistsWidget(concerts: concerts),
-
-              if (concerts.isNotEmpty)
-                const SizedBox(height: 30),
-
-              if (auth.user == null) ...[
-                FilledButton.icon(
-                  onPressed: () => context.push('/login'),
-                  icon: const Icon(Icons.login),
-                  label: Text(l.signIn),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () => context.push('/register'),
-                  icon: const Icon(Icons.person_add_alt_1),
-                  label: Text(l.createAccount),
-                ),
-              ] else ...[
-                FilledButton.icon(
-                  onPressed: () async {
-                    // NO reseteamos el tutorial — debe mantenerse entre sesiones
-                    ref.invalidate(concertsProvider);
-                    await auth.logout();
-                    if (!context.mounted) return;
-                    context.go('/login');
-                  },
-                  icon: const Icon(Icons.logout),
-                  label: Text(l.signOut),
-                ),
-              ],
-
-              const SizedBox(height: 24),
-
               // ── Wrapped ───────────────────────────────────────────────
               GestureDetector(
                 onTap: () => context.push('/annual-summary'),
@@ -541,6 +505,43 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ],
                 );
               }),
+
+              const SizedBox(height: 30),
+
+
+              // ── Mis artistas ─────────────────────────────────────────
+              if (concerts.isNotEmpty)
+                TopArtistsWidget(concerts: concerts),
+
+              if (concerts.isNotEmpty)
+                const SizedBox(height: 30),
+
+              if (auth.user == null) ...[
+                FilledButton.icon(
+                  onPressed: () => context.push('/login'),
+                  icon: const Icon(Icons.login),
+                  label: Text(l.signIn),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/register'),
+                  icon: const Icon(Icons.person_add_alt_1),
+                  label: Text(l.createAccount),
+                ),
+              ] else ...[
+                FilledButton.icon(
+                  onPressed: () async {
+                    // NO reseteamos el tutorial — debe mantenerse entre sesiones
+                    ref.invalidate(concertsProvider);
+                    await auth.logout();
+                    if (!context.mounted) return;
+                    context.go('/login');
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: Text(l.signOut),
+                ),
+              ],
+
 
               const SizedBox(height: 35),
 
