@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/models/app_notification_model.dart';
+import '../../domain/notification_target.dart';
 import '../../data/services/notifications_api_service.dart';
 
 class NotificationsController extends ChangeNotifier {
@@ -22,6 +23,7 @@ class NotificationsController extends ChangeNotifier {
     await _requestPermissions();
     await _registerToken();
     _listenForeground();
+    _listenTaps();
   }
 
   Future<void> _requestPermissions() async {
@@ -43,6 +45,28 @@ class NotificationsController extends ChangeNotifier {
         await _api.saveToken(newToken, platform);
       });
     } catch (_) {}
+  }
+
+  bool _tapsListening = false;
+
+  /// Toque en una push con la app en segundo plano o cerrada: si el aviso trae
+  /// un `target` (avisos del admin), lleva al usuario a esa pantalla.
+  void _listenTaps() {
+    if (_tapsListening) return;
+    _tapsListening = true;
+
+    FirebaseMessaging.onMessageOpenedApp.listen(_openTarget);
+
+    // Arranque en frío desde una push: esperar a que el router termine de
+    // redirigir desde /gate para que la navegación no se pierda.
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if (message == null) return;
+      Future.delayed(const Duration(seconds: 1), () => _openTarget(message));
+    }).ignore();
+  }
+
+  void _openTarget(RemoteMessage message) {
+    NotificationTarget.open(message.data['target']?.toString()).ignore();
   }
 
   void _listenForeground() {

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../data/models/app_notification_model.dart';
+import '../../domain/notification_target.dart';
 import '../controllers/notifications_controller.dart';
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../../friends/presentation/widgets/friend_avatar.dart';
@@ -144,6 +145,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       case 'FRIEND_ACCEPTED':
         context.push('/friends');
         break;
+      case 'ANNOUNCEMENT':
+        NotificationTarget.open(data['target']?.toString()).ignore();
+        break;
     }
   }
 }
@@ -168,6 +172,8 @@ class _NotificationTile extends StatelessWidget {
         return Icons.queue_music_rounded;
       case 'CONCERT_COMMENT':
         return Icons.chat_bubble_outline_rounded;
+      case 'ANNOUNCEMENT':
+        return Icons.campaign_rounded;
       default:
         return Icons.notifications_rounded;
     }

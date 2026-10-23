@@ -5,6 +5,7 @@ class User {
   final int memberNumber;
   final String? avatarUrl;
   final bool isPro;
+  final bool isAdmin;
   final bool showSpotify;
 
   const User({
@@ -14,6 +15,7 @@ class User {
     required this.memberNumber,
     this.avatarUrl,
     this.isPro = false,
+    this.isAdmin = false,
     this.showSpotify = false,
   });
 
@@ -24,6 +26,7 @@ class User {
     int? memberNumber,
     String? avatarUrl,
     bool? isPro,
+    bool? isAdmin,
     bool? showSpotify,
   }) {
     return User(
@@ -33,6 +36,7 @@ class User {
       memberNumber: memberNumber ?? this.memberNumber,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       isPro: isPro ?? this.isPro,
+      isAdmin: isAdmin ?? this.isAdmin,
       showSpotify: showSpotify ?? this.showSpotify,
     );
   }

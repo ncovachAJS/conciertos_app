@@ -8,6 +8,7 @@ class UserModel extends User {
     required super.memberNumber,
     super.avatarUrl,
     super.isPro,
+    super.isAdmin,
     super.showSpotify,
   });
 
@@ -19,6 +20,7 @@ class UserModel extends User {
       memberNumber: (json['memberNumber'] as num?)?.toInt() ?? 0,
       avatarUrl: json['avatarUrl']?.toString(),
       isPro: json['isPro'] as bool? ?? false,
+      isAdmin: json['isAdmin'] as bool? ?? false,
       showSpotify: json['showSpotify'] as bool? ?? false,
     );
   }

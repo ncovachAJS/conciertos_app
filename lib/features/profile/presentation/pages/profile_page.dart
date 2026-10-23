@@ -572,6 +572,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         MaterialPageRoute(builder: (_) => const SettingsPage()),
                       ),
                     ),
+                    if (auth.user?.isAdmin == true) ...[
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(
+                          Icons.admin_panel_settings_rounded,
+                          color: Color(0xFFE53935),
+                        ),
+                        title: Text(l.adminPanelTitle),
+                        subtitle: Text(l.adminPanelSubtitle),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.push('/admin'),
+                      ),
+                    ],
                     const Divider(height: 1),
                     ListTile(
                       leading: const Icon(Icons.info_outline),

@@ -23,6 +23,7 @@ import '../features/statistics/presentation/pages/stats_edit_page.dart';
 import '../features/statistics/presentation/pages/annual_summary_page.dart';
 import '../features/setlist/presentation/pages/setlist_test_page.dart';
 import '../features/import/presentation/pages/import_page.dart';
+import '../features/admin/presentation/pages/admin_page.dart';
 import '../features/records/presentation/pages/discogs_link_page.dart';
 import '../features/records/presentation/pages/records_page.dart';
 import '../features/records/presentation/pages/record_search_page.dart';
@@ -140,6 +141,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/report-issue',
           builder: (context, state) => const ReportIssuePage(),
+        ),
+        GoRoute(
+          path: '/admin',
+          builder: (context, state) => const AdminPage(),
         ),
         GoRoute(
           path: '/records',

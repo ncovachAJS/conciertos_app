@@ -1,7 +1,7 @@
 class AppNotification {
   final String id;
   final String
-  type; // CONCERT_TAG | PHOTO_TAG | FRIEND_REQUEST | FRIEND_ACCEPTED | FRIEND_CONCERT
+  type; // CONCERT_TAG | PHOTO_TAG | FRIEND_REQUEST | FRIEND_ACCEPTED | FRIEND_CONCERT | CONCERT_COMMENT | ANNOUNCEMENT
   final String title;
   final String body;
   final bool read;

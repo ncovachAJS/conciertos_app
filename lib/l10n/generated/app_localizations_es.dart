@@ -3831,4 +3831,326 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get memoryView => 'Ver concierto';
+
+  @override
+  String get adminPanelTitle => 'Panel de administración';
+
+  @override
+  String get adminPanelSubtitle => 'Estadísticas, avisos y usuarios';
+
+  @override
+  String get adminNoAccess => 'No tienes acceso a esta sección.';
+
+  @override
+  String get adminBack => 'Volver';
+
+  @override
+  String get adminTabStats => 'Estadísticas';
+
+  @override
+  String get adminTabBroadcast => 'Avisos';
+
+  @override
+  String get adminTabUsers => 'Usuarios';
+
+  @override
+  String get adminLoadError => 'No se pudieron cargar los datos';
+
+  @override
+  String get adminRetry => 'Reintentar';
+
+  @override
+  String get adminNoData => 'Sin datos todavía';
+
+  @override
+  String get adminSectionUsers => 'Usuarios';
+
+  @override
+  String get adminKpiTotalUsers => 'Usuarios totales';
+
+  @override
+  String get adminKpiPro => 'Usuarios Pro';
+
+  @override
+  String get adminKpiNew7d => 'Altas (7 días)';
+
+  @override
+  String get adminKpiNew30d => 'Altas (30 días)';
+
+  @override
+  String get adminKpiActive7d => 'Activos (7 días)';
+
+  @override
+  String get adminKpiActive30d => 'Activos (30 días)';
+
+  @override
+  String get adminKpiPushUsers => 'Con notificaciones';
+
+  @override
+  String get adminKpiDevices => 'Dispositivos';
+
+  @override
+  String get adminSectionActivity => 'Últimos 14 días';
+
+  @override
+  String get adminChartSignups => 'Altas de usuarios';
+
+  @override
+  String get adminChartConcerts => 'Conciertos añadidos';
+
+  @override
+  String get adminSectionFeatures => 'Qué usan más';
+
+  @override
+  String get adminFeatureConcerts => 'Conciertos';
+
+  @override
+  String get adminFeaturePhotos => 'Fotos';
+
+  @override
+  String get adminFeatureComments => 'Comentarios';
+
+  @override
+  String get adminFeatureWantToAttend => 'Quiero ir';
+
+  @override
+  String get adminFeatureRecords => 'Colección de discos';
+
+  @override
+  String get adminFeatureDiscogs => 'Cuentas de Discogs vinculadas';
+
+  @override
+  String adminFeatureMeta(int users, int last30) {
+    String _temp0 = intl.Intl.pluralLogic(
+      users,
+      locale: localeName,
+      other: '$users usuarios',
+      one: '1 usuario',
+    );
+    return '$_temp0 · $last30 en 30 días';
+  }
+
+  @override
+  String get adminSectionContent => 'Contenido';
+
+  @override
+  String get adminKpiConcerts => 'Conciertos';
+
+  @override
+  String get adminKpiFriendships => 'Amistades';
+
+  @override
+  String get adminKpiAvgRating => 'Valoración media';
+
+  @override
+  String get adminTopArtists => 'Artistas más repetidos';
+
+  @override
+  String get adminTopCities => 'Ciudades con más conciertos';
+
+  @override
+  String get adminTopGenres => 'Géneros más frecuentes';
+
+  @override
+  String adminRankMeta(int count, int users) {
+    String _temp0 = intl.Intl.pluralLogic(
+      users,
+      locale: localeName,
+      other: '$users usuarios',
+      one: '1 usuario',
+    );
+    return '$count · $_temp0';
+  }
+
+  @override
+  String get adminSectionHealth => 'Estado del servidor';
+
+  @override
+  String adminHealthDb(int ms) {
+    return 'Base de datos: $ms ms';
+  }
+
+  @override
+  String adminHealthUptime(String hours) {
+    return 'En marcha desde hace $hours h';
+  }
+
+  @override
+  String get adminBroadcastIntro =>
+      'Envía un aviso a los usuarios: les llegará como notificación push y, si quieres, quedará guardado en su bandeja.';
+
+  @override
+  String get adminTemplateUpdate => 'Plantilla: nueva actualización';
+
+  @override
+  String get adminTemplateUpdateTitle => 'Nueva actualización disponible';
+
+  @override
+  String get adminTemplateUpdateBody =>
+      'Ya está disponible una nueva versión de la app. Actualiza para disfrutar de las últimas mejoras.';
+
+  @override
+  String get adminFieldTitle => 'Título';
+
+  @override
+  String get adminFieldBody => 'Mensaje';
+
+  @override
+  String get adminAudienceLabel => 'Destinatarios';
+
+  @override
+  String get adminAudienceAll => 'Todos';
+
+  @override
+  String get adminAudiencePro => 'Solo Pro';
+
+  @override
+  String get adminAudienceFree => 'Solo gratis';
+
+  @override
+  String get adminInAppSwitch => 'Guardar en la bandeja';
+
+  @override
+  String get adminInAppHint =>
+      'Aparecerá también en Notificaciones dentro de la app';
+
+  @override
+  String get adminSend => 'Enviar aviso';
+
+  @override
+  String get adminConfirmTitle => '¿Enviar el aviso?';
+
+  @override
+  String adminConfirmBody(String audience, int recipients, int devices) {
+    return 'Se enviará a: $audience ($recipients usuarios, $devices dispositivos). No se puede deshacer.';
+  }
+
+  @override
+  String adminSentOk(int recipients, int devices) {
+    return 'Aviso enviado a $recipients usuarios ($devices dispositivos)';
+  }
+
+  @override
+  String get adminSendError => 'No se pudo enviar el aviso';
+
+  @override
+  String get adminSearchHint => 'Buscar por nombre o email';
+
+  @override
+  String adminUsersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count usuarios',
+      one: '1 usuario',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminNoUsers => 'No hay usuarios';
+
+  @override
+  String get adminLoadMore => 'Cargar más';
+
+  @override
+  String adminUserMeta(int concerts, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      concerts,
+      locale: localeName,
+      other: '$concerts conciertos',
+      one: '1 concierto',
+    );
+    return '$_temp0 · alta $date';
+  }
+
+  @override
+  String get adminMakePro => 'Dar Pro';
+
+  @override
+  String get adminRemovePro => 'Quitar Pro';
+
+  @override
+  String adminMakeProConfirm(String name) {
+    return '¿Dar el plan Pro a $name?';
+  }
+
+  @override
+  String adminRemoveProConfirm(String name) {
+    return '¿Quitar el plan Pro a $name?';
+  }
+
+  @override
+  String get adminConfirm => 'Confirmar';
+
+  @override
+  String get adminProChanged => 'Plan actualizado';
+
+  @override
+  String get adminActionError => 'No se pudo completar la acción';
+
+  @override
+  String get adminOnlyOutdatedSwitch => 'Solo a quien no ha actualizado';
+
+  @override
+  String get adminOnlyOutdatedHint =>
+      'Dispositivos con una versión anterior a la elegida o que aún no informan de su versión';
+
+  @override
+  String get adminOutdatedBeforeLabel => 'Anterior a la versión';
+
+  @override
+  String adminVersionOption(String version, int build) {
+    return '$version (build $build)';
+  }
+
+  @override
+  String get adminNoVersionsYet =>
+      'Todavía no hay dispositivos que informen de su versión; aparecerán cuando los usuarios abran la app actualizada.';
+
+  @override
+  String adminPreviewReach(int recipients, int devices) {
+    return 'Llegaría a $recipients usuarios ($devices dispositivos)';
+  }
+
+  @override
+  String get adminPreviewLoading => 'Calculando destinatarios…';
+
+  @override
+  String get adminSectionVersions => 'Versiones instaladas';
+
+  @override
+  String get adminVersionUnknown => 'Sin versión registrada';
+
+  @override
+  String adminVersionDevices(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dispositivos',
+      one: '1 dispositivo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminTargetLabel => 'Al tocar el aviso';
+
+  @override
+  String get adminTargetNone => 'Solo abrir la app';
+
+  @override
+  String get adminTargetStore => 'Abrir la tienda (actualizar)';
+
+  @override
+  String get adminTargetNotifications => 'Abrir Notificaciones';
+
+  @override
+  String get adminTargetFriends => 'Abrir Amigos';
+
+  @override
+  String get adminTargetStatistics => 'Abrir Estadísticas';
+
+  @override
+  String get adminTargetRecords => 'Abrir Mi colección de discos';
 }

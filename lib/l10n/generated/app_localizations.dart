@@ -6499,6 +6499,528 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Ver concierto'**
   String get memoryView;
+
+  /// No description provided for @adminPanelTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Panel de administración'**
+  String get adminPanelTitle;
+
+  /// No description provided for @adminPanelSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Estadísticas, avisos y usuarios'**
+  String get adminPanelSubtitle;
+
+  /// No description provided for @adminNoAccess.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes acceso a esta sección.'**
+  String get adminNoAccess;
+
+  /// No description provided for @adminBack.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver'**
+  String get adminBack;
+
+  /// No description provided for @adminTabStats.
+  ///
+  /// In es, this message translates to:
+  /// **'Estadísticas'**
+  String get adminTabStats;
+
+  /// No description provided for @adminTabBroadcast.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisos'**
+  String get adminTabBroadcast;
+
+  /// No description provided for @adminTabUsers.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuarios'**
+  String get adminTabUsers;
+
+  /// No description provided for @adminLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar los datos'**
+  String get adminLoadError;
+
+  /// No description provided for @adminRetry.
+  ///
+  /// In es, this message translates to:
+  /// **'Reintentar'**
+  String get adminRetry;
+
+  /// No description provided for @adminNoData.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin datos todavía'**
+  String get adminNoData;
+
+  /// No description provided for @adminSectionUsers.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuarios'**
+  String get adminSectionUsers;
+
+  /// No description provided for @adminKpiTotalUsers.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuarios totales'**
+  String get adminKpiTotalUsers;
+
+  /// No description provided for @adminKpiPro.
+  ///
+  /// In es, this message translates to:
+  /// **'Usuarios Pro'**
+  String get adminKpiPro;
+
+  /// No description provided for @adminKpiNew7d.
+  ///
+  /// In es, this message translates to:
+  /// **'Altas (7 días)'**
+  String get adminKpiNew7d;
+
+  /// No description provided for @adminKpiNew30d.
+  ///
+  /// In es, this message translates to:
+  /// **'Altas (30 días)'**
+  String get adminKpiNew30d;
+
+  /// No description provided for @adminKpiActive7d.
+  ///
+  /// In es, this message translates to:
+  /// **'Activos (7 días)'**
+  String get adminKpiActive7d;
+
+  /// No description provided for @adminKpiActive30d.
+  ///
+  /// In es, this message translates to:
+  /// **'Activos (30 días)'**
+  String get adminKpiActive30d;
+
+  /// No description provided for @adminKpiPushUsers.
+  ///
+  /// In es, this message translates to:
+  /// **'Con notificaciones'**
+  String get adminKpiPushUsers;
+
+  /// No description provided for @adminKpiDevices.
+  ///
+  /// In es, this message translates to:
+  /// **'Dispositivos'**
+  String get adminKpiDevices;
+
+  /// No description provided for @adminSectionActivity.
+  ///
+  /// In es, this message translates to:
+  /// **'Últimos 14 días'**
+  String get adminSectionActivity;
+
+  /// No description provided for @adminChartSignups.
+  ///
+  /// In es, this message translates to:
+  /// **'Altas de usuarios'**
+  String get adminChartSignups;
+
+  /// No description provided for @adminChartConcerts.
+  ///
+  /// In es, this message translates to:
+  /// **'Conciertos añadidos'**
+  String get adminChartConcerts;
+
+  /// No description provided for @adminSectionFeatures.
+  ///
+  /// In es, this message translates to:
+  /// **'Qué usan más'**
+  String get adminSectionFeatures;
+
+  /// No description provided for @adminFeatureConcerts.
+  ///
+  /// In es, this message translates to:
+  /// **'Conciertos'**
+  String get adminFeatureConcerts;
+
+  /// No description provided for @adminFeaturePhotos.
+  ///
+  /// In es, this message translates to:
+  /// **'Fotos'**
+  String get adminFeaturePhotos;
+
+  /// No description provided for @adminFeatureComments.
+  ///
+  /// In es, this message translates to:
+  /// **'Comentarios'**
+  String get adminFeatureComments;
+
+  /// No description provided for @adminFeatureWantToAttend.
+  ///
+  /// In es, this message translates to:
+  /// **'Quiero ir'**
+  String get adminFeatureWantToAttend;
+
+  /// No description provided for @adminFeatureRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'Colección de discos'**
+  String get adminFeatureRecords;
+
+  /// No description provided for @adminFeatureDiscogs.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuentas de Discogs vinculadas'**
+  String get adminFeatureDiscogs;
+
+  /// No description provided for @adminFeatureMeta.
+  ///
+  /// In es, this message translates to:
+  /// **'{users, plural, =1{1 usuario} other{{users} usuarios}} · {last30} en 30 días'**
+  String adminFeatureMeta(int users, int last30);
+
+  /// No description provided for @adminSectionContent.
+  ///
+  /// In es, this message translates to:
+  /// **'Contenido'**
+  String get adminSectionContent;
+
+  /// No description provided for @adminKpiConcerts.
+  ///
+  /// In es, this message translates to:
+  /// **'Conciertos'**
+  String get adminKpiConcerts;
+
+  /// No description provided for @adminKpiFriendships.
+  ///
+  /// In es, this message translates to:
+  /// **'Amistades'**
+  String get adminKpiFriendships;
+
+  /// No description provided for @adminKpiAvgRating.
+  ///
+  /// In es, this message translates to:
+  /// **'Valoración media'**
+  String get adminKpiAvgRating;
+
+  /// No description provided for @adminTopArtists.
+  ///
+  /// In es, this message translates to:
+  /// **'Artistas más repetidos'**
+  String get adminTopArtists;
+
+  /// No description provided for @adminTopCities.
+  ///
+  /// In es, this message translates to:
+  /// **'Ciudades con más conciertos'**
+  String get adminTopCities;
+
+  /// No description provided for @adminTopGenres.
+  ///
+  /// In es, this message translates to:
+  /// **'Géneros más frecuentes'**
+  String get adminTopGenres;
+
+  /// No description provided for @adminRankMeta.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} · {users, plural, =1{1 usuario} other{{users} usuarios}}'**
+  String adminRankMeta(int count, int users);
+
+  /// No description provided for @adminSectionHealth.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado del servidor'**
+  String get adminSectionHealth;
+
+  /// No description provided for @adminHealthDb.
+  ///
+  /// In es, this message translates to:
+  /// **'Base de datos: {ms} ms'**
+  String adminHealthDb(int ms);
+
+  /// No description provided for @adminHealthUptime.
+  ///
+  /// In es, this message translates to:
+  /// **'En marcha desde hace {hours} h'**
+  String adminHealthUptime(String hours);
+
+  /// No description provided for @adminBroadcastIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Envía un aviso a los usuarios: les llegará como notificación push y, si quieres, quedará guardado en su bandeja.'**
+  String get adminBroadcastIntro;
+
+  /// No description provided for @adminTemplateUpdate.
+  ///
+  /// In es, this message translates to:
+  /// **'Plantilla: nueva actualización'**
+  String get adminTemplateUpdate;
+
+  /// No description provided for @adminTemplateUpdateTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva actualización disponible'**
+  String get adminTemplateUpdateTitle;
+
+  /// No description provided for @adminTemplateUpdateBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya está disponible una nueva versión de la app. Actualiza para disfrutar de las últimas mejoras.'**
+  String get adminTemplateUpdateBody;
+
+  /// No description provided for @adminFieldTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Título'**
+  String get adminFieldTitle;
+
+  /// No description provided for @adminFieldBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Mensaje'**
+  String get adminFieldBody;
+
+  /// No description provided for @adminAudienceLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Destinatarios'**
+  String get adminAudienceLabel;
+
+  /// No description provided for @adminAudienceAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get adminAudienceAll;
+
+  /// No description provided for @adminAudiencePro.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo Pro'**
+  String get adminAudiencePro;
+
+  /// No description provided for @adminAudienceFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo gratis'**
+  String get adminAudienceFree;
+
+  /// No description provided for @adminInAppSwitch.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar en la bandeja'**
+  String get adminInAppSwitch;
+
+  /// No description provided for @adminInAppHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Aparecerá también en Notificaciones dentro de la app'**
+  String get adminInAppHint;
+
+  /// No description provided for @adminSend.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar aviso'**
+  String get adminSend;
+
+  /// No description provided for @adminConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Enviar el aviso?'**
+  String get adminConfirmTitle;
+
+  /// No description provided for @adminConfirmBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se enviará a: {audience} ({recipients} usuarios, {devices} dispositivos). No se puede deshacer.'**
+  String adminConfirmBody(String audience, int recipients, int devices);
+
+  /// No description provided for @adminSentOk.
+  ///
+  /// In es, this message translates to:
+  /// **'Aviso enviado a {recipients} usuarios ({devices} dispositivos)'**
+  String adminSentOk(int recipients, int devices);
+
+  /// No description provided for @adminSendError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo enviar el aviso'**
+  String get adminSendError;
+
+  /// No description provided for @adminSearchHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Buscar por nombre o email'**
+  String get adminSearchHint;
+
+  /// No description provided for @adminUsersCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 usuario} other{{count} usuarios}}'**
+  String adminUsersCount(int count);
+
+  /// No description provided for @adminNoUsers.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay usuarios'**
+  String get adminNoUsers;
+
+  /// No description provided for @adminLoadMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargar más'**
+  String get adminLoadMore;
+
+  /// No description provided for @adminUserMeta.
+  ///
+  /// In es, this message translates to:
+  /// **'{concerts, plural, =1{1 concierto} other{{concerts} conciertos}} · alta {date}'**
+  String adminUserMeta(int concerts, String date);
+
+  /// No description provided for @adminMakePro.
+  ///
+  /// In es, this message translates to:
+  /// **'Dar Pro'**
+  String get adminMakePro;
+
+  /// No description provided for @adminRemovePro.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar Pro'**
+  String get adminRemovePro;
+
+  /// No description provided for @adminMakeProConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Dar el plan Pro a {name}?'**
+  String adminMakeProConfirm(String name);
+
+  /// No description provided for @adminRemoveProConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quitar el plan Pro a {name}?'**
+  String adminRemoveProConfirm(String name);
+
+  /// No description provided for @adminConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar'**
+  String get adminConfirm;
+
+  /// No description provided for @adminProChanged.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan actualizado'**
+  String get adminProChanged;
+
+  /// No description provided for @adminActionError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo completar la acción'**
+  String get adminActionError;
+
+  /// No description provided for @adminOnlyOutdatedSwitch.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo a quien no ha actualizado'**
+  String get adminOnlyOutdatedSwitch;
+
+  /// No description provided for @adminOnlyOutdatedHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Dispositivos con una versión anterior a la elegida o que aún no informan de su versión'**
+  String get adminOnlyOutdatedHint;
+
+  /// No description provided for @adminOutdatedBeforeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Anterior a la versión'**
+  String get adminOutdatedBeforeLabel;
+
+  /// No description provided for @adminVersionOption.
+  ///
+  /// In es, this message translates to:
+  /// **'{version} (build {build})'**
+  String adminVersionOption(String version, int build);
+
+  /// No description provided for @adminNoVersionsYet.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay dispositivos que informen de su versión; aparecerán cuando los usuarios abran la app actualizada.'**
+  String get adminNoVersionsYet;
+
+  /// No description provided for @adminPreviewReach.
+  ///
+  /// In es, this message translates to:
+  /// **'Llegaría a {recipients} usuarios ({devices} dispositivos)'**
+  String adminPreviewReach(int recipients, int devices);
+
+  /// No description provided for @adminPreviewLoading.
+  ///
+  /// In es, this message translates to:
+  /// **'Calculando destinatarios…'**
+  String get adminPreviewLoading;
+
+  /// No description provided for @adminSectionVersions.
+  ///
+  /// In es, this message translates to:
+  /// **'Versiones instaladas'**
+  String get adminSectionVersions;
+
+  /// No description provided for @adminVersionUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin versión registrada'**
+  String get adminVersionUnknown;
+
+  /// No description provided for @adminVersionDevices.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 dispositivo} other{{count} dispositivos}}'**
+  String adminVersionDevices(int count);
+
+  /// No description provided for @adminTargetLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Al tocar el aviso'**
+  String get adminTargetLabel;
+
+  /// No description provided for @adminTargetNone.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo abrir la app'**
+  String get adminTargetNone;
+
+  /// No description provided for @adminTargetStore.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir la tienda (actualizar)'**
+  String get adminTargetStore;
+
+  /// No description provided for @adminTargetNotifications.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir Notificaciones'**
+  String get adminTargetNotifications;
+
+  /// No description provided for @adminTargetFriends.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir Amigos'**
+  String get adminTargetFriends;
+
+  /// No description provided for @adminTargetStatistics.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir Estadísticas'**
+  String get adminTargetStatistics;
+
+  /// No description provided for @adminTargetRecords.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir Mi colección de discos'**
+  String get adminTargetRecords;
 }
 
 class _AppLocalizationsDelegate

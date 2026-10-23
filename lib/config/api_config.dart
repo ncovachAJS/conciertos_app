@@ -33,6 +33,16 @@ class ApiConfig {
   static String friendStatsEndpoint(String friendId) =>
       '$baseUrl/friends/$friendId/stats';
 
+  // Panel de administración (solo usuarios con isAdmin)
+  static const String adminStatsEndpoint = '$baseUrl/admin/stats';
+  static const String adminBroadcastEndpoint = '$baseUrl/admin/broadcast';
+  static const String adminBroadcastPreviewEndpoint =
+      '$baseUrl/admin/broadcast/preview';
+  static const String adminVersionsEndpoint = '$baseUrl/admin/versions';
+  static const String adminUsersEndpoint = '$baseUrl/admin/users';
+  static String adminUserProEndpoint(String userId) =>
+      '$baseUrl/admin/users/$userId/pro';
+
   // Quiero ir
   static const String wantToAttendEndpoint = '$baseUrl/want-to-attend';
   static const String wantToAttendToggleEndpoint = '$baseUrl/want-to-attend/toggle';
