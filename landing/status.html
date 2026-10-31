@@ -774,6 +774,26 @@ async function loadAppStats() {
       document.getElementById('adminSaved').hidden = false;
     } catch {}
 
+    // Versions breakdown
+    const versions = (s.versions || [])
+      .filter(v => v.version)
+      .sort((a, b) => (b.build || 0) - (a.build || 0));
+    const totalDevices = versions.reduce((sum, v) => sum + v.devices, 0) || 1;
+    const versionsHtml = versions.length ? `
+      <div class="stats-users-list">
+        <div class="stats-users-title">Versiones de la app en uso</div>
+        ${versions.map(v => {
+          const pct = Math.round(v.devices / totalDevices * 100);
+          return `<div class="user-row" style="flex-direction:column;align-items:stretch;gap:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:13px;font-weight:700">v${v.version} <span style="font-weight:400;color:var(--fg-muted)">(build ${v.build ?? '—'})</span></span>
+              <span style="font-size:12px;color:var(--fg-muted)">${v.devices} dispositivos · ${pct}%</span>
+            </div>
+            <div class="usage-track"><div class="usage-fill ${pct > 80 ? 'green' : 'gold'}" style="width:${pct}%"></div></div>
+          </div>`;
+        }).join('')}
+      </div>` : '';
+
     el.innerHTML = `
       <div class="stats-kpi-grid">${kpis.map(k =>
         `<div class="kpi-card">
@@ -782,6 +802,7 @@ async function loadAppStats() {
           ${k.sub ? `<div class="kpi-sub">${k.sub}</div>` : ''}
         </div>`).join('')}
       </div>
+      ${versionsHtml}
       ${sparkHtml}
       ${usersHtml}`;
   } catch (e) {
