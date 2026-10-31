@@ -210,13 +210,13 @@ h1 {
 }
 @keyframes shimmer { from { background-position: 200% 0 } to { background-position: -200% 0 } }
 
-/* UptimeRobot key input */
-.utr-section {
+/* ── Extra sections (UTR, billing, usage) ── */
+.extra-section {
   margin-top: 32px;
   border-top: 1px solid var(--border);
   padding-top: 24px;
 }
-.utr-title {
+.section-title {
   font-size: 13px;
   font-weight: 600;
   color: var(--fg-muted);
@@ -224,10 +224,11 @@ h1 {
   text-transform: uppercase;
   margin-bottom: 12px;
 }
-.utr-form { display: flex; gap: 8px; flex-wrap: wrap; }
-.utr-input {
-  flex: 1;
-  min-width: 200px;
+.section-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.section-form.col { flex-direction: column; }
+.field-label { font-size: 11px; font-weight: 600; color: var(--fg-muted); margin-bottom: 4px; letter-spacing: .06em; text-transform: uppercase; }
+.field-group { display: flex; flex-direction: column; flex: 1; min-width: 150px; }
+.s-input {
   background: var(--bg-card);
   border: 1px solid var(--border);
   color: var(--fg);
@@ -237,9 +238,10 @@ h1 {
   border-radius: 10px;
   outline: none;
   transition: border-color .15s;
+  width: 100%;
 }
-.utr-input:focus { border-color: rgba(255,255,255,.2); }
-.utr-input::placeholder { color: var(--fg-muted); }
+.s-input:focus { border-color: rgba(255,255,255,.2); }
+.s-input::placeholder { color: var(--fg-muted); }
 .btn-load {
   background: var(--accent);
   color: #fff;
@@ -251,8 +253,11 @@ h1 {
   border-radius: 10px;
   cursor: pointer;
   transition: opacity .15s;
+  align-self: flex-end;
 }
 .btn-load:hover { opacity: .85; }
+
+/* UptimeRobot */
 .utr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 14px; }
 .utr-monitor {
   background: var(--bg-card);
@@ -265,6 +270,56 @@ h1 {
 }
 .utr-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .utr-ratio { font-size: 12px; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+
+/* Usage bars (Cloudinary) */
+.usage-display { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.usage-row { display: flex; flex-direction: column; gap: 4px; }
+.usage-row-top { display: flex; justify-content: space-between; font-size: 12px; }
+.usage-label { font-weight: 600; }
+.usage-val { color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+.usage-track { height: 6px; border-radius: 3px; background: rgba(255,255,255,.07); overflow: hidden; }
+.usage-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width .4s; }
+.usage-fill.green { background: var(--green); }
+.usage-fill.gold  { background: var(--gold); }
+.usage-msg { font-size: 12px; color: var(--fg-muted); padding: 8px 0; }
+
+/* Billing countdown */
+.billing-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 14px; }
+.billing-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.billing-service { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
+.billing-date { font-size: 15px; font-weight: 700; }
+.billing-countdown { font-size: 28px; font-weight: 800; letter-spacing: -.02em; color: var(--accent); }
+.billing-countdown.ok { color: var(--green); }
+.billing-sub { font-size: 12px; color: var(--fg-muted); }
+.billing-day-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 12px; color: var(--fg-muted); }
+.billing-day-row input[type=number] {
+  width: 52px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  outline: none;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .section-form { flex-direction: column; }
+  .field-group { min-width: 0; }
+  .btn-load { align-self: stretch; font-size: 15px; padding: 12px; }
+  .billing-cards { grid-template-columns: 1fr; }
+  .billing-countdown { font-size: 36px; }
+}
 
 <<<<<<< HEAD
 @media (max-width: 480px) {
@@ -306,9 +361,8 @@ h1 {
   .status-pill .dot { width: 9px; height: 9px; }
 
   /* uptimerobot */
-  .utr-title { font-size: 15px; }
-  .utr-form { flex-direction: column; }
-  .utr-input { min-width: 0; font-size: 15px; padding: 12px 14px; }
+  .section-title { font-size: 15px; }
+  .s-input { min-width: 0; font-size: 15px; padding: 12px 14px; }
   .btn-load { font-size: 15px; padding: 12px 16px; }
   .utr-grid { grid-template-columns: 1fr; }
   .utr-name { font-size: 15px; }
@@ -340,10 +394,38 @@ h1 {
 
 <div class="grid" id="grid"></div>
 
-<div class="utr-section">
-  <div class="utr-title">UptimeRobot — Monitores</div>
-  <div class="utr-form">
-    <input class="utr-input" id="utrKey" type="password" placeholder="API Key de solo lectura (u1234567-…)">
+<!-- Cloudinary Usage -->
+<div class="extra-section">
+  <div class="section-title">Cloudinary — Uso de créditos</div>
+  <div class="section-form">
+    <div class="field-group">
+      <div class="field-label">Cloud Name</div>
+      <input class="s-input" id="cldCloud" type="text" placeholder="mi-cloud-name">
+    </div>
+    <div class="field-group">
+      <div class="field-label">API Key</div>
+      <input class="s-input" id="cldKey" type="text" placeholder="123456789012345">
+    </div>
+    <div class="field-group">
+      <div class="field-label">API Secret</div>
+      <input class="s-input" id="cldSecret" type="password" placeholder="••••••••••••••••••••••">
+    </div>
+    <button class="btn-load" onclick="loadCloudinaryUsage()">Cargar</button>
+  </div>
+  <div id="cldUsage"></div>
+</div>
+
+<!-- Facturación (Render + Claude) -->
+<div class="extra-section">
+  <div class="section-title">Facturación — Próximos cobros</div>
+  <div class="billing-cards" id="billingCards"></div>
+</div>
+
+<!-- UptimeRobot -->
+<div class="extra-section">
+  <div class="section-title">UptimeRobot — Monitores</div>
+  <div class="section-form">
+    <input class="s-input" id="utrKey" type="password" placeholder="API Key de solo lectura (u1234567-…)" style="flex:1;min-width:200px">
     <button class="btn-load" onclick="loadUTR()">Cargar</button>
   </div>
   <div class="utr-grid" id="utrGrid"></div>
@@ -542,10 +624,126 @@ async function loadUTR() {
   }
 }
 
-// Init
+// ── Cloudinary Usage ──
+async function loadCloudinaryUsage() {
+  const cloud  = document.getElementById('cldCloud').value.trim();
+  const key    = document.getElementById('cldKey').value.trim();
+  const secret = document.getElementById('cldSecret').value.trim();
+  if (!cloud || !key || !secret) return;
+  try { localStorage.setItem('cld', JSON.stringify({ cloud, key, secret })); } catch {}
+
+  const el = document.getElementById('cldUsage');
+  el.innerHTML = '<div class="shimmer" style="height:80px;width:100%;border-radius:10px;margin-top:14px"></div>';
+
+  try {
+    const auth = btoa(key + ':' + secret);
+    const r = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/usage`, {
+      headers: { Authorization: 'Basic ' + auth },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+
+    const fmtBytes = b => b >= 1e9 ? (b/1e9).toFixed(2)+' GB' : b >= 1e6 ? (b/1e6).toFixed(1)+' MB' : (b/1e3).toFixed(0)+' KB';
+    const fmtNum  = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'k' : n;
+    const pct = (used, limit) => limit ? Math.min(100, Math.round(used / limit * 100)) : 0;
+    const colorClass = p => p >= 85 ? '' : p >= 60 ? 'gold' : 'green';
+
+    const rows = [
+      { label: 'Almacenamiento', used: d.storage?.usage, limit: d.storage?.limit, fmt: fmtBytes },
+      { label: 'Transformaciones', used: d.transformations?.usage, limit: d.transformations?.limit, fmt: fmtNum },
+      { label: 'Ancho de banda', used: d.bandwidth?.usage, limit: d.bandwidth?.limit, fmt: fmtBytes },
+      { label: 'Recursos (imágenes/vídeos)', used: d.resources, limit: d.objects?.limit, fmt: fmtNum },
+    ].filter(r => r.used != null);
+
+    el.innerHTML = '<div class="usage-display">' + rows.map(row => {
+      const p = pct(row.used, row.limit);
+      const cls = colorClass(p);
+      const valStr = row.limit ? `${row.fmt(row.used)} / ${row.fmt(row.limit)} (${p}%)` : row.fmt(row.used);
+      return `<div class="usage-row">
+        <div class="usage-row-top"><span class="usage-label">${row.label}</span><span class="usage-val">${valStr}</span></div>
+        ${row.limit ? `<div class="usage-track"><div class="usage-fill ${cls}" style="width:${p}%"></div></div>` : ''}
+      </div>`;
+    }).join('') + '</div>';
+  } catch (e) {
+    const consoleUrl = 'https://console.cloudinary.com/pm/developer-dashboard';
+    el.innerHTML = `<div class="usage-msg">No se pudo cargar vía API (CORS).
+      <a href="${consoleUrl}" target="_blank" rel="noopener" style="color:var(--accent)">Ver en Cloudinary Console →</a></div>`;
+  }
+}
+
+// ── Billing countdown ──
+const BILLING = [
+  { id: 'render',    label: 'Render',           lsKey: 'bill_render_day',    defaultDay: 1,  url: 'https://dashboard.render.com/billing' },
+  { id: 'anthropic', label: 'Anthropic / Claude', lsKey: 'bill_claude_day',  defaultDay: 1,  url: 'https://console.anthropic.com/settings/billing' },
+];
+
+function nextBillingDate(day) {
+  const now = new Date();
+  let d = new Date(now.getFullYear(), now.getMonth(), day);
+  if (d <= now) d = new Date(now.getFullYear(), now.getMonth() + 1, day);
+  return d;
+}
+function daysUntil(date) {
+  return Math.ceil((date - new Date()) / 86400000);
+}
+function buildBillingCards() {
+  const container = document.getElementById('billingCards');
+  container.innerHTML = '';
+  BILLING.forEach(b => {
+    let day = b.defaultDay;
+    try { const s = localStorage.getItem(b.lsKey); if (s) day = parseInt(s) || day; } catch {}
+    renderBillingCard(container, b, day);
+  });
+}
+function renderBillingCard(container, b, day) {
+  const next = nextBillingDate(day);
+  const days = daysUntil(next);
+  const month = next.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+  const urgentClass = days <= 7 ? '' : 'ok';
+
+  const card = document.createElement('div');
+  card.className = 'billing-card';
+  card.id = 'bccard-' + b.id;
+  card.innerHTML = `
+    <div class="billing-service">${b.label}</div>
+    <div class="billing-countdown ${urgentClass}">${days} días</div>
+    <div class="billing-date">Próximo cobro: <a href="${b.url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${month} ↗</a></div>
+    <div class="billing-day-row">
+      Día de cobro:
+      <input type="number" min="1" max="28" value="${day}" id="bday-${b.id}" onchange="saveBillingDay('${b.id}', this.value)">
+    </div>`;
+  container.appendChild(card);
+}
+function saveBillingDay(id, val) {
+  const b = BILLING.find(x => x.id === id);
+  if (!b) return;
+  const day = Math.min(28, Math.max(1, parseInt(val) || 1));
+  try { localStorage.setItem(b.lsKey, day); } catch {}
+  const container = document.getElementById('billingCards');
+  const old = document.getElementById('bccard-' + id);
+  if (old) old.remove();
+  renderBillingCard(container, b, day);
+}
+
+// ── Init ──
 (function init() {
   const grid = document.getElementById('grid');
   SERVICES.forEach(svc => grid.appendChild(buildCard(svc)));
+
+  // Restore Cloudinary credentials
+  try {
+    const cld = JSON.parse(localStorage.getItem('cld') || 'null');
+    if (cld) {
+      document.getElementById('cldCloud').value  = cld.cloud || '';
+      document.getElementById('cldKey').value    = cld.key   || '';
+      document.getElementById('cldSecret').value = cld.secret || '';
+      loadCloudinaryUsage();
+    }
+  } catch {}
+
+  // Billing cards
+  buildBillingCards();
 
   // Restore saved UTR key
   try {
