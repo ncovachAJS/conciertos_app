@@ -27,19 +27,17 @@ class SpotifyEmbedPage extends StatefulWidget {
   const SpotifyEmbedPage.playlist({
     super.key,
     required String playlistId,
-    String title = 'Tus canciones favoritas',
+    this.title = 'Tus canciones favoritas',
   })  : resourceId = playlistId,
-        type = SpotifyEmbedType.playlist,
-        title = title;
+        type = SpotifyEmbedType.playlist;
 
   /// Constructor de conveniencia para una canción concreta.
   const SpotifyEmbedPage.track({
     super.key,
     required String trackId,
-    String title = '',
+    this.title = '',
   })  : resourceId = trackId,
-        type = SpotifyEmbedType.track,
-        title = title;
+        type = SpotifyEmbedType.track;
 
   @override
   State<SpotifyEmbedPage> createState() => _SpotifyEmbedPageState();

@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/recommended_event.dart';
 
 class RecommendationCard extends StatelessWidget {
@@ -20,13 +19,6 @@ class RecommendationCard extends StatelessWidget {
     required this.onToggleWantToAttend,
     this.isCompact = false,
   });
-
-  Future<void> _openTicketUrl() async {
-    final uri = Uri.parse(event.ticketUrl);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw Exception('No se pudo abrir ${event.ticketUrl}');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +39,7 @@ class RecommendationCard extends StatelessWidget {
                 child: CachedNetworkImage(
                   imageUrl: event.imageUrl,
                   fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => Container(
+                  errorWidget: (_, _, _) => Container(
                     color: const Color(0xFF2B2B2B),
                     child: const Icon(Icons.music_note, color: Colors.white24, size: 60),
                   ),
@@ -89,15 +81,6 @@ class RecommendationCard extends StatelessWidget {
                     Text(DateFormat('dd/MM/yyyy').format(event.date)),
                   ],
                 ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: _openTicketUrl,
-                    icon: const Icon(Icons.confirmation_number),
-                    label: Text(AppLocalizations.of(context).buyTickets),
-                  ),
-                ),
               ],
             ),
           ),
@@ -108,68 +91,67 @@ class RecommendationCard extends StatelessWidget {
 
   Widget _buildCompact(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final dateStr = DateFormat('d MMM yyyy', 'es').format(event.date);
+    final dateStr = DateFormat(
+            'd MMM yyyy', Localizations.localeOf(context).languageCode)
+        .format(event.date);
     final subtitle = [event.city, event.venue].where((s) => s.isNotEmpty).join(' · ');
 
-    return InkWell(
-      onTap: event.ticketUrl.isNotEmpty ? _openTicketUrl : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: CachedNetworkImage(
-                imageUrl: event.imageUrl,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: CachedNetworkImage(
+              imageUrl: event.imageUrl,
+              width: 48,
+              height: 48,
+              fit: BoxFit.cover,
+              errorWidget: (_, _, _) => Container(
                 width: 48,
                 height: 48,
-                fit: BoxFit.cover,
-                errorWidget: (_, __, ___) => Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: cs.onSurface.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(Icons.music_note_rounded,
-                      color: cs.onSurface.withValues(alpha: 0.3), size: 24),
+                decoration: BoxDecoration(
+                  color: cs.onSurface.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(10),
                 ),
+                child: Icon(Icons.music_note_rounded,
+                    color: cs.onSurface.withValues(alpha: 0.3), size: 24),
               ),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  event.artist,
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
                   Text(
-                    event.artist,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                    subtitle,
+                    style: TextStyle(
+                        fontSize: 12, color: cs.onSurface.withValues(alpha: 0.5)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                          fontSize: 12, color: cs.onSurface.withValues(alpha: 0.5)),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                  const SizedBox(height: 2),
-                  Text(
-                    dateStr,
-                    style: TextStyle(
-                        fontSize: 11, color: cs.onSurface.withValues(alpha: 0.4)),
-                  ),
                 ],
-              ),
+                const SizedBox(height: 2),
+                Text(
+                  dateStr,
+                  style: TextStyle(
+                      fontSize: 11, color: cs.onSurface.withValues(alpha: 0.4)),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            _WantToAttendButton(active: wantToAttend, onTap: onToggleWantToAttend),
-          ],
-        ),
+          ),
+          const SizedBox(width: 8),
+          _WantToAttendButton(active: wantToAttend, onTap: onToggleWantToAttend),
+        ],
       ),
     );
   }
@@ -188,6 +170,7 @@ class _WantToAttendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final color = active ? Colors.greenAccent : Colors.white70;
 
     if (filled) {
@@ -212,7 +195,7 @@ class _WantToAttendButton extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                active ? 'Apuntado' : 'Quiero ir',
+                active ? l.recsAttending : l.wantToGoTab,
                 style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600),
               ),
             ],
@@ -230,7 +213,7 @@ class _WantToAttendButton extends StatelessWidget {
         active ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
         color: active ? Colors.greenAccent : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
       ),
-      tooltip: active ? 'Quitar de mi lista' : 'Quiero asistir',
+      tooltip: active ? l.recsRemoveFromList : l.recsWantToAttend,
     );
   }
 }

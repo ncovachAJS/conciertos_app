@@ -153,7 +153,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
         actions: [
           IconButton(
             icon: Icon(_isCompact ? Icons.grid_view_rounded : Icons.view_list_rounded),
-            tooltip: _isCompact ? 'Vista tarjeta' : 'Vista compacta',
+            tooltip: _isCompact ? l.recsViewCardTooltip : l.recsViewCompactTooltip,
             onPressed: () => setState(() => _isCompact = !_isCompact),
           ),
         ],
@@ -172,7 +172,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
                     prefixIcon: const Icon(Icons.search_rounded),
                     suffixIcon: ListenableBuilder(
                       listenable: _searchController,
-                      builder: (_, __) => _searchController.text.isEmpty
+                      builder: (_, _) => _searchController.text.isEmpty
                           ? const SizedBox.shrink()
                           : IconButton(
                               icon: const Icon(Icons.clear_rounded),
@@ -184,7 +184,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: _selectedCountry,
+                  initialValue: _selectedCountry,
                   decoration: InputDecoration(labelText: l.country),
                   items: localizedCountries(
                           Localizations.localeOf(context).languageCode)
@@ -212,7 +212,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
           TabBar(
             controller: _tabController,
             tabs: [
-              Tab(text: 'Resultados${_events.isNotEmpty ? ' (${_events.length})' : ''}'),
+              Tab(text: '${l.recsResultsTab}${_events.isNotEmpty ? ' (${_events.length})' : ''}'),
               Tab(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -220,7 +220,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
                     const Icon(Icons.check_circle_rounded,
                         size: 16, color: Colors.greenAccent),
                     const SizedBox(width: 6),
-                    Text('Quiero ir${wantList.isNotEmpty ? ' (${wantList.length})' : ''}'),
+                    Text('${l.wantToGoTab}${wantList.isNotEmpty ? ' (${wantList.length})' : ''}'),
                   ],
                 ),
               ),
@@ -244,7 +244,7 @@ class _RecommendationsPageState extends ConsumerState<RecommendationsPage>
                         wantToAttendIds: _wantToAttendIds,
                         isCompact: _isCompact,
                         onToggle: _toggleWantToAttend,
-                        emptyText: 'Aún no has marcado ningún concierto.',
+                        emptyText: l.recsWantEmpty,
                       ),
                     ],
                   ),
@@ -301,7 +301,7 @@ class _EventList extends StatelessWidget {
               child: ListView.separated(
                 padding: const EdgeInsets.only(top: 8, bottom: 32),
                 itemCount: left.length,
-                separatorBuilder: (_, __) => Divider(
+                separatorBuilder: (_, _) => Divider(
                   height: 1,
                   indent: 16,
                   endIndent: 16,
@@ -323,7 +323,7 @@ class _EventList extends StatelessWidget {
               child: ListView.separated(
                 padding: const EdgeInsets.only(top: 8, bottom: 32),
                 itemCount: right.length,
-                separatorBuilder: (_, __) => Divider(
+                separatorBuilder: (_, _) => Divider(
                   height: 1,
                   indent: 16,
                   endIndent: 16,
@@ -343,7 +343,7 @@ class _EventList extends StatelessWidget {
       return ListView.separated(
         padding: const EdgeInsets.only(top: 8, bottom: 32),
         itemCount: events.length,
-        separatorBuilder: (_, __) => Divider(
+        separatorBuilder: (_, _) => Divider(
           height: 1,
           indent: 16,
           endIndent: 16,

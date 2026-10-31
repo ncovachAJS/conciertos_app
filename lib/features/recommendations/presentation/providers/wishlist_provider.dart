@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:conciertos_app/core/utils/user_prefs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../auth/presentation/providers/current_user_provider.dart';
 import '../../domain/entities/recommended_event.dart';
 
 class WishlistNotifier extends AsyncNotifier<List<RecommendedEvent>> {
@@ -10,8 +12,10 @@ class WishlistNotifier extends AsyncNotifier<List<RecommendedEvent>> {
 
   @override
   Future<List<RecommendedEvent>> build() async {
+    ref.watch(currentUserIdProvider);
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
+    await UserPrefs.claimLegacy(prefs, _key);
+    final raw = prefs.getString(UserPrefs.key(_key));
     if (raw == null) return [];
     try {
       final list = jsonDecode(raw) as List;
@@ -35,7 +39,7 @@ class WishlistNotifier extends AsyncNotifier<List<RecommendedEvent>> {
 
   Future<void> _save(List<RecommendedEvent> list) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, jsonEncode(list.map(_toJson).toList()));
+    await prefs.setString(UserPrefs.key(_key), jsonEncode(list.map(_toJson).toList()));
   }
 
   static Map<String, dynamic> _toJson(RecommendedEvent e) => {

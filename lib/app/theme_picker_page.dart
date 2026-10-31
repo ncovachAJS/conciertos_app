@@ -1,3 +1,4 @@
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ class ThemePickerPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final current = ref.watch(themeProvider);
 
     return Scaffold(
@@ -20,9 +22,9 @@ class ThemePickerPage extends ConsumerWidget {
             children: [
               const SizedBox(height: 24),
 
-              const Text(
-                '¿Cómo prefieres\nver la app?',
-                style: TextStyle(
+              Text(
+                l.themePickerTitle,
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   height: 1.2,
@@ -30,11 +32,11 @@ class ThemePickerPage extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Puedes cambiarlo después en Ajustes.',
+                l.themePickerHint,
                 style: TextStyle(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.54),
+                  ).colorScheme.onSurface.withValues(alpha: 0.54),
                   fontSize: 15,
                 ),
               ),
@@ -43,8 +45,8 @@ class ThemePickerPage extends ConsumerWidget {
 
               _ThemeOption(
                 icon: Icons.brightness_auto,
-                title: 'Por defecto del sistema',
-                subtitle: 'Sigue el ajuste de tu móvil',
+                title: l.themeSystemDefault,
+                subtitle: l.themeSystemDesc,
                 selected: current == ThemeMode.system,
                 onTap: () =>
                     ref.read(themeProvider.notifier).setTheme(ThemeMode.system),
@@ -52,8 +54,8 @@ class ThemePickerPage extends ConsumerWidget {
               const SizedBox(height: 16),
               _ThemeOption(
                 icon: Icons.dark_mode_rounded,
-                title: 'Oscuro',
-                subtitle: 'Fondo negro, ideal para conciertos',
+                title: l.themeDark,
+                subtitle: l.themeDarkDesc,
                 selected: current == ThemeMode.dark,
                 onTap: () =>
                     ref.read(themeProvider.notifier).setTheme(ThemeMode.dark),
@@ -61,8 +63,8 @@ class ThemePickerPage extends ConsumerWidget {
               const SizedBox(height: 16),
               _ThemeOption(
                 icon: Icons.light_mode_rounded,
-                title: 'Claro',
-                subtitle: 'Fondo blanco, máxima legibilidad',
+                title: l.themeLight,
+                subtitle: l.themeLightDesc,
                 selected: current == ThemeMode.light,
                 onTap: () =>
                     ref.read(themeProvider.notifier).setTheme(ThemeMode.light),
@@ -74,7 +76,7 @@ class ThemePickerPage extends ConsumerWidget {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: () => context.go('/splash'),
-                  child: const Text('Empezar'),
+                  child: Text(l.getStartedLabel),
                 ),
               ),
 
@@ -88,11 +90,11 @@ class ThemePickerPage extends ConsumerWidget {
                     context.go('/splash');
                   },
                   child: Text(
-                    'Usar el del sistema',
+                    l.useSystemThemeLabel,
                     style: TextStyle(
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.5),
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -131,13 +133,13 @@ class _ThemeOption extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFFE53935).withOpacity(0.1)
+              ? const Color(0xFFE53935).withValues(alpha: 0.1)
               : cs.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: selected
                 ? const Color(0xFFE53935)
-                : cs.onSurface.withOpacity(0.12),
+                : cs.onSurface.withValues(alpha: 0.12),
             width: selected ? 2 : 1,
           ),
         ),
@@ -148,15 +150,15 @@ class _ThemeOption extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: selected
-                    ? const Color(0xFFE53935).withOpacity(0.15)
-                    : cs.onSurface.withOpacity(0.06),
+                    ? const Color(0xFFE53935).withValues(alpha: 0.15)
+                    : cs.onSurface.withValues(alpha: 0.06),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 color: selected
                     ? const Color(0xFFE53935)
-                    : cs.onSurface.withOpacity(0.6),
+                    : cs.onSurface.withValues(alpha: 0.6),
                 size: 24,
               ),
             ),
@@ -177,7 +179,7 @@ class _ThemeOption extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.54),
+                      color: cs.onSurface.withValues(alpha: 0.54),
                       fontSize: 13,
                     ),
                   ),

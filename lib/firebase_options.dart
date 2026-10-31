@@ -60,11 +60,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyA7MmkPANyozE4lu9WFWqq0cl1w38iP-dk',
-    appId: '1:988375120062:ios:9d1ac6bc57243a956106ef',
+    appId: '1:988375120062:ios:de484573f1772bed6106ef',
     messagingSenderId: '988375120062',
     projectId: 'la-vida-en-directo',
     storageBucket: 'la-vida-en-directo.firebasestorage.app',
-    iosBundleId: 'com.example.conciertosApp',
+    iosBundleId: 'com.nico.lavidaendirecto',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

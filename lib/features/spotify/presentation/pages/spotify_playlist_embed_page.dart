@@ -75,15 +75,14 @@ class _SpotifyPlaylistEmbedPageState
   /// Spotify está en "Development Mode" y solo permite hasta 25 usuarios
   /// añadidos a mano en el Dashboard de developer.spotify.com.
   String _friendlySpotifyError(Object? error) {
+    final l = AppLocalizations.of(context);
     final msg = error.toString();
     if (msg.contains('not authorized') ||
         msg.toLowerCase().contains('403') ||
         msg.toLowerCase().contains('forbidden')) {
-      return 'Spotify rechazó el acceso a esta cuenta. Puede que la app '
-          'esté en modo de desarrollo y esta cuenta no esté en la lista '
-          'de usuarios permitidos.';
+      return l.spotifyAccessDenied;
     }
-    return 'No se pudo vincular Spotify: $msg';
+    return l.spotifyLinkError(msg);
   }
 
   @override
@@ -93,14 +92,14 @@ class _SpotifyPlaylistEmbedPageState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _SpotifyDot(),
-            SizedBox(width: 8),
+            const _SpotifyDot(),
+            const SizedBox(width: 8),
             Flexible(
               child: Text(
-                'Tus canciones favoritas',
+                AppLocalizations.of(context).spotifyPlaylistTitle,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -113,7 +112,7 @@ class _SpotifyPlaylistEmbedPageState
         loading: () => const Center(
           child: CircularProgressIndicator(color: Color(0xFF1DB954)),
         ),
-        error: (_, __) => _ConnectView(
+        error: (_, _) => _ConnectView(
           connecting: _connecting,
           onConnect: _connectSpotify,
         ),
@@ -247,7 +246,7 @@ class _ConnectView extends StatelessWidget {
             const _SpotifyDot(size: 72),
             const SizedBox(height: 28),
             Text(
-              'Conecta tu cuenta de Spotify',
+              AppLocalizations.of(context).spotifyConnectTitle,
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -256,7 +255,7 @@ class _ConnectView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Vincula Spotify para ver aquí tu playlist de canciones favoritas.',
+              AppLocalizations.of(context).spotifyPlaylistConnectDesc,
               style: TextStyle(
                   fontSize: 15,
                   color: cs.onSurface.withValues(alpha: .6),
@@ -278,9 +277,9 @@ class _ConnectView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(50)),
                 ),
                 icon: const _SpotifyDot(size: 20),
-                label: const Text('Conectar con Spotify',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                label: Text(AppLocalizations.of(context).spotifyConnect,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
               ),
           ],
         ),
@@ -309,7 +308,7 @@ class _RelinkView extends StatelessWidget {
             const _SpotifyDot(size: 64),
             const SizedBox(height: 24),
             Text(
-              'Actualiza tu conexión con Spotify',
+              AppLocalizations.of(context).spotifyRelinkTitle,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -319,8 +318,7 @@ class _RelinkView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Para ver tu playlist necesitamos un permiso adicional. '
-              'Desconecta y vuelve a conectar tu cuenta de Spotify.',
+              AppLocalizations.of(context).spotifyRelinkDesc,
               style: TextStyle(
                 fontSize: 14,
                 color: cs.onSurface.withValues(alpha: .6),
@@ -340,9 +338,9 @@ class _RelinkView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(50)),
               ),
               icon: const Icon(Icons.sync_rounded),
-              label: const Text(
-                'Re-vincular Spotify',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              label: Text(
+                AppLocalizations.of(context).spotifyRelinkButton,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ],
@@ -368,13 +366,13 @@ class _ErrorView extends StatelessWidget {
           Icon(Icons.error_outline_rounded,
               size: 52, color: cs.error.withValues(alpha: .7)),
           const SizedBox(height: 16),
-          const Text('No se pudo cargar tu playlist',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context).spotifyPlaylistLoadError,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 24),
           OutlinedButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Reintentar'),
+            label: Text(AppLocalizations.of(context).retry),
           ),
         ],
       ),

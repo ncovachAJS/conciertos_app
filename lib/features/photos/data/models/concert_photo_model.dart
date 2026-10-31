@@ -21,7 +21,7 @@ class ConcertPhotoModel extends ConcertPhoto {
     // Parsear participantes
     final participantsList = json['participants'] as List<dynamic>? ?? [];
     final participants = participantsList
-        .where((p) => p is Map)
+        .whereType<Map>()
         .map((p) => PhotoParticipant.fromJson(p as Map<String, dynamic>))
         .where((p) => p.id.isNotEmpty)
         .toList();

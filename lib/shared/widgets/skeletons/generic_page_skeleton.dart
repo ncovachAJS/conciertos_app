@@ -97,7 +97,7 @@ class FeedSkeleton extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemCount: 5,
       separatorBuilder: (_, sep) => const SizedBox(height: 16),
-      itemBuilder: (_, __) => Column(
+      itemBuilder: (_, _) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(

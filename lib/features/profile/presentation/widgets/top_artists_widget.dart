@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../spotify/data/services/spotify_search_service.dart';
@@ -99,6 +100,7 @@ class _TopArtistsWidgetState extends State<TopArtistsWidget> {
   @override
   Widget build(BuildContext context) {
     if (_ranked.isEmpty) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,7 +112,7 @@ class _TopArtistsWidgetState extends State<TopArtistsWidget> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFF1DB954).withOpacity(0.15),
+                color: const Color(0xFF1DB954).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Center(
@@ -118,20 +120,20 @@ class _TopArtistsWidgetState extends State<TopArtistsWidget> {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Mis artistas',
-                    style: TextStyle(
+                    l.topArtistsTitle,
+                    style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    'Por conciertos y valoración',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    l.topArtistsSubtitle,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
@@ -148,13 +150,13 @@ class _TopArtistsWidgetState extends State<TopArtistsWidget> {
               ? ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _ranked.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  separatorBuilder: (_, _) => const SizedBox(width: 12),
                   itemBuilder: (_, i) => _SkeletonCard(),
                 )
               : ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _ranked.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  separatorBuilder: (_, _) => const SizedBox(width: 12),
                   itemBuilder: (_, i) {
                     final s = _ranked[i];
                     final spotify = _spotifyData[s.name];
@@ -193,6 +195,7 @@ class _ArtistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final hasImage = _imageUrl.isNotEmpty;
 
     return SizedBox(
@@ -208,7 +211,7 @@ class _ArtistCard extends StatelessWidget {
                 imageUrl: _imageUrl,
                 fit: BoxFit.cover,
                 fadeInDuration: const Duration(milliseconds: 300),
-                errorWidget: (_, __, ___) => _gradient(),
+                errorWidget: (_, _, _) => _gradient(),
               )
             else
               _gradient(),
@@ -310,7 +313,7 @@ class _ArtistCard extends StatelessWidget {
                   if (spotify != null && spotify!.followers > 0) ...[
                     const SizedBox(height: 2),
                     Text(
-                      '${_fmtFollowers(spotify!.followers)} seguidores',
+                      l.spotifyFollowers(_fmtFollowers(spotify!.followers)),
                       style: const TextStyle(
                         color: Color(0xFF1DB954),
                         fontSize: 10,
@@ -349,7 +352,7 @@ class _SkeletonCard extends StatelessWidget {
       width: 120,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Container(color: Colors.white.withOpacity(0.07)),
+        child: Container(color: Colors.white.withValues(alpha: 0.07)),
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/utils/month_names.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/concert.dart';
 
 class ConcertCalendarView extends StatefulWidget {
@@ -25,11 +27,6 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
   late DateTime _focus;
   bool _goingForward = true; // para la dirección del slide
 
-  static const _weekdays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-  static const _months = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-  ];
 
   @override
   void initState() {
@@ -69,6 +66,8 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context);
+    final weekdays = l.calendarWeekdayInitials.split(',');
     final byDay = _byDay();
 
     final firstOfMonth = DateTime(_focus.year, _focus.month, 1);
@@ -94,7 +93,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
               ),
               Expanded(
                 child: Text(
-                  '${_months[_focus.month - 1]} ${_focus.year}',
+                  '${monthName(l, _focus.month)} ${_focus.year}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 16,
@@ -116,9 +115,9 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                       color: const Color(0xFFE53935).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
-                      'Hoy',
-                      style: TextStyle(
+                    child: Text(
+                      l.today,
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFFE53935),
@@ -144,7 +143,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
             return Expanded(
               child: Center(
                 child: Text(
-                  _weekdays[i],
+                  weekdays[i],
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -170,6 +169,18 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
             },
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 260),
+              // Por defecto AnimatedSwitcher centra su contenido dentro del
+              // espacio disponible (Stack alignment: center). Como el
+              // Expanded le da toda la altura restante de la pantalla pero
+              // la rejilla ocupa menos, eso dejaba un hueco grande arriba
+              // (y otro abajo) en vez de pegar el calendario arriba del todo.
+              layoutBuilder: (currentChild, previousChildren) => Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  ...previousChildren,
+                  ?currentChild,
+                ],
+              ),
               transitionBuilder: (child, animation) {
                 // Slide + fade: entra desde la derecha al avanzar, desde la izquierda al retroceder
                 final begin = _goingForward
@@ -196,13 +207,24 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                     crossAxisCount: 7,
                     mainAxisSpacing: 5,
                     crossAxisSpacing: 5,
-                    childAspectRatio: 0.78,
+                    childAspectRatio: 0.85,
                   ),
                   itemCount: rows * 7,
                   itemBuilder: (_, index) {
                     final dayNum = index - startOffset + 1;
-                    if (dayNum < 1 || dayNum > daysInMonth) {
-                      return const SizedBox.shrink();
+                    if (dayNum < 1) {
+                      // Días del mes anterior: solo el número, sin fondo ni
+                      // interacción, para que nunca quede un hueco vacío.
+                      final prevMonth = DateTime(_focus.year, _focus.month - 1);
+                      final daysInPrevMonth = DateUtils.getDaysInMonth(
+                        prevMonth.year, prevMonth.month,
+                      );
+                      return _AdjacentMonthCell(
+                        day: daysInPrevMonth + dayNum,
+                      );
+                    }
+                    if (dayNum > daysInMonth) {
+                      return _AdjacentMonthCell(day: dayNum - daysInMonth);
                     }
                     final concerts = byDay[dayNum] ?? [];
                     final isToday = _focus.year == today.year &&
@@ -238,11 +260,13 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
     DateTime date,
   ) {
     final cs = Theme.of(context).colorScheme;
-    final label = '$day de ${_months[_focus.month - 1]}';
+    final l = AppLocalizations.of(context);
+    final label = l.calendarDayLabel(day, monthName(l, _focus.month));
     final addConcert = widget.onAddConcert;
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -282,7 +306,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${concerts.length} concierto${concerts.length > 1 ? 's' : ''}',
+                      l.concertCountLabel(concerts.length),
                       style: const TextStyle(
                         fontSize: 12, fontWeight: FontWeight.w600,
                         color: Color(0xFFE53935),
@@ -315,7 +339,7 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
                       addConcert(date);
                     },
                     icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('Añadir concierto en esta fecha'),
+                    label: Text(l.calendarAddOnDate),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFFE53935),
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -337,6 +361,29 @@ class _ConcertCalendarViewState extends State<ConcertCalendarView> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Celda de día — diseño con imagen de fondo + número encima
 // ─────────────────────────────────────────────────────────────────────────────
+
+/// Celda de relleno para días del mes anterior/siguiente — solo el número,
+/// sin fondo ni interacción, para que la cuadrícula nunca deje un hueco
+/// vacío al principio o al final.
+class _AdjacentMonthCell extends StatelessWidget {
+  final int day;
+  const _AdjacentMonthCell({required this.day});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Text(
+        '$day',
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: cs.onSurface.withValues(alpha: 0.18),
+        ),
+      ),
+    );
+  }
+}
 
 class _DayCell extends StatelessWidget {
   final int day;

@@ -2,27 +2,32 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
+import '../../../../core/utils/month_names.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../data/models/concert_photo_model.dart';
 import '../../data/services/photo_api_service.dart';
+import '../flows/add_memory_flow.dart';
+import '../memories_events.dart';
 import 'photo_viewer_page.dart';
 
-class FeedPage extends StatefulWidget {
+class FeedPage extends ConsumerStatefulWidget {
   const FeedPage({super.key});
 
   @override
-  State<FeedPage> createState() => _FeedPageState();
+  ConsumerState<FeedPage> createState() => _FeedPageState();
 }
 
-class _FeedPageState extends State<FeedPage>
+class _FeedPageState extends ConsumerState<FeedPage>
     with AutomaticKeepAliveClientMixin {
   final PhotoApiService _service = PhotoApiService();
   List<ConcertPhotoModel> _photos = [];
@@ -41,10 +46,24 @@ class _FeedPageState extends State<FeedPage>
   void initState() {
     super.initState();
     _load();
+    // Recarga cuando se añaden recuerdos desde fuera (atajo del inicio).
+    memoriesChanged.addListener(_load);
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _showTutorialIfNeeded(),
     );
   }
+
+  @override
+  void dispose() {
+    memoriesChanged.removeListener(_load);
+    super.dispose();
+  }
+
+  Widget _addMemoryButton(AppLocalizations l) => IconButton(
+        tooltip: l.memoryAdd,
+        icon: const Icon(Icons.add_a_photo_outlined),
+        onPressed: () => startAddMemory(context, ref),
+      );
 
   Future<void> _showTutorialIfNeeded() async {
     final should = await TutorialService.shouldShow(TutorialService.feed);
@@ -161,9 +180,11 @@ class _FeedPageState extends State<FeedPage>
     if (_photos.isEmpty) {
       return AppPage(
         title: l.memoriesTitle,
+        actions: [_addMemoryButton(l)],
         child: RefreshIndicator(
           onRefresh: _load,
           child: ListView(
+            padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
             children: [
               const SizedBox(height: 120),
               Icon(
@@ -171,7 +192,7 @@ class _FeedPageState extends State<FeedPage>
                 size: 80,
                 color: Theme.of(
                   context,
-                ).colorScheme.onSurface.withOpacity(0.15),
+                ).colorScheme.onSurface.withValues(alpha: 0.15),
               ),
               const SizedBox(height: 16),
               Center(
@@ -181,7 +202,7 @@ class _FeedPageState extends State<FeedPage>
                   style: TextStyle(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.4),
+                    ).colorScheme.onSurface.withValues(alpha: 0.4),
                     fontSize: 15,
                   ),
                 ),
@@ -266,6 +287,7 @@ class _FeedPageState extends State<FeedPage>
                         onPressed: _deleteSelected,
                       )
                     else ...[
+                      _addMemoryButton(l),
                       IconButton(
                         tooltip: _timelineMode
                             ? l.gridView
@@ -342,17 +364,18 @@ class _FeedPageState extends State<FeedPage>
                                       gaplessPlayback: true,
                                       frameBuilder:
                                           (_, child, frame, wasSyncLoaded) {
-                                            if (wasSyncLoaded || frame != null)
+                                            if (wasSyncLoaded || frame != null) {
                                               return child;
+                                            }
                                             return Container(
                                               color: cs.surfaceContainerHighest,
                                             );
                                           },
-                                      errorBuilder: (_, __, ___) => Container(
+                                      errorBuilder: (_, _, _) => Container(
                                         color: cs.surfaceContainerHighest,
                                         child: Icon(
                                           Icons.broken_image_outlined,
-                                          color: cs.onSurface.withOpacity(0.2),
+                                          color: cs.onSurface.withValues(alpha: 0.2),
                                           size: 24,
                                         ),
                                       ),
@@ -361,7 +384,7 @@ class _FeedPageState extends State<FeedPage>
                                   // Overlay oscuro + check cuando está seleccionada
                                   if (isSelected)
                                     Container(
-                                      color: Colors.black.withOpacity(0.4),
+                                      color: Colors.black.withValues(alpha: 0.4),
                                       child: const Center(
                                         child: Icon(
                                           Icons.check_circle_rounded,
@@ -420,7 +443,7 @@ class _FeedPageState extends State<FeedPage>
                             const SizedBox(width: 12),
                             Expanded(
                               child: Divider(
-                                color: cs.onSurface.withOpacity(0.12),
+                                color: cs.onSurface.withValues(alpha: 0.12),
                                 thickness: 1,
                               ),
                             ),
@@ -453,7 +476,7 @@ class _FeedPageState extends State<FeedPage>
                                         left: leftPad - lineWidth / 2,
                                         child: Container(
                                           width: lineWidth,
-                                          color: lineColor.withOpacity(0.3),
+                                          color: lineColor.withValues(alpha: 0.3),
                                         ),
                                       ),
                                       Positioned(
@@ -509,8 +532,8 @@ class _FeedPageState extends State<FeedPage>
                                             ].join(' · '),
                                             style: TextStyle(
                                               fontSize: 12,
-                                              color: cs.onSurface.withOpacity(
-                                                0.5,
+                                              color: cs.onSurface.withValues(
+                                                alpha: 0.5,
                                               ),
                                             ),
                                             maxLines: 1,
@@ -521,7 +544,7 @@ class _FeedPageState extends State<FeedPage>
                                             _formatDate(ref.date),
                                             style: TextStyle(
                                               fontSize: 11,
-                                              color: lineColor.withOpacity(0.8),
+                                              color: lineColor.withValues(alpha: 0.8),
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -544,7 +567,7 @@ class _FeedPageState extends State<FeedPage>
                                                       Axis.horizontal,
                                                   itemCount:
                                                       concertPhotos.length,
-                                                  separatorBuilder: (_, __) =>
+                                                  separatorBuilder: (_, _) =>
                                                       const SizedBox(width: 6),
                                                   itemBuilder: (_, j) =>
                                                       _ThumbPhoto(
@@ -569,7 +592,9 @@ class _FeedPageState extends State<FeedPage>
                     ),
                   ],
 
-                const SliverToBoxAdapter(child: SizedBox(height: 48)),
+                SliverToBoxAdapter(
+                  child: SizedBox(height: 48 + floatingNavBarClearance(context)),
+                ),
               ],
             ),
           ),
@@ -598,21 +623,8 @@ class _FeedPageState extends State<FeedPage>
   }
 
   String _formatDate(DateTime d) {
-    const months = [
-      'ene',
-      'feb',
-      'mar',
-      'abr',
-      'may',
-      'jun',
-      'jul',
-      'ago',
-      'sep',
-      'oct',
-      'nov',
-      'dic',
-    ];
-    return '${d.day} ${months[d.month - 1]} ${d.year}';
+    final l = AppLocalizations.of(context);
+    return '${d.day} ${monthAbbr(l, d.month).toLowerCase()} ${d.year}';
   }
 }
 
@@ -639,16 +651,16 @@ class _ThumbPhoto extends StatelessWidget {
             height: 140,
             memCacheWidth: 240,
             fadeInDuration: Duration.zero,
-            placeholder: (_, __) => Container(
+            placeholder: (_, _) => Container(
               width: 120,
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
-            errorWidget: (_, __, ___) => Container(
+            errorWidget: (_, _, _) => Container(
               width: 120,
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Icon(
                 Icons.broken_image_outlined,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
               ),
             ),
           ),

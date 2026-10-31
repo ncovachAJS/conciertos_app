@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../app/app_shell.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
 import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../../shared/widgets/app_page.dart';
@@ -43,15 +45,16 @@ class _FriendsActivityPageState extends ConsumerState<FriendsActivityPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final activityAsync = ref.watch(friendsActivityProvider);
     final cs = Theme.of(context).colorScheme;
 
     return AppPage(
-      title: 'Actividad de amigos',
+      title: l.friendActivityNotifTitle,
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh_rounded),
-          tooltip: 'Actualizar',
+          tooltip: l.refreshTooltip,
           onPressed: () => ref.read(friendsActivityProvider.notifier).reload(),
         ),
       ],
@@ -70,14 +73,14 @@ class _FriendsActivityPageState extends ConsumerState<FriendsActivityPage> {
                   Icon(
                     Icons.group_outlined,
                     size: 64,
-                    color: cs.onSurface.withOpacity(0.15),
+                    color: cs.onSurface.withValues(alpha: 0.15),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Tus amigos no han agregado\nconciertos todavía',
+                    l.friendsActivityEmpty,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.4),
+                      color: cs.onSurface.withValues(alpha: 0.4),
                       fontSize: 15,
                     ),
                   ),
@@ -89,9 +92,9 @@ class _FriendsActivityPageState extends ConsumerState<FriendsActivityPage> {
           final notifier = ref.read(friendsActivityProvider.notifier);
           return ListView.separated(
             controller: _scrollController,
-            padding: const EdgeInsets.only(bottom: 32),
+            padding: EdgeInsets.only(bottom: 32 + floatingNavBarClearance(context)),
             itemCount: concerts.length + (notifier.loadingMore ? 1 : 0),
-            separatorBuilder: (_, __) => const Divider(height: 1),
+            separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, i) {
               if (i == concerts.length) {
                 return const Padding(
@@ -117,6 +120,7 @@ class _ActivityCard extends StatelessWidget {
   void _showComments(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _CommentsSheet(concertId: concert.id),
@@ -125,8 +129,11 @@ class _ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    final dateStr = DateFormat('d MMM yyyy', 'es').format(concert.date);
+    final dateStr = DateFormat(
+            'd MMM yyyy', Localizations.localeOf(context).languageCode)
+        .format(concert.date);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -147,7 +154,7 @@ class _ActivityCard extends StatelessWidget {
                           width: 72,
                           height: 72,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _placeholder(cs),
+                          errorBuilder: (_, _, _) => _placeholder(cs),
                         )
                       : _placeholder(cs),
                 ),
@@ -186,10 +193,10 @@ class _ActivityCard extends StatelessWidget {
                             child: Text(
                               concert.userName.isNotEmpty
                                   ? concert.userName
-                                  : 'Amigo',
+                                  : l.friendDefaultName,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: cs.onSurface.withOpacity(0.55),
+                                color: cs.onSurface.withValues(alpha: 0.55),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -211,7 +218,7 @@ class _ActivityCard extends StatelessWidget {
                           concert.name,
                           style: TextStyle(
                             fontSize: 13,
-                            color: cs.onSurface.withOpacity(0.65),
+                            color: cs.onSurface.withValues(alpha: 0.65),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -222,14 +229,14 @@ class _ActivityCard extends StatelessWidget {
                           Icon(
                             Icons.calendar_today_outlined,
                             size: 12,
-                            color: cs.onSurface.withOpacity(0.4),
+                            color: cs.onSurface.withValues(alpha: 0.4),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             dateStr,
                             style: TextStyle(
                               fontSize: 12,
-                              color: cs.onSurface.withOpacity(0.4),
+                              color: cs.onSurface.withValues(alpha: 0.4),
                             ),
                           ),
                           if (concert.city.isNotEmpty) ...[
@@ -237,7 +244,7 @@ class _ActivityCard extends StatelessWidget {
                             Icon(
                               Icons.location_on_outlined,
                               size: 12,
-                              color: cs.onSurface.withOpacity(0.4),
+                              color: cs.onSurface.withValues(alpha: 0.4),
                             ),
                             const SizedBox(width: 2),
                             Expanded(
@@ -245,7 +252,7 @@ class _ActivityCard extends StatelessWidget {
                                 concert.city,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: cs.onSurface.withOpacity(0.4),
+                                  color: cs.onSurface.withValues(alpha: 0.4),
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -288,13 +295,13 @@ class _ActivityCard extends StatelessWidget {
                 icon: Icon(
                   Icons.chat_bubble_outline_rounded,
                   size: 16,
-                  color: cs.onSurface.withOpacity(0.5),
+                  color: cs.onSurface.withValues(alpha: 0.5),
                 ),
                 label: Text(
-                  'Comentar',
+                  l.commentAction,
                   style: TextStyle(
                     fontSize: 12,
-                    color: cs.onSurface.withOpacity(0.5),
+                    color: cs.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 style: TextButton.styleFrom(
@@ -321,7 +328,7 @@ class _ActivityCard extends StatelessWidget {
       ),
       child: Icon(
         Icons.music_note_rounded,
-        color: cs.onSurface.withOpacity(0.2),
+        color: cs.onSurface.withValues(alpha: 0.2),
       ),
     );
   }
@@ -377,6 +384,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
@@ -398,7 +406,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: cs.onSurface.withOpacity(0.2),
+                  color: cs.onSurface.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -410,9 +418,9 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                   children: [
                     const Icon(Icons.chat_bubble_outline_rounded),
                     const SizedBox(width: 10),
-                    const Text(
-                      'Comentarios',
-                      style: TextStyle(
+                    Text(
+                      l.commentsTitle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -442,13 +450,13 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                             Icon(
                               Icons.chat_bubble_outline_rounded,
                               size: 48,
-                              color: cs.onSurface.withOpacity(0.15),
+                              color: cs.onSurface.withValues(alpha: 0.15),
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'Sé el primero en comentar',
+                              l.commentsEmpty,
                               style: TextStyle(
-                                color: cs.onSurface.withOpacity(0.4),
+                                color: cs.onSurface.withValues(alpha: 0.4),
                                 fontSize: 14,
                               ),
                             ),
@@ -462,7 +470,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                       itemCount: all.length,
-                      separatorBuilder: (_, __) =>
+                      separatorBuilder: (_, _) =>
                           const SizedBox(height: 12),
                       itemBuilder: (_, i) =>
                           _CommentTile(comment: all[i], cs: cs),
@@ -490,7 +498,7 @@ class _CommentsSheetState extends State<_CommentsSheet> {
                           child: TextField(
                             controller: _textController,
                             decoration: InputDecoration(
-                              hintText: 'Escribe un comentario…',
+                              hintText: l.commentHint,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
@@ -543,7 +551,9 @@ class _CommentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timeStr = _formatTime(comment.createdAt);
+    final l = AppLocalizations.of(context);
+    final timeStr = _formatTime(
+        l, Localizations.localeOf(context).languageCode, comment.createdAt);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,7 +586,7 @@ class _CommentTile extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    comment.userName.isNotEmpty ? comment.userName : 'Usuario',
+                    comment.userName.isNotEmpty ? comment.userName : l.userDefaultName,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -587,7 +597,7 @@ class _CommentTile extends StatelessWidget {
                     timeStr,
                     style: TextStyle(
                       fontSize: 11,
-                      color: cs.onSurface.withOpacity(0.4),
+                      color: cs.onSurface.withValues(alpha: 0.4),
                     ),
                   ),
                 ],
@@ -604,13 +614,13 @@ class _CommentTile extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime dt) {
+  String _formatTime(AppLocalizations l, String lang, DateTime dt) {
     final now = DateTime.now();
     final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return 'ahora';
-    if (diff.inMinutes < 60) return 'hace ${diff.inMinutes} min';
-    if (diff.inHours < 24) return 'hace ${diff.inHours} h';
-    if (diff.inDays < 7) return 'hace ${diff.inDays} d';
-    return DateFormat('d MMM', 'es').format(dt);
+    if (diff.inMinutes < 1) return l.timeNow;
+    if (diff.inMinutes < 60) return l.timeMinutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l.timeHoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l.timeDaysAgo(diff.inDays);
+    return DateFormat('d MMM', lang).format(dt);
   }
 }

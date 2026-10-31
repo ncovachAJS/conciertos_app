@@ -9,15 +9,16 @@ class AboutPage extends StatelessWidget {
   static const _contactEmail = 'soporte@lavidaendirecto.app';
 
   Future<void> _openEmail(BuildContext context) async {
+    final l = AppLocalizations.of(context);
     final uri = Uri(
       scheme: 'mailto',
       path: _contactEmail,
-      query: 'subject=La Vida en Directo - Contacto',
+      query: 'subject=${l.mailtoSubject}',
     );
     if (!await launchUrl(uri)) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir el cliente de correo')),
+        SnackBar(content: Text(l.emailClientError)),
       );
     }
   }
@@ -28,16 +29,8 @@ class AboutPage extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l.privacyPolicy),
-        content: const SingleChildScrollView(
-          child: Text(
-            'La Vida en Directo recoge únicamente los datos necesarios para '
-            'el funcionamiento de la aplicación: nombre, correo electrónico '
-            'y los conciertos que añades.\n\n'
-            'Tus datos se almacenan de forma segura y nunca se comparten con '
-            'terceros ni se usan con fines publicitarios.\n\n'
-            'Puedes eliminar tu cuenta y todos tus datos en cualquier momento '
-            'desde la app o contactando con nosotros.',
-          ),
+        content: SingleChildScrollView(
+          child: Text(l.privacyPolicyBody),
         ),
         actions: [
           FilledButton(
@@ -59,25 +52,25 @@ class AboutPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Desarrollado con ❤️ por Nico',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l.creditsDevelopedBy,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(l.technologiesUsed),
             const SizedBox(height: 8),
-            _CreditRow(name: 'Flutter', description: 'Frontend móvil'),
-            _CreditRow(name: 'NestJS', description: 'Backend API'),
-            _CreditRow(name: 'Prisma', description: 'Base de datos'),
+            _CreditRow(name: 'Flutter', description: l.creditFrontend),
+            _CreditRow(name: 'NestJS', description: l.creditBackend),
+            _CreditRow(name: 'Prisma', description: l.creditDatabase),
             _CreditRow(
               name: 'Cloudinary',
-              description: 'Almacenamiento de imágenes',
+              description: l.creditImageStorage,
             ),
-            _CreditRow(name: 'Setlist.fm', description: 'Datos de setlists'),
-            _CreditRow(name: 'Spotify API', description: 'Datos de artistas'),
+            _CreditRow(name: 'Setlist.fm', description: l.creditSetlistData),
+            _CreditRow(name: 'Spotify API', description: l.creditArtistData),
             _CreditRow(
               name: 'Ticketmaster',
-              description: 'Eventos recomendados',
+              description: l.creditRecommendedEvents,
             ),
           ],
         ),
@@ -124,7 +117,7 @@ class AboutPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Versión $_version',
+                  l.appFooterVersion(_version),
                   style: const TextStyle(color: Colors.white54),
                 ),
               ],
@@ -157,11 +150,11 @@ class AboutPage extends StatelessWidget {
 
           const SizedBox(height: 40),
 
-          const Center(
+          Center(
             child: Text(
-              'Hecho con ❤️ para los que viven la música en directo.',
+              l.aboutFooterTagline,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white38, fontSize: 13),
+              style: const TextStyle(color: Colors.white38, fontSize: 13),
             ),
           ),
           const SizedBox(height: 24),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
@@ -178,7 +179,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Future<void> _checkAchievements() async {
     final stats = _buildStats(concerts);
-    final achievements = AchievementsEngine.compute(stats);
+    final achievements =
+        AchievementsEngine.compute(AppLocalizations.of(context), stats);
     final newOnes = await AchievementsService.checkNewUnlocks(achievements);
 
     if (!mounted || newOnes.isEmpty) return;
@@ -190,6 +192,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -232,50 +235,52 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al subir la foto: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).profileAvatarUploadError(e.toString())),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _uploadingAvatar = false);
     }
   }
 
   String fanLevel(int concerts) {
-    if (concerts >= 150) return '🤘 LEYENDA DEL DIRECTO';
-    if (concerts >= 75) return '🥇 HEADLINER';
-    if (concerts >= 25) return '🥈 ROADIE';
-    return '🥉 ROOKIE';
+    final l = AppLocalizations.of(context);
+    if (concerts >= 150) return l.fanLevelLegend;
+    if (concerts >= 75) return l.fanLevelHeadliner;
+    if (concerts >= 25) return l.fanLevelRoadie;
+    return l.fanLevelRookie;
   }
 
   String fanSince() {
-    if (concerts.isEmpty) return 'Fan desde este año';
+    final l = AppLocalizations.of(context);
+    if (concerts.isEmpty) return l.fanSinceThisYear;
     int oldestYear = concerts
         .map((c) => c.date.year)
         .reduce((a, b) => a < b ? a : b);
-    return 'Fan desde $oldestYear';
+    return l.fanSinceYear(oldestYear);
   }
 
   Future<void> _deleteAccount() async {
+    final l = AppLocalizations.of(context);
     final passwordCtrl = TextEditingController();
 
     // Paso 1 — advertencia
     final step1 = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('⚠️ Eliminar cuenta'),
-        content: const Text(
-          'Esta acción es irreversible. Se borrarán todos tus conciertos, '
-          'fotos, amigos y datos de la cuenta.',
-        ),
+        title: Text(l.deleteAccountTitle),
+        content: Text(l.deleteAccountWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Continuar'),
+            child: Text(l.continueLabel),
           ),
         ],
       ),
@@ -286,22 +291,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirma tu contraseña'),
+        title: Text(l.confirmPasswordTitle),
         content: TextField(
           controller: passwordCtrl,
           obscureText: true,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Contraseña actual'),
+          decoration: InputDecoration(labelText: l.currentPasswordLabel),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar cuenta'),
+            child: Text(l.deleteAccountButton),
           ),
         ],
       ),
@@ -317,7 +322,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text(l.genericErrorDetail(e.toString()))),
       );
     }
   }
@@ -342,21 +347,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       body: Stack(
         children: [
           ListView(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              20,
+              20,
+              20 + floatingNavBarClearance(context),
+            ),
             children: [
-              const Text(
-                'Tu acreditación',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              Text(
+                l.profileAccreditationTitle,
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Tu historial musical en un vistazo.',
-                style: TextStyle(color: Colors.grey, fontSize: 15),
+              Text(
+                l.profileAccreditationSubtitle,
+                style: const TextStyle(color: Colors.grey, fontSize: 15),
               ),
               const SizedBox(height: 24),
 
               ProfileCard(
-                name: auth.user?.name ?? 'Invitado',
+                name: auth.user?.name ?? l.guestLabel,
                 subtitle: auth.user != null
                     ? auth.user!.email
                     : '${fanLevel(concerts.length)}\n${fanSince()}',
@@ -373,46 +383,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
               // ── Logros ────────────────────────────────────────────────
               AchievementsWidget(
-                achievements: AchievementsEngine.compute(_buildStats(concerts)),
+                achievements: AchievementsEngine.compute(l, _buildStats(concerts)),
               ),
 
               const SizedBox(height: 30),
-
-              // ── Mis artistas ─────────────────────────────────────────
-              if (concerts.isNotEmpty)
-                TopArtistsWidget(concerts: concerts),
-
-              if (concerts.isNotEmpty)
-                const SizedBox(height: 30),
-
-              if (auth.user == null) ...[
-                FilledButton.icon(
-                  onPressed: () => context.push('/login'),
-                  icon: const Icon(Icons.login),
-                  label: Text(l.signIn),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () => context.push('/register'),
-                  icon: const Icon(Icons.person_add_alt_1),
-                  label: Text(l.createAccount),
-                ),
-              ] else ...[
-                FilledButton.icon(
-                  onPressed: () async {
-                    // NO reseteamos el tutorial — debe mantenerse entre sesiones
-                    ref.invalidate(concertsProvider);
-                    await auth.logout();
-                    if (!context.mounted) return;
-                    context.go('/login');
-                  },
-                  icon: const Icon(Icons.logout),
-                  label: Text(l.signOut),
-                ),
-              ],
-
-              const SizedBox(height: 24),
-
               // ── Wrapped ───────────────────────────────────────────────
               GestureDetector(
                 onTap: () => context.push('/annual-summary'),
@@ -449,8 +423,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Tu año en conciertos',
-                              style: TextStyle(
+                              l.wrappedCardTitle,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
@@ -458,8 +432,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Resumen anual · compartible',
-                              style: TextStyle(
+                              l.wrappedCardSubtitle,
+                              style: const TextStyle(
                                 color: Colors.white54,
                                 fontSize: 12,
                               ),
@@ -493,9 +467,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
-                    const Text(
-                      'Años anteriores',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white54),
+                    Text(
+                      l.pastYearsLabel,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white54),
                     ),
                     const SizedBox(height: 12),
                     SingleChildScrollView(
@@ -532,11 +506,48 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 );
               }),
 
+              const SizedBox(height: 30),
+
+
+              // ── Mis artistas ─────────────────────────────────────────
+              if (concerts.isNotEmpty)
+                TopArtistsWidget(concerts: concerts),
+
+              if (concerts.isNotEmpty)
+                const SizedBox(height: 30),
+
+              if (auth.user == null) ...[
+                FilledButton.icon(
+                  onPressed: () => context.push('/login'),
+                  icon: const Icon(Icons.login),
+                  label: Text(l.signIn),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/register'),
+                  icon: const Icon(Icons.person_add_alt_1),
+                  label: Text(l.createAccount),
+                ),
+              ] else ...[
+                FilledButton.icon(
+                  onPressed: () async {
+                    // NO reseteamos el tutorial — debe mantenerse entre sesiones
+                    ref.invalidate(concertsProvider);
+                    await auth.logout();
+                    if (!context.mounted) return;
+                    context.go('/login');
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: Text(l.signOut),
+                ),
+              ],
+
+
               const SizedBox(height: 35),
 
-              const Text(
-                'Herramientas',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                l.toolsSectionTitle,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
 
@@ -561,6 +572,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         MaterialPageRoute(builder: (_) => const SettingsPage()),
                       ),
                     ),
+                    if (auth.user?.isAdmin == true) ...[
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(
+                          Icons.admin_panel_settings_rounded,
+                          color: Color(0xFFE53935),
+                        ),
+                        title: Text(l.adminPanelTitle),
+                        subtitle: Text(l.adminPanelSubtitle),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.push('/admin'),
+                      ),
+                    ],
                     const Divider(height: 1),
                     ListTile(
                       leading: const Icon(Icons.info_outline),
@@ -578,7 +602,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
               Center(
                 child: Text(
-                  'La Vida en Directo\nVersión 1.0',
+                  'La Vida en Directo\n${l.appFooterVersion('1.0')}',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey.shade500),
                 ),
@@ -592,9 +616,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     size: 16,
                     color: Colors.redAccent,
                   ),
-                  label: const Text(
-                    'Eliminar cuenta',
-                    style: TextStyle(
+                  label: Text(
+                    l.deleteAccountButton,
+                    style: const TextStyle(
                       color: Colors.redAccent,
                       fontSize: 13,
                     ),
@@ -607,15 +631,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           if (_uploadingAvatar)
             Container(
               color: Colors.black54,
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
                     Text(
-                      'Subiendo foto...',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      l.uploadingAvatarLabel,
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ],
                 ),

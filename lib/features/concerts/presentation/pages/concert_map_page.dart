@@ -14,7 +14,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
-import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/concert.dart';
 import '../providers/concerts_provider.dart';
 
@@ -194,6 +193,7 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
     final l = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -239,14 +239,14 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
                     Icon(
                       Icons.map_outlined,
                       size: 64,
-                      color: cs.onSurface.withOpacity(0.15),
+                      color: cs.onSurface.withValues(alpha: 0.15),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       l.concertMapNoData,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: cs.onSurface.withOpacity(0.4),
+                        color: cs.onSurface.withValues(alpha: 0.4),
                         fontSize: 15,
                       ),
                     ),
@@ -294,7 +294,7 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
               left: 0,
               right: 0,
               child: Container(
-                color: cs.surface.withOpacity(0.92),
+                color: cs.surface.withValues(alpha: 0.92),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 10,
@@ -314,7 +314,7 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
                           '${l.concertMapLoading} ${l.concertMapProgress(_geocoded, total)}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: cs.onSurface.withOpacity(0.7),
+                            color: cs.onSurface.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
@@ -322,7 +322,7 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
                     const SizedBox(height: 6),
                     LinearProgressIndicator(
                       value: total == 0 ? 0 : _geocoded / total,
-                      backgroundColor: cs.onSurface.withOpacity(0.1),
+                      backgroundColor: cs.onSurface.withValues(alpha: 0.1),
                       color: const Color(0xFFE53935),
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -337,7 +337,7 @@ class _ConcertMapPageState extends ConsumerState<ConcertMapPage> {
               bottom: 24,
               right: 16,
               child: FloatingActionButton.small(
-                tooltip: 'Centrar',
+                tooltip: l.mapCenterTooltip,
                 backgroundColor: cs.surface,
                 foregroundColor: cs.onSurface,
                 onPressed: _fitBounds,
@@ -478,7 +478,7 @@ class _VenueSheet extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: cs.onSurface.withOpacity(0.2),
+                color: cs.onSurface.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -516,7 +516,7 @@ class _VenueSheet extends StatelessWidget {
           Text(
             l.concertMapConcertsHere,
             style: TextStyle(
-              color: cs.onSurface.withOpacity(0.5),
+              color: cs.onSurface.withValues(alpha: 0.5),
               fontSize: 13,
             ),
           ),
@@ -540,7 +540,7 @@ class _VenueSheet extends StatelessWidget {
                             width: 48,
                             height: 48,
                             fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) =>
+                            errorWidget: (_, _, _) =>
                                 const _PlaceholderThumb(),
                           )
                         : const _PlaceholderThumb(),
@@ -552,7 +552,7 @@ class _VenueSheet extends StatelessWidget {
                   subtitle: Text(
                     '${c.name}  ·  ${c.date.year}',
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.5),
+                      color: cs.onSurface.withValues(alpha: 0.5),
                       fontSize: 12,
                     ),
                   ),

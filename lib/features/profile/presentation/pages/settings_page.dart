@@ -13,9 +13,13 @@ import '../../data/services/jira_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:conciertos_app/core/utils/user_prefs.dart';
 
+import '../../../../app/app_shell.dart';
+import '../../../../app/color_themes.dart';
 import '../../../../app/theme_pack_provider.dart';
 import '../../../../app/theme_provider.dart';
+import '../../../../core/config/pro_config.dart';
 import '../../../../shared/widgets/pro_paywall_sheet.dart';
 import '../../../../core/notifiers/annual_goal_notifier.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
@@ -68,11 +72,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _loadNotifPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+    for (final k in [_kNotifFriends, _kNotifRecs, _kSplashSound]) {
+      await UserPrefs.claimLegacy(prefs, k);
+    }
     if (!mounted) return;
     setState(() {
-      _notifFriends = prefs.getBool(_kNotifFriends) ?? true;
-      _notifRecs    = prefs.getBool(_kNotifRecs)    ?? true;
-      _splashSound  = prefs.getBool(_kSplashSound)  ?? true;
+      _notifFriends = prefs.getBool(UserPrefs.key(_kNotifFriends)) ?? true;
+      _notifRecs    = prefs.getBool(UserPrefs.key(_kNotifRecs))    ?? true;
+      _splashSound  = prefs.getBool(UserPrefs.key(_kSplashSound))  ?? true;
     });
   }
 
@@ -83,6 +90,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _editAnnualGoal() async {
+    final l = AppLocalizations.of(context);
     final current = _annualGoal;
     final controller = TextEditingController(
       text: current != null ? '$current' : '',
@@ -94,24 +102,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         int? parsed = current;
         return StatefulBuilder(
           builder: (ctx2, setS) => AlertDialog(
-            title: const Text('Meta anual de conciertos'),
+            title: Text(l.annualGoalTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '¿Cuántos conciertos quieres ver este año?',
-                  style: TextStyle(fontSize: 13),
+                Text(
+                  l.annualGoalQuestion,
+                  style: const TextStyle(fontSize: 13),
                 ),
                 const SizedBox(height: 14),
                 TextField(
                   controller: controller,
                   autofocus: true,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Número de conciertos',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.flag_rounded,
+                  decoration: InputDecoration(
+                    labelText: l.annualGoalNumberLabel,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.flag_rounded,
                         color: Color(0xFFE53935)),
                   ),
                   onChanged: (v) {
@@ -124,20 +132,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               if (current != null)
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, -1), // señal borrar
-                  child: const Text(
-                    'Quitar meta',
-                    style: TextStyle(color: Colors.red),
+                  child: Text(
+                    l.removeGoal,
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx, null),
-                child: const Text('Cancelar'),
+                child: Text(l.cancel),
               ),
               FilledButton(
                 onPressed: parsed != null && parsed! > 0
                     ? () => Navigator.pop(ctx, parsed)
                     : null,
-                child: const Text('Guardar'),
+                child: Text(l.save),
               ),
             ],
           ),
@@ -162,7 +170,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _setNotifPref(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
+    await prefs.setBool(UserPrefs.key(key), value);
   }
 
   // ── Cuenta ──────────────────────────────────────────────────────────────────
@@ -205,7 +213,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+          .showSnackBar(SnackBar(content: Text(l.genericErrorDetail(e.toString()))));
     }
   }
 
@@ -276,18 +284,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+          .showSnackBar(SnackBar(content: Text(l.genericErrorDetail(e.toString()))));
     }
   }
 
   Future<void> _changeEmail() async {
+    final l = AppLocalizations.of(context);
     final emailCtrl    = TextEditingController(text: _auth.user?.email ?? '');
     final passwordCtrl = TextEditingController();
 
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cambiar email'),
+        title: Text(l.changeEmailTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -295,27 +304,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               controller: emailCtrl,
               keyboardType: TextInputType.emailAddress,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Nuevo email'),
+              decoration: InputDecoration(labelText: l.newEmailLabel),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: passwordCtrl,
               obscureText: true,
-              decoration: const InputDecoration(
-                  labelText: 'Contraseña actual'),
+              decoration: InputDecoration(
+                  labelText: l.currentPasswordLabel),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFE53935)),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Guardar'),
+            child: Text(l.save),
           ),
         ],
       ),
@@ -331,37 +340,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       _auth.updateEmail(newEmail);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email actualizado')),
+        SnackBar(content: Text(l.emailUpdated)),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+          .showSnackBar(SnackBar(content: Text(l.genericErrorDetail(e.toString()))));
     }
   }
 
   Future<void> _deleteAccount() async {
+    final l = AppLocalizations.of(context);
     final passwordCtrl = TextEditingController();
 
     // Paso 1 — advertencia
     final step1 = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('⚠️ Eliminar cuenta'),
-        content: const Text(
-          'Esta acción es irreversible. Se borrarán todos tus conciertos, '
-          'fotos, amigos y datos de la cuenta.',
-        ),
+        title: Text(l.deleteAccountTitle),
+        content: Text(l.deleteAccountWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
                 backgroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Continuar'),
+            child: Text(l.continueLabel),
           ),
         ],
       ),
@@ -372,23 +379,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirma tu contraseña'),
+        title: Text(l.confirmPasswordTitle),
         content: TextField(
           controller: passwordCtrl,
           obscureText: true,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Contraseña actual'),
+          decoration: InputDecoration(labelText: l.currentPasswordLabel),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
                 backgroundColor: Colors.red.shade700),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Eliminar cuenta'),
+            child: Text(l.deleteAccountButton),
           ),
         ],
       ),
@@ -405,17 +412,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+          .showSnackBar(SnackBar(content: Text(l.genericErrorDetail(e.toString()))));
     }
   }
 
   // ── Mis datos ────────────────────────────────────────────────────────────────
 
   Future<void> _exportData(String format) async {
+    final l = AppLocalizations.of(context);
     final concerts = ref.read(concertsProvider).asData?.value ?? [];
     if (concerts.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No hay conciertos para exportar')),
+        SnackBar(content: Text(l.noConcertsToExport)),
       );
       return;
     }
@@ -437,7 +445,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     try {
       if (format == 'csv') {
         final sb = StringBuffer();
-        sb.writeln('artista,nombre,fecha,recinto,ciudad,festival,género,valoracion,favorito,precio,notas');
+        sb.writeln(l.exportCsvHeader);
         for (final c in concerts) {
           String esc(String s) => '"${s.replaceAll('"', '""')}"';
           sb.writeln([
@@ -449,7 +457,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             esc(c.festival),
             esc(c.genre),
             c.rating,
-            c.favorite ? 'sí' : 'no',
+            c.favorite ? l.csvYes : l.csvNo,
             c.price.toStringAsFixed(2),
             esc(c.notes),
           ].join(','));
@@ -510,7 +518,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path, mimeType: mime)],
-          subject: 'Mis conciertos — La Vida en Directo',
+          subject: l.exportShareSubject,
         ),
       );
     } catch (e) {
@@ -519,20 +527,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al exportar: $e')),
+          SnackBar(content: Text(l.exportError(e.toString()))),
         );
       }
     }
   }
 
   void _showExportPicker() {
-    final isPro = _auth.user?.isPro ?? false;
+    final l = AppLocalizations.of(context);
+    final isPro = ProConfig.isUserPro(_auth.user?.isPro);
     if (!isPro) {
       ProPaywallSheet.showPaywall(context);
       return;
     }
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -549,26 +559,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
             const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                'Exportar mis datos',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                l.exportDataTitle,
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
               ),
             ),
             const SizedBox(height: 8),
             ListTile(
               leading: const Icon(Icons.table_chart_outlined,
                   color: Color(0xFF43A047)),
-              title: const Text('CSV — Excel/Sheets'),
-              subtitle: const Text('Compatible con cualquier hoja de cálculo'),
+              title: Text(l.exportCsvLabel),
+              subtitle: Text(l.exportCsvDesc),
               onTap: () { Navigator.pop(context); _exportData('csv'); },
             ),
             ListTile(
               leading: const Icon(Icons.data_object_rounded,
                   color: Color(0xFF1E88E5)),
-              title: const Text('JSON — copia de seguridad'),
-              subtitle: const Text('Formato completo para importar en el futuro'),
+              title: Text(l.exportJsonLabel),
+              subtitle: Text(l.exportJsonDesc),
               onTap: () { Navigator.pop(context); _exportData('json'); },
             ),
             const SizedBox(height: 8),
@@ -579,6 +589,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _syncCalendar() async {
+    final l = AppLocalizations.of(context);
     final concerts = ref.read(concertsProvider).asData?.value ?? [];
     final upcoming = concerts
         .where((c) => !c.isPastConcert)
@@ -586,8 +597,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     if (upcoming.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No tienes conciertos próximos para añadir'),
+        SnackBar(
+          content: Text(l.noUpcomingConcertsToSync),
         ),
       );
       return;
@@ -617,19 +628,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          added == 0
-              ? 'No se pudo añadir ningún evento'
-              : '$added concierto${added > 1 ? 's' : ''} añadido${added > 1 ? 's' : ''} al calendario',
+          added == 0 ? l.calendarNoEventsAdded : l.calendarEventsAdded(added),
         ),
       ),
     );
   }
 
   Future<void> _clearCache() async {
+    final l = AppLocalizations.of(context);
     await DefaultCacheManager().emptyCache();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Caché de imágenes limpiada')),
+      SnackBar(content: Text(l.cacheCleared)),
     );
   }
 
@@ -643,10 +653,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       builder: (ctx) => SimpleDialog(
         title: Text(l.appearanceSection),
         children: [
-          _ThemeOption(Icons.brightness_auto, 'Por defecto del sistema',
+          _ThemeOption(Icons.brightness_auto, l.themeSystemDefault,
               ThemeMode.system, current),
-          _ThemeOption(Icons.dark_mode, 'Oscuro', ThemeMode.dark, current),
-          _ThemeOption(Icons.light_mode, 'Claro', ThemeMode.light, current),
+          _ThemeOption(Icons.dark_mode, l.themeDark, ThemeMode.dark, current),
+          _ThemeOption(Icons.light_mode, l.themeLight, ThemeMode.light, current),
         ]
             .map(
               (opt) => SimpleDialogOption(
@@ -728,6 +738,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -782,7 +793,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     title: Text(entry.label,
                         style: const TextStyle(fontWeight: FontWeight.w600)),
                     subtitle: Text(
-                      '${entry.steps.length} pasos',
+                      l.tutorialStepsCount(entry.steps.length),
                       style: TextStyle(
                         fontSize: 12,
                         color: cs.onSurface.withValues(alpha: 0.45),
@@ -814,6 +825,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Scaffold(
       appBar: AppBar(title: Text(l.settingsTitle)),
       body: ListView(
+        padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
         children: [
           // ── Cuenta ────────────────────────────────────────────────────────
           _SectionHeader(title: l.accountSection),
@@ -827,7 +839,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const Divider(height: 1, indent: 56),
           ListTile(
             leading: const Icon(Icons.email_outlined),
-            title: const Text('Email'),
+            title: Text(l.emailLabel),
             subtitle: Text(_auth.user?.email ?? '—'),
             trailing: const Icon(Icons.chevron_right),
             onTap: _changeEmail,
@@ -843,18 +855,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ListTile(
             leading: const Icon(Icons.delete_forever_outlined,
                 color: Colors.redAccent),
-            title: const Text('Eliminar cuenta',
-                style: TextStyle(color: Colors.redAccent)),
+            title: Text(l.deleteAccountButton,
+                style: const TextStyle(color: Colors.redAccent)),
             trailing: const Icon(Icons.chevron_right, color: Colors.redAccent),
             onTap: _deleteAccount,
           ),
 
           // ── Notificaciones ────────────────────────────────────────────────
-          const _SectionHeader(title: 'Notificaciones'),
+          _SectionHeader(title: l.notificationsLabel),
           SwitchListTile(
             secondary: const Icon(Icons.people_outline),
-            title: const Text('Actividad de amigos'),
-            subtitle: const Text('Cuando un amigo añade un concierto'),
+            title: Text(l.friendActivityNotifTitle),
+            subtitle: Text(l.friendActivityNotifDesc),
             value: _notifFriends,
             activeThumbColor: const Color(0xFFE53935),
             onChanged: (v) {
@@ -865,8 +877,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const Divider(height: 1, indent: 56),
           SwitchListTile(
             secondary: const Icon(Icons.local_fire_department_outlined),
-            title: const Text('Recomendaciones'),
-            subtitle: const Text('Conciertos sugeridos basados en tus gustos'),
+            title: Text(l.recommendationsNotifTitle),
+            subtitle: Text(l.recommendationsNotifDesc),
             value: _notifRecs,
             activeThumbColor: const Color(0xFFE53935),
             onChanged: (v) {
@@ -890,16 +902,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
             title: Text(l.appearanceSection),
-            subtitle: Text(_themeName(ref.watch(themeProvider))),
+            subtitle: Text(_themeName(l, ref.watch(themeProvider))),
             trailing: const Icon(Icons.chevron_right),
             onTap: _changeTheme,
           ),
           const Divider(height: 1, indent: 56),
           ListTile(
             leading: const Icon(Icons.palette_outlined),
-            title: const Text('Paleta de color'),
+            title: Text(l.colorPaletteLabel),
             subtitle: Text(
-              ref.watch(themePackProvider).name,
+              ref.watch(themePackProvider).localizedName(l),
               style: TextStyle(color: ref.watch(themePackProvider).previewPrimary),
             ),
             trailing: Row(
@@ -916,8 +928,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const Divider(height: 1, indent: 56),
           SwitchListTile(
             secondary: const Icon(Icons.music_note_outlined),
-            title: const Text('Sonido de inicio'),
-            subtitle: const Text('Ambiente de público al abrir la app'),
+            title: Text(l.splashSoundLabel),
+            subtitle: Text(l.splashSoundDesc),
             value: _splashSound,
             activeThumbColor: const Color(0xFFE53935),
             onChanged: (v) {
@@ -927,14 +939,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
 
           // ── Mis datos ─────────────────────────────────────────────────────
-          const _SectionHeader(title: 'Mis datos'),
+          _SectionHeader(title: l.myDataSectionTitle),
           ListTile(
             leading: const Icon(Icons.flag_rounded, color: Color(0xFFE53935)),
-            title: const Text('Meta anual de conciertos'),
+            title: Text(l.annualGoalTitle),
             subtitle: Text(
               _annualGoal != null
-                  ? 'Este año: $_annualGoal conciertos'
-                  : 'Sin meta configurada',
+                  ? l.annualGoalSubtitleSet(_annualGoal!)
+                  : l.annualGoalSubtitleUnset,
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: _editAnnualGoal,
@@ -943,8 +955,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ListTile(
             leading: const Icon(Icons.download_rounded,
                 color: Color(0xFF43A047)),
-            title: const Text('Exportar mis conciertos'),
-            subtitle: const Text('CSV o JSON — ábrelo en Excel o guárdalo'),
+            title: Text(l.exportConcertsLabel),
+            subtitle: Text(l.exportConcertsDesc),
             trailing: const Icon(Icons.chevron_right),
             onTap: _showExportPicker,
           ),
@@ -952,9 +964,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ListTile(
             leading: const Icon(Icons.calendar_today_outlined,
                 color: Color(0xFF1E88E5)),
-            title: const Text('Sincronizar con el calendario'),
-            subtitle:
-                const Text('Añade tus próximos conciertos al calendario del móvil'),
+            title: Text(l.syncCalendarLabel),
+            subtitle: Text(l.syncCalendarDesc),
             trailing: const Icon(Icons.chevron_right),
             onTap: _syncCalendar,
           ),
@@ -962,8 +973,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ListTile(
             leading: const Icon(Icons.cleaning_services_outlined,
                 color: Color(0xFFFFB300)),
-            title: const Text('Limpiar caché de imágenes'),
-            subtitle: const Text('Libera espacio del almacenamiento'),
+            title: Text(l.clearCacheLabel),
+            subtitle: Text(l.clearCacheDesc),
             trailing: const Icon(Icons.chevron_right),
             onTap: _clearCache,
           ),
@@ -979,7 +990,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
 
           // ── Soporte ───────────────────────────────────────────────────────
-          const _SectionHeader(title: 'Soporte'),
+          _SectionHeader(title: l.supportSectionTitle),
           ListTile(
             leading: Container(
               width: 36,
@@ -994,11 +1005,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 size: 20,
               ),
             ),
-            title: const Text('Reportar incidencia'),
+            title: Text(l.reportIssueLabel),
             subtitle: Text(
               JiraService.isConfigured
-                  ? 'Envía un bug, sugerencia o comentario'
-                  : 'Integración Jira no configurada — rellena el .env',
+                  ? l.reportIssueDesc
+                  : l.jiraNotConfigured,
               style: JiraService.isConfigured
                   ? null
                   : const TextStyle(color: Colors.orange, fontSize: 12),
@@ -1023,6 +1034,7 @@ class _ExportingDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -1039,19 +1051,19 @@ class _ExportingDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 20),
-            const Expanded(
+            Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Preparando exportación…',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                    l.exportingDialogTitle,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Cargando fotos de cada concierto',
-                    style: TextStyle(fontSize: 12, color: Colors.white54),
+                    l.exportingDialogSubtitle,
+                    style: const TextStyle(fontSize: 12, color: Colors.white54),
                   ),
                 ],
               ),
@@ -1065,14 +1077,14 @@ class _ExportingDialog extends StatelessWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-String _themeName(ThemeMode mode) {
+String _themeName(AppLocalizations l, ThemeMode mode) {
   switch (mode) {
     case ThemeMode.light:
-      return 'Claro';
+      return l.themeLight;
     case ThemeMode.dark:
-      return 'Oscuro';
+      return l.themeDark;
     case ThemeMode.system:
-      return 'Por defecto del sistema';
+      return l.themeSystemDefault;
   }
 }
 
@@ -1095,9 +1107,9 @@ class _ProBadge extends StatelessWidget {
         color: const Color(0xFF7C3AED).withValues(alpha: .12),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: const Text(
-        'Pro',
-        style: TextStyle(
+      child: Text(
+        AppLocalizations.of(context).proBadgeLabel,
+        style: const TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           color: Color(0xFF7C3AED),

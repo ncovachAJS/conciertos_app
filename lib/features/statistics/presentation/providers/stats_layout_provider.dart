@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:conciertos_app/features/auth/presentation/providers/current_user_provider.dart';
 import '../../data/stats_layout_service.dart';
 import '../../domain/stats_section.dart';
 
@@ -7,7 +8,10 @@ class StatsLayoutNotifier extends AsyncNotifier<List<StatsSection>> {
   final _service = StatsLayoutService();
 
   @override
-  Future<List<StatsSection>> build() => _service.load();
+  Future<List<StatsSection>> build() {
+    ref.watch(currentUserIdProvider);
+    return _service.load();
+  }
 
   Future<void> reorder(int oldIndex, int newIndex) async {
     final current = state.asData?.value;

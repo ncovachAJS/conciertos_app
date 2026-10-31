@@ -59,6 +59,11 @@ class _ConcertsAppState extends ConsumerState<ConcertsApp>
       ],
       supportedLocales: const [Locale('es'), Locale('en')],
       routerConfig: appRouter,
+      builder: (context, child) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: child,
+      ),
     );
   }
 }

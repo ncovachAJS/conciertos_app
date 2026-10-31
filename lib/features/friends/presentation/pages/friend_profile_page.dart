@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -96,7 +97,8 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
       if (mounted) {
         setState(() {
           _friendUpcoming = results[0] as List<Concert>;
-          _friendAchievements = AchievementsEngine.compute(results[1] as UserStats);
+          _friendAchievements = AchievementsEngine.compute(
+              AppLocalizations.of(context), results[1] as UserStats);
           _friendAllConcerts = results[2] as List<Concert>;
         });
       }
@@ -130,7 +132,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
       ),
       body: concertsAsync.when(
         loading: () => const GenericPageSkeleton(itemCount: 5, withHeader: true),
-        error: (_, __) => Center(child: Text(l.error)),
+        error: (_, _) => Center(child: Text(l.error)),
         data: (allConcerts) {
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
@@ -156,7 +158,12 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
           final stats = _Stats(past);
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              0,
+              20,
+              40 + floatingNavBarClearance(context),
+            ),
             children: [
               // ── Cabecera de perfil ─────────────────────────────────────
               _ProfileHeader(friend: widget.friend, cs: cs),
@@ -172,7 +179,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                   },
                 ),
                 icon: const Icon(Icons.compare_arrows_rounded),
-                label: const Text('Comparar estadísticas'),
+                label: Text(l.compareStatsButton),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(44),
                 ),
@@ -188,7 +195,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
               // ── Próximos conciertos propios del amigo ─────────────────
               _SectionTitle(
                 icon: Icons.calendar_month_rounded,
-                title: 'PRÓXIMOS CONCIERTOS DE ${widget.friend.name.toUpperCase().split(' ').first}',
+                title: l.friendUpcomingTitle(widget.friend.name.toUpperCase().split(' ').first),
                 color: Colors.deepPurpleAccent,
               ),
               const SizedBox(height: 12),
@@ -198,9 +205,9 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
-                    'No tiene conciertos próximos',
+                    l.friendNoUpcoming,
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.4),
+                      color: cs.onSurface.withValues(alpha: 0.4),
                       fontSize: 14,
                     ),
                   ),
@@ -224,8 +231,8 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                         children: [
                           Text(
                             _upcomingExpanded
-                                ? 'Ver menos'
-                                : 'Ver ${_friendUpcoming.length - _upcomingCollapsedCount} más',
+                                ? l.onThisDaySeeLess
+                                : l.onThisDaySeeMore(_friendUpcoming.length - _upcomingCollapsedCount),
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -256,7 +263,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                 if (upcoming.isNotEmpty) ...[
                   _SectionTitle(
                     icon: Icons.people_rounded,
-                    title: 'PRÓXIMOS CONCIERTOS JUNTOS',
+                    title: l.upcomingTogetherTitle,
                     color: Colors.green,
                   ),
                   const SizedBox(height: 12),
@@ -268,7 +275,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
                 if (past.isNotEmpty) ...[
                   _SectionTitle(
                     icon: Icons.history_rounded,
-                    title: 'NÚMEROS JUNTOS',
+                    title: l.numbersTogetherTitle,
                     color: Colors.orange,
                   ),
                   const SizedBox(height: 16),
@@ -288,7 +295,7 @@ class _FriendProfilePageState extends ConsumerState<FriendProfilePage> {
 
                   _SectionTitle(
                     icon: Icons.queue_music_rounded,
-                    title: 'HISTORIAL',
+                    title: l.artistHistory,
                     color: Colors.tealAccent,
                   ),
                   const SizedBox(height: 12),
@@ -345,7 +352,7 @@ class _ProfileHeader extends StatelessWidget {
                   friend.email,
                   style: TextStyle(
                     fontSize: 13,
-                    color: cs.onSurface.withOpacity(0.5),
+                    color: cs.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -367,6 +374,7 @@ class _EmptyShared extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
@@ -374,24 +382,24 @@ class _EmptyShared extends StatelessWidget {
           Icon(
             Icons.music_off_rounded,
             size: 64,
-            color: cs.onSurface.withOpacity(0.18),
+            color: cs.onSurface.withValues(alpha: 0.18),
           ),
           const SizedBox(height: 16),
           Text(
-            'Aún no habéis ido a ningún\nconcierto juntos.',
+            l.emptySharedLine1,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15,
-              color: cs.onSurface.withOpacity(0.45),
+              color: cs.onSurface.withValues(alpha: 0.45),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            '¡Etiquetad vuestros próximos directos!',
+            l.emptySharedLine2,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
-              color: cs.onSurface.withOpacity(0.3),
+              color: cs.onSurface.withValues(alpha: 0.3),
             ),
           ),
         ],
@@ -491,7 +499,7 @@ class _StatCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: data.color.withOpacity(.15),
+              color: data.color.withValues(alpha: .15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(data.icon, color: data.color, size: 20),
@@ -508,7 +516,7 @@ class _StatCard extends StatelessWidget {
             data.label,
             style: TextStyle(
               color:
-                  Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -530,7 +538,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.54);
+    final c = color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54);
     return Row(
       children: [
         Icon(icon, color: c, size: 18),
@@ -596,7 +604,7 @@ class _HorizontalBars extends StatelessWidget {
                           Container(
                             height: 8,
                             decoration: BoxDecoration(
-                              color: cs.onSurface.withOpacity(0.1),
+                              color: cs.onSurface.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -661,7 +669,7 @@ class _ConcertList extends StatelessWidget {
                 height: 1,
                 indent: 16,
                 endIndent: 16,
-                color: cs.onSurface.withOpacity(0.08),
+                color: cs.onSurface.withValues(alpha: 0.08),
               ),
             _ConcertRow(concert: concerts[i], cs: cs, accent: accent),
           ],
@@ -679,7 +687,9 @@ class _ConcertRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('d MMM yyyy', 'es').format(concert.date);
+    final dateStr = DateFormat('d MMM yyyy',
+            Localizations.localeOf(context).languageCode)
+        .format(concert.date);
     final subtitle =
         [concert.venue, concert.city].where((s) => s.isNotEmpty).join(' · ');
 
@@ -698,7 +708,7 @@ class _ConcertRow extends StatelessWidget {
                   width: 48,
                   height: 48,
                   fit: BoxFit.cover,
-                  errorWidget: (_, __, ___) => _PlaceholderIcon(cs: cs),
+                  errorWidget: (_, _, _) => _PlaceholderIcon(cs: cs),
                 ),
               )
             else
@@ -723,7 +733,7 @@ class _ConcertRow extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 12,
-                        color: cs.onSurface.withOpacity(0.5),
+                        color: cs.onSurface.withValues(alpha: 0.5),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -740,7 +750,7 @@ class _ConcertRow extends StatelessWidget {
                   dateStr,
                   style: TextStyle(
                     fontSize: 11,
-                    color: cs.onSurface.withOpacity(0.45),
+                    color: cs.onSurface.withValues(alpha: 0.45),
                   ),
                 ),
                 if (concert.rating > 0) ...[
@@ -781,7 +791,7 @@ class _ConcertRow extends StatelessWidget {
             Icon(
               Icons.chevron_right_rounded,
               size: 18,
-              color: cs.onSurface.withOpacity(0.3),
+              color: cs.onSurface.withValues(alpha: 0.3),
             ),
           ],
         ),
@@ -800,12 +810,12 @@ class _PlaceholderIcon extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: cs.onSurface.withOpacity(0.06),
+        color: cs.onSurface.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(
         Icons.music_note_rounded,
-        color: cs.onSurface.withOpacity(0.3),
+        color: cs.onSurface.withValues(alpha: 0.3),
         size: 24,
       ),
     );

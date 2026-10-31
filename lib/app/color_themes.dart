@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Modelo
 // ─────────────────────────────────────────────────────────────────────────────
@@ -31,6 +33,20 @@ class ThemePack {
     required this.light,
     required this.dark,
   });
+}
+
+extension ThemePackL10n on ThemePack {
+  /// Nombre de la paleta traducido; cae al nombre base si el id no se conoce.
+  String localizedName(AppLocalizations l) => switch (id) {
+        'escenario' => l.themeNameEscenario,
+        'vinilo' => l.themeNameVinilo,
+        'festival' => l.themeNameFestival,
+        'neon_punk' => l.themeNameNeonPunk,
+        'acustico' => l.themeNameAcustico,
+        'backstage' => l.themeNameBackstage,
+        'jazz_club' => l.themeNameJazzClub,
+        _ => name,
+      };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

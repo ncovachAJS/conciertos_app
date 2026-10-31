@@ -6,9 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../core/config/pro_config.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../notifications/presentation/controllers/notifications_controller.dart';
 import '../../../../shared/widgets/pro_paywall_sheet.dart';
 
@@ -69,7 +69,7 @@ class DashboardHeader extends ConsumerWidget {
         final taglineWidget = Text(
           l.tagline,
           style: TextStyle(
-            color: cs.onSurface.withOpacity(0.54),
+            color: cs.onSurface.withValues(alpha: 0.54),
             fontSize: isTablet ? 15 : 14,
           ),
         );
@@ -83,7 +83,7 @@ class DashboardHeader extends ConsumerWidget {
                 width: 43,
                 height: 43,
                 decoration: BoxDecoration(
-                  color: cs.onSurface.withOpacity(0.08),
+                  color: cs.onSurface.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -92,7 +92,7 @@ class DashboardHeader extends ConsumerWidget {
                       : Icons.notifications_outlined,
                   color: badge > 0
                       ? const Color(0xFFE53935)
-                      : cs.onSurface.withOpacity(0.7),
+                      : cs.onSurface.withValues(alpha: 0.7),
                   size: 24,
                 ),
               ),
@@ -130,7 +130,7 @@ class DashboardHeader extends ConsumerWidget {
             decoration: BoxDecoration(
               color: const Color(0xFFE53935),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2),
             ),
             clipBehavior: Clip.antiAlias,
             child: avatarUrl != null && avatarUrl.isNotEmpty
@@ -139,7 +139,7 @@ class DashboardHeader extends ConsumerWidget {
                     fit: BoxFit.cover,
                     memCacheWidth: 120,
                     fadeInDuration: Duration.zero,
-                    errorWidget: (_, __, ___) => const Icon(
+                    errorWidget: (_, _, _) => const Icon(
                       Icons.person_outline,
                       color: Colors.white,
                       size: 24,
@@ -151,7 +151,7 @@ class DashboardHeader extends ConsumerWidget {
 
         final tuneWidget = GestureDetector(
           onTap: () async {
-            final isPro = AuthController.instance.user?.isPro ?? false;
+            final isPro = ProConfig.isUserPro(AuthController.instance.user?.isPro);
             if (!isPro) {
               await ProPaywallSheet.showPaywall(context);
               return;
@@ -161,7 +161,7 @@ class DashboardHeader extends ConsumerWidget {
           child: Icon(
             Icons.tune_rounded,
             size: 20,
-            color: cs.onSurface.withOpacity(0.35),
+            color: cs.onSurface.withValues(alpha: 0.35),
           ),
         );
 
@@ -216,7 +216,7 @@ class DashboardHeader extends ConsumerWidget {
               Text(
                 l.readyForNext,
                 style: TextStyle(
-                  color: cs.onSurface.withOpacity(0.6),
+                  color: cs.onSurface.withValues(alpha: 0.6),
                   fontSize: 15,
                 ),
               ),
@@ -272,7 +272,7 @@ class DashboardHeader extends ConsumerWidget {
             Text(
               l.readyForNext,
               style: TextStyle(
-                color: cs.onSurface.withOpacity(0.6),
+                color: cs.onSurface.withValues(alpha: 0.6),
                 fontSize: 15,
               ),
             ),

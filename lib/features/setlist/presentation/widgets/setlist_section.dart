@@ -48,7 +48,7 @@ class _SetlistSectionState extends State<SetlistSection> {
                     style: TextStyle(
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.54),
+                      ).colorScheme.onSurface.withValues(alpha: 0.54),
                       fontSize: 13,
                     ),
                   ),
@@ -60,10 +60,10 @@ class _SetlistSectionState extends State<SetlistSection> {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                'Datos de setlist.fm',
+                AppLocalizations.of(context).setlistDataFrom,
                 style: TextStyle(
                   fontSize: 10,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                 ),
               ),
             ),
@@ -80,7 +80,7 @@ class _SetlistSectionState extends State<SetlistSection> {
                   style: TextStyle(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.7),
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                     fontSize: 15,
                   ),
                 ),
@@ -137,7 +137,7 @@ class _SetlistContent extends StatelessWidget {
       Text(
         '${setlist.venue} · ${setlist.city}',
         style: TextStyle(
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           fontSize: 14,
         ),
       ),
@@ -199,9 +199,9 @@ class _SetHeader extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFFE53935).withOpacity(.15),
+          color: const Color(0xFFE53935).withValues(alpha: .15),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFE53935).withOpacity(.4)),
+          border: Border.all(color: const Color(0xFFE53935).withValues(alpha: .4)),
         ),
         child: Text(
           name.toUpperCase(),
@@ -240,7 +240,7 @@ class _SongTile extends StatelessWidget {
                     size: 20,
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.38),
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
                   )
                 : Text(
                     '$number',
@@ -263,7 +263,7 @@ class _SongTile extends StatelessWidget {
                     color: song.isTape
                         ? Theme.of(
                             context,
-                          ).colorScheme.onSurface.withOpacity(0.54)
+                          ).colorScheme.onSurface.withValues(alpha: 0.54)
                         : Theme.of(context).colorScheme.onSurface,
                     fontStyle: song.isTape
                         ? FontStyle.italic
@@ -278,7 +278,7 @@ class _SongTile extends StatelessWidget {
                       style: TextStyle(
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.38),
+                        ).colorScheme.onSurface.withValues(alpha: 0.38),
                         fontSize: 12,
                       ),
                     ),
@@ -312,7 +312,7 @@ class _SongTile extends StatelessWidget {
                       style: TextStyle(
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.38),
+                        ).colorScheme.onSurface.withValues(alpha: 0.38),
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
                       ),

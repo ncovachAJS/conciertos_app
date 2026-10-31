@@ -11,6 +11,8 @@ import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/utils/month_names.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -67,6 +69,7 @@ class _YearSummary {
   });
 
   static _YearSummary from(
+    AppLocalizations l,
     List<Concert> concerts,
     int year,
     String currentUserId,
@@ -162,11 +165,6 @@ class _YearSummary {
         ? null
         : monthCounts.entries.reduce((a, b) => a.value >= b.value ? a : b);
 
-    const monthNames = [
-      '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-    ];
-
     final rated = c.where((x) => x.hasDetailedRating).toList();
     final avg = rated.isEmpty
         ? 0.0
@@ -190,7 +188,7 @@ class _YearSummary {
       topCity: topKey(cityMap),
       topCityCount: topVal(cityMap),
       topVenue: topKey(venueMap),
-      topMonth: topMonthEntry == null ? '—' : monthNames[topMonthEntry.key],
+      topMonth: topMonthEntry == null ? '—' : monthName(l, topMonthEntry.key),
       topMonthIdx: topMonthEntry?.key ?? 0,
       topMonthCount: topMonthEntry?.value ?? 0,
       avgRating: avg,
@@ -268,6 +266,7 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
   }
 
   Future<void> _share() async {
+    final l = AppLocalizations.of(context);
     setState(() => _sharing = true);
     try {
       await Future.delayed(80.ms);
@@ -282,7 +281,7 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
       await file.writeAsBytes(bytes);
       await SharePlus.instance.share(ShareParams(
         files: [XFile(file.path)],
-        text: '🎸 Mi Wrapped $_selectedYear | La Vida en Directo',
+        text: l.wrappedShareText(_selectedYear),
       ));
     } finally {
       if (mounted) setState(() => _sharing = false);
@@ -337,11 +336,11 @@ class _AnnualSummaryPageState extends ConsumerState<AnnualSummaryPage> {
       backgroundColor: Colors.black,
       body: concertsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFE53935))),
-        error: (err, _) => const Center(child: Text('Error cargando conciertos', style: TextStyle(color: Colors.white54))),
+        error: (err, _) => Center(child: Text(AppLocalizations.of(context).wrappedLoadError, style: const TextStyle(color: Colors.white54))),
         data: (concerts) {
           final years = _availableYears(concerts);
           final currentUserId = AuthController.instance.user?.id ?? '';
-          final summary = _YearSummary.from(concerts, _selectedYear, currentUserId);
+          final summary = _YearSummary.from(AppLocalizations.of(context), concerts, _selectedYear, currentUserId);
           // Solo fotos de recuerdos subidas por el usuario, no portadas de concierto.
           final allImgs = _photosForYear(_selectedYear);
           final slides = _buildSlides(summary, years, allImgs);
@@ -521,6 +520,7 @@ class _IntroSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return _SlideBase(
       colors: const [Color(0xFF0D0005), Color(0xFF3A0010), Color(0xFF1A000A)],
       imageUrl: bgImageUrl,
@@ -570,7 +570,7 @@ class _IntroSlide extends StatelessWidget {
               const SizedBox(height: 24),
 
               Text(
-                'Tu año\nen conciertos',
+                l.wrappedIntroTitle,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 52,
@@ -598,7 +598,7 @@ class _IntroSlide extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text('Empieza', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13)),
+                  Text(l.wrappedStart, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13)),
                   const SizedBox(width: 8),
                   Icon(Icons.arrow_forward_rounded, color: Colors.white.withValues(alpha: 0.5), size: 18),
                 ],
@@ -625,6 +625,7 @@ class _TotalSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return _SlideBase(
       colors: const [Color(0xFF08001F), Color(0xFF1A0050), Color(0xFF0D0030)],
       imageUrl: bgImageUrl,
@@ -636,12 +637,12 @@ class _TotalSlide extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Text('Este año fuiste a', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 20, fontWeight: FontWeight.w400))
+              Text(l.wrappedTotalLead, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 20, fontWeight: FontWeight.w400))
                   .animate().fadeIn().slideY(begin: 0.3),
               const SizedBox(height: 8),
               Text('${summary.total}', style: const TextStyle(color: Colors.white, fontSize: 120, fontWeight: FontWeight.w900, height: 1, letterSpacing: -4))
                   .animate(delay: 150.ms).fadeIn().scale(begin: const Offset(0.7, 0.7), curve: Curves.elasticOut, duration: 700.ms),
-              Text('conciertos', style: const TextStyle(color: Color(0xFFB39DFF), fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: 0.5))
+              Text(l.wrappedConcertsWord(summary.total), style: const TextStyle(color: Color(0xFFB39DFF), fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: 0.5))
                   .animate(delay: 300.ms).fadeIn().slideX(begin: -0.2),
               const SizedBox(height: 32),
               if (summary.total > 0) ...[
@@ -652,10 +653,10 @@ class _TotalSlide extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    summary.total >= 50 ? '🔥 ¡Año legendario!' :
-                    summary.total >= 20 ? '🎉 ¡Gran año en directo!' :
-                    summary.total >= 10 ? '👏 Muy buen año' :
-                    '🎵 Empezando fuerte',
+                    summary.total >= 50 ? l.wrappedTier50 :
+                    summary.total >= 20 ? l.wrappedTier20 :
+                    summary.total >= 10 ? l.wrappedTier10 :
+                    l.wrappedTier0,
                     style: const TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                 ).animate(delay: 500.ms).fadeIn(),
@@ -683,6 +684,7 @@ class _ArtistSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     // Si el artista proviene de conciertos compartidos no mostramos la
     // valoración (sería la del amigo, no la nuestra).
     final isShared = summary.topArtistIsShared;
@@ -703,7 +705,7 @@ class _ArtistSlide extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Text('Tu artista del año', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18, fontWeight: FontWeight.w400))
+              Text(l.wrappedArtistTitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18, fontWeight: FontWeight.w400))
                   .animate().fadeIn(),
               const SizedBox(height: 16),
               Text(
@@ -727,7 +729,7 @@ class _ArtistSlide extends StatelessWidget {
                       Icon(Icons.people_rounded, color: Colors.white.withValues(alpha: 0.6), size: 14),
                       const SizedBox(width: 6),
                       Text(
-                        'Concierto compartido',
+                        l.wrappedSharedBadge,
                         style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     ],
@@ -735,7 +737,7 @@ class _ArtistSlide extends StatelessWidget {
                 ).animate(delay: 300.ms).fadeIn(),
                 const SizedBox(height: 16),
                 Text(
-                  times > 1 ? 'Lo viste $times veces' : 'Estuviste allí',
+                  times > 1 ? l.wrappedSeenTimes(times) : l.wrappedWasThere,
                   style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 20, fontWeight: FontWeight.w600),
                 ).animate(delay: 400.ms).fadeIn(),
               ] else ...[
@@ -767,13 +769,13 @@ class _ArtistSlide extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
-                        'Lo viste $times veces',
+                        l.wrappedSeenTimes(times),
                         style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 15),
                       ).animate(delay: 850.ms).fadeIn(),
                     ),
                 ] else ...[
                   Text(
-                    times > 1 ? 'Lo viste $times veces' : 'Fue especial',
+                    times > 1 ? l.wrappedSeenTimes(times) : l.wrappedWasSpecial,
                     style: const TextStyle(color: Color(0xFF64B5F6), fontSize: 20, fontWeight: FontWeight.w600),
                   ).animate(delay: 350.ms).fadeIn(),
                 ],
@@ -805,6 +807,7 @@ class _VarietySlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return _SlideBase(
       colors: const [Color(0xFF000F0F), Color(0xFF00352A), Color(0xFF001A15)],
       imageUrl: bgImageUrl,
@@ -816,13 +819,13 @@ class _VarietySlide extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Text('Nunca te cansas', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
+              Text(l.wrappedVarietyTitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
                   .animate().fadeIn(),
               const SizedBox(height: 32),
               // Artists stat
               _BigStat(
                 value: '${summary.uniqueArtists}',
-                label: 'artistas distintos',
+                label: l.wrappedArtistsLabel(summary.uniqueArtists),
                 color: const Color(0xFF4DB6AC),
                 delay: 150.ms,
               ),
@@ -830,7 +833,7 @@ class _VarietySlide extends StatelessWidget {
               // Cities stat
               _BigStat(
                 value: '${summary.uniqueCities}',
-                label: summary.uniqueCities == 1 ? 'ciudad' : 'ciudades diferentes',
+                label: l.wrappedCitiesLabel(summary.uniqueCities),
                 color: const Color(0xFF80CBC4),
                 delay: 350.ms,
               ),
@@ -838,7 +841,7 @@ class _VarietySlide extends StatelessWidget {
                 const SizedBox(height: 28),
                 _BigStat(
                   value: '${summary.festivals}',
-                  label: summary.festivals == 1 ? 'festival' : 'festivales',
+                  label: l.wrappedFestivalsLabel(summary.festivals),
                   color: const Color(0xFFB2DFDB),
                   delay: 500.ms,
                 ),
@@ -890,6 +893,7 @@ class _CitySlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return _SlideBase(
       colors: const [Color(0xFF100500), Color(0xFF3D1200), Color(0xFF1A0800)],
       imageUrl: bgImageUrl,
@@ -901,7 +905,7 @@ class _CitySlide extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Text('Tu ciudad favorita', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
+              Text(l.wrappedCityTitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
                   .animate().fadeIn(),
               const SizedBox(height: 16),
               Text('📍', style: const TextStyle(fontSize: 48))
@@ -913,7 +917,7 @@ class _CitySlide extends StatelessWidget {
               ).animate(delay: 200.ms).fadeIn().slideY(begin: 0.4, curve: Curves.easeOutCubic),
               const SizedBox(height: 16),
               Text(
-                summary.topCityCount == 1 ? '1 concierto' : '${summary.topCityCount} conciertos',
+                '${summary.topCityCount} ${l.wrappedConcertsWord(summary.topCityCount)}',
                 style: const TextStyle(color: Color(0xFFFFAB76), fontSize: 20, fontWeight: FontWeight.w600),
               ).animate(delay: 400.ms).fadeIn(),
               const Spacer(),
@@ -941,8 +945,7 @@ class _MonthSlide extends StatelessWidget {
   Widget build(BuildContext context) {
     final counts = summary.monthCounts;
     final maxVal = counts.values.fold(0, math.max);
-
-    const monthShort = ['', 'E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+    final l = AppLocalizations.of(context);
 
     return _SlideBase(
       colors: const [Color(0xFF100800), Color(0xFF3D2200), Color(0xFF1E1000)],
@@ -955,7 +958,7 @@ class _MonthSlide extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Text('Tu mes más activo', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
+              Text(l.wrappedMonthTitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
                   .animate().fadeIn(),
               const SizedBox(height: 12),
               Text(
@@ -963,7 +966,7 @@ class _MonthSlide extends StatelessWidget {
                 style: const TextStyle(color: Colors.white, fontSize: 56, fontWeight: FontWeight.w900, height: 1, letterSpacing: -1),
               ).animate(delay: 150.ms).fadeIn().slideY(begin: 0.3, curve: Curves.easeOutCubic),
               const SizedBox(height: 8),
-              Text('${summary.topMonthCount} ${summary.topMonthCount == 1 ? "concierto" : "conciertos"}',
+              Text('${summary.topMonthCount} ${l.wrappedConcertsWord(summary.topMonthCount)}',
                   style: const TextStyle(color: Color(0xFFFFD180), fontSize: 18, fontWeight: FontWeight.w600))
                   .animate(delay: 300.ms).fadeIn(),
               const SizedBox(height: 40),
@@ -994,7 +997,7 @@ class _MonthSlide extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              monthShort[month],
+                              monthName(l, month).substring(0, 1).toUpperCase(),
                               style: TextStyle(
                                 color: isTop ? const Color(0xFFFFD180) : Colors.white.withValues(alpha: 0.3),
                                 fontSize: 9,
@@ -1032,6 +1035,7 @@ class _RatingSlide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rating = summary.avgRating;
+    final l = AppLocalizations.of(context);
     return _SlideBase(
       colors: const [Color(0xFF0F0C00), Color(0xFF3D3000), Color(0xFF1F1800)],
       imageUrl: bgImageUrl,
@@ -1043,7 +1047,7 @@ class _RatingSlide extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
-              Text('Tu valoración media', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
+              Text(l.wrappedRatingTitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
                   .animate().fadeIn(),
               const SizedBox(height: 32),
               // Stars
@@ -1064,7 +1068,7 @@ class _RatingSlide extends StatelessWidget {
                 style: const TextStyle(color: Colors.white, fontSize: 96, fontWeight: FontWeight.w900, height: 1, letterSpacing: -3),
               ).animate(delay: 500.ms).fadeIn().scale(begin: const Offset(0.6, 0.6), curve: Curves.easeOutBack),
               const SizedBox(height: 8),
-              Text('sobre 5', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 18, fontWeight: FontWeight.w400))
+              Text(l.wrappedOutOf5, style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 18, fontWeight: FontWeight.w400))
                   .animate(delay: 600.ms).fadeIn(),
               const Spacer(),
             ],
@@ -1089,6 +1093,7 @@ class _PhotosSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final photos = imageUrls.take(9).toList();
     // Slight rotation angles for each photo cell
     const angles = [-0.03, 0.02, -0.01, 0.04, -0.02, 0.03, -0.01, 0.02, -0.03];
@@ -1102,7 +1107,7 @@ class _PhotosSlide extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Tus memorias', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 18, fontWeight: FontWeight.w400))
+              Text(l.wrappedPhotosTitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 18, fontWeight: FontWeight.w400))
                   .animate().fadeIn(),
               const SizedBox(height: 4),
               Text('$year', style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900))
@@ -1148,7 +1153,7 @@ class _PhotosSlide extends StatelessWidget {
 
               const SizedBox(height: 16),
               Text(
-                '${imageUrls.length} ${imageUrls.length == 1 ? "recuerdo" : "recuerdos"} este año',
+                l.wrappedMemoriesCount(imageUrls.length),
                 style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 13),
               ).animate(delay: 800.ms).fadeIn(),
             ],
@@ -1181,6 +1186,7 @@ class _ClosingSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return _SlideBase(
       colors: const [Color(0xFF0D0005), Color(0xFF2D0010), Color(0xFF1A000A)],
       onPrev: onPrev,
@@ -1190,7 +1196,7 @@ class _ClosingSlide extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Tu resumen', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
+              Text(l.wrappedClosingTitle, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 18))
                   .animate().fadeIn(),
               Text('${summary.year}', style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900))
                   .animate(delay: 100.ms).fadeIn(),
@@ -1217,7 +1223,7 @@ class _ClosingSlide extends StatelessWidget {
                   icon: sharing
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.ios_share_rounded),
-                  label: Text(sharing ? 'Preparando...' : 'Compartir mi Wrapped',
+                  label: Text(sharing ? l.wrappedPreparing : l.wrappedShareButton,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ).animate(delay: 400.ms).fadeIn().slideY(begin: 0.3),
@@ -1239,6 +1245,7 @@ class _ShareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
@@ -1270,7 +1277,7 @@ class _ShareCard extends StatelessWidget {
 
           // Big number
           Text('${summary.total}', style: const TextStyle(color: Colors.white, fontSize: 80, fontWeight: FontWeight.w900, height: 1, letterSpacing: -2)),
-          const Text('conciertos', style: TextStyle(color: Color(0xFFE53935), fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+          Text(l.wrappedConcertsWord(summary.total), style: const TextStyle(color: Color(0xFFE53935), fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
 
           const SizedBox(height: 24),
           Container(height: 1, color: Colors.white.withValues(alpha: 0.08)),
@@ -1278,15 +1285,15 @@ class _ShareCard extends StatelessWidget {
 
           // Stats rows
           if (summary.topArtist != '—') ...[
-            _Row(emoji: '🎤', label: 'Artista favorito', value: summary.topArtist),
+            _Row(emoji: '🎤', label: l.wrappedFavArtist, value: summary.topArtist),
             const SizedBox(height: 12),
           ],
           if (summary.topCity != '—') ...[
-            _Row(emoji: '🏙️', label: 'Ciudad favorita', value: summary.topCity),
+            _Row(emoji: '🏙️', label: l.wrappedFavCity, value: summary.topCity),
             const SizedBox(height: 12),
           ],
           if (summary.topMonth != '—')
-            _Row(emoji: '📅', label: 'Mes más activo', value: summary.topMonth),
+            _Row(emoji: '📅', label: l.wrappedActiveMonth, value: summary.topMonth),
 
           const SizedBox(height: 20),
           Container(height: 1, color: Colors.white.withValues(alpha: 0.08)),
@@ -1295,12 +1302,12 @@ class _ShareCard extends StatelessWidget {
           // Bottom stats
           Row(
             children: [
-              _MiniBox(value: '${summary.uniqueArtists}', label: 'artistas'),
+              _MiniBox(value: '${summary.uniqueArtists}', label: l.wrappedMiniArtists),
               const SizedBox(width: 10),
-              _MiniBox(value: '${summary.uniqueCities}', label: 'ciudades'),
+              _MiniBox(value: '${summary.uniqueCities}', label: l.wrappedMiniCities),
               const SizedBox(width: 10),
               if (summary.avgRating > 0)
-                _MiniBox(value: summary.avgRating.toStringAsFixed(1), label: 'valoración'),
+                _MiniBox(value: summary.avgRating.toStringAsFixed(1), label: l.wrappedMiniRating),
             ],
           ),
 
@@ -1382,7 +1389,7 @@ class _WrapTeaser extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final monthsLeft = 12 - now.month; // meses que faltan hasta diciembre
-    const monthLabels = ['E','F','M','A','M','J','J','A','S','O','N','D'];
+    final l = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF07070F),
@@ -1424,7 +1431,7 @@ class _WrapTeaser extends StatelessWidget {
 
                   // Label
                   Text(
-                    'Tu año en conciertos',
+                    l.wrappedCardTitle,
                     style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 14, fontWeight: FontWeight.w500),
                   ).animate().fadeIn(),
 
@@ -1435,9 +1442,9 @@ class _WrapTeaser extends StatelessWidget {
                     text: TextSpan(
                       style: const TextStyle(fontSize: 46, fontWeight: FontWeight.w900, height: 0.95, letterSpacing: -2),
                       children: [
-                        const TextSpan(text: 'Tu ', style: TextStyle(color: Colors.white)),
+                        TextSpan(text: l.wrappedTeaserPre, style: const TextStyle(color: Colors.white)),
                         const TextSpan(text: 'Wrapped\n', style: TextStyle(color: Color(0xFFE53935))),
-                        TextSpan(text: 'del $year', style: const TextStyle(color: Colors.white)),
+                        TextSpan(text: l.wrappedTeaserYear(year), style: const TextStyle(color: Colors.white)),
                       ],
                     ),
                   ).animate(delay: 100.ms).fadeIn().slideY(begin: 0.3, curve: Curves.easeOutCubic),
@@ -1445,7 +1452,7 @@ class _WrapTeaser extends StatelessWidget {
                   const SizedBox(height: 8),
 
                   Text(
-                    'llega en diciembre',
+                    l.wrappedTeaserComing,
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white.withValues(alpha: 0.35), letterSpacing: -0.5),
                   ).animate(delay: 200.ms).fadeIn(),
 
@@ -1456,11 +1463,11 @@ class _WrapTeaser extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'PROGRESO DEL AÑO',
+                        l.wrappedTeaserProgress,
                         style: TextStyle(fontSize: 10, letterSpacing: 1.8, color: Colors.white.withValues(alpha: 0.22), fontWeight: FontWeight.w600),
                       ),
                       Text(
-                        monthsLeft == 1 ? '1 mes para diciembre' : '$monthsLeft meses para diciembre',
+                        l.wrappedTeaserMonthsLeft(monthsLeft),
                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFFFFB300)),
                       ),
                     ],
@@ -1502,7 +1509,7 @@ class _WrapTeaser extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              monthLabels[i],
+                              monthName(l, i + 1).substring(0, 1).toUpperCase(),
                               style: TextStyle(fontSize: 8, fontWeight: FontWeight.w800, color: fg),
                             ),
                           ),
@@ -1526,7 +1533,7 @@ class _WrapTeaser extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'TU HISTORIA ESTE AÑO',
+                          l.wrappedTeaserStory,
                           style: TextStyle(fontSize: 9, letterSpacing: 2, color: Colors.white.withValues(alpha: 0.22), fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 16),
@@ -1534,11 +1541,11 @@ class _WrapTeaser extends StatelessWidget {
                           imageFilter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                           child: Row(
                             children: [
-                              _TeaserStat(num: '—', label: 'conciertos'),
+                              _TeaserStat(num: '—', label: l.wrappedConcertsWord(0)),
                               Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.08), margin: const EdgeInsets.symmetric(horizontal: 18)),
-                              _TeaserStat(num: '—', label: 'artistas'),
+                              _TeaserStat(num: '—', label: l.wrappedMiniArtists),
                               Container(width: 1, height: 40, color: Colors.white.withValues(alpha: 0.08), margin: const EdgeInsets.symmetric(horizontal: 18)),
-                              _TeaserStat(num: '—', label: 'ciudades'),
+                              _TeaserStat(num: '—', label: l.wrappedMiniCities),
                             ],
                           ),
                         ),

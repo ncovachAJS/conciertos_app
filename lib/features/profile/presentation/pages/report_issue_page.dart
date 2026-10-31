@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../data/services/jira_service.dart';
+
+String _issueTypeLabel(AppLocalizations l, IssueType type) => switch (type) {
+      IssueType.bug => l.issueTypeBug,
+      IssueType.mejora => l.issueTypeImprovement,
+      IssueType.otro => l.issueTypeOther,
+    };
 
 class ReportIssuePage extends StatefulWidget {
   const ReportIssuePage({super.key});
@@ -61,28 +69,34 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reportar incidencia'),
+        title: Text(l.reportIssueLabel),
         centerTitle: false,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          24,
+          20,
+          40 + floatingNavBarClearance(context),
+        ),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Cabecera ───────────────────────────────────────────────────
-              const Text(
-                '¿Algo no funciona como esperabas?',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              Text(
+                l.reportIssueIntroTitle,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Text(
-                'Cuéntanos qué ha pasado y lo revisaremos lo antes posible.',
+                l.reportIssueIntroDesc,
                 style: TextStyle(
                     fontSize: 14,
                     color: cs.onSurface.withValues(alpha: .55),
@@ -91,17 +105,17 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
               const SizedBox(height: 28),
 
               // ── Tipo de incidencia ─────────────────────────────────────────
-              const Text(
-                'Tipo',
+              Text(
+                l.typeLabel,
                 style:
-                    TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 10),
               SegmentedButton<IssueType>(
                 segments: IssueType.values
                     .map((t) => ButtonSegment<IssueType>(
                           value: t,
-                          label: Text(t.label),
+                          label: Text(_issueTypeLabel(l, t)),
                         ))
                     .toList(),
                 selected: {_type},
@@ -118,16 +132,16 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
               const SizedBox(height: 24),
 
               // ── Título ────────────────────────────────────────────────────
-              const Text(
-                'Título',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              Text(
+                l.titleLabel,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _titleCtrl,
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
-                  hintText: 'Resumen breve del problema…',
+                  hintText: l.titleHint,
                   filled: true,
                   fillColor: cs.surfaceContainerHighest,
                   border: OutlineInputBorder(
@@ -144,7 +158,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'Escribe un título para el ticket';
+                    return l.titleRequiredError;
                   }
                   return null;
                 },
@@ -152,10 +166,10 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
               const SizedBox(height: 20),
 
               // ── Descripción ────────────────────────────────────────────────
-              const Text(
-                'Descripción',
+              Text(
+                l.descriptionLabel,
                 style:
-                    TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 10),
               TextFormField(
@@ -165,10 +179,10 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
                 textInputAction: TextInputAction.newline,
                 decoration: InputDecoration(
                   hintText: _type == IssueType.bug
-                      ? 'Describe el problema: qué hiciste, qué esperabas y qué pasó…'
+                      ? l.descBugHint
                       : _type == IssueType.mejora
-                          ? 'Explica la mejora que te gustaría ver…'
-                          : 'Escribe tu comentario o sugerencia…',
+                          ? l.descImprovementHint
+                          : l.descOtherHint,
                   filled: true,
                   fillColor: cs.surfaceContainerHighest,
                   border: OutlineInputBorder(
@@ -184,10 +198,10 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) {
-                    return 'Escribe una descripción antes de enviar';
+                    return l.descRequiredError;
                   }
                   if (v.trim().length < 10) {
-                    return 'La descripción es demasiado corta';
+                    return l.descTooShortError;
                   }
                   return null;
                 },
@@ -211,8 +225,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Se incluirá automáticamente la versión de la app, '
-                        'plataforma y tu email para poder contactarte si hace falta.',
+                        l.autoInfoNote,
                         style: TextStyle(
                             fontSize: 12,
                             color: cs.onSurface.withValues(alpha: .65),
@@ -243,15 +256,15 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              '¡Incidencia enviada! 🎉',
-                              style: TextStyle(
+                            Text(
+                              l.issueSentTitle,
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Ticket creado: $_successKey',
+                              l.ticketCreatedLabel(_successKey!),
                               style: TextStyle(
                                   fontSize: 13,
                                   color: cs.onSurface.withValues(alpha: .6)),
@@ -308,7 +321,7 @@ class _ReportIssuePageState extends State<ReportIssuePage> {
                               color: Colors.white, strokeWidth: 2),
                         )
                       : const Icon(Icons.send_rounded, size: 18),
-                  label: Text(_sending ? 'Enviando…' : 'Enviar incidencia'),
+                  label: Text(_sending ? l.sendingLabel : l.sendIssueButton),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFFE53935),
                     foregroundColor: Colors.white,

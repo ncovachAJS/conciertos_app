@@ -8,9 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../shared/widgets/shimmer_box.dart';
 import '../../../concerts/data/services/upload_service.dart';
 import '../../../friends/presentation/widgets/friend_avatar.dart';
-import '../../../friends/presentation/widgets/tag_friends_selector.dart';
 import '../../data/models/concert_photo_model.dart';
 import '../../data/services/photo_api_service.dart';
+import '../flows/add_memory_flow.dart';
 import '../pages/photo_viewer_page.dart';
 import '../../../../core/utils/cloudinary_utils.dart';
 
@@ -91,12 +91,13 @@ class _MemoriesSectionState extends State<MemoriesSection> {
           context,
         ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).photoUploadError(e.toString()))));
       } finally {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _uploading = false;
             _uploadCurrent = 0;
             _uploadTotal = 0;
           });
+        }
       }
       return;
     }
@@ -140,64 +141,8 @@ class _MemoriesSectionState extends State<MemoriesSection> {
   }
 
   // Devuelve (caption, taggedFriendIds) o null si se cancela
-  Future<(String, List<String>)?> _askCaptionAndTags(File image) {
-    final controller = TextEditingController();
-    List<String> taggedIds = [];
-
-    return showDialog<(String, List<String>)>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setStateDialog) => AlertDialog(
-          title: Text(AppLocalizations.of(ctx).newMemory),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      image,
-                      height: 160,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: controller,
-                    maxLines: 2,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(ctx).captionHint,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TagFriendsSelector(
-                    isPast: widget.isPast,
-                    onChanged: (ids) => taggedIds = ids,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(AppLocalizations.of(ctx).cancel),
-            ),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.pop(ctx, (controller.text.trim(), taggedIds)),
-              child: Text(AppLocalizations.of(ctx).publish),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Future<(String, List<String>)?> _askCaptionAndTags(File image) =>
+      askMemoryCaptionAndTags(context, image, isPast: widget.isPast);
 
   Future<void> _openPhoto(ConcertPhotoModel photo) async {
     final index = _photos.indexOf(photo);
@@ -289,7 +234,7 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                 child: Text(
                   l.noMemoriesShort,
                   style: TextStyle(
-                    color: cs.onSurface.withOpacity(0.5),
+                    color: cs.onSurface.withValues(alpha: 0.5),
                     fontSize: 15,
                   ),
                 ),
@@ -322,10 +267,10 @@ class _MemoriesSectionState extends State<MemoriesSection> {
                                 memCacheWidth: 300,
                                 fadeInDuration: Duration.zero,
                                 fadeOutDuration: Duration.zero,
-                                placeholder: (_, __) => Container(
+                                placeholder: (_, _) => Container(
                                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                                 ),
-                                errorWidget: (_, __, ___) => Container(
+                                errorWidget: (_, _, _) => Container(
                                   color: const Color(0xFF2B2B2B),
                                   child: const Icon(Icons.broken_image_outlined, color: Colors.white24),
                                 ),

@@ -8,6 +8,8 @@ class UserModel extends User {
     required super.memberNumber,
     super.avatarUrl,
     super.isPro,
+    super.isAdmin,
+    super.showSpotify,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +20,8 @@ class UserModel extends User {
       memberNumber: (json['memberNumber'] as num?)?.toInt() ?? 0,
       avatarUrl: json['avatarUrl']?.toString(),
       isPro: json['isPro'] as bool? ?? false,
+      isAdmin: json['isAdmin'] as bool? ?? false,
+      showSpotify: json['showSpotify'] as bool? ?? false,
     );
   }
 }

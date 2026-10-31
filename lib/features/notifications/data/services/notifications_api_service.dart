@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../config/api_config.dart';
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
@@ -67,10 +68,25 @@ class NotificationsApiService {
   }
 
   Future<void> saveToken(String token, String platform) async {
+    // La versión permite al admin avisar solo a quien no ha actualizado.
+    // Si no se puede leer, se registra el token igualmente sin ella.
+    String? version;
+    int? build;
+    try {
+      final info = await PackageInfo.fromPlatform();
+      version = info.version;
+      build = int.tryParse(info.buildNumber);
+    } catch (_) {}
+
     await http.post(
       Uri.parse('${ApiConfig.baseUrl}/notifications/token'),
       headers: _headers,
-      body: jsonEncode({'token': token, 'platform': platform}),
+      body: jsonEncode({
+        'token': token,
+        'platform': platform,
+        'appVersion': ?version,
+        'appBuild': ?build,
+      }),
     );
   }
 

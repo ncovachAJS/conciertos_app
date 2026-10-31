@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/concert_photo_model.dart';
 import '../pages/photo_viewer_page.dart';
-import 'network_photo.dart';
 
 class PhotoYearGrid extends StatelessWidget {
   final int year;

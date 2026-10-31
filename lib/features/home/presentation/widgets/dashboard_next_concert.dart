@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/month_names.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
 class DashboardNextConcert extends StatelessWidget {
@@ -37,27 +38,14 @@ class DashboardNextConcert extends StatelessWidget {
 
     final concert = this.concert!;
 
-    const months = [
-      '',
-      'ENE',
-      'FEB',
-      'MAR',
-      'ABR',
-      'MAY',
-      'JUN',
-      'JUL',
-      'AGO',
-      'SEP',
-      'OCT',
-      'NOV',
-      'DIC',
-    ];
-
     final today = DateTime.now();
-
-    final days = concert.date
-        .difference(DateTime(today.year, today.month, today.day))
-        .inDays;
+    final todayDate = DateTime(today.year, today.month, today.day);
+    // Comparamos solo fecha contra fecha (sin la hora del concierto):
+    // restar duraciones cuando concert.date lleva hora (p. ej. 23:00) contra
+    // una medianoche podía desplazar el resultado en ±1 día según la hora.
+    final concertDate =
+        DateTime(concert.date.year, concert.date.month, concert.date.day);
+    final days = concertDate.difference(todayDate).inDays;
 
     final double progress = days <= 0
         ? 1
@@ -88,7 +76,7 @@ class DashboardNextConcert extends StatelessWidget {
             CachedNetworkImage(
               imageUrl: concert.imageUrl,
               fit: BoxFit.cover,
-              errorWidget: (_, __, ___) {
+              errorWidget: (_, _, _) {
                 return Container(
                   color: const Color(0xFF303542),
                   child: const Center(
@@ -109,8 +97,8 @@ class DashboardNextConcert extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(.10),
-                    Colors.black.withOpacity(.98),
+                    Colors.black.withValues(alpha: .10),
+                    Colors.black.withValues(alpha: .98),
                   ],
                   stops: const [0, .45, 1],
                 ),
@@ -138,7 +126,7 @@ class DashboardNextConcert extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      months[concert.date.month],
+                      monthAbbr(l, concert.date.month),
                       style: const TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,

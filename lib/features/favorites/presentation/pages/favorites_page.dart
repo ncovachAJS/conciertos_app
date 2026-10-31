@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../../shared/widgets/empty_state.dart';
@@ -70,12 +71,12 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
               Icon(
                 Icons.wifi_off,
                 size: 48,
-                color: cs.onSurface.withOpacity(0.38),
+                color: cs.onSurface.withValues(alpha: 0.38),
               ),
               const SizedBox(height: 12),
               Text(
                 l.favoritesError,
-                style: TextStyle(color: cs.onSurface.withOpacity(0.54)),
+                style: TextStyle(color: cs.onSurface.withValues(alpha: 0.54)),
               ),
               const SizedBox(height: 16),
               FilledButton(
@@ -115,9 +116,9 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
             const SizedBox(height: 20),
 
             Text(
-              '${filtered.length} artista${filtered.length != 1 ? "s" : ""}',
+              l.favoritesArtistCount(filtered.length),
               style: TextStyle(
-                color: cs.onSurface.withOpacity(0.6),
+                color: cs.onSurface.withValues(alpha: 0.6),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -129,11 +130,13 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
                   ? EmptyState(
                       emoji: '⭐',
                       title: l.noFavoritesMessage,
-                      subtitle: 'Marca conciertos como favoritos para verlos aquí agrupados por artista',
+                      subtitle: l.favoritesEmptySubtitle,
                       accentColor: Colors.amber,
                     )
                   : GridView.builder(
-                      padding: EdgeInsets.zero,
+                      padding: EdgeInsets.only(
+                        bottom: floatingNavBarClearance(context),
+                      ),
                       itemCount: filtered.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: Responsive.gridColumns(
@@ -176,6 +179,7 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
   ) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) =>
@@ -213,7 +217,7 @@ class _ArtistCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: cs.shadow.withOpacity(0.08),
+              color: cs.shadow.withValues(alpha: 0.08),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -236,12 +240,12 @@ class _ArtistCard extends StatelessWidget {
                       imageUrl: imageUrl,
                       fit: BoxFit.cover,
                       fadeInDuration: Duration.zero,
-                      errorWidget: (_, __, ___) => Container(
+                      errorWidget: (_, _, _) => Container(
                         color: cs.surfaceContainerHighest,
                         child: Icon(
                           Icons.music_note,
                           size: 48,
-                          color: cs.onSurface.withOpacity(0.2),
+                          color: cs.onSurface.withValues(alpha: 0.2),
                         ),
                       ),
                     ),
@@ -255,7 +259,7 @@ class _ArtistCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -293,7 +297,7 @@ class _ArtistCard extends StatelessWidget {
                   Text(
                     l.concertCountLabel(concertCount),
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.5),
+                      color: cs.onSurface.withValues(alpha: 0.5),
                       fontSize: 12,
                     ),
                   ),
@@ -337,7 +341,7 @@ class _ArtistConcertsSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: cs.onSurface.withOpacity(0.2),
+                color: cs.onSurface.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -359,7 +363,7 @@ class _ArtistConcertsSheet extends StatelessWidget {
                   Text(
                     l.concertCountLabel(concerts.length),
                     style: TextStyle(
-                      color: cs.onSurface.withOpacity(0.5),
+                      color: cs.onSurface.withValues(alpha: 0.5),
                       fontSize: 13,
                     ),
                   ),
@@ -382,7 +386,7 @@ class _ArtistConcertsSheet extends StatelessWidget {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE53935).withOpacity(0.12),
+                        color: const Color(0xFFE53935).withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -398,7 +402,7 @@ class _ArtistConcertsSheet extends StatelessWidget {
                     subtitle: Text(
                       '${c.date.day}/${c.date.month}/${c.date.year} · ${c.city}',
                       style: TextStyle(
-                        color: cs.onSurface.withOpacity(0.5),
+                        color: cs.onSurface.withValues(alpha: 0.5),
                         fontSize: 12,
                       ),
                     ),

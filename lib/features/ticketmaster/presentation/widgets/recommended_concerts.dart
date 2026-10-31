@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../shared/widgets/shimmer_box.dart';
 
@@ -54,13 +54,6 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
     if (mounted) setState(() => loading = false);
   }
 
-  Future<void> _openTicketmaster(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -70,8 +63,8 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: 3,
-          separatorBuilder: (_, __) => const SizedBox(width: 16),
-          itemBuilder: (_, __) => const ShimmerBox(
+          separatorBuilder: (_, _) => const SizedBox(width: 16),
+          itemBuilder: (_, _) => const ShimmerBox(
             width: 220,
             height: 300,
             borderRadius: 24,
@@ -98,7 +91,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: events.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (_, _) => const SizedBox(width: 16),
             itemBuilder: (_, index) {
           final event = events[index];
           return Container(
@@ -109,7 +102,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: cs.shadow.withOpacity(0.08),
+                  color: cs.shadow.withValues(alpha: 0.08),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -123,7 +116,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
                     event.image,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       color: Colors.black26,
                       child: const Center(
                         child: Icon(
@@ -146,7 +139,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(.15),
+                          color: Colors.red.withValues(alpha: .15),
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Text(
@@ -171,17 +164,27 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
                       const SizedBox(height: 8),
                       Text(
                         event.venue,
-                        style: TextStyle(color: cs.onSurface.withOpacity(0.7)),
+                        style: TextStyle(color: cs.onSurface.withValues(alpha: 0.7)),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         event.city,
-                        style: TextStyle(color: cs.onSurface.withOpacity(0.54)),
+                        style: TextStyle(color: cs.onSurface.withValues(alpha: 0.54)),
                       ),
-                      const SizedBox(height: 16),
-                      FilledButton(
-                        onPressed: () => _openTicketmaster(event.url),
-                        child: Text(l.viewOnTicketmaster),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_month_rounded,
+                              size: 16, color: cs.onSurface.withValues(alpha: 0.54)),
+                          const SizedBox(width: 6),
+                          Text(
+                            DateFormat('d MMM yyyy', Localizations.localeOf(context).languageCode)
+                                .format(event.date),
+                            style: TextStyle(
+                                color: cs.onSurface.withValues(alpha: 0.54),
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -200,7 +203,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
             'Powered by Ticketmaster',
             style: TextStyle(
               fontSize: 10,
-              color: Colors.grey.withOpacity(0.55),
+              color: Colors.grey.withValues(alpha: 0.55),
             ),
           ),
         ),
@@ -213,12 +216,12 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
     return Row(
       children: [
         Icon(Icons.wifi_off_rounded,
-            size: 18, color: cs.onSurface.withOpacity(0.4)),
+            size: 18, color: cs.onSurface.withValues(alpha: 0.4)),
         const SizedBox(width: 8),
         Text(
           l.error,
           style:
-              TextStyle(color: cs.onSurface.withOpacity(0.54), fontSize: 14),
+              TextStyle(color: cs.onSurface.withValues(alpha: 0.54), fontSize: 14),
         ),
         const SizedBox(width: 12),
         TextButton(
@@ -235,7 +238,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
     if (widget.favoriteArtists.isEmpty) {
       return Text(
         l.noConcertsAddForRec,
-        style: TextStyle(color: cs.onSurface.withOpacity(0.54), fontSize: 14),
+        style: TextStyle(color: cs.onSurface.withValues(alpha: 0.54), fontSize: 14),
       );
     }
 
@@ -252,7 +255,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
       children: [
         Text(
           l.noUpcomingEvents,
-          style: TextStyle(color: cs.onSurface.withOpacity(0.54), fontSize: 13),
+          style: TextStyle(color: cs.onSurface.withValues(alpha: 0.54), fontSize: 13),
         ),
         const SizedBox(height: 14),
         SingleChildScrollView(
@@ -268,10 +271,10 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
                     color: cs.surface,
                     borderRadius: BorderRadius.circular(30),
                     border: Border.all(
-                      color: const Color(0xFFE53935).withOpacity(0.3),
+                      color: const Color(0xFFE53935).withValues(alpha: 0.3),
                     ),
                     boxShadow: [
-                      BoxShadow(color: cs.shadow.withOpacity(0.06), blurRadius: 6),
+                      BoxShadow(color: cs.shadow.withValues(alpha: 0.06), blurRadius: 6),
                     ],
                   ),
                   child: Row(
@@ -288,7 +291,7 @@ class _RecommendedConcertsState extends ConsumerState<RecommendedConcerts> {
                         Text(
                           '×$count',
                           style: TextStyle(
-                            color: cs.onSurface.withOpacity(0.4),
+                            color: cs.onSurface.withValues(alpha: 0.4),
                             fontSize: 11,
                           ),
                         ),

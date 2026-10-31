@@ -9,39 +9,28 @@ class TutorialContent {
   static List<TutorialStep> dashboard(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.waving_hand_rounded,
-      title: '¡Bienvenido a La Vida en Directo!',
-      description:
-          'Tu diario musical personal. El dashboard te muestra de un vistazo tus próximos conciertos, estadísticas clave, actividad de amigos y mucho más.',
+      title: l.tutDash1Title,
+      description: l.tutDash1Desc,
     ),
     TutorialStep(
       icon: Icons.add_circle_outline_rounded,
-      title: 'Añade un concierto',
-      description:
-          'Toca el botón + en cualquier momento para registrar un concierto: artista, recinto, fecha, precio, foto y valoración detallada por criterios.',
+      title: l.tutDash2Title,
+      description: l.tutDash2Desc,
     ),
     TutorialStep(
       icon: Icons.star_outline_rounded,
-      title: 'Por valorar',
-      description:
-          'El widget "Por valorar" lista los conciertos pasados que todavía no tienen puntuación. Desliza entre ellos y toca uno para valorarlo en 5 criterios.',
-    ),
-    TutorialStep(
-      icon: Icons.headphones_rounded,
-      title: 'Tus canciones favoritas',
-      description:
-          'El widget de Spotify muestra tu playlist personal directamente en la app. Cada usuario ve la suya propia. Necesitas vincular tu cuenta de Spotify para activarlo.',
+      title: l.tutDash3Title,
+      description: l.tutDash3Desc,
     ),
     TutorialStep(
       icon: Icons.local_fire_department_rounded,
-      title: 'Conciertos recomendados',
-      description:
-          'Descubre eventos próximos cerca de ti basados en tus artistas. Toca uno para ver detalles y acceder al enlace de compra de entradas.',
+      title: l.tutDash4Title,
+      description: l.tutDash4Desc,
     ),
     TutorialStep(
       icon: Icons.tune_rounded,
-      title: 'Personalizar el dashboard (Pro)',
-      description:
-          'Con la versión Pro puedes reorganizar, mostrar u ocultar los widgets del dashboard pulsando el icono de edición junto al saludo.',
+      title: l.tutDash5Title,
+      description: l.tutDash5Desc,
     ),
   ];
 
@@ -50,39 +39,33 @@ class TutorialContent {
   static List<TutorialStep> addConcert(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.music_note_rounded,
-      title: 'Registra el concierto',
-      description:
-          'Completa artista, recinto, ciudad, fecha y precio. El género musical se sugiere automáticamente desde Spotify al escribir el nombre del artista.',
+      title: l.tutAdd1Title,
+      description: l.tutAdd1Desc,
     ),
     TutorialStep(
       icon: Icons.photo_camera_rounded,
-      title: 'Foto del concierto',
-      description:
-          'Añade una foto desde tu galería para darle vida al recuerdo. Puedes cambiarla o eliminarla más adelante desde la pantalla de edición.',
+      title: l.tutAdd2Title,
+      description: l.tutAdd2Desc,
     ),
     TutorialStep(
       icon: Icons.tune_rounded,
-      title: 'Valoración por criterios',
-      description:
-          'Valora 5 criterios con estrellas: Artista, Sonido, Ambiente, Setlist y Precio/valor. La puntuación general se calcula automáticamente como la media.',
+      title: l.tutAdd3Title,
+      description: l.tutAdd3Desc,
     ),
     TutorialStep(
       icon: Icons.auto_graph_rounded,
-      title: 'Nota calculada automáticamente',
-      description:
-          'No hay puntuación manual: la nota que aparece en tu historial y estadísticas es siempre la media de tus 5 criterios. Más justa y más detallada.',
+      title: l.tutAdd4Title,
+      description: l.tutAdd4Desc,
     ),
     TutorialStep(
       icon: Icons.festival_rounded,
-      title: 'Festival o concierto individual',
-      description:
-          'Indica si fue un festival para que tus estadísticas distingan entre ambos formatos y puedas ver el reparto en la sección "Festival vs. individual".',
+      title: l.tutAdd5Title,
+      description: l.tutAdd5Desc,
     ),
     TutorialStep(
       icon: Icons.people_rounded,
-      title: 'Etiquetar amigos',
-      description:
-          '¿Fuiste acompañado? Etiqueta a tus amigos para que el concierto aparezca también en su historial compartido y puedan verlo desde su perfil.',
+      title: l.tutAdd6Title,
+      description: l.tutAdd6Desc,
     ),
   ];
 
@@ -91,51 +74,48 @@ class TutorialContent {
   static List<TutorialStep> concertDetail(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.info_outline_rounded,
-      title: 'Todo sobre el concierto',
-      description:
-          'Aquí ves la info completa: fecha, recinto, ciudad, precio, foto, tus notas personales y la valoración detallada por criterios con barras de progreso.',
+      title: l.tutDetail1Title,
+      description: l.tutDetail1Desc,
     ),
     TutorialStep(
       icon: Icons.tune_rounded,
-      title: 'Valoración detallada',
-      description:
-          'Si puntuaste el concierto, se muestra una tarjeta con la nota de cada criterio: Artista, Sonido, Ambiente, Setlist y Precio/valor, además de la media.',
+      title: l.tutDetail2Title,
+      description: l.tutDetail2Desc,
     ),
     TutorialStep(
       icon: Icons.edit_outlined,
-      title: 'Editar en cualquier momento',
-      description:
-          'Toca el botón de edición (lápiz) para cambiar cualquier dato, añadir o modificar las valoraciones, la foto o las notas cuando quieras.',
+      title: l.tutDetail3Title,
+      description: l.tutDetail3Desc,
     ),
     TutorialStep(
       icon: Icons.queue_music_rounded,
-      title: 'Setlist automático',
-      description:
-          'La app busca el setlist real del concierto en Setlist.fm para que puedas revivir canción por canción lo que tocaron esa noche.',
+      title: l.tutDetail4Title,
+      description: l.tutDetail4Desc,
     ),
     TutorialStep(
       icon: Icons.headphones_rounded,
-      title: 'Artista en Spotify',
-      description:
-          'Se vincula automáticamente el artista en Spotify: foto, géneros, seguidores y las canciones más populares con su popularidad y duración.',
+      title: l.tutDetail5Title,
+      description: l.tutDetail5Desc,
     ),
     TutorialStep(
       icon: Icons.add_a_photo_rounded,
-      title: 'Fotos y recuerdos',
-      description:
-          'Añade fotos del concierto y etiqueta a las personas que estuvieron. Quedan guardadas en tu galería personal de recuerdos.',
+      title: l.tutDetail6Title,
+      description: l.tutDetail6Desc,
     ),
     TutorialStep(
       icon: Icons.place_rounded,
-      title: 'Recinto y ubicación',
-      description:
-          'Toca el nombre del recinto para ver todos los conciertos que tienes registrados en ese mismo lugar y explorar su ubicación en el mapa.',
+      title: l.tutDetail7Title,
+      description: l.tutDetail7Desc,
     ),
     TutorialStep(
       icon: Icons.chat_bubble_outline_rounded,
-      title: 'Comentarios',
-      description:
-          'Tus amigos pueden comentar el concierto si los etiquetaste. Abre la sección de comentarios para ver o continuar la conversación.',
+      title: l.tutDetail8Title,
+      description: l.tutDetail8Desc,
+    ),
+    TutorialStep(
+      icon: Icons.qr_code_2_rounded,
+      title: l.tutDetail9Title,
+      description: l.tutDetail9Desc,
     ),
   ];
 
@@ -144,39 +124,38 @@ class TutorialContent {
   static List<TutorialStep> concerts(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.library_music_rounded,
-      title: 'Tu historial musical',
-      description:
-          'Todos tus conciertos en un solo lugar. Los pasados muestran la valoración media de sus criterios; los futuros se marcan como "próximos".',
+      title: l.tutConcerts1Title,
+      description: l.tutConcerts1Desc,
     ),
     TutorialStep(
       icon: Icons.star_outline_rounded,
-      title: 'Valoración visible',
-      description:
-          'Cada concierto pasado muestra su nota calculada (media de criterios) o "Sin valorar" si todavía no lo has puntuado. Tócalo para valorarlo.',
+      title: l.tutConcerts2Title,
+      description: l.tutConcerts2Desc,
     ),
     TutorialStep(
       icon: Icons.view_module_rounded,
-      title: 'Tres vistas disponibles',
-      description:
-          'Cambia entre vista de lista, cuadrícula compacta o calendario según cómo prefieras explorar tu historial.',
+      title: l.tutConcerts3Title,
+      description: l.tutConcerts3Desc,
     ),
     TutorialStep(
       icon: Icons.calendar_month_rounded,
-      title: 'Vista calendario',
-      description:
-          'El calendario marca los días en que tuviste un concierto. Toca cualquier fecha para ver el detalle o añadir uno nuevo en ese día.',
+      title: l.tutConcerts4Title,
+      description: l.tutConcerts4Desc,
     ),
     TutorialStep(
       icon: Icons.search_rounded,
-      title: 'Buscar y filtrar',
-      description:
-          'Usa la barra de búsqueda para encontrar conciertos por artista, recinto o ciudad, y filtra por año para navegar rápidamente por tu historial.',
+      title: l.tutConcerts5Title,
+      description: l.tutConcerts5Desc,
     ),
     TutorialStep(
       icon: Icons.map_rounded,
-      title: 'Mapa de conciertos',
-      description:
-          'Toca el icono de mapa para ver todos tus conciertos geolocalizados. Explora en qué ciudades y recintos has estado y descubre patrones.',
+      title: l.tutConcerts6Title,
+      description: l.tutConcerts6Desc,
+    ),
+    TutorialStep(
+      icon: Icons.groups_rounded,
+      title: l.tutConcerts7Title,
+      description: l.tutConcerts7Desc,
     ),
   ];
 
@@ -185,45 +164,38 @@ class TutorialContent {
   static List<TutorialStep> statistics(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.bar_chart_rounded,
-      title: 'Tus estadísticas musicales',
-      description:
-          'Un análisis completo de tu historial: total de conciertos, artistas únicos, ciudades visitadas, géneros favoritos, gasto total y mucho más.',
+      title: l.tutStats1Title,
+      description: l.tutStats1Desc,
     ),
     TutorialStep(
       icon: Icons.auto_graph_rounded,
-      title: 'Conciertos por año y mes',
-      description:
-          'Gráficas de barras que muestran cómo se distribuyen tus conciertos a lo largo del tiempo. Descubre tus temporadas más activas.',
+      title: l.tutStats2Title,
+      description: l.tutStats2Desc,
     ),
     TutorialStep(
       icon: Icons.emoji_events_rounded,
-      title: 'Top artistas, géneros y recintos',
-      description:
-          'Rankings de los artistas más vistos, géneros más escuchados en vivo y recintos más visitados. Con foto de Spotify cuando está disponible.',
+      title: l.tutStats3Title,
+      description: l.tutStats3Desc,
     ),
     TutorialStep(
       icon: Icons.star_half_rounded,
-      title: 'Valoraciones y distribución',
-      description:
-          'Histograma de tus notas, valoración media por año y tus artistas mejor valorados. Solo se cuentan los conciertos puntuados con el sistema de criterios.',
+      title: l.tutStats4Title,
+      description: l.tutStats4Desc,
     ),
     TutorialStep(
       icon: Icons.festival_rounded,
-      title: 'Festival vs. individual',
-      description:
-          'Gráfico circular que muestra el reparto entre tus conciertos de festival y los individuales, para conocer tu perfil como espectador.',
+      title: l.tutStats5Title,
+      description: l.tutStats5Desc,
     ),
     TutorialStep(
       icon: Icons.auto_awesome_rounded,
-      title: 'Resumen anual',
-      description:
-          'Desde el icono de calendario accedes al Wrapped de cualquier año: artista estrella, ciudad favorita, valoración media y los momentos más destacados.',
+      title: l.tutStats6Title,
+      description: l.tutStats6Desc,
     ),
     TutorialStep(
       icon: Icons.tune_rounded,
-      title: 'Personalizar secciones (Pro)',
-      description:
-          'Con la versión Pro puedes elegir qué secciones de estadísticas quieres ver y reordenarlas a tu gusto pulsando el icono de edición.',
+      title: l.tutStats7Title,
+      description: l.tutStats7Desc,
     ),
   ];
 
@@ -232,33 +204,28 @@ class TutorialContent {
   static List<TutorialStep> profile(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.account_circle_rounded,
-      title: 'Tu acreditación',
-      description:
-          'Tu perfil resume todo tu historial musical: número de conciertos, fotos, favoritos y tu nivel de fan basado en cuántos shows llevas acumulados.',
+      title: l.tutProfile1Title,
+      description: l.tutProfile1Desc,
     ),
     TutorialStep(
       icon: Icons.emoji_events_rounded,
-      title: 'Logros desbloqueables',
-      description:
-          'Ganas medallas por hitos musicales: 10 conciertos, primer festival, ver un artista repetido, conseguir una valoración perfecta y mucho más.',
+      title: l.tutProfile2Title,
+      description: l.tutProfile2Desc,
     ),
     TutorialStep(
       icon: Icons.headphones_rounded,
-      title: 'Mis artistas',
-      description:
-          'Ranking de tus artistas más vistos, enriquecido con datos de Spotify: foto, seguidores, cuántas veces los has visto y tu valoración media de sus shows.',
+      title: l.tutProfile3Title,
+      description: l.tutProfile3Desc,
     ),
     TutorialStep(
       icon: Icons.auto_awesome_rounded,
-      title: 'Wrapped anual',
-      description:
-          'Accede al resumen animado de cada año desde tu perfil: artista del año, ciudad favorita, valoración media y todos tus conciertos destacados.',
+      title: l.tutProfile4Title,
+      description: l.tutProfile4Desc,
     ),
     TutorialStep(
       icon: Icons.palette_rounded,
-      title: 'Tema de color (Pro)',
-      description:
-          'Con la versión Pro puedes personalizar el color principal de la app desde los ajustes. Elige el que mejor refleje tu estilo musical.',
+      title: l.tutProfile5Title,
+      description: l.tutProfile5Desc,
     ),
   ];
 
@@ -267,33 +234,28 @@ class TutorialContent {
   static List<TutorialStep> friends(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.people_rounded,
-      title: 'Conecta con tu gente',
-      description:
-          'Busca amigos por nombre o email y envía solicitudes de amistad. Cuando te acepten, puedes ver sus conciertos y comparar historiales.',
+      title: l.tutFriends1Title,
+      description: l.tutFriends1Desc,
     ),
     TutorialStep(
       icon: Icons.tab_rounded,
-      title: 'Amigos y solicitudes',
-      description:
-          'La primera pestaña lista tus amigos actuales. La segunda gestiona las solicitudes pendientes que hayas recibido.',
+      title: l.tutFriends2Title,
+      description: l.tutFriends2Desc,
     ),
     TutorialStep(
       icon: Icons.person_rounded,
-      title: 'Perfil de amigo',
-      description:
-          'Toca a un amigo para ver su perfil: sus conciertos, artistas favoritos y logros. Puedes explorar su historial aunque sea privado si sois amigos.',
+      title: l.tutFriends3Title,
+      description: l.tutFriends3Desc,
     ),
     TutorialStep(
       icon: Icons.compare_arrows_rounded,
-      title: 'Comparar estadísticas',
-      description:
-          'Desde el perfil de un amigo toca "Comparar" para ver vuestras estadísticas frente a frente: total de conciertos, artistas en común y valoración media.',
+      title: l.tutFriends4Title,
+      description: l.tutFriends4Desc,
     ),
     TutorialStep(
       icon: Icons.notifications_rounded,
-      title: 'Notificaciones de actividad',
-      description:
-          'Recibes una notificación cuando un amigo añade un concierto o te etiqueta en uno. También puedes comentar su actividad desde el feed.',
+      title: l.tutFriends5Title,
+      description: l.tutFriends5Desc,
     ),
   ];
 
@@ -302,21 +264,18 @@ class TutorialContent {
   static List<TutorialStep> feed(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.view_timeline_rounded,
-      title: 'Feed de amigos',
-      description:
-          'Sigue la actividad musical de tus amigos en tiempo real: qué conciertos añadieron, cuándo y con quién fueron.',
+      title: l.tutFeed1Title,
+      description: l.tutFeed1Desc,
     ),
     TutorialStep(
       icon: Icons.chat_bubble_outline_rounded,
-      title: 'Comentar conciertos',
-      description:
-          'Toca "Comentar" en cualquier actividad para dejar un mensaje. Abre el hilo completo para ver la conversación y responder.',
+      title: l.tutFeed2Title,
+      description: l.tutFeed2Desc,
     ),
     TutorialStep(
       icon: Icons.photo_library_rounded,
-      title: 'Galería compartida',
-      description:
-          'En la pestaña de fotos ves todas las imágenes que tú y tus amigos subisteis a vuestros conciertos, ordenadas cronológicamente.',
+      title: l.tutFeed3Title,
+      description: l.tutFeed3Desc,
     ),
   ];
 
@@ -325,21 +284,18 @@ class TutorialContent {
   static List<TutorialStep> recommendations(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.local_fire_department_rounded,
-      title: 'Conciertos cerca de ti',
-      description:
-          'Descubre eventos próximos basados en tu ubicación y los artistas que ya sigues en la app. Datos en tiempo real de Ticketmaster.',
+      title: l.tutRecs1Title,
+      description: l.tutRecs1Desc,
     ),
     TutorialStep(
       icon: Icons.confirmation_number_rounded,
-      title: 'Quiero ir',
-      description:
-          'Marca un evento como "Quiero ir" para guardarlo y acceder rápidamente al enlace de compra cuando estés listo para comprarlo.',
+      title: l.tutRecs2Title,
+      description: l.tutRecs2Desc,
     ),
     TutorialStep(
       icon: Icons.add_circle_outline_rounded,
-      title: 'Añadir directamente',
-      description:
-          'Si ya tienes entradas para un evento recomendado, toca "Añadir" para registrarlo en tu historial como concierto futuro.',
+      title: l.tutRecs3Title,
+      description: l.tutRecs3Desc,
     ),
   ];
 
@@ -348,21 +304,18 @@ class TutorialContent {
   static List<TutorialStep> import_(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.search_rounded,
-      title: 'Buscar en Setlist.fm',
-      description:
-          'En la pestaña "Setlist.fm" escribe el nombre de un artista. La app mostrará sus conciertos pasados para que elijas los que hayas asistido.',
+      title: l.tutImport1Title,
+      description: l.tutImport1Desc,
     ),
     TutorialStep(
       icon: Icons.download_done_rounded,
-      title: 'Seleccionar e importar',
-      description:
-          'Marca los conciertos de la lista y toca "Importar". Se añaden automáticamente a tu historial; después puedes editar cada uno para añadir foto, precio y valoración.',
+      title: l.tutImport2Title,
+      description: l.tutImport2Desc,
     ),
     TutorialStep(
       icon: Icons.backup_rounded,
-      title: 'Copia de seguridad',
-      description:
-          'En la pestaña "Copia de seguridad" puedes exportar todos tus conciertos a un archivo o restaurarlos desde una copia anterior para no perder nada.',
+      title: l.tutImport3Title,
+      description: l.tutImport3Desc,
     ),
   ];
 
@@ -371,21 +324,18 @@ class TutorialContent {
   static List<TutorialStep> spotifyPlaylist(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.headphones_rounded,
-      title: 'Tu playlist de Spotify',
-      description:
-          'Esta pantalla muestra el reproductor embebido de Spotify con tu playlist personal. Cada usuario ve la suya propia gracias al acceso OAuth.',
+      title: l.tutSpotifyPlaylist1Title,
+      description: l.tutSpotifyPlaylist1Desc,
     ),
     TutorialStep(
       icon: Icons.link_rounded,
-      title: 'Vincular tu cuenta',
-      description:
-          'Si aún no has vinculado Spotify, toca "Conectar con Spotify" para autorizar el acceso. Solo necesitas hacerlo una vez.',
+      title: l.tutSpotifyPlaylist2Title,
+      description: l.tutSpotifyPlaylist2Desc,
     ),
     TutorialStep(
       icon: Icons.sync_rounded,
-      title: 'Actualizar permisos',
-      description:
-          'Si ves el botón "Re-vincular Spotify" significa que tu sesión necesita un permiso adicional para acceder a playlists. Tócalo para actualizarla.',
+      title: l.tutSpotifyPlaylist3Title,
+      description: l.tutSpotifyPlaylist3Desc,
     ),
   ];
 
@@ -394,21 +344,18 @@ class TutorialContent {
   static List<TutorialStep> spotifyImport(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.headphones_rounded,
-      title: 'Tus artistas de Spotify',
-      description:
-          'Al vincular tu cuenta de Spotify, la app muestra aquí los artistas que más escuchas. Toca uno para buscar sus conciertos pasados en Setlist.fm.',
+      title: l.tutSpotifyImport1Title,
+      description: l.tutSpotifyImport1Desc,
     ),
     TutorialStep(
       icon: Icons.music_note_rounded,
-      title: 'Importar conciertos del artista',
-      description:
-          'Al tocar un artista se abre la lista de sus conciertos pasados. Selecciona los que hayas visto y se añaden directamente a tu historial.',
+      title: l.tutSpotifyImport2Title,
+      description: l.tutSpotifyImport2Desc,
     ),
     TutorialStep(
       icon: Icons.logout_rounded,
-      title: 'Desconectar Spotify',
-      description:
-          'Toca el icono de salida en la esquina superior derecha para desvincular tu cuenta de Spotify en cualquier momento.',
+      title: l.tutSpotifyImport3Title,
+      description: l.tutSpotifyImport3Desc,
     ),
   ];
 
@@ -417,15 +364,13 @@ class TutorialContent {
   static List<TutorialStep> concertMap(AppLocalizations l) => [
     TutorialStep(
       icon: Icons.map_rounded,
-      title: 'Tu mapa musical',
-      description:
-          'Todos tus conciertos geolocalizados en el mapa. Cada pin representa un concierto; las ciudades más visitadas se destacan con marcadores más grandes.',
+      title: l.tutMap1Title,
+      description: l.tutMap1Desc,
     ),
     TutorialStep(
       icon: Icons.place_rounded,
-      title: 'Explorar conciertos',
-      description:
-          'Toca cualquier pin para ver el nombre del artista, el recinto y la fecha. Desde ahí puedes abrir el detalle completo del concierto.',
+      title: l.tutMap2Title,
+      description: l.tutMap2Desc,
     ),
   ];
 
@@ -433,69 +378,54 @@ class TutorialContent {
 
   static List<TutorialEntry> allEntries(AppLocalizations l) => [
     TutorialEntry(
-      label: 'Inicio / Dashboard',
+      label: l.tutEntryDashboard,
       icon: Icons.home_rounded,
       steps: dashboard(l),
     ),
     TutorialEntry(
-      label: 'Mis conciertos',
+      label: l.tutEntryConcerts,
       icon: Icons.library_music_rounded,
       steps: concerts(l),
     ),
     TutorialEntry(
-      label: 'Añadir / Editar concierto',
+      label: l.tutEntryAddConcert,
       icon: Icons.add_circle_outline_rounded,
       steps: addConcert(l),
     ),
     TutorialEntry(
-      label: 'Detalle de concierto',
+      label: l.tutEntryDetail,
       icon: Icons.info_outline_rounded,
       steps: concertDetail(l),
     ),
     TutorialEntry(
-      label: 'Estadísticas',
+      label: l.tutEntryStats,
       icon: Icons.bar_chart_rounded,
       steps: statistics(l),
     ),
     TutorialEntry(
-      label: 'Mi perfil',
+      label: l.tutEntryProfile,
       icon: Icons.account_circle_rounded,
       steps: profile(l),
     ),
     TutorialEntry(
-      label: 'Amigos',
+      label: l.tutEntryFriends,
       icon: Icons.people_rounded,
       steps: friends(l),
     ),
     TutorialEntry(
-      label: 'Feed de actividad',
+      label: l.tutEntryFeed,
       icon: Icons.view_timeline_rounded,
       steps: feed(l),
     ),
     TutorialEntry(
-      label: 'Recomendaciones',
+      label: l.tutEntryRecs,
       icon: Icons.local_fire_department_rounded,
       steps: recommendations(l),
     ),
     TutorialEntry(
-      label: 'Importar conciertos',
+      label: l.tutEntryImport,
       icon: Icons.download_rounded,
       steps: import_(l),
-    ),
-    TutorialEntry(
-      label: 'Spotify: canciones favoritas',
-      icon: Icons.headphones_rounded,
-      steps: spotifyPlaylist(l),
-    ),
-    TutorialEntry(
-      label: 'Importar desde Spotify',
-      icon: Icons.download_rounded,
-      steps: spotifyImport(l),
-    ),
-    TutorialEntry(
-      label: 'Mapa de conciertos',
-      icon: Icons.map_rounded,
-      steps: concertMap(l),
     ),
   ];
 }

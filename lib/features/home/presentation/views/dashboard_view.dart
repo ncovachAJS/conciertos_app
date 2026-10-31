@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
 import '../../../../core/tutorial/tutorial_content.dart';
 import '../../../../core/tutorial/tutorial_overlay.dart';
 import '../../../../core/tutorial/tutorial_service.dart';
 import '../../../../shared/widgets/app_error_widget.dart';
 import '../../../../shared/widgets/skeletons/dashboard_skeleton.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
 import '../../../ticketmaster/presentation/widgets/recommended_concerts.dart';
@@ -22,6 +24,7 @@ import '../widgets/dashboard_on_this_day.dart';
 import '../widgets/dashboard_quick_actions.dart';
 import '../widgets/dashboard_rate_pending.dart';
 import '../widgets/dashboard_recent_concerts.dart';
+import '../widgets/dashboard_records.dart';
 import '../widgets/dashboard_section_title.dart';
 import '../widgets/dashboard_stats.dart';
 import '../widgets/dashboard_streak.dart';
@@ -142,7 +145,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 DashboardSectionTitle(
                   icon: Icons.calendar_month_rounded,
                   title: l.upcomingConcerts,
-                  action: 'Calendario',
+                  action: l.dashCalendarAction,
                   onAction: () =>
                       context.go('/concerts?view=calendar'),
                 ),
@@ -198,18 +201,37 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 const SizedBox(height: 36),
               ],
 
-            DashboardSectionId.spotifyEmbed => [
-                DashboardSectionTitle(
-                  icon: Icons.headphones_rounded,
-                  title: 'Tus canciones favoritas',
-                ),
-                const SizedBox(height: 14),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: DashboardSpotifyEmbed(),
-                ),
-                const SizedBox(height: 36),
-              ],
+            // Fase de pruebas: solo isPro real (ProConfig.isUserPro está abierto a todos).
+            DashboardSectionId.records =>
+              (AuthController.instance.user?.isPro == true)
+                  ? [
+                      DashboardSectionTitle(
+                        icon: Icons.album_rounded,
+                        title: l.recordsTitle,
+                        action: l.dashRecordsViewAll,
+                        onAction: () => context.push('/records'),
+                      ),
+                      const SizedBox(height: 14),
+                      const DashboardRecords(),
+                      const SizedBox(height: 36),
+                    ]
+                  : [],
+
+            DashboardSectionId.spotifyEmbed =>
+              (AuthController.instance.user?.showSpotify ?? false)
+                  ? [
+                      DashboardSectionTitle(
+                        icon: Icons.headphones_rounded,
+                        title: 'Tus canciones favoritas',
+                      ),
+                      const SizedBox(height: 14),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: DashboardSpotifyEmbed(),
+                      ),
+                      const SizedBox(height: 36),
+                    ]
+                  : [],
           };
         }
 
@@ -219,8 +241,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         final isTablet = Responsive.isTablet(context);
 
         // ── Layout ───────────────────────────────────────────────────────────
+        // El padding inferior reserva justo el espacio que ocupa la barra
+        // flotante, para que el final del scroll no quede tapado detrás de
+        // ella sin dejar un hueco visible el resto del tiempo (el espacio
+        // solo aparece al llegar al final del contenido real).
         return SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(4, 4, 4, isTablet ? 32 : 100),
+          padding: EdgeInsets.fromLTRB(
+            4,
+            4,
+            4,
+            isTablet ? 32 : 24 + floatingNavBarClearance(context),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -261,6 +292,7 @@ const _fullWidthSections = {
   DashboardSectionId.recommended,
   DashboardSectionId.spotifyEmbed,
   DashboardSectionId.stats,
+  DashboardSectionId.records,
 };
 
 class _TabletDashboardLayout extends StatelessWidget {

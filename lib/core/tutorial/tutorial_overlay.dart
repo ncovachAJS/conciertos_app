@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
+
 /// Paso individual del tutorial
 class TutorialStep {
   final IconData icon;
@@ -29,6 +31,7 @@ class TutorialOverlay extends StatefulWidget {
   }) {
     return showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isDismissible: false,
       enableDrag: false,
       backgroundColor: Colors.transparent,
@@ -83,6 +86,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final step = widget.steps[_step];
     final total = widget.steps.length;
     final cs = Theme.of(context).colorScheme;
@@ -95,7 +99,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -121,7 +125,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                     decoration: BoxDecoration(
                       color: active
                           ? const Color(0xFFE53935)
-                          : cs.onSurface.withOpacity(0.15),
+                          : cs.onSurface.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   );
@@ -135,7 +139,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE53935).withOpacity(0.12),
+                  color: const Color(0xFFE53935).withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -165,7 +169,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                 step.description,
                 style: TextStyle(
                   fontSize: 15,
-                  color: cs.onSurface.withOpacity(0.6),
+                  color: cs.onSurface.withValues(alpha: 0.6),
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -180,8 +184,8 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                     TextButton(
                       onPressed: _skip,
                       child: Text(
-                        'Saltar',
-                        style: TextStyle(color: cs.onSurface.withOpacity(0.4)),
+                        l.tutorialSkip,
+                        style: TextStyle(color: cs.onSurface.withValues(alpha: 0.4)),
                       ),
                     ),
                   const Spacer(),
@@ -196,7 +200,7 @@ class _TutorialOverlayState extends State<TutorialOverlay>
                       ),
                     ),
                     child: Text(
-                      isLast ? '¡Empezar! 🎸' : 'Siguiente',
+                      isLast ? l.tutorialStart : l.tutorialNext,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),

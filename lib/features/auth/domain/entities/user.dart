@@ -5,6 +5,8 @@ class User {
   final int memberNumber;
   final String? avatarUrl;
   final bool isPro;
+  final bool isAdmin;
+  final bool showSpotify;
 
   const User({
     required this.id,
@@ -13,6 +15,8 @@ class User {
     required this.memberNumber,
     this.avatarUrl,
     this.isPro = false,
+    this.isAdmin = false,
+    this.showSpotify = false,
   });
 
   User copyWith({
@@ -22,6 +26,8 @@ class User {
     int? memberNumber,
     String? avatarUrl,
     bool? isPro,
+    bool? isAdmin,
+    bool? showSpotify,
   }) {
     return User(
       id: id ?? this.id,
@@ -30,6 +36,8 @@ class User {
       memberNumber: memberNumber ?? this.memberNumber,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       isPro: isPro ?? this.isPro,
+      isAdmin: isAdmin ?? this.isAdmin,
+      showSpotify: showSpotify ?? this.showSpotify,
     );
   }
 }

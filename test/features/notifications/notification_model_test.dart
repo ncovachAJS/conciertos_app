@@ -5,7 +5,7 @@ import 'package:conciertos_app/features/notifications/domain/entities/app_notifi
 
 void main() {
   group('AppNotificationModel.fromJson', () {
-    Map<String, dynamic> _baseJson({bool withSender = true}) => {
+    Map<String, dynamic> baseJson({bool withSender = true}) => {
           'id': 'n1',
           'type': 'CONCERT_TAG',
           'title': 'Te han etiquetado',
@@ -21,7 +21,7 @@ void main() {
         };
 
     test('parses all fields including sender', () {
-      final n = AppNotificationModel.fromJson(_baseJson());
+      final n = AppNotificationModel.fromJson(baseJson());
       expect(n.id, 'n1');
       expect(n.type, 'CONCERT_TAG');
       expect(n.title, 'Te han etiquetado');
@@ -34,14 +34,14 @@ void main() {
     });
 
     test('parses createdAt date correctly', () {
-      final n = AppNotificationModel.fromJson(_baseJson());
+      final n = AppNotificationModel.fromJson(baseJson());
       expect(n.createdAt.year, 2024);
       expect(n.createdAt.month, 6);
       expect(n.createdAt.day, 15);
     });
 
     test('sender is null when not provided', () {
-      final n = AppNotificationModel.fromJson(_baseJson(withSender: false));
+      final n = AppNotificationModel.fromJson(baseJson(withSender: false));
       expect(n.sender, isNull);
     });
 
@@ -57,21 +57,21 @@ void main() {
     });
 
     test('falls back to DateTime.now() for invalid createdAt', () {
-      final json = {..._baseJson(withSender: false), 'createdAt': 'bad-date'};
+      final json = {...baseJson(withSender: false), 'createdAt': 'bad-date'};
       final before = DateTime.now().subtract(const Duration(seconds: 1));
       final n = AppNotificationModel.fromJson(json);
       expect(n.createdAt.isAfter(before), isTrue);
     });
 
     test('read flag is parsed correctly as true', () {
-      final json = {..._baseJson(withSender: false), 'read': true};
+      final json = {...baseJson(withSender: false), 'read': true};
       final n = AppNotificationModel.fromJson(json);
       expect(n.read, isTrue);
     });
 
     test('data field is parsed when present', () {
       final json = {
-        ..._baseJson(withSender: false),
+        ...baseJson(withSender: false),
         'data': {'concertId': 'c99'},
       };
       final n = AppNotificationModel.fromJson(json);
@@ -80,13 +80,13 @@ void main() {
     });
 
     test('is a subtype of AppNotification', () {
-      final n = AppNotificationModel.fromJson(_baseJson());
+      final n = AppNotificationModel.fromJson(baseJson());
       expect(n, isA<AppNotification>());
     });
 
     test('sender avatarUrl can be null', () {
       final json = {
-        ..._baseJson(withSender: false),
+        ...baseJson(withSender: false),
         'sender': {'id': 'u3', 'name': 'X'},
       };
       final n = AppNotificationModel.fromJson(json);

@@ -30,7 +30,7 @@ class SpotifyAuthService {
   /// AuthController carga la sesión mientras el flujo OAuth está en marcha).
   final String? _userId;
 
-  SpotifyAuthService({String? userId}) : _userId = userId;
+  SpotifyAuthService({this._userId});
 
   static String get _clientId =>
       dotenv.env['SPOTIFY_CLIENT_ID'] ?? '';

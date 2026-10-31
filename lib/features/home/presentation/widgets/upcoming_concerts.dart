@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../../../shared/widgets/concert_card.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
-import '../../../../shared/widgets/hero_concert_card.dart';
 
 import 'section_title.dart';
 
@@ -63,7 +62,7 @@ class UpcomingConcerts extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: upcoming.length - 1,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (_, _) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               return SizedBox(
                 width: 300,

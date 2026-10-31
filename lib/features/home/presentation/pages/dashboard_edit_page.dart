@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_shell.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../domain/dashboard_section.dart';
 import '../providers/dashboard_layout_provider.dart';
@@ -20,47 +23,49 @@ class DashboardEditPage extends ConsumerWidget {
         DashboardSectionId.favorites => Icons.favorite_rounded,
         DashboardSectionId.recent => Icons.history_rounded,
         DashboardSectionId.spotifyEmbed => Icons.headphones_rounded,
+        DashboardSectionId.records => Icons.album_rounded,
       };
 
-  static String _label(DashboardSectionId id) => switch (id) {
-        DashboardSectionId.streak => 'Racha de conciertos',
-        DashboardSectionId.annualGoal => 'Meta anual',
-        DashboardSectionId.ratePending => 'Por valorar',
-        DashboardSectionId.onThisDay => 'En tal día como hoy',
-        DashboardSectionId.upcoming => 'Próximos conciertos',
-        DashboardSectionId.stats => 'Estadísticas rápidas',
-        DashboardSectionId.recommended => 'Recomendaciones',
-        DashboardSectionId.favorites => 'Favoritos',
-        DashboardSectionId.recent => 'Últimos añadidos',
-        DashboardSectionId.spotifyEmbed => 'Canciones favoritas (Spotify)',
+  static String _label(AppLocalizations l, DashboardSectionId id) =>
+      switch (id) {
+        DashboardSectionId.streak => l.dashSectionStreak,
+        DashboardSectionId.annualGoal => l.dashSectionAnnualGoal,
+        DashboardSectionId.ratePending => l.dashRatePendingTitle,
+        DashboardSectionId.onThisDay => l.dashSectionOnThisDay,
+        DashboardSectionId.upcoming => l.dashSectionUpcoming,
+        DashboardSectionId.stats => l.dashSectionStats,
+        DashboardSectionId.recommended => l.dashSectionRecommended,
+        DashboardSectionId.favorites => l.dashSectionFavorites,
+        DashboardSectionId.recent => l.dashSectionRecent,
+        DashboardSectionId.spotifyEmbed => l.dashSectionSpotify,
+        DashboardSectionId.records => l.recordsTitle,
       };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final sectionsAsync = ref.watch(dashboardLayoutProvider);
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Personalizar dashboard'),
+        title: Text(l.dashEditTitle),
         actions: [
           TextButton(
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Restablecer orden'),
-                  content: const Text(
-                    '¿Restaurar la disposición por defecto del dashboard?',
-                  ),
+                  title: Text(l.layoutResetTitle),
+                  content: Text(l.dashEditResetConfirm),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
+                      child: Text(l.cancel),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Restablecer'),
+                      child: Text(l.resetLabel),
                     ),
                   ],
                 ),
@@ -69,20 +74,40 @@ class DashboardEditPage extends ConsumerWidget {
                 await ref.read(dashboardLayoutProvider.notifier).reset();
               }
             },
-            child: const Text('Restablecer'),
+            child: Text(l.resetLabel),
           ),
         ],
       ),
       body: sectionsAsync.when(
         loading: () => const GenericPageSkeleton(itemCount: 8, withHeader: true),
-        error: (e, _) =>
-            const Center(child: Text('Error cargando la configuración')),
+        error: (e, _) => Center(child: Text(l.layoutLoadError)),
         data: (sections) => Column(
           children: [
             Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: .10),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: cs.primary.withValues(alpha: .25)),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.dashboard_customize_rounded,
+                      color: cs.primary),
+                  title: Text(
+                    l.quickActionsEditTitle,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(l.quickActionsEditTileSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/quick-actions-edit'),
+                ),
+              ),
+            ),
+            Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Text(
-                'Arrastra   para reordenar · activa o desactiva cada sección',
+                l.layoutEditHint,
                 style: TextStyle(
                   fontSize: 13,
                   color: cs.onSurface.withValues(alpha: .55),
@@ -91,8 +116,12 @@ class DashboardEditPage extends ConsumerWidget {
             ),
             Expanded(
               child: ReorderableListView.builder(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: EdgeInsets.fromLTRB(
+                  12,
+                  4,
+                  12,
+                  16 + floatingNavBarClearance(context),
+                ),
                 itemCount: sections.length,
                 onReorder: (oldIndex, newIndex) => ref
                     .read(dashboardLayoutProvider.notifier)
@@ -110,7 +139,7 @@ class DashboardEditPage extends ConsumerWidget {
                     index: index,
                     section: section,
                     icon: _icon(section.id),
-                    label: _label(section.id),
+                    label: _label(l, section.id),
                     onToggle: () => ref
                         .read(dashboardLayoutProvider.notifier)
                         .toggleVisibility(section.id),
@@ -175,7 +204,7 @@ class _SectionTile extends StatelessWidget {
           subtitle: visible
               ? null
               : Text(
-                  'Oculta',
+                  AppLocalizations.of(context).hiddenLabel,
                   style: TextStyle(
                     fontSize: 12,
                     color: cs.onSurface.withValues(alpha: .4),

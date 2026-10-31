@@ -18,13 +18,13 @@ class FriendAvatar extends StatelessWidget {
       return CircleAvatar(
         radius: radius,
         backgroundImage: NetworkImage(avatarUrl!),
-        onBackgroundImageError: (_, __) {},
+        onBackgroundImageError: (_, _) {},
       );
     }
 
     return CircleAvatar(
       radius: radius,
-      backgroundColor: const Color(0xFFE53935).withOpacity(0.15),
+      backgroundColor: const Color(0xFFE53935).withValues(alpha: 0.15),
       child: Text(
         name.isNotEmpty ? name[0].toUpperCase() : '?',
         style: TextStyle(

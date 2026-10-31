@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../../core/notifiers/annual_goal_notifier.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 
@@ -59,10 +60,12 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
 
   void _showConcertsSheet(
       BuildContext context, List<Concert> yearConcerts, int year) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: cs.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -95,7 +98,7 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
                       color: Color(0xFFE53935), size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    'Mis conciertos de $year',
+                    l.annualGoalMyConcerts(year),
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
@@ -127,7 +130,7 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
               child: yearConcerts.isEmpty
                   ? Center(
                       child: Text(
-                        'Aún no has ido a ningún concierto en $year',
+                        l.annualGoalNoConcerts(year),
                         style: TextStyle(
                           color: cs.onSurface.withValues(alpha: 0.45),
                         ),
@@ -151,6 +154,7 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final year = DateTime.now().year;
     final userId = AuthController.instance.user?.id ?? '';
 
@@ -214,7 +218,7 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$done concierto${done != 1 ? 's' : ''} en $year',
+                      l.annualGoalDoneInYear(done, year),
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
@@ -222,7 +226,7 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Configura tu meta en Ajustes',
+                      l.annualGoalConfigure,
                       style: TextStyle(
                         fontSize: 12,
                         color: cs.onSurface.withValues(alpha: 0.5),
@@ -274,8 +278,8 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
                 Expanded(
                   child: Text(
                     reached
-                        ? '¡Meta alcanzada en $year! 🎉'
-                        : 'Meta $year: $_goal conciertos',
+                        ? l.annualGoalReached(year)
+                        : l.annualGoalProgressTitle(year, _goal!),
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -305,7 +309,7 @@ class _DashboardAnnualGoalState extends State<DashboardAnnualGoal> {
             if (!reached) ...[
               const SizedBox(height: 8),
               Text(
-                'Te quedan $remaining concierto${remaining != 1 ? 's' : ''} para conseguirlo',
+                l.annualGoalRemaining(remaining),
                 style: TextStyle(
                   fontSize: 11,
                   color: cs.onSurface.withValues(alpha: 0.45),

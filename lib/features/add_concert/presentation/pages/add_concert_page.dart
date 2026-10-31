@@ -10,7 +10,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../../core/responsive/responsive.dart';
+import '../../../../core/utils/artist_name_utils.dart';
 import '../../../../shared/widgets/app_page.dart';
 import '../../../concerts/data/models/concert_model.dart';
 import '../../../concerts/data/services/concert_api_service.dart';
@@ -77,6 +79,13 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   File? _selectedImage;
   String? _imageUrl;
 
+  /// Nombre normalizado del artista cuya foto de Spotify se puso sola.
+  /// null → la imagen actual (si la hay) la eligió el usuario.
+  String? _autoImageArtistKey;
+
+  /// Artista cuya foto automática quitó el usuario: no se vuelve a poner sola.
+  String? _dismissedImageArtistKey;
+
   bool _saving = false;
   int _soundRating = 0;
   int _atmosphereRating = 0;
@@ -113,7 +122,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
   void initState() {
     super.initState();
     _artistFocusNode.addListener(() {
-      if (!_artistFocusNode.hasFocus) _hideArtistOverlay();
+      if (!_artistFocusNode.hasFocus) {
+        _hideArtistOverlay();
+        _autofillFromSpotify();
+      }
     });
     _festivalController.addListener(() {
       final hasFest = _festivalController.text.trim().isNotEmpty;
@@ -189,28 +201,90 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
     // Pre-rellenar artista cuando se viene de importación Spotify
     if (widget.concert == null && widget.initialArtist != null) {
       _artistController.text = widget.initialArtist!;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _autofillFromSpotify();
+      });
     }
   }
 
-  /// Busca el género en Spotify cuando el artista pierde el foco.
-  /// Solo rellena si el campo está vacío.
-  Future<void> _suggestGenreFromSpotify() async {
+  /// ¿La imagen actual la ha elegido el usuario (galería) y no Spotify?
+  bool get _hasOwnImage =>
+      _selectedImage != null ||
+      ((_imageUrl ?? '').isNotEmpty && _autoImageArtistKey == null);
+
+  /// ¿Hay que buscar la foto de este artista? Solo al crear, sin imagen
+  /// elegida por el usuario y si no se ha puesto ya (o descartado) para él.
+  bool _wantsAutoImageFor(String artistName) {
+    if (widget.concert != null || _hasOwnImage) return false;
+    final key = normalizeArtistName(artistName);
+    return key.isNotEmpty &&
+        key != _autoImageArtistKey &&
+        key != _dismissedImageArtistKey;
+  }
+
+  /// Pone la foto de Spotify del artista como imagen del concierto. Si no hay
+  /// foto fiable, quita la automática del artista anterior. Nunca pisa una
+  /// imagen elegida por el usuario.
+  void _applyArtistImage(String artistName, SpotifyArtist? match,
+      {bool explicit = false}) {
+    if (!mounted || widget.concert != null || _hasOwnImage) return;
+    final key = normalizeArtistName(artistName);
+    if (explicit) _dismissedImageArtistKey = null;
+    final image = match?.image;
+    if (image == null || image.isEmpty) {
+      if (_autoImageArtistKey != null) {
+        setState(() {
+          _imageUrl = null;
+          _autoImageArtistKey = null;
+        });
+      }
+      return;
+    }
+    if (key == _dismissedImageArtistKey) return;
+    setState(() {
+      _imageUrl = image;
+      _autoImageArtistKey = key;
+    });
+  }
+
+  /// Al salir del campo artista (o al abrir con uno pre-rellenado) sugiere el
+  /// género y, al crear, la foto del artista desde Spotify. Solo rellena lo
+  /// que el usuario no ha puesto; la foto exige que el nombre coincida.
+  Future<void> _autofillFromSpotify() async {
     final artist = _artistController.text.trim();
-    if (artist.isEmpty || _genreController.text.trim().isNotEmpty) return;
-    setState(() => _fetchingGenre = true);
+    if (artist.isEmpty) {
+      if (_autoImageArtistKey != null) {
+        setState(() {
+          _imageUrl = null;
+          _autoImageArtistKey = null;
+        });
+      }
+      return;
+    }
+    final needGenre = _genreController.text.trim().isEmpty;
+    final needImage = _wantsAutoImageFor(artist);
+    if (!needGenre && !needImage) return;
+    if (needGenre) setState(() => _fetchingGenre = true);
     try {
-      final spotifyArtist = await _spotifyService.searchArtist(artist);
-      if (!mounted) return;
-      if (spotifyArtist != null && spotifyArtist.genres.isNotEmpty) {
+      final results = await _spotifyService.searchArtists(artist, limit: 5);
+      if (!mounted || _artistController.text.trim() != artist) return;
+      final exact =
+          results.where((a) => sameArtistName(a.name, artist)).firstOrNull;
+      final genreSource = exact ?? results.firstOrNull;
+      if (needGenre &&
+          _genreController.text.trim().isEmpty &&
+          genreSource != null &&
+          genreSource.genres.isNotEmpty) {
         // Capitaliza el primer género
-        final genre = spotifyArtist.genres.first
+        final genre = genreSource.genres.first
             .split(' ')
             .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
             .join(' ');
         setState(() => _genreController.text = genre);
       }
+      if (needImage) _applyArtistImage(artist, exact);
     } catch (_) {} finally {
-      if (mounted) setState(() => _fetchingGenre = false);
+      if (mounted && needGenre) setState(() => _fetchingGenre = false);
     }
   }
 
@@ -273,7 +347,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 itemCount: _artistSuggestions.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (_, i) {
                   final artist = _artistSuggestions[i];
                   return ListTile(
@@ -322,6 +396,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
           .join(' ');
       _genreController.text = genre;
     }
+    _applyArtistImage(artist.name, artist, explicit: true);
     _artistFocusNode.unfocus();
   }
 
@@ -379,6 +454,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
       setState(() {
         _selectedImage = File(image.path);
         _imageUrl = imageUrl;
+        _autoImageArtistKey = null;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l.imageUploadedSuccess)),
@@ -504,7 +580,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                   : null,
             ),
             onChanged: _onArtistTextChanged,
-            onEditingComplete: _suggestGenreFromSpotify,
+            onEditingComplete: _autofillFromSpotify,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return l.artistRequired;
@@ -517,8 +593,8 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
         TextFormField(
           controller: _genreController,
           decoration: InputDecoration(
-            labelText: '🎸 Género musical',
-            hintText: 'Rock, Pop, Metal, Jazz…',
+            labelText: l.addGenreLabel,
+            hintText: l.addGenreHint,
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(Icons.library_music_outlined),
             suffixIcon: _fetchingGenre
@@ -566,8 +642,8 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
             labelText: _hasFestival
-                ? 'Precio del festival'
-                : 'Precio de la entrada',
+                ? l.priceFestivalLabel
+                : l.priceTicketLabel,
             hintText: '0.00',
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(Icons.euro_rounded),
@@ -616,8 +692,8 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                 readOnly: true,
                 onTap: _selectTime,
                 decoration: InputDecoration(
-                  labelText: 'Hora',
-                  hintText: 'Opcional',
+                  labelText: l.timeLabel,
+                  hintText: l.optionalHint,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.access_time_rounded),
                   suffixIcon: _selectedTime != null
@@ -654,6 +730,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
               const SizedBox(width: 10),
               OutlinedButton.icon(
                 onPressed: () => setState(() {
+                  if (_autoImageArtistKey != null) {
+                    _dismissedImageArtistKey = _autoImageArtistKey;
+                    _autoImageArtistKey = null;
+                  }
                   _selectedImage = null;
                   _imageUrl = null;
                 }),
@@ -686,7 +766,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                         _imageUrl!,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _placeholderImage(),
+                        errorBuilder: (_, _, _) => _placeholderImage(),
                       )
                     : _placeholderImage(),
           ),
@@ -702,6 +782,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
           ? '➕ ${l.addConcertTitle}'
           : '✏️ ${l.editConcertTitle}',
       child: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: floatingNavBarClearance(context)),
         child: Form(
           key: _formKey,
           child: Column(
@@ -758,9 +839,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                     // ── Valoración ────────────────────────────────────
                     Row(
                       children: [
-                        const Text(
-                          'Valoración',
-                          style: TextStyle(
+                        Text(
+                          l.ratingTitle,
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -789,9 +870,9 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                           ),
                         ] else
                           Text(
-                            'Sin valorar',
+                            l.ratingNone,
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                               fontSize: 13,
                             ),
                           ),
@@ -799,10 +880,10 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'La valoración general se calcula como la media de los criterios.',
+                      l.ratingAutoNote,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -816,7 +897,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                           children: [
                             _SubRatingRow(
                               icon: Icons.mic_external_on_rounded,
-                              label: 'Artista',
+                              label: l.ratingCriterionArtist,
                               value: _artistRating,
                               onChanged: (v) =>
                                   setState(() => _artistRating = v),
@@ -824,7 +905,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                             const Divider(height: 1),
                             _SubRatingRow(
                               icon: Icons.volume_up_rounded,
-                              label: 'Sonido',
+                              label: l.ratingCriterionSound,
                               value: _soundRating,
                               onChanged: (v) =>
                                   setState(() => _soundRating = v),
@@ -832,7 +913,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                             const Divider(height: 1),
                             _SubRatingRow(
                               icon: Icons.people_rounded,
-                              label: 'Ambiente',
+                              label: l.ratingCriterionAtmosphere,
                               value: _atmosphereRating,
                               onChanged: (v) =>
                                   setState(() => _atmosphereRating = v),
@@ -840,7 +921,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                             const Divider(height: 1),
                             _SubRatingRow(
                               icon: Icons.queue_music_rounded,
-                              label: 'Setlist',
+                              label: l.ratingCriterionSetlist,
                               value: _setlistRating,
                               onChanged: (v) =>
                                   setState(() => _setlistRating = v),
@@ -848,7 +929,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                             const Divider(height: 1),
                             _SubRatingRow(
                               icon: Icons.attach_money_rounded,
-                              label: 'Precio / valor',
+                              label: l.ratingCriterionValue,
                               value: _valueRating,
                               onChanged: (v) =>
                                   setState(() => _valueRating = v),
@@ -893,7 +974,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                                     ? Colors.blueAccent
                                     : Theme.of(
                                         context,
-                                      ).colorScheme.onSurface.withOpacity(0.6),
+                                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                           ),
@@ -939,7 +1020,7 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                                     ? Colors.amber
                                     : Theme.of(
                                         context,
-                                      ).colorScheme.onSurface.withOpacity(0.6),
+                                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                           ),
@@ -956,8 +1037,8 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                 controller: _notesController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  labelText: '📝 Notas / diario',
-                  hintText: '¿Qué recordás de este concierto?',
+                  labelText: l.notesDiaryLabel,
+                  hintText: l.notesDiaryHint,
                   border: const OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
@@ -972,11 +1053,11 @@ class _AddConcertPageState extends ConsumerState<AddConcertPage> {
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
                   ),
-                  title: const Text('Visible para mis amigos'),
+                  title: Text(l.visibleToFriendsTitle),
                   subtitle: Text(
                     _visibleToFriends
-                        ? 'Aparece en tu feed de amigos y en las comparativas'
-                        : 'Solo tú lo verás — oculto para tus amigos',
+                        ? l.visibleToFriendsOn
+                        : l.visibleToFriendsOff,
                   ),
                   value: _visibleToFriends,
                   onChanged: (v) => setState(() => _visibleToFriends = v),
@@ -1068,7 +1149,7 @@ class _SubRatingRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: cs.onSurface.withOpacity(0.6)),
+          Icon(icon, size: 20, color: cs.onSurface.withValues(alpha: 0.6)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
@@ -1086,7 +1167,7 @@ class _SubRatingRow extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: Icon(
                     active ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: active ? Colors.amber : cs.onSurface.withOpacity(0.25),
+                    color: active ? Colors.amber : cs.onSurface.withValues(alpha: 0.25),
                     size: 26,
                   ),
                 ),

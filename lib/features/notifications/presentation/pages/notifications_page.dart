@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../data/models/app_notification_model.dart';
+import '../../domain/notification_target.dart';
 import '../controllers/notifications_controller.dart';
 import '../../../../shared/widgets/skeletons/generic_page_skeleton.dart';
 import '../../../friends/presentation/widgets/friend_avatar.dart';
@@ -62,7 +63,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -92,11 +92,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ? EmptyState(
               emoji: '🔔',
               title: l.noNotifications,
-              subtitle: 'Aquí aparecerán tus avisos y actividad de amigos',
+              subtitle: l.notificationsEmptyHint,
             )
           : ListView.separated(
               itemCount: _ctrl.notifications.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (_, i) {
                 final n = _ctrl.notifications[i];
                 return Dismissible(
@@ -145,6 +145,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       case 'FRIEND_ACCEPTED':
         context.push('/friends');
         break;
+      case 'ANNOUNCEMENT':
+        NotificationTarget.open(data['target']?.toString()).ignore();
+        break;
     }
   }
 }
@@ -169,6 +172,8 @@ class _NotificationTile extends StatelessWidget {
         return Icons.queue_music_rounded;
       case 'CONCERT_COMMENT':
         return Icons.chat_bubble_outline_rounded;
+      case 'ANNOUNCEMENT':
+        return Icons.campaign_rounded;
       default:
         return Icons.notifications_rounded;
     }
@@ -183,7 +188,7 @@ class _NotificationTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: unread ? red.withOpacity(0.06) : null,
+        color: unread ? red.withValues(alpha: 0.06) : null,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +201,7 @@ class _NotificationTile extends StatelessWidget {
                   )
                 : CircleAvatar(
                     radius: 22,
-                    backgroundColor: red.withOpacity(0.12),
+                    backgroundColor: red.withValues(alpha: 0.12),
                     child: Icon(_icon(), color: red, size: 20),
                   ),
 
@@ -218,17 +223,17 @@ class _NotificationTile extends StatelessWidget {
                     notification.body,
                     style: TextStyle(
                       fontSize: 13,
-                      color: cs.onSurface.withOpacity(0.6),
+                      color: cs.onSurface.withValues(alpha: 0.6),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    timeago.format(notification.createdAt, locale: 'es'),
+                    timeago.format(notification.createdAt, locale: Localizations.localeOf(context).languageCode),
                     style: TextStyle(
                       fontSize: 11,
-                      color: cs.onSurface.withOpacity(0.4),
+                      color: cs.onSurface.withValues(alpha: 0.4),
                     ),
                   ),
                 ],

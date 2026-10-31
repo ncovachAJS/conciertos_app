@@ -1,7 +1,12 @@
 class ApiConfig {
   ApiConfig._();
 
-  static const String baseUrl = 'https://conciertos-backend.onrender.com';
+  /// Por defecto apunta a producción. Para desarrollo:
+  ///   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://conciertos-backend.onrender.com',
+  );
 
   static const String concertsEndpoint = '$baseUrl/concerts';
   static const String friendsActivityEndpoint = '$baseUrl/concerts/friends-activity';
@@ -27,6 +32,16 @@ class ApiConfig {
       '$baseUrl/friends/$friendId/concerts';
   static String friendStatsEndpoint(String friendId) =>
       '$baseUrl/friends/$friendId/stats';
+
+  // Panel de administración (solo usuarios con isAdmin)
+  static const String adminStatsEndpoint = '$baseUrl/admin/stats';
+  static const String adminBroadcastEndpoint = '$baseUrl/admin/broadcast';
+  static const String adminBroadcastPreviewEndpoint =
+      '$baseUrl/admin/broadcast/preview';
+  static const String adminVersionsEndpoint = '$baseUrl/admin/versions';
+  static const String adminUsersEndpoint = '$baseUrl/admin/users';
+  static String adminUserProEndpoint(String userId) =>
+      '$baseUrl/admin/users/$userId/pro';
 
   // Quiero ir
   static const String wantToAttendEndpoint = '$baseUrl/want-to-attend';
@@ -54,4 +69,16 @@ class ApiConfig {
   static String photoEndpoint(String photoId) => '$baseUrl/photos/$photoId';
   static String photoTagEndpoint(String photoId, String friendId) =>
       '$baseUrl/photos/$photoId/tag/$friendId';
+
+  // Colección de discos (proxy Discogs en backend)
+  static const String recordsEndpoint = '$baseUrl/records';
+  static const String recordsSearchEndpoint = '$baseUrl/records/search';
+  static String recordEndpoint(String id) => '$baseUrl/records/$id';
+
+  // Vinculación OAuth con Discogs
+  static const String discogsStartEndpoint = '$baseUrl/discogs/connect/start';
+  static const String discogsFinishEndpoint = '$baseUrl/discogs/connect/finish';
+  static const String discogsStatusEndpoint = '$baseUrl/discogs/status';
+  static const String discogsImportEndpoint = '$baseUrl/discogs/import';
+  static const String discogsConnectionEndpoint = '$baseUrl/discogs/connection';
 }

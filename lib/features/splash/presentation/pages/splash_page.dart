@@ -1,6 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:conciertos_app/core/initialization/app_initializer.dart';
-import 'package:conciertos_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:conciertos_app/features/concerts/presentation/providers/concerts_provider.dart';
 import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:conciertos_app/core/utils/user_prefs.dart';
 
 import '../widgets/splash_progress.dart';
 
@@ -29,7 +29,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
   late Animation<Offset> _titleSlideAnimation;
 
   final AudioPlayer _crowdPlayer = AudioPlayer();
-  final _authController = AuthController.instance;
 
   // AppInitializer recibe un callback que pre-calienta el provider.
   // Con ref.read(concertsProvider.future) el notifier arranca build()
@@ -79,7 +78,8 @@ class _SplashPageState extends ConsumerState<SplashPage>
   Future<void> _playCrowd() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final enabled = prefs.getBool(_kSplashSound) ?? true;
+      await UserPrefs.claimLegacy(prefs, _kSplashSound);
+      final enabled = prefs.getBool(UserPrefs.key(_kSplashSound)) ?? true;
       if (!enabled) return;
 
       await _crowdPlayer.setReleaseMode(ReleaseMode.stop);
@@ -156,7 +156,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
           ),
 
           Container(
-            decoration: BoxDecoration(color: Colors.black.withOpacity(0.50)),
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.50)),
           ),
 
           SafeArea(

@@ -40,6 +40,7 @@ class _SpotifyImportPageState extends ConsumerState<SpotifyImportPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final artistsAsync = ref.watch(spotifyTopArtistsProvider);
     final cs = Theme.of(context).colorScheme;
 
@@ -50,9 +51,9 @@ class _SpotifyImportPageState extends ConsumerState<SpotifyImportPage> {
           children: [
             _SpotifyLogo(size: 22),
             const SizedBox(width: 8),
-            const Flexible(
+            Flexible(
               child: Text(
-                'Importar desde Spotify',
+                l.importFromSpotifyTitle,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -64,7 +65,7 @@ class _SpotifyImportPageState extends ConsumerState<SpotifyImportPage> {
             data: (artists) => artists.isNotEmpty
                 ? IconButton(
                     icon: const Icon(Icons.logout_rounded),
-                    tooltip: 'Desconectar Spotify',
+                    tooltip: l.spotifyDisconnect,
                     onPressed: () =>
                         ref.read(spotifyTopArtistsProvider.notifier).logout(),
                   )
@@ -127,7 +128,7 @@ class _ConnectPromptState extends State<_ConnectPrompt> {
             _SpotifyLogo(size: 72),
             const SizedBox(height: 28),
             Text(
-              'Conecta tu cuenta de Spotify',
+              AppLocalizations.of(context).spotifyConnectTitle,
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -137,7 +138,7 @@ class _ConnectPromptState extends State<_ConnectPrompt> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Verás tus artistas más escuchados y podrás añadir conciertos con un toque.',
+              AppLocalizations.of(context).spotifyImportConnectDesc,
               style: TextStyle(
                 fontSize: 15,
                 color: cs.onSurface.withValues(alpha: .6),
@@ -170,7 +171,7 @@ class _ConnectPromptState extends State<_ConnectPrompt> {
                     )
                   : _SpotifyLogo(size: 20),
               label: Text(
-                _loading ? 'Conectando…' : 'Conectar con Spotify',
+                _loading ? AppLocalizations.of(context).spotifyConnecting : AppLocalizations.of(context).spotifyConnect,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -203,7 +204,7 @@ class _ArtistGrid extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tus artistas favoritos',
+                  AppLocalizations.of(context).spotifyYourFavoriteArtists,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -212,7 +213,7 @@ class _ArtistGrid extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Toca un artista para añadir un concierto',
+                  AppLocalizations.of(context).spotifyTapArtistHint,
                   style: TextStyle(
                     fontSize: 14,
                     color: cs.onSurface.withValues(alpha: .55),
@@ -262,11 +263,11 @@ class _ArtistCard extends StatelessWidget {
                       imageUrl: artist.imageUrl!,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (_, __) => Container(
+                      placeholder: (_, _) => Container(
                         color: cs.surfaceContainerHighest,
                         child: const Icon(Icons.person_rounded, size: 40),
                       ),
-                      errorWidget: (_, __, ___) =>
+                      errorWidget: (_, _, _) =>
                           _ArtistPlaceholder(name: artist.name, cs: cs),
                     )
                   : _ArtistPlaceholder(name: artist.name, cs: cs),
@@ -339,7 +340,7 @@ class _ErrorState extends StatelessWidget {
                 size: 56, color: cs.error.withValues(alpha: .7)),
             const SizedBox(height: 16),
             Text(
-              'No se pudo conectar con Spotify',
+              AppLocalizations.of(context).spotifyConnectError,
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -359,7 +360,7 @@ class _ErrorState extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Reintentar'),
+              label: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),

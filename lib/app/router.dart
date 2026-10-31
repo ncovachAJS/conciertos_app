@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/concerts/presentation/providers/concerts_provider.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../shared/widgets/skeletons/generic_page_skeleton.dart';
 
 import '../features/profile/presentation/pages/profile_page.dart';
@@ -16,11 +17,17 @@ import '../features/profile/presentation/pages/settings_page.dart';
 import '../features/profile/presentation/pages/report_issue_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/home/presentation/pages/dashboard_edit_page.dart';
+import '../features/home/presentation/pages/quick_actions_edit_page.dart';
 import '../features/settings/presentation/pages/color_theme_picker_page.dart';
 import '../features/statistics/presentation/pages/stats_edit_page.dart';
 import '../features/statistics/presentation/pages/annual_summary_page.dart';
 import '../features/setlist/presentation/pages/setlist_test_page.dart';
 import '../features/import/presentation/pages/import_page.dart';
+import '../features/admin/presentation/pages/admin_page.dart';
+import '../features/records/presentation/pages/discogs_link_page.dart';
+import '../features/records/presentation/pages/records_page.dart';
+import '../features/records/presentation/pages/record_search_page.dart';
+import '../features/records/presentation/pages/record_detail_page.dart';
 import '../features/photos/presentation/pages/feed_page.dart';
 import '../features/friends_activity/presentation/pages/friends_activity_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
@@ -61,12 +68,18 @@ final appRouter = GoRouter(
         return AppShell(child: child);
       },
       routes: [
-        GoRoute(path: '/', builder: (context, state) => const HomePage()),
+        GoRoute(
+          path: '/',
+          pageBuilder: (context, state) =>
+              const NoTransitionPage(child: HomePage()),
+        ),
         GoRoute(
           path: '/concerts',
-          builder: (context, state) => ConcertsPage(
-            openCalendar:
-                state.uri.queryParameters['view'] == 'calendar',
+          pageBuilder: (context, state) => NoTransitionPage(
+            child: ConcertsPage(
+              openCalendar:
+                  state.uri.queryParameters['view'] == 'calendar',
+            ),
           ),
         ),
         GoRoute(
@@ -87,26 +100,39 @@ final appRouter = GoRouter(
         ),
         GoRoute(
           path: '/add',
-          builder: (context, state) {
+          pageBuilder: (context, state) {
             final extra = state.extra;
-            if (extra is Concert) return AddConcertPage(concert: extra);
-            if (extra is DateTime) return AddConcertPage(initialDate: extra);
-            if (extra is String) return AddConcertPage(initialArtist: extra);
-            return const AddConcertPage();
+            final Widget page;
+            if (extra is Concert) {
+              page = AddConcertPage(concert: extra);
+            } else if (extra is DateTime) {
+              page = AddConcertPage(initialDate: extra);
+            } else if (extra is String) {
+              page = AddConcertPage(initialArtist: extra);
+            } else {
+              page = const AddConcertPage();
+            }
+            return NoTransitionPage(child: page);
           },
         ),
-        GoRoute(path: '/feed', builder: (context, state) => const FeedPage()),
+        GoRoute(
+          path: '/feed',
+          pageBuilder: (context, state) =>
+              const NoTransitionPage(child: FeedPage()),
+        ),
         GoRoute(
           path: '/friends-activity',
           builder: (context, state) => const FriendsActivityPage(),
         ),
         GoRoute(
           path: '/favorites',
-          builder: (context, state) => const FavoritesPage(),
+          pageBuilder: (context, state) =>
+              const NoTransitionPage(child: FavoritesPage()),
         ),
         GoRoute(
           path: '/statistics',
-          builder: (context, state) => const StatisticsPage(),
+          pageBuilder: (context, state) =>
+              const NoTransitionPage(child: StatisticsPage()),
         ),
         GoRoute(
           path: '/settings',
@@ -115,6 +141,29 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/report-issue',
           builder: (context, state) => const ReportIssuePage(),
+        ),
+        GoRoute(
+          path: '/admin',
+          builder: (context, state) => const AdminPage(),
+        ),
+        GoRoute(
+          path: '/records',
+          builder: (context, state) => const RecordsPage(),
+        ),
+        GoRoute(
+          path: '/records/discogs',
+          builder: (context, state) => const DiscogsLinkPage(),
+        ),
+        GoRoute(
+          path: '/records/search',
+          builder: (context, state) => RecordSearchPage(
+            wishlist: state.uri.queryParameters['wishlist'] == '1',
+          ),
+        ),
+        GoRoute(
+          path: '/record/:id',
+          builder: (context, state) =>
+              RecordDetailPage(recordId: state.pathParameters['id']!),
         ),
         GoRoute(
           path: '/import',
@@ -170,6 +219,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/dashboard-edit',
           builder: (context, state) => const DashboardEditPage(),
+        ),
+        GoRoute(
+          path: '/quick-actions-edit',
+          builder: (context, state) => const QuickActionsEditPage(),
         ),
         GoRoute(
           path: '/color-theme',
@@ -241,21 +294,22 @@ class _ConcertDetailById extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final concertsAsync = ref.watch(concertsProvider);
 
     return concertsAsync.when(
       loading: () => const Scaffold(
         body: GenericPageSkeleton(itemCount: 4, withHeader: true),
       ),
-      error: (_, __) => Scaffold(
+      error: (_, _) => Scaffold(
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('No se encontró el concierto'),
+              Text(l.concertNotFoundError),
               TextButton(
                 onPressed: () => context.go('/'),
-                child: const Text('Volver'),
+                child: Text(l.backLabel),
               ),
             ],
           ),
@@ -273,17 +327,17 @@ class _ConcertDetailById extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Concierto no encontrado'),
+                  Text(l.concertNotFoundTitle),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Puede que ya no formes parte de este concierto',
+                  Text(
+                    l.concertNotFoundHint,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () => context.go('/'),
-                    child: const Text('Volver'),
+                    child: Text(l.backLabel),
                   ),
                 ],
               ),

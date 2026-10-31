@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:conciertos_app/l10n/generated/app_localizations.dart';
 
+import '../../../../app/app_shell.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../concerts/domain/entities/concert.dart';
 import '../../../concerts/presentation/providers/concerts_provider.dart';
@@ -19,6 +21,7 @@ class CompareStatsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
     final allMyConcerts = ref.watch(concertsProvider).asData?.value ?? [];
 
@@ -26,10 +29,10 @@ class CompareStatsPage extends ConsumerWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final currentUserId = AuthController.instance.user?.id ?? '';
-    final currentUserName = AuthController.instance.user?.name ?? 'Tú';
+    final currentUserName = AuthController.instance.user?.name ?? l.youLabel;
 
     // Incluir propios + compartidos, deduplicar por artista+fecha
-    final _pastAll = allMyConcerts.where((c) => c.date.isBefore(today)).toList()
+    final pastAll = allMyConcerts.where((c) => c.date.isBefore(today)).toList()
       ..sort((a, b) {
         // Propios primero para que la versión propia gane en deduplicación
         final aOwn = (a.userId == currentUserId || a.userId.isEmpty) ? 0 : 1;
@@ -37,28 +40,28 @@ class CompareStatsPage extends ConsumerWidget {
         return aOwn.compareTo(bOwn);
       });
 
-    final _seenKeys = <String>{};
+    final seenKeys = <String>{};
     final myConcerts = <Concert>[];
-    for (final c in _pastAll) {
+    for (final c in pastAll) {
       final key =
           '${c.artist.trim().toLowerCase()}_${DateTime(c.date.year, c.date.month, c.date.day)}';
-      if (_seenKeys.add(key)) myConcerts.add(c);
+      if (seenKeys.add(key)) myConcerts.add(c);
     }
 
     // Deduplicar conciertos del amigo por artista+fecha (propios ganan sobre compartidos)
-    final _friendSorted = friendConcerts.where((c) => c.date.isBefore(today)).toList()
+    final friendSorted = friendConcerts.where((c) => c.date.isBefore(today)).toList()
       ..sort((a, b) {
         final aOwn = a.userId == friend.id ? 0 : 1;
         final bOwn = b.userId == friend.id ? 0 : 1;
         return aOwn.compareTo(bOwn);
       });
 
-    final _friendSeenKeys = <String>{};
+    final friendSeenKeys = <String>{};
     final friendPast = <Concert>[];
-    for (final c in _friendSorted) {
+    for (final c in friendSorted) {
       final key =
           '${c.artist.trim().toLowerCase()}_${DateTime(c.date.year, c.date.month, c.date.day)}';
-      if (_friendSeenKeys.add(key)) friendPast.add(c);
+      if (friendSeenKeys.add(key)) friendPast.add(c);
     }
 
     final myStats = _ConcertStats(myConcerts);
@@ -111,12 +114,17 @@ class CompareStatsPage extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Tú vs ${friend.name.split(' ').first}',
+          l.compareStatsAppBarTitle(l.youLabel, friend.name.split(' ').first),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          0,
+          20,
+          40 + floatingNavBarClearance(context),
+        ),
         children: [
           // ── Cabecera con avatares ────────────────────────────────────────
           _CompareHeader(
@@ -128,20 +136,21 @@ class CompareStatsPage extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // ── Tabla de estadísticas ────────────────────────────────────────
-          _SectionTitle(title: 'ESTADÍSTICAS', icon: Icons.bar_chart_rounded),
+          _SectionTitle(title: l.statisticsSection, icon: Icons.bar_chart_rounded),
           const SizedBox(height: 12),
           _StatsTable(
             myStats: myStats,
             friendStats: friendStats,
             friendName: friend.name.split(' ').first,
             cs: cs,
+            l: l,
           ),
           const SizedBox(height: 28),
 
           // ── Artistas en común ────────────────────────────────────────────
           if (commonArtists.isNotEmpty) ...[
             _SectionTitle(
-              title: 'ARTISTAS EN COMÚN',
+              title: l.commonArtistsTitle,
               icon: Icons.favorite_rounded,
               color: Colors.pinkAccent,
             ),
@@ -157,7 +166,7 @@ class CompareStatsPage extends ConsumerWidget {
           // ── Solo yo ──────────────────────────────────────────────────────
           if (onlyMyArtists.isNotEmpty) ...[
             _SectionTitle(
-              title: 'SOLO TÚ HAS VISTO',
+              title: l.onlyYouSawTitle,
               icon: Icons.person_rounded,
               color: const Color(0xFF42A5F5),
             ),
@@ -173,7 +182,7 @@ class CompareStatsPage extends ConsumerWidget {
           // ── Solo el amigo ────────────────────────────────────────────────
           if (onlyFriendArtists.isNotEmpty) ...[
             _SectionTitle(
-              title: 'SOLO ${friend.name.split(' ').first.toUpperCase()} HA VISTO',
+              title: l.onlyFriendSawTitle(friend.name.split(' ').first.toUpperCase()),
               icon: Icons.person_rounded,
               color: Colors.deepPurpleAccent,
             ),
@@ -265,7 +274,7 @@ class _CompareHeader extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: const Color(0xFFE53935).withOpacity(0.2),
+                  backgroundColor: const Color(0xFFE53935).withValues(alpha: 0.2),
                   backgroundImage: (myAvatarUrl != null && myAvatarUrl!.isNotEmpty)
                       ? NetworkImage(myAvatarUrl!)
                       : null,
@@ -298,11 +307,11 @@ class _CompareHeader extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
-              'VS',
+              AppLocalizations.of(context).vsLabel,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
-                color: cs.onSurface.withOpacity(0.4),
+                color: cs.onSurface.withValues(alpha: 0.4),
                 letterSpacing: 2,
               ),
             ),
@@ -345,33 +354,35 @@ class _StatsTable extends StatelessWidget {
   final _ConcertStats friendStats;
   final String friendName;
   final ColorScheme cs;
+  final AppLocalizations l;
 
   const _StatsTable({
     required this.myStats,
     required this.friendStats,
     required this.friendName,
     required this.cs,
+    required this.l,
   });
 
   @override
   Widget build(BuildContext context) {
     final rows = [
       _StatRow(
-        label: 'Total conciertos',
+        label: l.compareTotalConcertsLabel,
         myValue: '${myStats.total}',
         friendValue: '${friendStats.total}',
         myWins: myStats.total > friendStats.total,
         friendWins: friendStats.total > myStats.total,
       ),
       _StatRow(
-        label: 'Artistas únicos',
+        label: l.compareUniqueArtistsLabel,
         myValue: '${myStats.uniqueArtists}',
         friendValue: '${friendStats.uniqueArtists}',
         myWins: myStats.uniqueArtists > friendStats.uniqueArtists,
         friendWins: friendStats.uniqueArtists > myStats.uniqueArtists,
       ),
       _StatRow(
-        label: 'Media rating',
+        label: l.compareAvgRatingLabel,
         myValue: myStats.avgRating > 0
             ? '${myStats.avgRating.toStringAsFixed(1)} ⭐'
             : '—',
@@ -382,14 +393,14 @@ class _StatsTable extends StatelessWidget {
         friendWins: friendStats.avgRating > myStats.avgRating,
       ),
       _StatRow(
-        label: 'Este año',
+        label: l.compareThisYearLabel,
         myValue: '${myStats.thisYear}',
         friendValue: '${friendStats.thisYear}',
         myWins: myStats.thisYear > friendStats.thisYear,
         friendWins: friendStats.thisYear > myStats.thisYear,
       ),
       _StatRow(
-        label: 'Artista top',
+        label: l.compareTopArtistLabel,
         myValue: myStats.topArtist,
         friendValue: friendStats.topArtist,
         myWins: false,
@@ -410,7 +421,7 @@ class _StatsTable extends StatelessWidget {
                 height: 1,
                 indent: 16,
                 endIndent: 16,
-                color: cs.onSurface.withOpacity(0.08),
+                color: cs.onSurface.withValues(alpha: 0.08),
               ),
             _StatsTableRow(row: rows[i], cs: cs),
           ],
@@ -473,7 +484,7 @@ class _StatsTableRow extends StatelessWidget {
               row.label,
               style: TextStyle(
                 fontSize: 11,
-                color: cs.onSurface.withOpacity(0.5),
+                color: cs.onSurface.withValues(alpha: 0.5),
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
@@ -529,8 +540,8 @@ class _ArtistChipsList extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          backgroundColor: color.withOpacity(0.1),
-          side: BorderSide(color: color.withOpacity(0.3)),
+          backgroundColor: color.withValues(alpha: 0.1),
+          side: BorderSide(color: color.withValues(alpha: 0.3)),
           padding: const EdgeInsets.symmetric(horizontal: 4),
         );
       }).toList(),
@@ -555,7 +566,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.54);
+    final c = color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54);
     return Row(
       children: [
         Icon(icon, color: c, size: 18),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -5,6 +7,18 @@ import '../core/responsive/responsive.dart';
 import '../features/friends/presentation/controllers/friends_controller.dart';
 import '../features/notifications/presentation/controllers/notifications_controller.dart';
 import '../l10n/generated/app_localizations.dart';
+
+/// Espacio que debe reservar el final del scroll de cada página en
+/// iPhone/Android para que su contenido no quede tapado detrás de la barra
+/// flotante de navegación (ver _BottomPillNavBar). Incluye el inset de
+/// seguridad del home indicator, que la propia barra también añade.
+/// En iPad no hace falta: ahí la navegación es un AppBar superior, no una
+/// barra flotante al fondo.
+double floatingNavBarClearance(BuildContext context) {
+  if (Responsive.isTablet(context)) return 0;
+  final bottomInset = MediaQuery.of(context).padding.bottom;
+  return bottomInset + 79.0;
+}
 
 class AppShell extends StatefulWidget {
   final Widget child;
@@ -87,13 +101,35 @@ class _AppShellState extends State<AppShell> {
     }
 
     // ── iPhone / Android: pill flotante al fondo ────────────────────────────
+    // No usamos bottomNavigationBar/extendBody: con un Scaffold anidado
+    // dentro de widget.child (p. ej. AppPage), ese mecanismo no garantiza
+    // que el contenido real llegue a pintarse detrás de la barra. En vez de
+    // eso, el contenido ocupa el 100% de la pantalla y la barra flota
+    // encima como overlay directo en el mismo Stack — así el blur siempre
+    // tiene algo real debajo que difuminar.
+    //
+    // Importante: NO recortamos aquí la altura de widget.child con un
+    // Padding — eso dejaría un hueco con el fondo liso del Scaffold detrás
+    // de la barra en vez de contenido real, y se vería como si la barra
+    // tuviera un fondo sólido. El espacio de respiro para que el scroll no
+    // termine tapado va dentro de cada página (su propio scroll bottom
+    // padding), usando kFloatingNavBarClearance.
     return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: _BottomPillNavBar(
-        selectedIndex: idx,
-        labels: labels,
-        unreadCount: unread,
-        onTap: (i) => _navigate(context, i),
+      body: Stack(
+        children: [
+          Positioned.fill(child: widget.child),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _BottomPillNavBar(
+              selectedIndex: idx,
+              labels: labels,
+              unreadCount: unread,
+              onTap: (i) => _navigate(context, i),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -265,9 +301,10 @@ class _BottomPillNavBar extends StatelessWidget {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-        child: Container(
+        child: DecoratedBox(
+          // La sombra va en una capa aparte: si viviera dentro del
+          // ClipRRect que recorta el blur, se recortaría con él.
           decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(26),
             boxShadow: [
               BoxShadow(
@@ -277,76 +314,96 @@ class _BottomPillNavBar extends StatelessWidget {
               ),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-            child: Row(
-              children: List.generate(labels.length, (i) {
-                final selected = i == selectedIndex;
-                final hasUnread = i == 0 && unreadCount > 0;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => onTap(i),
-                    behavior: HitTestBehavior.opaque,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeInOut,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? cs.surface.withValues(alpha: 0.85)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Icon(
-                                selected
-                                    ? _filledIcons[i]
-                                    : _outlinedIcons[i],
-                                size: 24,
-                                color: selected
-                                    ? cs.onSurface
-                                    : cs.onSurface.withValues(alpha: 0.45),
-                              ),
-                              if (hasUnread)
-                                Positioned(
-                                  top: -2,
-                                  right: -4,
-                                  child: Container(
-                                    width: 7,
-                                    height: 7,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFE53935),
-                                      shape: BoxShape.circle,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(26),
+            child: BackdropFilter(
+              // Menos opacidad que antes (0.72 → 0.4): con tanto cuerpo de
+              // color, el blur quedaba oculto detrás y la barra se veía
+              // como una cápsula sólida en vez de cristal esmerilado real
+              // (tipo WhatsApp), donde se distinguen formas de lo que hay
+              // detrás difuminado.
+              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(26),
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  child: Row(
+                    children: List.generate(labels.length, (i) {
+                      final selected = i == selectedIndex;
+                      final hasUnread = i == 0 && unreadCount > 0;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => onTap(i),
+                          behavior: HitTestBehavior.opaque,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeInOut,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? cs.surface.withValues(alpha: 0.85)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Icon(
+                                      selected
+                                          ? _filledIcons[i]
+                                          : _outlinedIcons[i],
+                                      size: 24,
+                                      color: selected
+                                          ? cs.onSurface
+                                          : cs.onSurface
+                                              .withValues(alpha: 0.45),
                                     ),
+                                    if (hasUnread)
+                                      Positioned(
+                                        top: -2,
+                                        right: -4,
+                                        child: Container(
+                                          width: 7,
+                                          height: 7,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFE53935),
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  labels[i],
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: selected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                    color: selected
+                                        ? cs.onSurface
+                                        : cs.onSurface
+                                            .withValues(alpha: 0.45),
                                   ),
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            labels[i],
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: selected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: selected
-                                  ? cs.onSurface
-                                  : cs.onSurface.withValues(alpha: 0.45),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    }),
                   ),
-                );
-              }),
+                ),
+              ),
             ),
           ),
         ),
