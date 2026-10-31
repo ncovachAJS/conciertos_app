@@ -321,46 +321,89 @@ h1 {
   .billing-countdown { font-size: 36px; }
 }
 
-<<<<<<< HEAD
-@media (max-width: 480px) {
-  .global-sub { display: none; }
-=======
+/* ── App Stats ── */
+.stats-kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 14px; }
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.kpi-label { font-size: 11px; font-weight: 600; color: var(--fg-muted); letter-spacing: .07em; text-transform: uppercase; }
+.kpi-value { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1; }
+.kpi-sub   { font-size: 11px; color: var(--fg-muted); }
+.kpi-value.green { color: var(--green); }
+.kpi-value.gold  { color: var(--gold); }
+.kpi-value.accent { color: var(--accent); }
+
+.stats-users-list { margin-top: 16px; }
+.stats-users-title { font-size: 12px; font-weight: 700; color: var(--fg-muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.user-row:last-child { border-bottom: none; }
+.user-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  object-fit: cover;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--fg-muted);
+  overflow: hidden;
+}
+.user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.user-info { flex: 1; min-width: 0; }
+.user-name  { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-email { font-size: 11px; color: var(--fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .05em;
+  padding: 2px 7px; border-radius: 20px;
+  background: rgba(201,162,39,.15); color: var(--gold);
+  flex-shrink: 0;
+}
+.user-badge.admin { background: rgba(232,73,26,.15); color: var(--accent); }
+.user-concerts { font-size: 11px; color: var(--fg-muted); flex-shrink: 0; }
+
+.stats-signup-chart { margin-top: 16px; }
+.chart-bars { display: flex; align-items: flex-end; gap: 3px; height: 60px; }
+.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.chart-bar { width: 100%; background: var(--accent); border-radius: 3px 3px 0 0; min-height: 2px; opacity: .8; transition: opacity .15s; }
+.chart-bar:hover { opacity: 1; }
+.chart-label { font-size: 9px; color: var(--fg-muted); text-align: center; white-space: nowrap; }
+
 @media (max-width: 600px) {
   body { font-size: 17px; padding-block: 20px; }
 
-  /* header: stack vertically */
   .header { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 24px; }
-  .btn-refresh {
-    width: 100%;
-    justify-content: center;
-    font-size: 15px;
-    padding: 13px 16px;
-  }
+  .btn-refresh { width: 100%; justify-content: center; font-size: 15px; padding: 13px 16px; }
   h1 { font-size: 26px; }
   .app-label { font-size: 12px; }
   .last-updated { font-size: 13px; }
 
-  /* global bar */
   .global-bar { padding: 16px 18px; gap: 12px; }
   .global-dot { width: 14px; height: 14px; }
   .global-text { font-size: 16px; }
   .global-sub { display: none; }
 
-  /* grid: 1 column */
   .grid { grid-template-columns: 1fr; gap: 12px; }
 
-  /* cards */
   .card { padding: 20px; gap: 14px; }
   .card-name { font-size: 18px; }
   .card-role { font-size: 13px; }
   .card-desc { font-size: 15px; }
   .card-link { font-size: 14px; }
 
-  /* status pill */
   .status-pill { font-size: 14px; padding: 6px 13px; }
   .status-pill .dot { width: 9px; height: 9px; }
 
-  /* uptimerobot */
   .section-title { font-size: 15px; }
   .s-input { min-width: 0; font-size: 15px; padding: 12px 14px; }
   .btn-load { font-size: 15px; padding: 12px 16px; }
@@ -368,7 +411,10 @@ h1 {
   .utr-name { font-size: 15px; }
   .utr-ratio { font-size: 13px; }
   .utr-monitor { padding: 16px; }
->>>>>>> claude/app-store-review-analysis-zd4bw7
+  .stats-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-value { font-size: 28px; }
+  .billing-cards { grid-template-columns: 1fr; }
+  .billing-countdown { font-size: 36px; }
 }
 </style>
 
@@ -393,6 +439,19 @@ h1 {
 </div>
 
 <div class="grid" id="grid"></div>
+
+<!-- App Stats -->
+<div class="extra-section">
+  <div class="section-title">App — Estadísticas</div>
+  <div class="section-form">
+    <div class="field-group" style="flex:1;min-width:200px">
+      <div class="field-label">Admin JWT Token</div>
+      <input class="s-input" id="adminToken" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5…">
+    </div>
+    <button class="btn-load" onclick="loadAppStats()">Cargar</button>
+  </div>
+  <div id="appStats"></div>
+</div>
 
 <!-- Cloudinary Usage -->
 <div class="extra-section">
@@ -460,13 +519,6 @@ const SERVICES = [
     role: 'Push notifications · Crashlytics',
     api: 'https://status.firebase.google.com/api/v2/status.json',
     page: 'https://status.firebase.google.com',
-  },
-  {
-    id: 'spotify',
-    name: 'Spotify',
-    role: 'Integración OAuth · Reproducción',
-    api: null,
-    page: 'https://status.spotify.com',
   },
   {
     id: 'apple',
@@ -624,6 +676,101 @@ async function loadUTR() {
   }
 }
 
+// ── App Stats ──
+const BACKEND = 'https://conciertos-backend.onrender.com';
+
+async function loadAppStats() {
+  const token = document.getElementById('adminToken').value.trim();
+  if (!token) return;
+  try { localStorage.setItem('admin_token', token); } catch {}
+
+  const el = document.getElementById('appStats');
+  el.innerHTML = '<div class="shimmer" style="height:100px;width:100%;border-radius:10px;margin-top:14px"></div>';
+
+  try {
+    const headers = { Authorization: 'Bearer ' + token };
+    const [statsRes, usersRes] = await Promise.all([
+      fetch(`${BACKEND}/admin/stats`, { headers, signal: AbortSignal.timeout(15000) }),
+      fetch(`${BACKEND}/admin/users?take=8`, { headers, signal: AbortSignal.timeout(15000) }),
+    ]);
+    if (!statsRes.ok) throw new Error('HTTP ' + statsRes.status + ' — comprueba que el token sea de admin');
+    const s = await statsRes.json();
+    const u = usersRes.ok ? await usersRes.json() : null;
+
+    const users   = s.users   || {};
+    const content = s.content || {};
+    const health  = s.health  || {};
+
+    const fmt = n => n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'k' : n;
+    const uptimeH = Math.floor((health.uptimeSec || 0) / 3600);
+
+    const kpis = [
+      { label: 'Usuarios totales', value: fmt(users.total || 0), cls: '', sub: '' },
+      { label: 'Nuevos esta semana', value: fmt(users.new7d || 0), cls: 'green', sub: `${fmt(users.new30d||0)} este mes` },
+      { label: 'Activos 7 días', value: fmt(users.active7d || 0), cls: 'accent', sub: `${fmt(users.active30d||0)} activos 30d` },
+      { label: 'Usuarios Pro', value: fmt(users.pro || 0), cls: 'gold', sub: `de ${fmt(users.total||0)}` },
+      { label: 'Conciertos', value: fmt(content.concerts || 0), cls: '', sub: `media valoración ${(content.avgRating||0).toFixed(1)}★` },
+      { label: 'DB respuesta', value: (health.dbMs || 0) + 'ms', cls: (health.dbMs||0) < 100 ? 'green' : 'accent', sub: `uptime ${uptimeH}h` },
+    ];
+
+    // Signup sparkline (last 14 days)
+    const signups = (s.activity?.signups || []).slice(-14);
+    const maxSig = Math.max(1, ...signups.map(d => d.count));
+    const sparkHtml = signups.length > 1 ? `
+      <div class="stats-signup-chart">
+        <div class="stats-users-title">Registros últimos 14 días</div>
+        <div class="chart-bars">
+          ${signups.map(d => {
+            const pct = Math.round(d.count / maxSig * 100);
+            const dayLabel = new Date(d.day).toLocaleDateString('es-ES', { day:'numeric', month:'short' });
+            return `<div class="chart-bar-wrap" title="${d.count} el ${dayLabel}">
+              <div class="chart-bar" style="height:${Math.max(4, pct * 0.6)}px"></div>
+              <div class="chart-label">${d.count}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>` : '';
+
+    // Recent users
+    const items = u?.items || [];
+    const usersHtml = items.length ? `
+      <div class="stats-users-list">
+        <div class="stats-users-title">Últimos usuarios registrados</div>
+        ${items.map(usr => {
+          const initials = (usr.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+          const avatarInner = usr.avatarUrl
+            ? `<img src="${usr.avatarUrl}" alt="" loading="lazy">`
+            : initials;
+          const badge = usr.isAdmin ? '<span class="user-badge admin">Admin</span>'
+                      : usr.isPro   ? '<span class="user-badge">Pro</span>' : '';
+          const joined = new Date(usr.createdAt).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' });
+          return `<div class="user-row">
+            <div class="user-avatar">${avatarInner}</div>
+            <div class="user-info">
+              <div class="user-name">${usr.name || '—'}</div>
+              <div class="user-email">${usr.email} · ${joined}</div>
+            </div>
+            ${badge}
+            <div class="user-concerts">${usr.concertCount} 🎵</div>
+          </div>`;
+        }).join('')}
+      </div>` : '';
+
+    el.innerHTML = `
+      <div class="stats-kpi-grid">${kpis.map(k =>
+        `<div class="kpi-card">
+          <div class="kpi-label">${k.label}</div>
+          <div class="kpi-value ${k.cls}">${k.value}</div>
+          ${k.sub ? `<div class="kpi-sub">${k.sub}</div>` : ''}
+        </div>`).join('')}
+      </div>
+      ${sparkHtml}
+      ${usersHtml}`;
+  } catch (e) {
+    el.innerHTML = `<div class="usage-msg" style="color:var(--red);padding-top:12px">${e.message}</div>`;
+  }
+}
+
 // ── Cloudinary Usage ──
 async function loadCloudinaryUsage() {
   const cloud  = document.getElementById('cldCloud').value.trim();
@@ -730,6 +877,12 @@ function saveBillingDay(id, val) {
 (function init() {
   const grid = document.getElementById('grid');
   SERVICES.forEach(svc => grid.appendChild(buildCard(svc)));
+
+  // Restore admin token
+  try {
+    const tok = localStorage.getItem('admin_token');
+    if (tok) { document.getElementById('adminToken').value = tok; loadAppStats(); }
+  } catch {}
 
   // Restore Cloudinary credentials
   try {
