@@ -1,0 +1,503 @@
+<title>Estado de Servicios</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Dark-first — matches app palette: accent orange, green, gold */
+:root {
+  --bg:        #090909;
+  --bg-card:   #111113;
+  --bg-hover:  #17171a;
+  --border:    rgba(255,255,255,.07);
+  --fg:        #f0ede8;
+  --fg-muted:  #7a7672;
+  --accent:    #e8491a;
+  --green:     #22c97b;
+  --gold:      #c9a227;
+  --red:       #e05252;
+  --yellow:    #e0a830;
+  --font:      'Inter', system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100%;
+  padding-left:  max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+.header-left { display: flex; flex-direction: column; gap: 4px; }
+.app-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+h1 {
+  font-size: clamp(22px, 5vw, 30px);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  text-wrap: balance;
+}
+.last-updated {
+  font-size: 12px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+}
+
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  white-space: nowrap;
+}
+.btn-refresh:hover { background: var(--bg-hover); border-color: rgba(255,255,255,.14); }
+.btn-refresh svg { transition: transform .5s; }
+.btn-refresh.spinning svg { transform: rotate(360deg); }
+
+/* ── Global pill ── */
+.global-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 28px;
+}
+.global-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+.global-text { font-size: 14px; font-weight: 600; }
+.global-sub  { font-size: 12px; color: var(--fg-muted); margin-left: auto; }
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: background .15s;
+  text-decoration: none;
+  color: inherit;
+}
+.card:hover { background: var(--bg-hover); }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.card-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.card-role {
+  font-size: 11px;
+  color: var(--fg-muted);
+  font-weight: 500;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-pill .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* status variants */
+.s-ok     { background: rgba(34,201,123,.12); color: var(--green); }
+.s-ok .dot     { background: var(--green); box-shadow: 0 0 5px var(--green); }
+.s-minor  { background: rgba(224,168,48,.12); color: var(--yellow); }
+.s-minor .dot  { background: var(--yellow); }
+.s-major  { background: rgba(232,73,26,.12); color: var(--accent); }
+.s-major .dot  { background: var(--accent); }
+.s-critical { background: rgba(224,82,82,.12); color: var(--red); }
+.s-critical .dot { background: var(--red); }
+.s-unknown { background: rgba(122,118,114,.1); color: var(--fg-muted); }
+.s-unknown .dot { background: var(--fg-muted); }
+
+.card-desc {
+  font-size: 13px;
+  color: var(--fg-muted);
+  min-height: 20px;
+}
+.card-link {
+  font-size: 12px;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  text-decoration: none;
+  width: fit-content;
+  transition: color .15s;
+}
+.card-link:hover { color: var(--fg); }
+.card-link svg { flex-shrink: 0; }
+
+/* loading shimmer */
+.shimmer {
+  background: linear-gradient(90deg, var(--bg-hover) 25%, rgba(255,255,255,.04) 50%, var(--bg-hover) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+  height: 14px;
+  width: 120px;
+}
+@keyframes shimmer { from { background-position: 200% 0 } to { background-position: -200% 0 } }
+
+/* UptimeRobot key input */
+.utr-section {
+  margin-top: 32px;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+.utr-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.utr-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.utr-input {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 9px 13px;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .15s;
+}
+.utr-input:focus { border-color: rgba(255,255,255,.2); }
+.utr-input::placeholder { color: var(--fg-muted); }
+.btn-load {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 9px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-load:hover { opacity: .85; }
+.utr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 14px; }
+.utr-monitor {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.utr-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.utr-ratio { font-size: 12px; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 480px) {
+  .global-sub { display: none; }
+}
+</style>
+
+<div class="header">
+  <div class="header-left">
+    <span class="app-label">La Vida en Directo</span>
+    <h1>Estado de Servicios</h1>
+    <span class="last-updated" id="ts">Comprobando…</span>
+  </div>
+  <button class="btn-refresh" id="refreshBtn" onclick="refresh()">
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+      <path d="M1.5 7.5a6 6 0 1 0 1.2-3.6M1.5 1v3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Actualizar
+  </button>
+</div>
+
+<div class="global-bar">
+  <div class="global-dot" id="globalDot"></div>
+  <span class="global-text" id="globalText">Comprobando estado…</span>
+  <span class="global-sub" id="globalSub"></span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="utr-section">
+  <div class="utr-title">UptimeRobot — Monitores</div>
+  <div class="utr-form">
+    <input class="utr-input" id="utrKey" type="password" placeholder="API Key de solo lectura (u1234567-…)">
+    <button class="btn-load" onclick="loadUTR()">Cargar</button>
+  </div>
+  <div class="utr-grid" id="utrGrid"></div>
+</div>
+
+<script>
+const SERVICES = [
+  {
+    id: 'render',
+    name: 'Render',
+    role: 'Backend / Hosting',
+    api: 'https://status.render.com/api/v2/status.json',
+    page: 'https://status.render.com',
+  },
+  {
+    id: 'cloudinary',
+    name: 'Cloudinary',
+    role: 'Imágenes y multimedia',
+    api: 'https://status.cloudinary.com/api/v2/status.json',
+    page: 'https://status.cloudinary.com',
+  },
+  {
+    id: 'neon',
+    name: 'Neon',
+    role: 'Base de datos PostgreSQL',
+    api: 'https://neonstatus.com/api/v2/status.json',
+    page: 'https://neonstatus.com',
+  },
+  {
+    id: 'firebase',
+    name: 'Firebase',
+    role: 'Push notifications · Crashlytics',
+    api: 'https://status.firebase.google.com/api/v2/status.json',
+    page: 'https://status.firebase.google.com',
+  },
+  {
+    id: 'spotify',
+    name: 'Spotify',
+    role: 'Integración OAuth · Reproducción',
+    api: null,
+    page: 'https://status.spotify.com',
+  },
+  {
+    id: 'apple',
+    name: 'Apple Developer',
+    role: 'App Store · TestFlight',
+    api: null,
+    page: 'https://developer.apple.com/system-status/',
+  },
+];
+
+function indicatorClass(ind) {
+  if (!ind || ind === 'none') return 's-ok';
+  if (ind === 'minor')        return 's-minor';
+  if (ind === 'major')        return 's-major';
+  if (ind === 'critical')     return 's-critical';
+  return 's-unknown';
+}
+function indicatorLabel(ind) {
+  if (!ind || ind === 'none') return 'Operativo';
+  if (ind === 'minor')        return 'Incidencia menor';
+  if (ind === 'major')        return 'Incidencia mayor';
+  if (ind === 'critical')     return 'Interrupción crítica';
+  return 'Desconocido';
+}
+
+function extIcon() {
+  return `<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 10 10 1M10 1H4M10 1v6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function buildCard(svc) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.id = 'card-' + svc.id;
+  div.innerHTML = `
+    <div class="card-top">
+      <div>
+        <div class="card-name">${svc.name}</div>
+        <div class="card-role">${svc.role}</div>
+      </div>
+      <div class="status-pill s-unknown" id="pill-${svc.id}">
+        <div class="dot"></div>
+        <span id="pill-label-${svc.id}">…</span>
+      </div>
+    </div>
+    <div class="card-desc" id="desc-${svc.id}"><div class="shimmer"></div></div>
+    <a class="card-link" href="${svc.page}" target="_blank" rel="noopener">
+      Ver página de estado ${extIcon()}
+    </a>`;
+  return div;
+}
+
+async function fetchStatus(svc) {
+  if (!svc.api) {
+    setPill(svc.id, 'unknown', 'Sin API pública', 'Revisa manualmente en la página de estado.');
+    return { indicator: 'unknown' };
+  }
+  try {
+    const r = await fetch(svc.api, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const ind  = data?.status?.indicator ?? 'none';
+    const desc = data?.status?.description ?? indicatorLabel(ind);
+    setPill(svc.id, ind, indicatorLabel(ind), desc);
+    return { indicator: ind };
+  } catch {
+    setPill(svc.id, 'unknown', 'Sin acceso', 'No se pudo obtener el estado. Comprueba la página.');
+    return { indicator: 'unknown' };
+  }
+}
+
+function setPill(id, indicator, label, desc) {
+  const pill  = document.getElementById('pill-' + id);
+  const plbl  = document.getElementById('pill-label-' + id);
+  const descEl = document.getElementById('desc-' + id);
+  if (pill)  { pill.className = 'status-pill ' + indicatorClass(indicator); }
+  if (plbl)  { plbl.textContent = label; }
+  if (descEl) { descEl.textContent = desc; }
+}
+
+function updateGlobal(results) {
+  const dot  = document.getElementById('globalDot');
+  const text = document.getElementById('globalText');
+  const sub  = document.getElementById('globalSub');
+  const inds = results.map(r => r.indicator);
+  const hasCritical = inds.includes('critical');
+  const hasMajor    = inds.includes('major');
+  const hasMinor    = inds.includes('minor');
+
+  if (hasCritical) {
+    dot.style.cssText = 'background:var(--red);box-shadow:0 0 8px var(--red)';
+    text.textContent  = 'Interrupción crítica detectada';
+  } else if (hasMajor) {
+    dot.style.cssText = 'background:var(--accent);box-shadow:0 0 8px var(--accent)';
+    text.textContent  = 'Incidencia mayor en algún servicio';
+  } else if (hasMinor) {
+    dot.style.cssText = 'background:var(--yellow);box-shadow:0 0 6px var(--yellow)';
+    text.textContent  = 'Incidencia menor en algún servicio';
+  } else {
+    dot.style.cssText = 'background:var(--green);box-shadow:0 0 8px var(--green)';
+    text.textContent  = 'Todos los servicios operativos';
+  }
+  const known = results.filter(r => r.indicator !== 'unknown').length;
+  sub.textContent = `${known} de ${results.length} comprobados`;
+}
+
+function updateTimestamp() {
+  const now = new Date();
+  document.getElementById('ts').textContent =
+    'Última actualización: ' + now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+async function refresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+  const results = await Promise.all(SERVICES.map(fetchStatus));
+  updateGlobal(results);
+  updateTimestamp();
+  btn.classList.remove('spinning');
+  btn.disabled = false;
+}
+
+// UptimeRobot
+async function loadUTR() {
+  const key = document.getElementById('utrKey').value.trim();
+  if (!key) return;
+  try {
+    localStorage.setItem('utr_key', key);
+  } catch {}
+  const grid = document.getElementById('utrGrid');
+  grid.innerHTML = '<div class="shimmer" style="height:48px;width:100%;border-radius:12px"></div>';
+
+  try {
+    const form = new URLSearchParams({ api_key: key, format: 'json', logs: '0', response_times: '0' });
+    const r = await fetch('https://api.uptimerobot.com/v2/getMonitors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form.toString(),
+      signal: AbortSignal.timeout(10000),
+    });
+    const data = await r.json();
+    if (data.stat !== 'ok') throw new Error(data.error?.message || 'Error API');
+
+    const statusLabel = s => ({ 0:'Pausado', 1:'Sin datos', 2:'Activo', 8:'Incidencia', 9:'Caído' }[s] || 'Desconocido');
+    const statusClass = s => ({ 2:'s-ok', 8:'s-minor', 9:'s-critical', 0:'s-unknown', 1:'s-unknown' }[s] || 's-unknown');
+
+    grid.innerHTML = data.monitors.map(m => `
+      <div class="utr-monitor">
+        <div class="dot status-pill ${statusClass(m.status)}" style="padding:0;width:9px;height:9px;border-radius:50%;display:block;flex-shrink:0"></div>
+        <div class="utr-name" title="${m.friendly_name}">${m.friendly_name}</div>
+        <div class="utr-ratio">${m.all_time_uptime_ratio ?? '--'}%</div>
+      </div>`).join('');
+  } catch (e) {
+    grid.innerHTML = `<div style="color:var(--fg-muted);font-size:13px;padding:8px 0">${e.message}</div>`;
+  }
+}
+
+// Init
+(function init() {
+  const grid = document.getElementById('grid');
+  SERVICES.forEach(svc => grid.appendChild(buildCard(svc)));
+
+  // Restore saved UTR key
+  try {
+    const saved = localStorage.getItem('utr_key');
+    if (saved) { document.getElementById('utrKey').value = saved; loadUTR(); }
+  } catch {}
+
+  refresh();
+  setInterval(refresh, 60000);
+})();
+</script>
