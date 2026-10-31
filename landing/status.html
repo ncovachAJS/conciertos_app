@@ -443,7 +443,11 @@ h1 {
 <!-- App Stats -->
 <div class="extra-section">
   <div class="section-title">App — Estadísticas</div>
-  <div class="section-form">
+  <div id="adminSaved" hidden style="display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:var(--fg-muted)">
+    <span style="color:var(--green)">●</span> Token guardado
+    <button onclick="clearAdminToken()" style="background:none;border:none;color:var(--fg-muted);cursor:pointer;font-size:12px;text-decoration:underline;padding:0">Cambiar</button>
+  </div>
+  <div id="adminTokenForm" class="section-form">
     <div class="field-group" style="flex:1;min-width:200px">
       <div class="field-label">Admin JWT Token</div>
       <input class="s-input" id="adminToken" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5…">
@@ -756,6 +760,12 @@ async function loadAppStats() {
         }).join('')}
       </div>` : '';
 
+    // Hide form, show saved badge
+    try {
+      document.getElementById('adminTokenForm').style.display = 'none';
+      document.getElementById('adminSaved').hidden = false;
+    } catch {}
+
     el.innerHTML = `
       <div class="stats-kpi-grid">${kpis.map(k =>
         `<div class="kpi-card">
@@ -769,6 +779,14 @@ async function loadAppStats() {
   } catch (e) {
     el.innerHTML = `<div class="usage-msg" style="color:var(--red);padding-top:12px">${e.message}</div>`;
   }
+}
+
+function clearAdminToken() {
+  try { localStorage.removeItem('admin_token'); } catch {}
+  document.getElementById('adminToken').value = '';
+  document.getElementById('adminSaved').hidden = true;
+  document.getElementById('adminTokenForm').style.display = '';
+  document.getElementById('appStats').innerHTML = '';
 }
 
 // ── Cloudinary Usage ──
@@ -878,10 +896,23 @@ function saveBillingDay(id, val) {
   const grid = document.getElementById('grid');
   SERVICES.forEach(svc => grid.appendChild(buildCard(svc)));
 
-  // Restore admin token
+  // Restore admin token — from URL hash (#t=…) or localStorage
   try {
-    const tok = localStorage.getItem('admin_token');
-    if (tok) { document.getElementById('adminToken').value = tok; loadAppStats(); }
+    const hashToken = new URLSearchParams(location.hash.slice(1)).get('t');
+    if (hashToken) {
+      localStorage.setItem('admin_token', hashToken);
+      // Clean hash from URL without reload
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+    const tok = hashToken || localStorage.getItem('admin_token');
+    if (tok) {
+      document.getElementById('adminToken').value = tok;
+      loadAppStats();
+      // Hide the token form — show only a "saved" badge
+      const form = document.getElementById('adminTokenForm');
+      if (form) form.style.display = 'none';
+      document.getElementById('adminSaved').hidden = false;
+    }
   } catch {}
 
   // Restore Cloudinary credentials
