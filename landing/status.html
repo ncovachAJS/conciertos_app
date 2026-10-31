@@ -444,16 +444,24 @@ h1 {
 <div class="extra-section">
   <div class="section-title">App — Estadísticas</div>
   <div id="adminSaved" hidden style="display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:var(--fg-muted)">
-    <span style="color:var(--green)">●</span> Token guardado
-    <button onclick="clearAdminToken()" style="background:none;border:none;color:var(--fg-muted);cursor:pointer;font-size:12px;text-decoration:underline;padding:0">Cambiar</button>
+    <span style="color:var(--green)">●</span> Sesión activa
+    <button onclick="clearAdminToken()" style="background:none;border:none;color:var(--fg-muted);cursor:pointer;font-size:12px;text-decoration:underline;padding:0">Cerrar sesión</button>
   </div>
-  <div id="adminTokenForm" class="section-form">
-    <div class="field-group" style="flex:1;min-width:200px">
-      <div class="field-label">Admin JWT Token</div>
-      <input class="s-input" id="adminToken" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5…">
+  <div id="adminLoginForm">
+    <div class="section-form">
+      <div class="field-group">
+        <div class="field-label">Email admin</div>
+        <input class="s-input" id="adminEmail" type="email" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Contraseña</div>
+        <input class="s-input" id="adminPass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()">
+      </div>
+      <button class="btn-load" onclick="adminLogin()">Entrar</button>
     </div>
-    <button class="btn-load" onclick="loadAppStats()">Cargar</button>
+    <div id="adminLoginError" style="font-size:13px;color:var(--red);margin-top:8px;display:none"></div>
   </div>
+  <input type="hidden" id="adminToken">
   <div id="appStats"></div>
 </div>
 
@@ -781,11 +789,49 @@ async function loadAppStats() {
   }
 }
 
+async function adminLogin() {
+  const email = document.getElementById('adminEmail').value.trim();
+  const pass  = document.getElementById('adminPass').value;
+  const errEl = document.getElementById('adminLoginError');
+  const btn   = document.querySelector('#adminLoginForm .btn-load');
+  if (!email || !pass) return;
+
+  errEl.style.display = 'none';
+  btn.textContent = 'Entrando…';
+  btn.disabled = true;
+
+  try {
+    const r = await fetch(`${BACKEND}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass }),
+      signal: AbortSignal.timeout(12000),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.message || 'Credenciales incorrectas');
+    const token = data.token || data.accessToken;
+    if (!token) throw new Error('El servidor no devolvió token');
+
+    try { localStorage.setItem('admin_token', token); } catch {}
+    document.getElementById('adminToken').value = token;
+    document.getElementById('adminPass').value = '';
+    document.getElementById('adminLoginForm').style.display = 'none';
+    document.getElementById('adminSaved').hidden = false;
+    loadAppStats();
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Entrar';
+    btn.disabled = false;
+  }
+}
+
 function clearAdminToken() {
   try { localStorage.removeItem('admin_token'); } catch {}
   document.getElementById('adminToken').value = '';
   document.getElementById('adminSaved').hidden = true;
-  document.getElementById('adminTokenForm').style.display = '';
+  document.getElementById('adminLoginForm').style.display = '';
   document.getElementById('appStats').innerHTML = '';
 }
 
@@ -907,11 +953,9 @@ function saveBillingDay(id, val) {
     const tok = hashToken || localStorage.getItem('admin_token');
     if (tok) {
       document.getElementById('adminToken').value = tok;
-      loadAppStats();
-      // Hide the token form — show only a "saved" badge
-      const form = document.getElementById('adminTokenForm');
-      if (form) form.style.display = 'none';
+      document.getElementById('adminLoginForm').style.display = 'none';
       document.getElementById('adminSaved').hidden = false;
+      loadAppStats();
     }
   } catch {}
 
