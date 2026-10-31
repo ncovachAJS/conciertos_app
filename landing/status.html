@@ -1,5 +1,5 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Estado de Servicios</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
 /* Dark-first — matches app palette: accent orange, green, gold */
@@ -25,12 +25,21 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font);
+<<<<<<< HEAD
   font-size: 15px;
   line-height: 1.5;
   min-height: 100%;
   padding-left:  max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 32px;
+=======
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100%;
+  padding-left:  max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+  padding-block: 28px;
+>>>>>>> claude/app-store-review-analysis-zd4bw7
 }
 
 /* ── Header ── */
@@ -257,8 +266,55 @@ h1 {
 .utr-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .utr-ratio { font-size: 12px; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
 
+<<<<<<< HEAD
 @media (max-width: 480px) {
   .global-sub { display: none; }
+=======
+@media (max-width: 600px) {
+  body { font-size: 17px; padding-block: 20px; }
+
+  /* header: stack vertically */
+  .header { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 24px; }
+  .btn-refresh {
+    width: 100%;
+    justify-content: center;
+    font-size: 15px;
+    padding: 13px 16px;
+  }
+  h1 { font-size: 26px; }
+  .app-label { font-size: 12px; }
+  .last-updated { font-size: 13px; }
+
+  /* global bar */
+  .global-bar { padding: 16px 18px; gap: 12px; }
+  .global-dot { width: 14px; height: 14px; }
+  .global-text { font-size: 16px; }
+  .global-sub { display: none; }
+
+  /* grid: 1 column */
+  .grid { grid-template-columns: 1fr; gap: 12px; }
+
+  /* cards */
+  .card { padding: 20px; gap: 14px; }
+  .card-name { font-size: 18px; }
+  .card-role { font-size: 13px; }
+  .card-desc { font-size: 15px; }
+  .card-link { font-size: 14px; }
+
+  /* status pill */
+  .status-pill { font-size: 14px; padding: 6px 13px; }
+  .status-pill .dot { width: 9px; height: 9px; }
+
+  /* uptimerobot */
+  .utr-title { font-size: 15px; }
+  .utr-form { flex-direction: column; }
+  .utr-input { min-width: 0; font-size: 15px; padding: 12px 14px; }
+  .btn-load { font-size: 15px; padding: 12px 16px; }
+  .utr-grid { grid-template-columns: 1fr; }
+  .utr-name { font-size: 15px; }
+  .utr-ratio { font-size: 13px; }
+  .utr-monitor { padding: 16px; }
+>>>>>>> claude/app-store-review-analysis-zd4bw7
 }
 </style>
 
