@@ -248,20 +248,6 @@ h1 {
 }
 .btn-load:hover { opacity: .85; }
 
-/* UptimeRobot */
-.utr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 14px; }
-.utr-monitor {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.utr-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.utr-ratio { font-size: 12px; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
-
 /* Usage bars (Cloudinary) */
 .usage-display { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
 .usage-row { display: flex; flex-direction: column; gap: 4px; }
@@ -429,10 +415,6 @@ h1 {
   .section-title { font-size: 15px; }
   .s-input { min-width: 0; font-size: 15px; padding: 12px 14px; }
   .btn-load { font-size: 15px; padding: 12px 16px; }
-  .utr-grid { grid-template-columns: 1fr; }
-  .utr-name { font-size: 15px; }
-  .utr-ratio { font-size: 13px; }
-  .utr-monitor { padding: 16px; }
   .stats-kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .kpi-value { font-size: 28px; }
   .billing-cards { grid-template-columns: 1fr; }
@@ -505,15 +487,6 @@ h1 {
   <div class="billing-cards" id="billingCards"></div>
 </div>
 
-<!-- UptimeRobot -->
-<div class="extra-section">
-  <div class="section-title">UptimeRobot — Monitores</div>
-  <div class="section-form">
-    <input class="s-input" id="utrKey" type="password" placeholder="API Key de solo lectura (u1234567-…)" style="flex:1;min-width:200px">
-    <button class="btn-load" onclick="loadUTR()">Cargar</button>
-  </div>
-  <div class="utr-grid" id="utrGrid"></div>
-</div>
 
 <script>
 const SERVICES = [
@@ -544,13 +517,6 @@ const SERVICES = [
     role: 'Push notifications · Crashlytics',
     api: 'https://status.firebase.google.com/api/v2/status.json',
     page: 'https://status.firebase.google.com',
-  },
-  {
-    id: 'apple',
-    name: 'Apple Developer',
-    role: 'App Store · TestFlight',
-    api: null,
-    page: 'https://developer.apple.com/system-status/',
   },
 ];
 
@@ -666,40 +632,7 @@ async function refresh() {
   btn.disabled = false;
 }
 
-// UptimeRobot
-async function loadUTR() {
-  const key = document.getElementById('utrKey').value.trim();
-  if (!key) return;
-  try {
-    localStorage.setItem('utr_key', key);
-  } catch {}
-  const grid = document.getElementById('utrGrid');
-  grid.innerHTML = '<div class="shimmer" style="height:48px;width:100%;border-radius:12px"></div>';
 
-  try {
-    const form = new URLSearchParams({ api_key: key, format: 'json', logs: '0', response_times: '0' });
-    const r = await fetch('https://api.uptimerobot.com/v2/getMonitors', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: form.toString(),
-      signal: AbortSignal.timeout(10000),
-    });
-    const data = await r.json();
-    if (data.stat !== 'ok') throw new Error(data.error?.message || 'Error API');
-
-    const statusLabel = s => ({ 0:'Pausado', 1:'Sin datos', 2:'Activo', 8:'Incidencia', 9:'Caído' }[s] || 'Desconocido');
-    const statusClass = s => ({ 2:'s-ok', 8:'s-minor', 9:'s-critical', 0:'s-unknown', 1:'s-unknown' }[s] || 's-unknown');
-
-    grid.innerHTML = data.monitors.map(m => `
-      <div class="utr-monitor">
-        <div class="dot status-pill ${statusClass(m.status)}" style="padding:0;width:9px;height:9px;border-radius:50%;display:block;flex-shrink:0"></div>
-        <div class="utr-name" title="${m.friendly_name}">${m.friendly_name}</div>
-        <div class="utr-ratio">${m.all_time_uptime_ratio ?? '--'}%</div>
-      </div>`).join('');
-  } catch (e) {
-    grid.innerHTML = `<div style="color:var(--fg-muted);font-size:13px;padding:8px 0">${e.message}</div>`;
-  }
-}
 
 // ── App Stats ──
 const BACKEND = 'https://conciertos-backend.onrender.com';
@@ -1021,12 +954,6 @@ function saveBillingDay(id, val) {
 
   // Billing cards
   buildBillingCards();
-
-  // Restore saved UTR key
-  try {
-    const saved = localStorage.getItem('utr_key');
-    if (saved) { document.getElementById('utrKey').value = saved; loadUTR(); }
-  } catch {}
 
   refresh();
   setInterval(refresh, 60000);
