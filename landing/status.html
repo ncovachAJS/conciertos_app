@@ -781,7 +781,7 @@ async function loadAppStats() {
           <div class="user-name">${usr.name || '—'} ${badge}</div>
           <div class="user-email">${usr.email} · ${joined}</div>
           <div class="user-version">${verStr}</div>
-          ${stats.length ? `<div class="user-stats">${stats.map(s => `<span class="user-stat">${s}</span>`).join('')}</div>` : ''}
+          ${stats.length ? `<div class="user-stats">${stats.map(st => `<span class="user-stat">${st}</span>`).join('')}</div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -838,7 +838,7 @@ async function loadAppStats() {
       ${sparkHtml}
       ${usersHtml}`;
   } catch (e) {
-    el.innerHTML = `<div class="usage-msg" style="color:var(--red);padding-top:12px">${e.message}</div>`;
+    el.innerHTML = `<div style="color:var(--red);padding-top:12px;font-size:13px">❌ Error: ${e.message}<br><small style="color:var(--fg-muted)">${e.stack?.split('\n')[1] || ''}</small></div>`;
   }
 }
 
