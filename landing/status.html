@@ -489,6 +489,8 @@ h1 {
 
 
 <script>
+const BACKEND = 'https://conciertos-backend.onrender.com';
+
 const SERVICES = [
   {
     id: 'render',
@@ -503,6 +505,22 @@ const SERVICES = [
     role: 'Imágenes y multimedia',
     api: 'https://status.cloudinary.com/api/v2/status.json',
     page: 'https://status.cloudinary.com',
+  },
+  {
+    id: 'neon',
+    name: 'Neon',
+    role: 'Base de datos PostgreSQL',
+    api: null,
+    proxy: `${BACKEND}/admin/status/neon`,
+    page: 'https://neonstatus.com',
+  },
+  {
+    id: 'firebase',
+    name: 'Firebase',
+    role: 'Push notifications · Crashlytics',
+    api: null,
+    proxy: `${BACKEND}/admin/status/firebase`,
+    page: 'https://status.firebase.google.com',
   },
 ];
 
@@ -548,14 +566,25 @@ function buildCard(svc) {
 }
 
 async function fetchStatus(svc) {
-  if (!svc.api) {
+  const url = svc.api || (svc.proxy ? buildProxyUrl(svc.proxy) : null);
+  if (!url) {
     setPill(svc.id, 'unknown', 'Sin API pública', 'Revisa manualmente en la página de estado.');
     return { indicator: 'unknown' };
   }
   try {
-    const r = await fetch(svc.api, { signal: AbortSignal.timeout(8000) });
+    const headers = {};
+    if (svc.proxy) {
+      const tok = getAdminToken();
+      if (!tok) {
+        setPill(svc.id, 'unknown', 'Sin sesión', 'Inicia sesión en Estadísticas para ver este estado.');
+        return { indicator: 'unknown' };
+      }
+      headers['Authorization'] = 'Bearer ' + tok;
+    }
+    const r = await fetch(url, { headers, signal: AbortSignal.timeout(10000) });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
+    if (data.error) throw new Error(data.error);
     const ind  = data?.status?.indicator ?? 'none';
     const desc = data?.status?.description ?? indicatorLabel(ind);
     setPill(svc.id, ind, indicatorLabel(ind), desc);
@@ -564,6 +593,12 @@ async function fetchStatus(svc) {
     setPill(svc.id, 'unknown', 'Sin acceso', 'No se pudo obtener el estado. Comprueba la página.');
     return { indicator: 'unknown' };
   }
+}
+function buildProxyUrl(u) { return u; }
+function getAdminToken() {
+  try {
+    return document.getElementById('adminToken')?.value?.trim() || localStorage.getItem('admin_token') || '';
+  } catch { return ''; }
 }
 
 function setPill(id, indicator, label, desc) {
@@ -621,7 +656,6 @@ async function refresh() {
 
 
 // ── App Stats ──
-const BACKEND = 'https://conciertos-backend.onrender.com';
 
 async function loadAppStats() {
   const token = document.getElementById('adminToken').value.trim();
@@ -799,6 +833,7 @@ async function adminLogin() {
     document.getElementById('adminSaved').hidden = false;
     loadAppStats();
     loadCloudinaryUsage();
+    refresh();
   } catch (e) {
     errEl.textContent = e.message;
     errEl.style.display = 'block';
@@ -939,6 +974,7 @@ function saveBillingDay(id, val) {
   } catch {}
 
   // Billing cards
+
   buildBillingCards();
 
   refresh();
