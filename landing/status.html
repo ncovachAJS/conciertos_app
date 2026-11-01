@@ -25,21 +25,12 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font);
-<<<<<<< HEAD
   font-size: 15px;
   line-height: 1.5;
   min-height: 100%;
   padding-left:  max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 32px;
-=======
-  font-size: 16px;
-  line-height: 1.5;
-  min-height: 100%;
-  padding-left:  max(20px, env(safe-area-inset-left, 0px));
-  padding-right: max(20px, env(safe-area-inset-right, 0px));
-  padding-block: 28px;
->>>>>>> claude/app-store-review-analysis-zd4bw7
 }
 
 /* ── Header ── */
@@ -372,6 +363,32 @@ h1 {
 .user-badge.admin { background: rgba(232,73,26,.15); color: var(--accent); }
 .user-concerts { font-size: 11px; color: var(--fg-muted); flex-shrink: 0; }
 
+/* Versions grid */
+.versions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 14px; }
+.version-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.version-num { font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
+.version-build { font-size: 11px; color: var(--fg-muted); }
+.version-devices { font-size: 11px; font-weight: 600; color: var(--fg-muted); margin-top: 2px; }
+
+/* Cloudinary card */
+.cld-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 14px;
+}
+.cld-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cld-card-title { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
+
 .stats-signup-chart { margin-top: 16px; }
 .chart-bars { display: flex; align-items: flex-end; gap: 3px; height: 60px; }
 .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
@@ -468,7 +485,13 @@ h1 {
 <!-- Cloudinary Usage -->
 <div class="extra-section">
   <div class="section-title">Cloudinary — Uso de créditos</div>
-  <div id="cldUsage"><div class="usage-msg">Inicia sesión en Estadísticas de la App para ver el uso de Cloudinary.</div></div>
+  <div class="cld-card">
+    <div class="cld-card-header">
+      <span class="cld-card-title">Plan activo</span>
+      <span id="cldPlan" style="font-size:12px;font-weight:600;color:var(--fg-muted)">—</span>
+    </div>
+    <div id="cldUsage"><div class="usage-msg">Inicia sesión en Estadísticas de la App para ver el uso de Cloudinary.</div></div>
+  </div>
 </div>
 
 <!-- Facturación (Render + Claude) -->
@@ -765,18 +788,20 @@ async function loadAppStats() {
       .sort((a, b) => (b.build || 0) - (a.build || 0));
     const totalDevices = versions.reduce((sum, v) => sum + v.devices, 0) || 1;
     const versionsHtml = versions.length ? `
-      <div class="stats-users-list">
+      <div style="margin-top:20px">
         <div class="stats-users-title">Versiones de la app en uso</div>
-        ${versions.map(v => {
-          const pct = Math.round(v.devices / totalDevices * 100);
-          return `<div class="user-row" style="flex-direction:column;align-items:stretch;gap:6px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <span style="font-size:13px;font-weight:700">v${v.version} <span style="font-weight:400;color:var(--fg-muted)">(build ${v.build ?? '—'})</span></span>
-              <span style="font-size:12px;color:var(--fg-muted)">${v.devices} dispositivos · ${pct}%</span>
-            </div>
-            <div class="usage-track"><div class="usage-fill ${pct > 80 ? 'green' : 'gold'}" style="width:${pct}%"></div></div>
-          </div>`;
-        }).join('')}
+        <div class="versions-grid">
+          ${versions.map(v => {
+            const p = Math.round(v.devices / totalDevices * 100);
+            const cls = p >= 50 ? 'green' : 'gold';
+            return `<div class="version-card">
+              <div class="version-num">${v.version}</div>
+              <div class="version-build">build ${v.build ?? '—'}</div>
+              <div class="version-devices">${v.devices} dispositivo${v.devices !== 1 ? 's' : ''} · ${p}%</div>
+              <div class="usage-track" style="margin-top:4px"><div class="usage-fill ${cls}" style="width:${p}%"></div></div>
+            </div>`;
+          }).join('')}
+        </div>
       </div>` : '';
 
     el.innerHTML = `
@@ -874,6 +899,9 @@ async function loadCloudinaryUsage() {
       { label: 'Ancho de banda', used: d.bandwidth?.usage, limit: d.bandwidth?.limit, fmt: fmtBytes },
       { label: 'Imágenes / recursos', used: d.resources, limit: d.objects?.limit, fmt: fmtNum },
     ].filter(row => row.used != null);
+
+    // Show plan
+    try { document.getElementById('cldPlan').textContent = d.plan || '—'; } catch {}
 
     el.innerHTML = '<div class="usage-display">' + rows.map(row => {
       const p = pct(row.used, row.limit);
