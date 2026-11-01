@@ -468,22 +468,7 @@ h1 {
 <!-- Cloudinary Usage -->
 <div class="extra-section">
   <div class="section-title">Cloudinary — Uso de créditos</div>
-  <div class="section-form">
-    <div class="field-group">
-      <div class="field-label">Cloud Name</div>
-      <input class="s-input" id="cldCloud" type="text" placeholder="mi-cloud-name">
-    </div>
-    <div class="field-group">
-      <div class="field-label">API Key</div>
-      <input class="s-input" id="cldKey" type="text" placeholder="123456789012345">
-    </div>
-    <div class="field-group">
-      <div class="field-label">API Secret</div>
-      <input class="s-input" id="cldSecret" type="password" placeholder="••••••••••••••••••••••">
-    </div>
-    <button class="btn-load" onclick="loadCloudinaryUsage()">Cargar</button>
-  </div>
-  <div id="cldUsage"></div>
+  <div id="cldUsage"><div class="usage-msg">Inicia sesión en Estadísticas de la App para ver el uso de Cloudinary.</div></div>
 </div>
 
 <!-- Facturación (Render + Claude) -->
@@ -844,6 +829,7 @@ async function adminLogin() {
     document.getElementById('adminLoginForm').style.display = 'none';
     document.getElementById('adminSaved').hidden = false;
     loadAppStats();
+    loadCloudinaryUsage();
   } catch (e) {
     errEl.textContent = e.message;
     errEl.style.display = 'block';
@@ -861,25 +847,21 @@ function clearAdminToken() {
   document.getElementById('appStats').innerHTML = '';
 }
 
-// ── Cloudinary Usage ──
+// ── Cloudinary Usage (via backend proxy) ──
 async function loadCloudinaryUsage() {
-  const cloud  = document.getElementById('cldCloud').value.trim();
-  const key    = document.getElementById('cldKey').value.trim();
-  const secret = document.getElementById('cldSecret').value.trim();
-  if (!cloud || !key || !secret) return;
-  try { localStorage.setItem('cld', JSON.stringify({ cloud, key, secret })); } catch {}
-
+  const token = document.getElementById('adminToken').value.trim();
   const el = document.getElementById('cldUsage');
+  if (!token) return;
+
   el.innerHTML = '<div class="shimmer" style="height:80px;width:100%;border-radius:10px;margin-top:14px"></div>';
 
   try {
-    const auth = btoa(key + ':' + secret);
-    const r = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/usage`, {
-      headers: { Authorization: 'Basic ' + auth },
-      signal: AbortSignal.timeout(10000),
+    const r = await fetch(`${BACKEND}/admin/cloudinary/usage`, {
+      headers: { Authorization: 'Bearer ' + token },
+      signal: AbortSignal.timeout(12000),
     });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
+    if (!r.ok || d.error) throw new Error(d.error || 'HTTP ' + r.status);
 
     const fmtBytes = b => b >= 1e9 ? (b/1e9).toFixed(2)+' GB' : b >= 1e6 ? (b/1e6).toFixed(1)+' MB' : (b/1e3).toFixed(0)+' KB';
     const fmtNum  = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'k' : n;
@@ -890,8 +872,8 @@ async function loadCloudinaryUsage() {
       { label: 'Almacenamiento', used: d.storage?.usage, limit: d.storage?.limit, fmt: fmtBytes },
       { label: 'Transformaciones', used: d.transformations?.usage, limit: d.transformations?.limit, fmt: fmtNum },
       { label: 'Ancho de banda', used: d.bandwidth?.usage, limit: d.bandwidth?.limit, fmt: fmtBytes },
-      { label: 'Recursos (imágenes/vídeos)', used: d.resources, limit: d.objects?.limit, fmt: fmtNum },
-    ].filter(r => r.used != null);
+      { label: 'Imágenes / recursos', used: d.resources, limit: d.objects?.limit, fmt: fmtNum },
+    ].filter(row => row.used != null);
 
     el.innerHTML = '<div class="usage-display">' + rows.map(row => {
       const p = pct(row.used, row.limit);
@@ -903,9 +885,7 @@ async function loadCloudinaryUsage() {
       </div>`;
     }).join('') + '</div>';
   } catch (e) {
-    const consoleUrl = 'https://console.cloudinary.com/pm/developer-dashboard';
-    el.innerHTML = `<div class="usage-msg">No se pudo cargar vía API (CORS).
-      <a href="${consoleUrl}" target="_blank" rel="noopener" style="color:var(--accent)">Ver en Cloudinary Console →</a></div>`;
+    el.innerHTML = `<div class="usage-msg" style="color:var(--red)">${e.message}</div>`;
   }
 }
 
@@ -982,16 +962,6 @@ function saveBillingDay(id, val) {
       document.getElementById('adminLoginForm').style.display = 'none';
       document.getElementById('adminSaved').hidden = false;
       loadAppStats();
-    }
-  } catch {}
-
-  // Restore Cloudinary credentials
-  try {
-    const cld = JSON.parse(localStorage.getItem('cld') || 'null');
-    if (cld) {
-      document.getElementById('cldCloud').value  = cld.cloud || '';
-      document.getElementById('cldKey').value    = cld.key   || '';
-      document.getElementById('cldSecret').value = cld.secret || '';
       loadCloudinaryUsage();
     }
   } catch {}
