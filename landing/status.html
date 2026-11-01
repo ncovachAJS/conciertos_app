@@ -316,43 +316,67 @@ h1 {
 .kpi-value.gold  { color: var(--gold); }
 .kpi-value.accent { color: var(--accent); }
 
-.stats-users-list { margin-top: 16px; }
-.stats-users-title { font-size: 12px; font-weight: 700; color: var(--fg-muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
-.user-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
+.stats-users-list { margin-top: 20px; }
+.stats-users-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.stats-users-title { font-size: 12px; font-weight: 700; color: var(--fg-muted); letter-spacing: .06em; text-transform: uppercase; }
+.user-search {
+  background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--fg); font-family: var(--font);
+  font-size: 13px; padding: 8px 12px; outline: none; width: 220px; max-width: 100%;
 }
-.user-row:last-child { border-bottom: none; }
+.user-search:focus { border-color: var(--accent); }
+
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.user-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color .15s, transform .15s;
+}
+.user-card:hover { border-color: rgba(255,255,255,.14); transform: translateY(-1px); }
+.user-card-top { display: flex; align-items: center; gap: 12px; }
 .user-avatar {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.08);
-  object-fit: cover;
-  flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; color: var(--fg-muted);
-  overflow: hidden;
+  font-size: 15px; font-weight: 800; color: #fff;
+  overflow: hidden; letter-spacing: -.01em;
 }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-.user-info { flex: 1; min-width: 0; }
-.user-name  { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-email { font-size: 11px; color: var(--fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-card-meta { flex: 1; min-width: 0; }
+.user-name {
+  font-size: 14px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.user-email { font-size: 11px; color: var(--fg-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-joined { font-size: 10px; color: var(--fg-muted); margin-top: 2px; }
 .user-badge {
-  font-size: 10px; font-weight: 700; letter-spacing: .05em;
+  font-size: 9px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
   padding: 2px 7px; border-radius: 20px;
-  background: rgba(201,162,39,.15); color: var(--gold);
-  flex-shrink: 0;
+  background: rgba(201,162,39,.15); color: var(--gold); flex-shrink: 0;
 }
 .user-badge.admin { background: rgba(232,73,26,.15); color: var(--accent); }
-.user-concerts { font-size: 11px; color: var(--fg-muted); flex-shrink: 0; }
-.user-stats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.user-stat { font-size: 11px; color: var(--fg-muted); display: flex; align-items: center; gap: 3px; }
-.user-version { font-size: 11px; font-weight: 600; color: var(--fg-muted); margin-top: 3px; }
-.user-search { width: 100%; background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 10px; color: var(--fg); font-family: var(--font); font-size: 14px; padding: 10px 14px; outline: none; margin-bottom: 12px; }
-.user-search:focus { border-color: var(--accent); }
+
+.user-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+.user-stat {
+  font-size: 11px; font-weight: 600;
+  background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  border-radius: 8px; padding: 3px 8px;
+  display: flex; align-items: center; gap: 4px; color: var(--fg-muted);
+}
+.user-version {
+  font-size: 10px; font-weight: 600; color: var(--fg-muted);
+  display: flex; align-items: center; gap: 5px;
+  padding-top: 8px; border-top: 1px solid var(--border);
+}
 
 /* Versions grid */
 .versions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 14px; }
@@ -714,6 +738,8 @@ async function loadAppStats() {
     const items = u?.items || [];
     const renderUsers = (list) => list.map(usr => {
       const initials = (usr.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+      const hue = [...(usr.name || usr.email || '?')].reduce((h, c) => (h * 31 + c.charCodeAt(0)) & 0xffff, 0) % 360;
+      const avatarStyle = usr.avatarUrl ? '' : `background: hsl(${hue},50%,36%);`;
       const avatarInner = usr.avatarUrl
         ? `<img src="${usr.avatarUrl}" alt="" loading="lazy">`
         : initials;
@@ -721,22 +747,27 @@ async function loadAppStats() {
                   : usr.isPro   ? '<span class="user-badge">Pro</span>' : '';
       const joined = new Date(usr.createdAt).toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'2-digit' });
       const platIcon = usr.platform === 'ios' ? '🍎' : usr.platform === 'android' ? '🤖' : '📱';
-      const verStr = usr.appVersion ? `${platIcon} v${usr.appVersion} (build ${usr.appBuild ?? '—'})` : `${platIcon} sin versión`;
+      const verStr = usr.appVersion
+        ? `${platIcon} v${usr.appVersion} · build ${usr.appBuild ?? '—'}`
+        : `${platIcon} sin versión`;
       const stats = [
-        usr.concertCount   ? `🎵 ${usr.concertCount}` : null,
-        usr.photoCount     ? `📷 ${usr.photoCount}` : null,
-        usr.commentCount   ? `💬 ${usr.commentCount}` : null,
-        usr.recordCount    ? `💿 ${usr.recordCount}` : null,
+        usr.concertCount      ? `🎵 ${usr.concertCount}` : null,
+        usr.photoCount        ? `📷 ${usr.photoCount}` : null,
+        usr.commentCount      ? `💬 ${usr.commentCount}` : null,
+        usr.recordCount       ? `💿 ${usr.recordCount}` : null,
         usr.wantToAttendCount ? `🎟 ${usr.wantToAttendCount}` : null,
       ].filter(Boolean);
-      return `<div class="user-row">
-        <div class="user-avatar">${avatarInner}</div>
-        <div class="user-info">
-          <div class="user-name">${usr.name || '—'} ${badge}</div>
-          <div class="user-email">${usr.email} · ${joined}</div>
-          <div class="user-version">${verStr}</div>
-          ${stats.length ? `<div class="user-stats">${stats.map(st => `<span class="user-stat">${st}</span>`).join('')}</div>` : ''}
+      return `<div class="user-card">
+        <div class="user-card-top">
+          <div class="user-avatar" style="${avatarStyle}">${avatarInner}</div>
+          <div class="user-card-meta">
+            <div class="user-name">${usr.name || '—'} ${badge}</div>
+            <div class="user-email">${usr.email}</div>
+            <div class="user-joined">Se unió ${joined}</div>
+          </div>
         </div>
+        ${stats.length ? `<div class="user-stats">${stats.map(st => `<span class="user-stat">${st}</span>`).join('')}</div>` : ''}
+        <div class="user-version">${verStr}</div>
       </div>`;
     }).join('');
 
@@ -744,9 +775,11 @@ async function loadAppStats() {
       ? `<div class="stats-users-list"><div class="stats-users-title" style="color:var(--red)">❌ ${usersErr}</div></div>`
       : items.length ? `
       <div class="stats-users-list" id="userListWrap">
-        <div class="stats-users-title">Todos los usuarios (${items.length})</div>
-        <input class="user-search" id="userSearch" type="search" placeholder="Buscar por nombre o email…" oninput="filterUsers(this.value)">
-        <div id="userList">${renderUsers(items)}</div>
+        <div class="stats-users-header">
+          <span class="stats-users-title">Todos los usuarios (${items.length})</span>
+          <input class="user-search" id="userSearch" type="search" placeholder="Buscar…" oninput="filterUsers(this.value)">
+        </div>
+        <div class="user-grid" id="userList">${renderUsers(items)}</div>
       </div>` : `<div class="stats-users-list"><div class="stats-users-title" style="color:var(--fg-muted)">Sin usuarios</div></div>`;
 
     // Store items globally for search
