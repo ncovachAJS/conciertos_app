@@ -721,6 +721,7 @@ async function loadAppStats() {
     if (!statsRes.ok) throw new Error('HTTP ' + statsRes.status + ' — comprueba que el token sea de admin');
     const s = await statsRes.json();
     const u = usersRes.ok ? await usersRes.json() : null;
+    const usersErr = usersRes.ok ? null : `HTTP ${usersRes.status} al cargar usuarios`;
 
     const users   = s.users   || {};
     const content = s.content || {};
@@ -786,12 +787,14 @@ async function loadAppStats() {
       </div>`;
     }).join('');
 
-    const usersHtml = items.length ? `
+    const usersHtml = usersErr
+      ? `<div class="stats-users-list"><div class="stats-users-title" style="color:var(--red)">❌ ${usersErr}</div></div>`
+      : items.length ? `
       <div class="stats-users-list" id="userListWrap">
         <div class="stats-users-title">Todos los usuarios (${items.length})</div>
         <input class="user-search" id="userSearch" type="search" placeholder="Buscar por nombre o email…" oninput="filterUsers(this.value)">
         <div id="userList">${renderUsers(items)}</div>
-      </div>` : '';
+      </div>` : `<div class="stats-users-list"><div class="stats-users-title" style="color:var(--fg-muted)">Sin usuarios</div></div>`;
 
     // Store items globally for search
     window._adminUsers = items;
