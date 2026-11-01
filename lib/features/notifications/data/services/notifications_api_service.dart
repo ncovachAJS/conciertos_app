@@ -84,8 +84,8 @@ class NotificationsApiService {
       body: jsonEncode({
         'token': token,
         'platform': platform,
-        'appVersion': ?version,
-        'appBuild': ?build,
+        if (version != null) 'appVersion': version,
+        if (build != null) 'appBuild': build,
       }),
     );
   }
