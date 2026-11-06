@@ -565,6 +565,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     ),
                     const Divider(height: 1),
                     ListTile(
+                      leading: const Icon(
+                        Icons.new_releases_rounded,
+                        color: Color(0xFFFFB300),
+                      ),
+                      title: Text(l.whatsNewTitle),
+                      subtitle: Text(l.whatsNewSettingsDesc),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/whats-new'),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
                       leading: const Icon(Icons.settings),
                       title: Text(l.settingsTitle),
                       trailing: const Icon(Icons.chevron_right),

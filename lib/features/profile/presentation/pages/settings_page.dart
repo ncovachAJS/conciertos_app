@@ -992,6 +992,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           // ── Soporte ───────────────────────────────────────────────────────
           _SectionHeader(title: l.supportSectionTitle),
           ListTile(
+            leading: const Icon(Icons.new_releases_outlined),
+            title: Text(l.whatsNewTitle),
+            subtitle: Text(l.whatsNewSettingsDesc),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/whats-new'),
+          ),
+          ListTile(
             leading: Container(
               width: 36,
               height: 36,

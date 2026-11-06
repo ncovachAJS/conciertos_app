@@ -36,19 +36,11 @@ void main() {
       expect(r.last, QuickActionId.friends);
     });
 
-    test('atajo de discos: Pro lo conserva', () {
-      final r = QuickActionsService.merge(const ['records', 'add'], isPro: true);
-      expect(r, contains(QuickActionId.records));
-    });
-
-    test('atajo de discos: no Pro lo pierde', () {
-      final r = QuickActionsService.merge(const ['records', 'add'], isPro: false);
-      expect(r, [QuickActionId.add]);
-    });
-
-    test('solo atajos Pro y no Pro → defaults', () {
-      final r = QuickActionsService.merge(const ['records'], isPro: false);
-      expect(r, kDefaultQuickActions);
+    test('atajo de discos: lo conservan Pro y no Pro', () {
+      for (final pro in [true, false]) {
+        final r = QuickActionsService.merge(const ['records', 'add'], isPro: pro);
+        expect(r, contains(QuickActionId.records));
+      }
     });
 
     test('ids eliminados (favorites, map...) se descartan', () {

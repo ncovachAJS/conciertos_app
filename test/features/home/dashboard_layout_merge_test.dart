@@ -7,10 +7,9 @@ List<DashboardSectionId> ids(List<DashboardSection> l) =>
 
 void main() {
   group('DashboardLayoutService.merge', () {
-    test('sin layout guardado, no Pro: defaults sin la colección', () {
+    test('sin layout guardado, no Pro: también incluye la colección', () {
       final r = DashboardLayoutService.merge(const [], isPro: false);
-      expect(ids(r), isNot(contains(DashboardSectionId.records)));
-      expect(r.length, DashboardLayoutService.defaults.length - 1);
+      expect(ids(r), ids(DashboardLayoutService.defaults));
     });
 
     test('sin layout guardado, Pro: defaults completos y en orden', () {
@@ -34,13 +33,13 @@ void main() {
       );
     });
 
-    test('layout con records y usuario no Pro: se descarta', () {
+    test('layout con records y usuario no Pro: se conserva', () {
       const saved = [
         DashboardSection(id: DashboardSectionId.records, visible: true),
         DashboardSection(id: DashboardSectionId.stats, visible: true),
       ];
       final r = DashboardLayoutService.merge(saved, isPro: false);
-      expect(ids(r), isNot(contains(DashboardSectionId.records)));
+      expect(ids(r), contains(DashboardSectionId.records));
     });
 
     test('layout con records oculto y Pro: se conserva oculto', () {

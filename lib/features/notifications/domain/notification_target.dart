@@ -17,6 +17,7 @@ class NotificationTarget {
     'friends': '/friends',
     'statistics': '/statistics',
     'records': '/records',
+    'whatsnew': '/whats-new',
   };
 
   static bool isKnown(String? target) =>

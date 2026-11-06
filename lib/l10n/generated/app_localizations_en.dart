@@ -4138,4 +4138,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminTargetRecords => 'Open My record collection';
+
+  @override
+  String get adminTargetWhatsNew => 'Open What\'s new';
+
+  @override
+  String get adminTemplateWhatsNew => 'Template: what\'s new';
+
+  @override
+  String get adminTemplateWhatsNewTitle => '✨ What\'s new in the app';
+
+  @override
+  String get adminTemplateWhatsNewBody =>
+      'Check out the latest: reorder your shortcuts, add your records or import them from Discogs. Tap to see.';
+
+  @override
+  String get whatsNewTitle => 'What\'s new';
+
+  @override
+  String get whatsNewSettingsDesc =>
+      'Latest improvements and features of the app';
+
+  @override
+  String get whatsNewIntro =>
+      'The latest things we\'ve added to the app. Tap an item to jump straight to it.';
+
+  @override
+  String get whatsNewTryIt => 'Try it now';
+
+  @override
+  String whatsNewVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get whatsNewRecordsTitle => 'My record collection';
+
+  @override
+  String get whatsNewRecordsBody =>
+      'Add your vinyl and CDs to your collection by searching for them by artist or title. If you already have your collection on Discogs, link your account and the app will import your records automatically.';
+
+  @override
+  String get whatsNewQuickActionsTitle => 'Reorder your shortcuts';
+
+  @override
+  String get whatsNewQuickActionsBody =>
+      'You can now reorder the home shortcuts: long-press one and drag it wherever you want, or do it from Customize. You can also choose which ones to show (up to 5).';
+
+  @override
+  String get whatsNewDashboardTitle => 'Customize your home';
+
+  @override
+  String get whatsNewDashboardBody =>
+      'Choose which sections you see on the home screen, which ones you hide and the order they appear in. Customization is saved per user, so if you share your phone each account keeps its own.';
+
+  @override
+  String get whatsNewYearTitle => 'Your concert year, in your profile';
+
+  @override
+  String get whatsNewYearBody =>
+      'The yearly summary now sits right below your achievements in the profile. See how many concerts you attended, your top artists and compare year over year.';
+
+  @override
+  String get whatsNewAlertsTitle =>
+      'Announcements that take you to the right place';
+
+  @override
+  String get whatsNewAlertsBody =>
+      'When we announce something new, tapping the notification opens the screen we\'re talking about, and from What\'s new you can jump to each improvement with one tap.';
 }

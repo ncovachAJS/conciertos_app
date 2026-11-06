@@ -96,6 +96,14 @@ class _AdminBroadcastTabState extends State<AdminBroadcastTab>
     });
   }
 
+  void _useWhatsNewTemplate(AppLocalizations l) {
+    setState(() {
+      _title.text = l.adminTemplateWhatsNewTitle;
+      _body.text = l.adminTemplateWhatsNewBody;
+      _target = 'whatsnew';
+    });
+  }
+
   String _audienceName(AppLocalizations l) => switch (_audience) {
         'pro' => l.adminAudiencePro,
         'free' => l.adminAudienceFree,
@@ -173,10 +181,21 @@ class _AdminBroadcastTabState extends State<AdminBroadcastTab>
         const SizedBox(height: 12),
         Align(
           alignment: Alignment.centerLeft,
-          child: ActionChip(
-            avatar: const Icon(Icons.system_update_alt_rounded, size: 18),
-            label: Text(l.adminTemplateUpdate),
-            onPressed: _sending ? null : () => _useUpdateTemplate(l),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              ActionChip(
+                avatar: const Icon(Icons.system_update_alt_rounded, size: 18),
+                label: Text(l.adminTemplateUpdate),
+                onPressed: _sending ? null : () => _useUpdateTemplate(l),
+              ),
+              ActionChip(
+                avatar: const Icon(Icons.new_releases_rounded, size: 18),
+                label: Text(l.adminTemplateWhatsNew),
+                onPressed: _sending ? null : () => _useWhatsNewTemplate(l),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 12),
@@ -262,27 +281,34 @@ class _AdminBroadcastTabState extends State<AdminBroadcastTab>
                   },
           ),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String?>(
-          initialValue: _target,
-          decoration: InputDecoration(
-            labelText: l.adminTargetLabel,
-            border: const OutlineInputBorder(),
-          ),
-          items: [
-            DropdownMenuItem(value: null, child: Text(l.adminTargetNone)),
-            DropdownMenuItem(value: 'store', child: Text(l.adminTargetStore)),
-            DropdownMenuItem(
-              value: 'notifications',
-              child: Text(l.adminTargetNotifications),
-            ),
-            DropdownMenuItem(value: 'friends', child: Text(l.adminTargetFriends)),
-            DropdownMenuItem(
-              value: 'statistics',
-              child: Text(l.adminTargetStatistics),
-            ),
-            DropdownMenuItem(value: 'records', child: Text(l.adminTargetRecords)),
+        // Chips en lugar de un desplegable: la ventana emergente de un
+        // desplegable queda tapada por la barra de navegación flotante.
+        Text(
+          l.adminTargetLabel,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final (value, label) in <(String?, String)>[
+              (null, l.adminTargetNone),
+              ('store', l.adminTargetStore),
+              ('notifications', l.adminTargetNotifications),
+              ('friends', l.adminTargetFriends),
+              ('statistics', l.adminTargetStatistics),
+              ('records', l.adminTargetRecords),
+              ('whatsnew', l.adminTargetWhatsNew),
+            ])
+              ChoiceChip(
+                label: Text(label),
+                selected: _target == value,
+                onSelected: _sending
+                    ? null
+                    : (_) => setState(() => _target = value),
+              ),
           ],
-          onChanged: _sending ? null : (v) => setState(() => _target = v),
         ),
         const SizedBox(height: 8),
         SwitchListTile(

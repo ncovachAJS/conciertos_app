@@ -201,21 +201,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
                 const SizedBox(height: 36),
               ],
 
-            // Fase de pruebas: solo isPro real (ProConfig.isUserPro está abierto a todos).
-            DashboardSectionId.records =>
-              (AuthController.instance.user?.isPro == true)
-                  ? [
-                      DashboardSectionTitle(
-                        icon: Icons.album_rounded,
-                        title: l.recordsTitle,
-                        action: l.dashRecordsViewAll,
-                        onAction: () => context.push('/records'),
-                      ),
-                      const SizedBox(height: 14),
-                      const DashboardRecords(),
-                      const SizedBox(height: 36),
-                    ]
-                  : [],
+            DashboardSectionId.records => [
+              DashboardSectionTitle(
+                icon: Icons.album_rounded,
+                title: l.recordsTitle,
+                action: l.dashRecordsViewAll,
+                onAction: () => context.push('/records'),
+              ),
+              const SizedBox(height: 14),
+              const DashboardRecords(),
+              const SizedBox(height: 36),
+            ],
 
             DashboardSectionId.spotifyEmbed =>
               (AuthController.instance.user?.showSpotify ?? false)

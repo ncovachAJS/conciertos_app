@@ -4153,4 +4153,71 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get adminTargetRecords => 'Abrir Mi colección de discos';
+
+  @override
+  String get adminTargetWhatsNew => 'Abrir Novedades';
+
+  @override
+  String get adminTemplateWhatsNew => 'Plantilla: novedades';
+
+  @override
+  String get adminTemplateWhatsNewTitle => '✨ Novedades en la app';
+
+  @override
+  String get adminTemplateWhatsNewBody =>
+      'Descubre lo último: reordena tus accesos directos, añade tus discos o impórtalos desde Discogs. Toca para verlo.';
+
+  @override
+  String get whatsNewTitle => 'Novedades';
+
+  @override
+  String get whatsNewSettingsDesc =>
+      'Últimas mejoras y funcionalidades de la app';
+
+  @override
+  String get whatsNewIntro =>
+      'Lo último que hemos añadido a la app. Toca una novedad para ir directamente a ella.';
+
+  @override
+  String get whatsNewTryIt => 'Probar ahora';
+
+  @override
+  String whatsNewVersion(String version) {
+    return 'Versión $version';
+  }
+
+  @override
+  String get whatsNewRecordsTitle => 'Mi colección de discos';
+
+  @override
+  String get whatsNewRecordsBody =>
+      'Añade tus vinilos y CDs a tu colección buscándolos por artista o título. Si ya tienes tu colección en Discogs, vincula tu cuenta y la app importará tus discos automáticamente.';
+
+  @override
+  String get whatsNewQuickActionsTitle => 'Reordena tus accesos directos';
+
+  @override
+  String get whatsNewQuickActionsBody =>
+      'Ahora puedes reordenar los accesos directos del inicio: mantén pulsado uno y arrástralo a la posición que quieras, o hazlo desde Personalizar. También puedes elegir cuáles mostrar (hasta 5).';
+
+  @override
+  String get whatsNewDashboardTitle => 'Personaliza tu inicio';
+
+  @override
+  String get whatsNewDashboardBody =>
+      'Decide qué secciones ves en el inicio, cuáles ocultas y en qué orden aparecen. La personalización se guarda por usuario, así que si compartes el móvil cada cuenta mantiene la suya.';
+
+  @override
+  String get whatsNewYearTitle => 'Tu año en conciertos, en tu perfil';
+
+  @override
+  String get whatsNewYearBody =>
+      'El resumen anual ahora está justo debajo de tus logros en el perfil. Consulta cuántos conciertos viste, tus artistas más escuchados y compáralo año a año.';
+
+  @override
+  String get whatsNewAlertsTitle => 'Avisos que te llevan a su sección';
+
+  @override
+  String get whatsNewAlertsBody =>
+      'Cuando te avisamos de una novedad, al tocar la notificación se abre directamente la pantalla de la que hablamos, y desde Novedades puedes saltar a cada mejora con un toque.';
 }

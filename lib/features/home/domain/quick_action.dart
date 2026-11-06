@@ -27,5 +27,5 @@ const List<QuickActionId> kDefaultQuickActions = [
   QuickActionId.friends,
 ];
 
-/// Atajos que solo se ofrecen a usuarios con Pro real (fase de pruebas).
-const Set<QuickActionId> kProOnlyQuickActions = {QuickActionId.records};
+/// Atajos que solo se ofrecen a usuarios Pro (ahora ninguno).
+const Set<QuickActionId> kProOnlyQuickActions = {};

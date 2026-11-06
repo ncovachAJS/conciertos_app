@@ -26,7 +26,7 @@ class DashboardLayoutService {
   ];
 
   /// Secciones que solo existen para usuarios con Pro real.
-  static const _proOnly = {DashboardSectionId.records};
+  static const Set<DashboardSectionId> _proOnly = {};
 
   /// Combina el layout guardado con los valores por defecto.
   ///

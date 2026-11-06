@@ -7021,6 +7021,120 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Abrir Mi colección de discos'**
   String get adminTargetRecords;
+
+  /// No description provided for @adminTargetWhatsNew.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir Novedades'**
+  String get adminTargetWhatsNew;
+
+  /// No description provided for @adminTemplateWhatsNew.
+  ///
+  /// In es, this message translates to:
+  /// **'Plantilla: novedades'**
+  String get adminTemplateWhatsNew;
+
+  /// No description provided for @adminTemplateWhatsNewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'✨ Novedades en la app'**
+  String get adminTemplateWhatsNewTitle;
+
+  /// No description provided for @adminTemplateWhatsNewBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Descubre lo último: reordena tus accesos directos, añade tus discos o impórtalos desde Discogs. Toca para verlo.'**
+  String get adminTemplateWhatsNewBody;
+
+  /// No description provided for @whatsNewTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Novedades'**
+  String get whatsNewTitle;
+
+  /// No description provided for @whatsNewSettingsDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Últimas mejoras y funcionalidades de la app'**
+  String get whatsNewSettingsDesc;
+
+  /// No description provided for @whatsNewIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo último que hemos añadido a la app. Toca una novedad para ir directamente a ella.'**
+  String get whatsNewIntro;
+
+  /// No description provided for @whatsNewTryIt.
+  ///
+  /// In es, this message translates to:
+  /// **'Probar ahora'**
+  String get whatsNewTryIt;
+
+  /// No description provided for @whatsNewVersion.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión {version}'**
+  String whatsNewVersion(String version);
+
+  /// No description provided for @whatsNewRecordsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi colección de discos'**
+  String get whatsNewRecordsTitle;
+
+  /// No description provided for @whatsNewRecordsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade tus vinilos y CDs a tu colección buscándolos por artista o título. Si ya tienes tu colección en Discogs, vincula tu cuenta y la app importará tus discos automáticamente.'**
+  String get whatsNewRecordsBody;
+
+  /// No description provided for @whatsNewQuickActionsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reordena tus accesos directos'**
+  String get whatsNewQuickActionsTitle;
+
+  /// No description provided for @whatsNewQuickActionsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora puedes reordenar los accesos directos del inicio: mantén pulsado uno y arrástralo a la posición que quieras, o hazlo desde Personalizar. También puedes elegir cuáles mostrar (hasta 5).'**
+  String get whatsNewQuickActionsBody;
+
+  /// No description provided for @whatsNewDashboardTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Personaliza tu inicio'**
+  String get whatsNewDashboardTitle;
+
+  /// No description provided for @whatsNewDashboardBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Decide qué secciones ves en el inicio, cuáles ocultas y en qué orden aparecen. La personalización se guarda por usuario, así que si compartes el móvil cada cuenta mantiene la suya.'**
+  String get whatsNewDashboardBody;
+
+  /// No description provided for @whatsNewYearTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu año en conciertos, en tu perfil'**
+  String get whatsNewYearTitle;
+
+  /// No description provided for @whatsNewYearBody.
+  ///
+  /// In es, this message translates to:
+  /// **'El resumen anual ahora está justo debajo de tus logros en el perfil. Consulta cuántos conciertos viste, tus artistas más escuchados y compáralo año a año.'**
+  String get whatsNewYearBody;
+
+  /// No description provided for @whatsNewAlertsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Avisos que te llevan a su sección'**
+  String get whatsNewAlertsTitle;
+
+  /// No description provided for @whatsNewAlertsBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando te avisamos de una novedad, al tocar la notificación se abre directamente la pantalla de la que hablamos, y desde Novedades puedes saltar a cada mejora con un toque.'**
+  String get whatsNewAlertsBody;
 }
 
 class _AppLocalizationsDelegate
