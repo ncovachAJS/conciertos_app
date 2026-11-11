@@ -49,28 +49,4 @@ final List<WhatsNewEntry> kWhatsNewEntries = [
     title: (l) => l.whatsNewRecordsTitle,
     body: (l) => l.whatsNewRecordsBody,
   ),
-  WhatsNewEntry(
-    id: 'alerts',
-    version: '1.4.2',
-    icon: Icons.notifications_active_rounded,
-    route: '/notifications',
-    title: (l) => l.whatsNewAlertsTitle,
-    body: (l) => l.whatsNewAlertsBody,
-  ),
-  WhatsNewEntry(
-    id: 'year',
-    version: '1.4.1',
-    icon: Icons.calendar_month_rounded,
-    route: '/annual-summary',
-    title: (l) => l.whatsNewYearTitle,
-    body: (l) => l.whatsNewYearBody,
-  ),
-  WhatsNewEntry(
-    id: 'dashboard',
-    version: '1.4.1',
-    icon: Icons.dashboard_customize_rounded,
-    route: '/dashboard-edit',
-    title: (l) => l.whatsNewDashboardTitle,
-    body: (l) => l.whatsNewDashboardBody,
-  ),
 ];

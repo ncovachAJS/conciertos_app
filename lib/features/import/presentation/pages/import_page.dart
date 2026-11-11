@@ -417,14 +417,11 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                    child: LayoutBuilder(
-                      builder: (ctx, bc) {
-                        const yw = 110.0, bw = 88.0, sp = 10.0;
-                        final aw = bc.maxWidth - yw - bw - sp * 2;
-                        return Row(
+                    child: Column(
+                      children: [
+                        Row(
                           children: [
-                            SizedBox(
-                              width: aw,
+                            Expanded(
                               child: ListenableBuilder(
                                 listenable: _searchController,
                                 builder: (_, _) => TextField(
@@ -454,10 +451,13 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: sp),
+                            const SizedBox(width: 10),
                             SizedBox(
-                              width: yw,
+                              width: 130,
                               child: DropdownButtonFormField<int>(
+                                isExpanded: true,
+                                menuMaxHeight: 320,
+                                borderRadius: BorderRadius.circular(14),
                                 initialValue: _artistYear,
                                 style: TextStyle(
                                     color: cs.onSurface, fontSize: 14),
@@ -497,9 +497,11 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                                 },
                               ),
                             ),
-                            const SizedBox(width: sp),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
                             SizedBox(
-                              width: bw,
+                              width: double.infinity,
                               child: FilledButton(
                                 onPressed: _searching ? null : _search,
                                 style: FilledButton.styleFrom(
@@ -523,9 +525,7 @@ class _SetlistTabState extends ConsumerState<_SetlistTab> {
                                         overflow: TextOverflow.clip),
                               ),
                             ),
-                          ],
-                        );
-                      },
+                      ],
                     ),
                   ),
                 ),
