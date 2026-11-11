@@ -35,7 +35,7 @@ class WhatsNewEntry {
 final List<WhatsNewEntry> kWhatsNewEntries = [
   WhatsNewEntry(
     id: 'quick_actions',
-    version: '1.4.2',
+    version: '2.0.0',
     icon: Icons.drag_indicator_rounded,
     route: '/quick-actions-edit',
     title: (l) => l.whatsNewQuickActionsTitle,
@@ -43,7 +43,7 @@ final List<WhatsNewEntry> kWhatsNewEntries = [
   ),
   WhatsNewEntry(
     id: 'records',
-    version: '1.4.2',
+    version: '2.0.0',
     icon: Icons.album_rounded,
     route: '/records',
     title: (l) => l.whatsNewRecordsTitle,
