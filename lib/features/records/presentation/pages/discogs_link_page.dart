@@ -88,6 +88,7 @@ class _DiscogsLinkPageState extends ConsumerState<DiscogsLinkPage> {
     try {
       await _service.disconnect();
       ref.invalidate(discogsStatusProvider);
+      ref.invalidate(recordsProvider);
     } catch (_) {
       _snack(l.discogsConnectError);
     }

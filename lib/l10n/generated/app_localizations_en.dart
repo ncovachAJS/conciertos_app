@@ -3728,7 +3728,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discogsDisconnectConfirm =>
-      'Unlink your Discogs account? Records already imported stay in the app.';
+      'Unlink your Discogs account? Discogs-imported records will be deleted. Manually added ones are kept.';
 
   @override
   String get discogsConnectError => 'Couldn\'t link your Discogs account';

@@ -6365,7 +6365,7 @@ abstract class AppLocalizations {
   /// No description provided for @discogsDisconnectConfirm.
   ///
   /// In es, this message translates to:
-  /// **'¿Desvincular tu cuenta de Discogs? Los discos ya importados se quedan en la app.'**
+  /// **'¿Desvincular tu cuenta de Discogs? Se eliminarán los discos importados de Discogs. Los añadidos a mano se conservan.'**
   String get discogsDisconnectConfirm;
 
   /// No description provided for @discogsConnectError.

@@ -1519,7 +1519,7 @@
   "@discogsImportSkipped": {"placeholders":{"count":{"type":"int"}}},
   "discogsImportError": "Couldn't import from Discogs",
   "discogsDisconnect": "Unlink account",
-  "discogsDisconnectConfirm": "Unlink your Discogs account? Records already imported stay in the app.",
+  "discogsDisconnectConfirm": "Unlink your Discogs account? Discogs-imported records will be deleted. Manually added ones are kept.",
   "discogsConnectError": "Couldn't link your Discogs account",
   "discogsDenied": "You cancelled the Discogs authorization",
   "discogsImportHint": "Records you already have are not modified. Only new ones are added.",

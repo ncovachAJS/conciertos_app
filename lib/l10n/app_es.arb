@@ -1519,7 +1519,7 @@
   "@discogsImportSkipped": {"placeholders":{"count":{"type":"int"}}},
   "discogsImportError": "No se pudo importar desde Discogs",
   "discogsDisconnect": "Desvincular cuenta",
-  "discogsDisconnectConfirm": "¿Desvincular tu cuenta de Discogs? Los discos ya importados se quedan en la app.",
+  "discogsDisconnectConfirm": "¿Desvincular tu cuenta de Discogs? Se eliminarán los discos importados de Discogs. Los añadidos a mano se conservan.",
   "discogsConnectError": "No se pudo vincular la cuenta de Discogs",
   "discogsDenied": "Cancelaste la autorización de Discogs",
   "discogsImportHint": "Los discos que ya tienes no se modifican. Solo se añaden los nuevos.",

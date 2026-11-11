@@ -3742,7 +3742,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get discogsDisconnectConfirm =>
-      '¿Desvincular tu cuenta de Discogs? Los discos ya importados se quedan en la app.';
+      '¿Desvincular tu cuenta de Discogs? Se eliminarán los discos importados de Discogs. Los añadidos a mano se conservan.';
 
   @override
   String get discogsConnectError => 'No se pudo vincular la cuenta de Discogs';
